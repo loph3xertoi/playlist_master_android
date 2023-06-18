@@ -1,0 +1,66 @@
+name: playlistmaster
+description: Android client for playlist master.
+
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
+
+version: 0.0.1+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.0.0
+  flutter_svg: ^0.22.0
+  flutter_animator: ^3.1.0
+  flutter_animate: ^4.1.1+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/welcome.png
+    - assets/images/avatar.png
+    - assets/images/home_button.png
+    - assets/images/qqmusic.png
+    - assets/images/netease.png
+    - assets/images/bilibili.png
+    - assets/images/songs_cover/tit.png
+    - assets/images/songs_cover/owl.png
+    - assets/images/songs_cover/parrot.png
+    - assets/images/playlist_cover/bird.png
+    - assets/images/playlist_cover/zebra.png
+    - assets/images/playlist_cover/cat.png
+    - assets/images/playlist_cover/owl.png
+    - assets/images/playlist_cover/shark.png
+    - assets/images/playlist_cover/panther.png
+    - assets/images/playlist_cover/lion.png
+    - assets/images/playlist_cover/fox.png
+    - assets/images/playlist_cover/dog.png
+    - assets/images/playlist_cover/dolphin.png
+    - assets/images/playlist_cover/rabbit.png
+    - assets/images/playlist_cover/elephant.png
+    - assets/images/playlist_cover/wolf.png
+    - assets/images/playlist_cover/dove.png
+    - assets/images/playlist_cover/snake.png
+    - assets/images/playlist_cover/bear.png
+    - assets/images/playlist_cover/bee.png
+    - assets/images/playlist_cover/panda.png
+    - assets/images/playlist_cover/koala.png
+    - assets/images/playlist_cover/lizard.png
+    - assets/images/playlist_cover/test.jpg
+    - assets/images/cloud.png
+    - assets/images/cloud2.png
+    - assets/images/cloud3.png
+    - assets/images/moon.png
+    - assets/images/mountain1.png
+    - assets/images/mountain2.png
+    - assets/images/mountain2_night.png
+    - assets/images/mountain_night.png
