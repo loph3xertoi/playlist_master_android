@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/third_lib_change/like_button/like_button.dart';
 
 import '../entities/song.dart';
-import '../third_lib_change/music_visualizer.dart';
 
 class SongItem extends StatefulWidget {
   final int index;
@@ -64,12 +64,11 @@ class _SongItemState extends State<SongItem> {
           SizedBox(
             height: 40.0,
             child: Row(children: [
-              IconButton(
-                  onPressed: () {},
-                  color: Color(0x42000000),
-                  icon: Icon(
-                    Icons.favorite_outline_rounded,
-                  )),
+              LikeButton(
+                size: 24.0,
+                isLiked: false,
+                padding: EdgeInsets.fromLTRB(10.0, 8.0, 10.0, 8.0),
+              ),
               IconButton(
                   onPressed: () {},
                   color: Color(0x42000000),
