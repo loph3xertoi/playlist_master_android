@@ -307,6 +307,7 @@ class LikeButtonState extends State<LikeButton> with TickerProviderStateMixin {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(50.0),
           child: Material(
+            color: Colors.transparent,
             child: InkWell(
               splashColor: Colors.transparent,
               highlightColor: Color(0xFFFFC3AE),

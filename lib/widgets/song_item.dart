@@ -20,7 +20,7 @@ class SongItem extends StatefulWidget {
 class _SongItemState extends State<SongItem> {
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Material(
       child: InkWell(
         onTap: () {
           Navigator.pushNamed(
