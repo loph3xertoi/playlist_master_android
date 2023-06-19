@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:playlistmaster/pages/my_homepage.dart';
 import 'package:playlistmaster/pages/playlist_detail.dart';
 import 'package:playlistmaster/pages/search_page.dart';
+import 'package:playlistmaster/pages/song_player.dart';
 import 'package:playlistmaster/pages/splash_screen.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/states/my_navigation_button_state.dart';
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
           '/': (context) => MyHomePage(),
           '/search': (context) => SearchPage(),
           '/playlist_detail': (context) => PlaylistDetailPage(),
+          '/song_player': (context) => SongPlayerPage(),
         },
         // home: SplashScreen(),
       ),

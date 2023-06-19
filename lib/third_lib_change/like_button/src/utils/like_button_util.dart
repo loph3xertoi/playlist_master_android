@@ -18,10 +18,10 @@ double clamp(double value, double low, double high) {
   return math.min(math.max(value, low), high);
 }
 
-Widget defaultWidgetBuilder(bool isLiked, double size) {
+Widget defaultWidgetBuilder(bool isLiked, bool isPressed, double size) {
   return Icon(
     isLiked ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
-    color: isLiked ? Color(0xFFFC2D2D) : Color(0x42000000),
+    color: isLiked ? Color(0xFFFC2D2D) : isPressed ? Color(0xFFFC2D2D) : Color(0x42000000),
     size: size,
   );
 }

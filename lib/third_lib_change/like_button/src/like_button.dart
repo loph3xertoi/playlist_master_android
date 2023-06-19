@@ -129,10 +129,12 @@ class LikeButtonState extends State<LikeButton> with TickerProviderStateMixin {
   AnimationController? get likeCountController => _likeCountController;
 
   bool? _isLiked = false;
+  bool? _isPressed = false;
   int? _likeCount;
   int? _preLikeCount;
 
   bool? get isLiked => _isLiked;
+  bool? get isPressed => _isPressed;
   int? get likeCount => _likeCount;
   int? get preLikeCount => _preLikeCount;
   @override
@@ -210,7 +212,8 @@ class LikeButtonState extends State<LikeButton> with TickerProviderStateMixin {
         builder: (BuildContext c, Widget? w) {
           final Widget likeWidget =
               widget.likeBuilder?.call(_isLiked ?? true) ??
-                  defaultWidgetBuilder(_isLiked ?? true, widget.size);
+                  defaultWidgetBuilder(
+                      _isLiked ?? true, _isPressed ?? false, widget.size);
           return Stack(
             clipBehavior: Clip.none,
             children: <Widget>[
@@ -249,9 +252,9 @@ class LikeButtonState extends State<LikeButton> with TickerProviderStateMixin {
                       ? _scaleAnimation.value
                       : 1.0,
                   child: SizedBox(
-                    child: likeWidget,
                     height: widget.size,
                     width: widget.size,
+                    child: likeWidget,
                   ),
                 ),
               ),
@@ -259,7 +262,7 @@ class LikeButtonState extends State<LikeButton> with TickerProviderStateMixin {
           );
         },
       ),
-      likeCountWidget
+      // likeCountWidget
     ];
 
     if (widget.countPostion == CountPostion.left ||
@@ -279,18 +282,54 @@ class LikeButtonState extends State<LikeButton> with TickerProviderStateMixin {
             children: children,
           );
 
-    if (widget.padding != null) {
-      result = Padding(
-        padding: widget.padding!,
-        child: result,
-      );
-    }
-
-    return GestureDetector(
+    result = GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: onTap,
-      child: result,
+      onLongPressDown: (_) {
+        setState(() {
+          _isPressed = true;
+        });
+      },
+      onLongPressUp: () {
+        setState(() {
+          _isPressed = false;
+        });
+      },
+      onLongPressCancel: () {
+        setState(() {
+          _isPressed = false;
+        });
+      },
+      child: Container(
+        width: 40.0,
+        height: 40.0,
+        alignment: Alignment.center,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(50.0),
+          child: Material(
+            child: InkWell(
+              splashColor: Colors.transparent,
+              highlightColor: Color(0xFFFFC3AE),
+              onTap: onTap,
+              child: Ink(
+                width: 34.0,
+                height: 34.0,
+                child: result,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
+
+    // if (widget.padding != null) {
+    //   result = Padding(
+    //     padding: widget.padding!,
+    //     child: result,
+    //   );
+    // }
+
+    return result;
   }
 
   Widget _getLikeCountWidget() {
@@ -346,12 +385,12 @@ class LikeButtonState extends State<LikeButton> with TickerProviderStateMixin {
                     clipBehavior: Clip.hardEdge,
                     children: <Widget>[
                       Opacity(
-                        child: currentSameWidget,
                         opacity: _opacityAnimation.value,
+                        child: currentSameWidget,
                       ),
                       Opacity(
-                        child: preSameWidget,
                         opacity: 1.0 - _opacityAnimation.value,
+                        child: preSameWidget,
                       ),
                     ],
                   ),
@@ -402,8 +441,8 @@ class LikeButtonState extends State<LikeButton> with TickerProviderStateMixin {
     }
 
     result = ClipRect(
-      child: result,
       clipper: LikeCountClip(),
+      child: result,
     );
 
     return result;
