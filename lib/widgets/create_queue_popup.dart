@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/widgets/song_item_in_queue.dart';
 import '../entities/song.dart';
 
 class ShowQueueDialog extends StatefulWidget {
+  final List<Song> songsQueue;
+
+  ShowQueueDialog({
+    required this.songsQueue,
+  });
+
   @override
   State<ShowQueueDialog> createState() => _ShowQueueDialogState();
 }
 
 class _ShowQueueDialogState extends State<ShowQueueDialog>
     with SingleTickerProviderStateMixin {
-  List<Song> _songsQueue = MockData.songs;
   int _currentPlaying = 1;
 
   @override
@@ -34,7 +38,7 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                 Row(children: [
                   Expanded(
                     child: Text(
-                      'Queue(${_songsQueue.length})',
+                      'Queue(${widget.songsQueue.length})',
                       style: TextStyle(
                         color: Color(0x42000000),
                         fontSize: 12.0,
@@ -48,13 +52,13 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                   )
                 ]),
                 Expanded(
-                  child: (_songsQueue.isNotEmpty)
+                  child: (widget.songsQueue.isNotEmpty)
                       ? ListView.builder(
-                          itemCount: _songsQueue.length,
+                          itemCount: widget.songsQueue.length,
                           itemBuilder: (context, index) {
-                            var songName = _songsQueue[index].name;
-                            var singers = _songsQueue[index].singers;
-                            var coverUri = _songsQueue[index].coverUri;
+                            var songName = widget.songsQueue[index].name;
+                            var singers = widget.songsQueue[index].singers;
+                            var coverUri = widget.songsQueue[index].coverUri;
                             return SongItemInQueue(
                               name: songName,
                               coverUri: coverUri,
