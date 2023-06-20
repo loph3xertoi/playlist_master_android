@@ -304,8 +304,8 @@ class LikeButtonState extends State<LikeButton> with TickerProviderStateMixin {
         width: 40.0,
         height: 40.0,
         alignment: Alignment.center,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(50.0),
+        child: ClipOval(
+          // borderRadius: BorderRadius.circular(50.0),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
