@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/mock_data.dart';
@@ -157,13 +159,29 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                         ),
                                         Expanded(
                                           child: ListView.builder(
+                                            // TODO: fix this. Mock.songs have 10 songs only.
                                             // itemCount: playlist.songsCount,
-                                            //TODO: fix this
-                                            itemCount: 20,
+                                            itemCount:
+                                                min(playlist.songsCount, 10),
                                             itemBuilder: (context, index) {
-                                              return SongItem(
-                                                index: index,
-                                                song: songs[index],
+                                              return Material(
+                                                color: Colors.transparent,
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    Navigator.pushNamed(
+                                                      context,
+                                                      '/song_player',
+                                                      arguments: {
+                                                        'index': index,
+                                                        'songs': songs,
+                                                      },
+                                                    );
+                                                  },
+                                                  child: SongItem(
+                                                    index: index,
+                                                    song: songs[index],
+                                                  ),
+                                                ),
                                               );
                                             },
                                           ),

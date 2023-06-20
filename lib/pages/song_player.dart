@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:playlistmaster/entities/song.dart';
+import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:playlistmaster/widgets/create_queue_popup.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class SongPlayerPage extends StatefulWidget {
   const SongPlayerPage({super.key});
@@ -11,50 +14,84 @@ class SongPlayerPage extends StatefulWidget {
   State<SongPlayerPage> createState() => _SongPlayerPageState();
 }
 
-class _SongPlayerPageState extends State<SongPlayerPage> {
+class _SongPlayerPageState extends State<SongPlayerPage>
+    with SingleTickerProviderStateMixin {
   late AudioPlayer _player;
+  late AnimationController _controller;
   // Global playing mode, 0 for shuffle, 1 for repeat, 2 for repeat one.
   // 0 as default for the first using.
   int _userPlayingMode = 0;
+  late int _currentSong;
 
-// Define the queue
-  final queue = ConcatenatingAudioSource(
-    // Start loading next item just before reaching it
-    useLazyPreparation: true,
-    // Customise the shuffle algorithm
-    shuffleOrder: DefaultShuffleOrder(),
-    // Specify the queue items
-    children: [
-      AudioSource.asset('assets/audios/parrot.mp3'),
-      AudioSource.asset('assets/audios/tit.mp3'),
-      AudioSource.asset('assets/audios/owl.mp3'),
-      AudioSource.asset('assets/audios/sft.mp3'),
-    ],
-  );
+  // Define the queue
+  late final ConcatenatingAudioSource queue;
+
+  // Songs of current playlist.
+  late List<Song> songsOfPlaylist;
+
+  // Index of selected song.
+  late int indexOfSelectedSong;
+
+  late final Map<String, dynamic> args;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    indexOfSelectedSong = args['index'];
+    _currentSong = indexOfSelectedSong;
+    songsOfPlaylist = args['songs'];
+    _init();
+  }
 
   @override
   void initState() {
     super.initState();
-    _init();
+    _controller = AnimationController(
+      vsync: this,
+      // lowerBound: 0.5,
+      duration: const Duration(seconds: 5),
+    );
   }
 
   Future<void> _init() async {
     _player = AudioPlayer();
 
     // Listen to errors during playback.
-    _player.playbackEventStream.listen((event) {},
-        onError: (Object e, StackTrace stackTrace) {
-      print('A stream error occurred: $e');
-    });
+    _player.playbackEventStream.listen(
+      (event) {
+        if (event.currentIndex != null && event.currentIndex != _currentSong) {
+          setState(() {
+            _currentSong = event.currentIndex!;
+          });
+        }
+      },
+      onError: (Object e, StackTrace stackTrace) {
+        print('A stream error occurred: $e');
+      },
+    );
+
     // Try to load audio from a source and catch any errors.
     try {
       // AAC example: https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.aac
       // await _player.setAudioSource(AudioSource.uri(Uri.parse(
       //     "https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3")));
       // await _player.setAsset('assets/audios/parrot.mp3');
+      queue = ConcatenatingAudioSource(
+        // Start loading next item just before reaching it
+        useLazyPreparation: true,
+        // Customise the shuffle algorithm
+        shuffleOrder: DefaultShuffleOrder(),
+        // Specify the queue items
+        children: songsOfPlaylist
+            .map(
+              (e) => AudioSource.asset(e.link),
+            )
+            .toList(),
+      );
       await _player.setAudioSource(queue,
-          initialIndex: 0, initialPosition: Duration.zero);
-
+          initialIndex: indexOfSelectedSong, initialPosition: Duration.zero);
+      // Set the playing mode of the player.
       if (_userPlayingMode == 0) {
         await _player.setShuffleModeEnabled(true);
         await _player.setLoopMode(LoopMode.all);
@@ -76,6 +113,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
   void dispose() {
     // Release decoders and buffers back to the operating system making them
     // available for other apps to use.
+    _controller.dispose();
     _player.dispose();
     super.dispose();
   }
@@ -130,7 +168,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                       children: [
                         Expanded(
                           child: Text(
-                            'Tit',
+                            songsOfPlaylist[_currentSong].name,
                             style: TextStyle(
                               color: Color(0xE5FFFFFF),
                               fontFamily: 'Roboto',
@@ -139,7 +177,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                           ),
                         ),
                         Text(
-                          'Little Chickadee',
+                          songsOfPlaylist[_currentSong].singers[0].name,
                           style: TextStyle(
                             color: Color(0x80FFFFFF),
                             fontFamily: 'Roboto',
@@ -159,14 +197,118 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
             ),
           ),
           Expanded(
-            child: Center(
-              child: SizedBox(
-                height: 240.0,
-                child: Placeholder(
-                  color: Colors.amber,
-                ),
-              ),
-            ),
+            child: Center(),
+            //   child: AnimatedBuilder(
+            //     animation: _controller,
+            //     builder: (BuildContext context, Widget? child) {
+            //       return Stack(
+            //         alignment: Alignment.center,
+            //         children: [
+            //           // Positioned(
+            //           //   bottom: -20,
+            //           //   right: 0,
+            //           //   left: 0,
+            //           //   child: Transform.translate(
+            //           //     offset: Offset(50 * _controller.value, 0),
+            //           //     child: Opacity(
+            //           //       opacity: val ? 0.0 : 0.8,
+            //           //       child: Image.asset(
+            //           //         'assets/images/cloud2.png',
+            //           //         fit: BoxFit.cover,
+            //           //       ),
+            //           //     ),
+            //           //   ),
+            //           // ),
+            //           // Positioned(
+            //           //   bottom: -20,
+            //           //   right: 0,
+            //           //   left: 0,
+            //           //   child: Transform.translate(
+            //           //     offset: Offset(100 * _controller.value, 0),
+            //           //     child: Opacity(
+            //           //       opacity: val ? 0.0 : 0.4,
+            //           //       child: Image.asset(
+            //           //         'assets/images/cloud3.png',
+            //           //         fit: BoxFit.cover,
+            //           //       ),
+            //           //     ),
+            //           //   ),
+            //           // ),
+            //           Positioned(
+            //             left: -272.0,
+            //             width: 155.0,
+            //             height: 155.0,
+            //             child: Transform.translate(
+            //               offset: Offset(166.0 * _controller.value, 0),
+            //               child: SizedBox(
+            //                 width: 155.0,
+            //                 height: 155.0,
+            //                 child: ClipOval(
+            //                   child: Image.asset(
+            //                       'assets/images/songs_cover/owl.png'),
+            //                 ),
+            //               ),
+            //             ),
+            //           ),
+            //           Positioned(
+            //             left: -106.0,
+            //             width: 155.0,
+            //             height: 155.0,
+            //             child: SizedBox(
+            //               width: 155.0,
+            //               height: 155.0,
+            //               child: ClipOval(
+            //                 child: Image.asset(
+            //                     'assets/images/songs_cover/parrot.png'),
+            //               ),
+            //             ),
+            //           ),
+            //           Positioned(
+            //             width: 240.0,
+            //             height: 240.0,
+            //             child: Transform.translate(
+            //               offset: Offset(50 * _controller.value, 0),
+            //               child: SizedBox(
+            //                 width: 240.0,
+            //                 height: 240.0,
+            //                 child: ClipOval(
+            //                   child: Image.asset(
+            //                       'assets/images/songs_cover/tit.png'),
+            //                 ),
+            //               ),
+            //             ),
+            //           ),
+            //           Positioned(
+            //             right: -106.0,
+            //             width: 155.0,
+            //             height: 155.0,
+            //             child: SizedBox(
+            //               width: 155.0,
+            //               height: 155.0,
+            //               child: ClipOval(
+            //                 child: Image.asset(
+            //                     'assets/images/songs_cover/owl.png'),
+            //               ),
+            //             ),
+            //           ),
+            //           Positioned(
+            //             right: -272.0,
+            //             width: 155.0,
+            //             height: 155.0,
+            //             child: SizedBox(
+            //               width: 155.0,
+            //               height: 155.0,
+            //               child: ClipOval(
+            //                 child: Image.asset(
+            //                     'assets/images/songs_cover/parrot.png'),
+            //               ),
+            //             ),
+            //           ),
+            //         ],
+            //       );
+            //     },
+            //   ),
+            // ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(
@@ -380,7 +522,12 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                   IconButton(
                     icon: const Icon(Icons.skip_previous_rounded),
                     color: Color(0xE5FFFFFF),
-                    onPressed: _player.seekToPrevious,
+                    // onPressed: _player.seekToPrevious,
+                    onPressed: () {
+                      _controller.value = 0.0;
+                      // ..value = 1.0
+                      // ..reverse(from: 1.0);
+                    },
                   ),
                   Material(
                     color: Colors.transparent,
@@ -434,9 +581,12 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     icon: const Icon(Icons.skip_next_rounded),
                     color: Color(0xE5FFFFFF),
                     onPressed: () {
-                      _player.seekToNext();
-                      print(
-                          'daw=====${_player.currentIndex}=========${_player.nextIndex}=====');
+                      _controller
+                        ..value = 0.0
+                        ..forward(from: 0.0);
+                      // _player.seekToNext();
+                      // print(
+                      //     'daw=====${_player.currentIndex}=========${_player.nextIndex}=====');
                     },
                   ),
                   IconButton(
@@ -444,7 +594,9 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     color: Color(0xE5FFFFFF),
                     onPressed: () {
                       showDialog(
-                          context: context, builder: (_) => ShowQueueDialog());
+                          context: context,
+                          builder: (_) =>
+                              ShowQueueDialog(songsQueue: MockData.songs));
                     },
                   ),
                 ],
