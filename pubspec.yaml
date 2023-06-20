@@ -17,6 +17,7 @@ dependencies:
   flutter_animate: ^4.1.1+1
   just_audio: ^0.9.34
   rxdart: ^0.27.7
+  carousel_slider: ^4.2.1
 
 dev_dependencies:
   flutter_test:
@@ -34,9 +35,16 @@ flutter:
     - assets/images/qqmusic.png
     - assets/images/netease.png
     - assets/images/bilibili.png
+    - assets/images/songs_cover/parrot.png
     - assets/images/songs_cover/tit.png
     - assets/images/songs_cover/owl.png
-    - assets/images/songs_cover/parrot.png
+    - assets/images/songs_cover/budgerigar.jpeg
+    - assets/images/songs_cover/bluejay.jpeg
+    - assets/images/songs_cover/columbidae.jpeg
+    - assets/images/songs_cover/hummingbirds.jpeg
+    - assets/images/songs_cover/toucans.jpeg
+    - assets/images/songs_cover/finches.jpeg
+    - assets/images/songs_cover/bluebirds.jpeg
     - assets/images/playlist_cover/bird.png
     - assets/images/playlist_cover/zebra.png
     - assets/images/playlist_cover/cat.png
@@ -70,4 +78,10 @@ flutter:
     - assets/audios/parrot.mp3
     - assets/audios/tit.mp3
     - assets/audios/owl.mp3
-    - assets/audios/sft.mp3
+    - assets/audios/budgerigar.mp3
+    - assets/audios/bluejay.mp3
+    - assets/audios/columbidae.mp3
+    - assets/audios/hummingbirds.mp3
+    - assets/audios/toucans.mp3
+    - assets/audios/finches.mp3
+    - assets/audios/bluebirds.mp3
