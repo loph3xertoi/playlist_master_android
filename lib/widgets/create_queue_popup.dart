@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/widgets/song_item_in_queue.dart';
-
-import '../entities/singer.dart';
 import '../entities/song.dart';
 
 class ShowQueueDialog extends StatefulWidget {
@@ -12,7 +10,6 @@ class ShowQueueDialog extends StatefulWidget {
 
 class _ShowQueueDialogState extends State<ShowQueueDialog>
     with SingleTickerProviderStateMixin {
-  List<Singer> _singers = MockData.singers;
   List<Song> _songsQueue = MockData.songs;
   int _currentPlaying = 1;
 

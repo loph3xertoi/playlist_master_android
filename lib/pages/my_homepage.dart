@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/states/my_navigation_button_state.dart';
 import 'package:playlistmaster/widgets/floating_button/quick_action.dart';
 import 'package:playlistmaster/widgets/floating_button/quick_action_menu.dart';
 import 'package:playlistmaster/widgets/my_footer.dart';
 import 'package:provider/provider.dart';
 
 import '../states/app_state.dart';
-import '../states/my_search_state.dart';
 import '../widgets/bottom_player.dart';
 import '../widgets/night_background.dart';
 import '../widgets/my_content_area.dart';

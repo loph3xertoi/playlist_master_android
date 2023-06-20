@@ -21,6 +21,7 @@ class _SongItemState extends State<SongItem> {
   @override
   Widget build(BuildContext context) {
     return Material(
+      color: Colors.transparent,
       child: InkWell(
         onTap: () {
           Navigator.pushNamed(

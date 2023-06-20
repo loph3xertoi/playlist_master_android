@@ -15,6 +15,8 @@ dependencies:
   flutter_svg: ^0.22.0
   flutter_animator: ^3.1.0
   flutter_animate: ^4.1.1+1
+  just_audio: ^0.9.34
+  rxdart: ^0.27.7
 
 dev_dependencies:
   flutter_test:
@@ -64,3 +66,8 @@ flutter:
     - assets/images/mountain2.png
     - assets/images/mountain2_night.png
     - assets/images/mountain_night.png
+
+    - assets/audios/parrot.mp3
+    - assets/audios/tit.mp3
+    - assets/audios/owl.mp3
+    - assets/audios/sft.mp3
