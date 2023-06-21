@@ -14,15 +14,13 @@ class SongPlayerPage extends StatefulWidget {
   State<SongPlayerPage> createState() => _SongPlayerPageState();
 }
 
-class _SongPlayerPageState extends State<SongPlayerPage>
-    with SingleTickerProviderStateMixin {
+class _SongPlayerPageState extends State<SongPlayerPage> {
   late AudioPlayer _player;
-  late AnimationController _controller;
   // Global playing mode, 0 for shuffle, 1 for repeat, 2 for repeat one.
   // 0 as default for the first using.
   int _userPlayingMode = 0;
   late int _currentSong;
-
+  CarouselController carouselController = CarouselController();
   // Define the queue
   late final ConcatenatingAudioSource queue;
 
@@ -47,11 +45,6 @@ class _SongPlayerPageState extends State<SongPlayerPage>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      // lowerBound: 0.5,
-      duration: const Duration(seconds: 5),
-    );
   }
 
   Future<void> _init() async {
@@ -64,6 +57,11 @@ class _SongPlayerPageState extends State<SongPlayerPage>
           setState(() {
             _currentSong = event.currentIndex!;
           });
+          carouselController.animateToPage(_currentSong);
+          if (_userPlayingMode == 0) {
+            _player.shuffle();
+            // _player.seek(Duration.zero, index: _player.effectiveIndices?[0]);
+          }
         }
       },
       onError: (Object e, StackTrace stackTrace) {
@@ -113,7 +111,6 @@ class _SongPlayerPageState extends State<SongPlayerPage>
   void dispose() {
     // Release decoders and buffers back to the operating system making them
     // available for other apps to use.
-    _controller.dispose();
     _player.dispose();
     super.dispose();
   }
@@ -197,119 +194,74 @@ class _SongPlayerPageState extends State<SongPlayerPage>
             ),
           ),
           Expanded(
-            child: Center(),
-            //   child: AnimatedBuilder(
-            //     animation: _controller,
-            //     builder: (BuildContext context, Widget? child) {
-            //       return Stack(
-            //         alignment: Alignment.center,
-            //         children: [
-            //           // Positioned(
-            //           //   bottom: -20,
-            //           //   right: 0,
-            //           //   left: 0,
-            //           //   child: Transform.translate(
-            //           //     offset: Offset(50 * _controller.value, 0),
-            //           //     child: Opacity(
-            //           //       opacity: val ? 0.0 : 0.8,
-            //           //       child: Image.asset(
-            //           //         'assets/images/cloud2.png',
-            //           //         fit: BoxFit.cover,
-            //           //       ),
-            //           //     ),
-            //           //   ),
-            //           // ),
-            //           // Positioned(
-            //           //   bottom: -20,
-            //           //   right: 0,
-            //           //   left: 0,
-            //           //   child: Transform.translate(
-            //           //     offset: Offset(100 * _controller.value, 0),
-            //           //     child: Opacity(
-            //           //       opacity: val ? 0.0 : 0.4,
-            //           //       child: Image.asset(
-            //           //         'assets/images/cloud3.png',
-            //           //         fit: BoxFit.cover,
-            //           //       ),
-            //           //     ),
-            //           //   ),
-            //           // ),
-            //           Positioned(
-            //             left: -272.0,
-            //             width: 155.0,
-            //             height: 155.0,
-            //             child: Transform.translate(
-            //               offset: Offset(166.0 * _controller.value, 0),
-            //               child: SizedBox(
-            //                 width: 155.0,
-            //                 height: 155.0,
-            //                 child: ClipOval(
-            //                   child: Image.asset(
-            //                       'assets/images/songs_cover/owl.png'),
-            //                 ),
-            //               ),
-            //             ),
-            //           ),
-            //           Positioned(
-            //             left: -106.0,
-            //             width: 155.0,
-            //             height: 155.0,
-            //             child: SizedBox(
-            //               width: 155.0,
-            //               height: 155.0,
-            //               child: ClipOval(
-            //                 child: Image.asset(
-            //                     'assets/images/songs_cover/parrot.png'),
-            //               ),
-            //             ),
-            //           ),
-            //           Positioned(
-            //             width: 240.0,
-            //             height: 240.0,
-            //             child: Transform.translate(
-            //               offset: Offset(50 * _controller.value, 0),
-            //               child: SizedBox(
-            //                 width: 240.0,
-            //                 height: 240.0,
-            //                 child: ClipOval(
-            //                   child: Image.asset(
-            //                       'assets/images/songs_cover/tit.png'),
-            //                 ),
-            //               ),
-            //             ),
-            //           ),
-            //           Positioned(
-            //             right: -106.0,
-            //             width: 155.0,
-            //             height: 155.0,
-            //             child: SizedBox(
-            //               width: 155.0,
-            //               height: 155.0,
-            //               child: ClipOval(
-            //                 child: Image.asset(
-            //                     'assets/images/songs_cover/owl.png'),
-            //               ),
-            //             ),
-            //           ),
-            //           Positioned(
-            //             right: -272.0,
-            //             width: 155.0,
-            //             height: 155.0,
-            //             child: SizedBox(
-            //               width: 155.0,
-            //               height: 155.0,
-            //               child: ClipOval(
-            //                 child: Image.asset(
-            //                     'assets/images/songs_cover/parrot.png'),
-            //               ),
-            //             ),
-            //           ),
-            //         ],
-            //       );
-            //     },
-            //   ),
-            // ),
+            child: Center(
+              child: SizedBox(
+                height: 250.0,
+                width: double.infinity,
+                child: CarouselSlider.builder(
+                  carouselController: carouselController,
+                  options: CarouselOptions(
+                    initialPage: indexOfSelectedSong,
+                    aspectRatio: 1.0,
+                    viewportFraction: _userPlayingMode == 0 ? 0.8 : 0.6,
+                    enlargeCenterPage: true,
+                    onPageChanged: (index, reason) {
+                      if (reason == CarouselPageChangedReason.manual) {
+                        _player.seek(Duration.zero,
+                            index: _player.effectiveIndices![index]);
+                      }
+                    },
+                    onScrolled: (position) {
+                      // print(position);
+                    },
+                    // enlargeStrategy: CenterPageEnlargeStrategy.scale,
+                    enlargeFactor: 0.45,
+                  ),
+                  // items: imageSliders,
+                  itemBuilder:
+                      (BuildContext context, int itemIndex, int pageViewIndex) {
+                    return Padding(
+                      padding: const EdgeInsets.only(
+                        top: 10.0,
+                        bottom: 10.0,
+                      ),
+                      child: Container(
+                        width: 230.0,
+                        height: 230.0,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          // color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0x40000000),
+                              spreadRadius: 0.0,
+                              blurRadius: 4.0,
+                              offset: Offset(
+                                  0.0, 4.0), // changes position of shadow
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(150.0)),
+                          child: Image.asset(
+                            // (_userPlayingMode ==0)?
+                            // songsOfPlaylist[itemIndex].coverUri
+                            songsOfPlaylist[itemIndex].coverUri,
+                            fit: BoxFit.fitHeight,
+                            height: 230.0,
+                            width: 230.0,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  itemCount: songsOfPlaylist.length,
+                ),
+              ),
+            ),
           ),
+
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 91.0,
@@ -353,12 +305,6 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                   stream: _positionDataStream,
                   builder: (context, snapshot) {
                     final positionData = snapshot.data;
-                    if (_userPlayingMode == 0 &&
-                        _player.currentIndex == _player.shuffleIndices?.last &&
-                        _player.position.inSeconds ==
-                            _player.duration?.inSeconds) {
-                      _player.shuffle();
-                    }
                     return SeekBar(
                       duration: positionData?.duration ?? Duration.zero,
                       position: positionData?.position ?? Duration.zero,
@@ -371,96 +317,6 @@ class _SongPlayerPageState extends State<SongPlayerPage>
               ),
             ),
           ),
-          // Padding(
-          //   padding: const EdgeInsets.fromLTRB(12.0, 0.0, 12.0, 22.0),
-          //   child: SizedBox(
-          //     height: 50.0,
-          //     child: Row(
-          //       mainAxisSize: MainAxisSize.min,
-          //       children: [
-          //         // Opens volume slider dialog
-          //         IconButton(
-          //           icon: const Icon(Icons.volume_up),
-          //           onPressed: () {
-          //             showSliderDialog(
-          //               context: context,
-          //               title: "Adjust volume",
-          //               divisions: 10,
-          //               min: 0.0,
-          //               max: 1.0,
-          //               value: _player.volume,
-          //               stream: _player.volumeStream,
-          //               onChanged: _player.setVolume,
-          //             );
-          //           },
-          //         ),
-
-          //         /// This StreamBuilder rebuilds whenever the player state changes, which
-          //         /// includes the playing/paused state and also the
-          //         /// loading/buffering/ready state. Depending on the state we show the
-          //         /// appropriate button or loading indicator.
-          //         Material(
-          //           child: StreamBuilder<PlayerState>(
-          //             stream: _player.playerStateStream,
-          //             builder: (context, snapshot) {
-          //               final playerState = snapshot.data;
-          //               final processingState = playerState?.processingState;
-          //               final playing = playerState?.playing;
-          //               if (processingState == ProcessingState.loading ||
-          //                   processingState == ProcessingState.buffering) {
-          //                 return Container(
-          //                   margin: const EdgeInsets.all(8.0),
-          //                   width: 64.0,
-          //                   height: 64.0,
-          //                   child: const CircularProgressIndicator(),
-          //                 );
-          //               } else if (playing != true) {
-          //                 return IconButton(
-          //                   icon: const Icon(Icons.play_arrow),
-          //                   iconSize: 64.0,
-          //                   onPressed: _player.play,
-          //                 );
-          //               } else if (processingState !=
-          //                   ProcessingState.completed) {
-          //                 return IconButton(
-          //                   icon: const Icon(Icons.pause),
-          //                   iconSize: 64.0,
-          //                   onPressed: _player.pause,
-          //                 );
-          //               } else {
-          //                 return IconButton(
-          //                   icon: const Icon(Icons.replay),
-          //                   iconSize: 64.0,
-          //                   onPressed: () => _player.seek(Duration.zero),
-          //                 );
-          //               }
-          //             },
-          //           ),
-          //         ),
-          //         // Opens speed slider dialog
-          //         StreamBuilder<double>(
-          //           stream: _player.speedStream,
-          //           builder: (context, snapshot) => IconButton(
-          //             icon: Text("${snapshot.data?.toStringAsFixed(1)}x",
-          //                 style: const TextStyle(fontWeight: FontWeight.bold)),
-          //             onPressed: () {
-          //               showSliderDialog(
-          //                 context: context,
-          //                 title: "Adjust speed",
-          //                 divisions: 10,
-          //                 min: 0.5,
-          //                 max: 1.5,
-          //                 value: _player.speed,
-          //                 stream: _player.speedStream,
-          //                 onChanged: _player.setSpeed,
-          //               );
-          //             },
-          //           ),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ),
 
           Padding(
             padding: const EdgeInsets.fromLTRB(12.0, 0.0, 12.0, 22.0),
@@ -522,11 +378,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                   IconButton(
                     icon: const Icon(Icons.skip_previous_rounded),
                     color: Color(0xE5FFFFFF),
-                    // onPressed: _player.seekToPrevious,
                     onPressed: () {
-                      _controller.value = 0.0;
-                      // ..value = 1.0
-                      // ..reverse(from: 1.0);
+                      _player.seekToPrevious();
                     },
                   ),
                   Material(
@@ -581,18 +434,14 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                     icon: const Icon(Icons.skip_next_rounded),
                     color: Color(0xE5FFFFFF),
                     onPressed: () {
-                      _controller
-                        ..value = 0.0
-                        ..forward(from: 0.0);
-                      // _player.seekToNext();
-                      // print(
-                      //     'daw=====${_player.currentIndex}=========${_player.nextIndex}=====');
+                      _player.seekToNext();
                     },
                   ),
                   IconButton(
                     icon: const Icon(Icons.queue_music_rounded),
                     color: Color(0xE5FFFFFF),
                     onPressed: () {
+                      print(_player.effectiveIndices);
                       showDialog(
                           context: context,
                           builder: (_) =>
