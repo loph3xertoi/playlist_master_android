@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/widgets/create_queue_popup.dart';
 import 'package:provider/provider.dart';
@@ -126,11 +125,7 @@ class _BottomPlayerState extends State<BottomPlayer>
             IconButton(
               icon: Icon(Icons.queue_music_rounded),
               onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (_) => ShowQueueDialog(
-                          songsQueue: MockData.songs,
-                        ));
+                showDialog(context: context, builder: (_) => ShowQueueDialog());
               },
             ),
           ],

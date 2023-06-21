@@ -74,31 +74,32 @@ class _MyHomePageState extends State<MyHomePage>
               // SizedBox.expand(),
 
               Expanded(
-                child: Stack(
-                  alignment: Alignment.bottomCenter,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Color(0xFF75B6F8),
-                            Color(0xFFD3EAFF),
-                            Color(0xFFF1F8FF),
-                            Color(0xFFFFFFFF),
-                            Color(0xFFFFEED9),
-                          ],
-                          stops: [0.0, 0.38, 0.6, 0.81, 1.0],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xFF75B6F8),
+                        Color(0xFFD3EAFF),
+                        Color(0xFFF1F8FF),
+                        Color(0xFFFFFFFF),
+                        Color(0xFFFFEED9),
+                      ],
+                      stops: [0.0, 0.38, 0.6, 0.81, 1.0],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
+                          child: MyContentArea(),
                         ),
                       ),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
-                        child: MyContentArea(),
-                      ),
-                    ),
-                    appState.isQueueEmpty ? Container() : BottomPlayer(),
-                  ],
+                      appState.isQueueEmpty ? Container() : BottomPlayer(),
+                    ],
+                  ),
                 ),
               ),
               MyFooter(),

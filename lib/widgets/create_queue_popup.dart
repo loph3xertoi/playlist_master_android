@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:playlistmaster/entities/song.dart';
+import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/widgets/song_item_in_queue.dart';
+import 'package:provider/provider.dart';
 
 class ShowQueueDialog extends StatefulWidget {
-  final List<Song> songsQueue;
-
-  ShowQueueDialog({
-    required this.songsQueue,
-  });
-
   @override
   State<ShowQueueDialog> createState() => _ShowQueueDialogState();
 }
@@ -19,6 +15,9 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
 
   @override
   Widget build(BuildContext context) {
+    MyAppState appState = context.watch<MyAppState>();
+    List<Song>? queue = appState.queue;
+    int? queueLength = queue?.length ?? 0;
     return Dialog(
       backgroundColor: Colors.white,
       insetPadding: EdgeInsets.all(0.0),
@@ -38,7 +37,7 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                 Row(children: [
                   Expanded(
                     child: Text(
-                      'Queue(${widget.songsQueue.length})',
+                      'Queue($queueLength)',
                       style: TextStyle(
                         color: Color(0x42000000),
                         fontSize: 12.0,
@@ -52,13 +51,14 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                   )
                 ]),
                 Expanded(
-                  child: (widget.songsQueue.isNotEmpty)
-                      ? ListView.builder(
-                          itemCount: widget.songsQueue.length,
+                  child: (appState.isQueueEmpty)
+                      ? Center(child: Text('Empty Queue'))
+                      : ListView.builder(
+                          itemCount: queueLength,
                           itemBuilder: (context, index) {
-                            var songName = widget.songsQueue[index].name;
-                            var singers = widget.songsQueue[index].singers;
-                            var coverUri = widget.songsQueue[index].coverUri;
+                            var songName = queue![index].name;
+                            var singers = queue[index].singers;
+                            var coverUri = queue[index].coverUri;
                             return SongItemInQueue(
                               name: songName,
                               coverUri: coverUri,
@@ -67,8 +67,7 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                   (_currentPlaying == index) ? true : false,
                             );
                           },
-                        )
-                      : Center(child: Text('Empty Queue')),
+                        ),
                 ),
               ],
             ),

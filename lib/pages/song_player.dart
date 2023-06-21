@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:playlistmaster/entities/song.dart';
-import 'package:playlistmaster/mock_data.dart';
+import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:playlistmaster/third_lib_change/like_button/like_button.dart';
 import 'package:playlistmaster/widgets/create_queue_popup.dart';
+import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
@@ -16,49 +17,63 @@ class SongPlayerPage extends StatefulWidget {
 }
 
 class _SongPlayerPageState extends State<SongPlayerPage> {
+  // MyAppState _appState = context.watch<MyAppState>();;
+  late MyAppState _appState;
+
   late AudioPlayer _player;
+
   // Global playing mode, 0 for shuffle, 1 for repeat, 2 for repeat one.
   // 0 as default for the first using.
-  int _userPlayingMode = 0;
-  late int _currentSong;
-  CarouselController carouselController = CarouselController();
+  late int _userPlayingMode;
+
+  late int _currentSongIndex;
+
+  CarouselController _carouselController = CarouselController();
+
   // Define the queue
-  late final ConcatenatingAudioSource queue;
+  late ConcatenatingAudioSource _initQueue;
 
   // Songs of current playlist.
-  late List<Song> songsOfPlaylist;
+  late List<Song>? _songsOfPlaylist;
 
-  // Index of selected song.
-  late int indexOfSelectedSong;
+  // Default volume.
+  late double? _defaultVolume;
 
-  late final Map<String, dynamic> args;
+  // Default speed.
+  late double? _defaultSpeed;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    indexOfSelectedSong = args['index'];
-    _currentSong = indexOfSelectedSong;
-    songsOfPlaylist = args['songs'];
-    _init();
   }
 
   @override
   void initState() {
     super.initState();
+    final state = Provider.of<MyAppState>(context, listen: false);
+
+    _currentSongIndex = state.currentPlayingSongInQueue;
+    _userPlayingMode = state.userPlayingMode;
+    _songsOfPlaylist = state.songsOfPlaylist;
+    _defaultVolume = state.volume;
+    _defaultSpeed = state.speed;
+    _initAudioPlayer();
   }
 
-  Future<void> _init() async {
+  Future<void> _initAudioPlayer() async {
     _player = AudioPlayer();
-
     // Listen to errors during playback.
     _player.playbackEventStream.listen(
       (event) {
-        if (event.currentIndex != null && event.currentIndex != _currentSong) {
+        if (event.currentIndex != null &&
+            event.currentIndex != _currentSongIndex) {
           setState(() {
-            _currentSong = event.currentIndex!;
+            _currentSongIndex = event.currentIndex!;
           });
-          carouselController.animateToPage(_currentSong);
+
+          // _appState.currentPlayingSongInQueue = _currentSongIndex;
+
+          _carouselController.animateToPage(_currentSongIndex);
           if (_userPlayingMode == 0) {
             _player.shuffle();
             // _player.seek(Duration.zero, index: _player.effectiveIndices?[0]);
@@ -76,20 +91,21 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
       // await _player.setAudioSource(AudioSource.uri(Uri.parse(
       //     "https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3")));
       // await _player.setAsset('assets/audios/parrot.mp3');
-      queue = ConcatenatingAudioSource(
+      _initQueue = ConcatenatingAudioSource(
         // Start loading next item just before reaching it
         useLazyPreparation: true,
         // Customise the shuffle algorithm
         shuffleOrder: DefaultShuffleOrder(),
         // Specify the queue items
-        children: songsOfPlaylist
+        children: _songsOfPlaylist!
             .map(
               (e) => AudioSource.asset(e.link),
             )
             .toList(),
       );
-      await _player.setAudioSource(queue,
-          initialIndex: indexOfSelectedSong, initialPosition: Duration.zero);
+      await _player.setAudioSource(_initQueue,
+          initialIndex: _currentSongIndex, initialPosition: Duration.zero);
+
       // Set the playing mode of the player.
       if (_userPlayingMode == 0) {
         await _player.setShuffleModeEnabled(true);
@@ -103,6 +119,15 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
       } else {
         throw Exception('Invalid playing mode');
       }
+
+      // Set the volume.
+      await _player.setVolume(_defaultVolume!);
+
+      // Set the speed.
+      await _player.setSpeed(_defaultSpeed!);
+
+      // Default playing.
+      await _player.play();
     } catch (e) {
       print("Error init audio player: $e");
     }
@@ -128,6 +153,11 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
 
   @override
   Widget build(BuildContext context) {
+    MyAppState appState = context.watch<MyAppState>();
+    setState(() {
+      _appState = appState;
+    });
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -157,6 +187,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     color: Color(0xE5FFFFFF),
                     icon: Icon(Icons.arrow_back_rounded),
                     onPressed: () {
+                      _appState!.initSongPlayer = true;
                       Navigator.pop(context);
                     },
                   ),
@@ -166,7 +197,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                       children: [
                         Expanded(
                           child: Text(
-                            songsOfPlaylist[_currentSong].name,
+                            _songsOfPlaylist![_currentSongIndex].name,
                             style: TextStyle(
                               color: Color(0xE5FFFFFF),
                               fontFamily: 'Roboto',
@@ -175,7 +206,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                           ),
                         ),
                         Text(
-                          songsOfPlaylist[_currentSong].singers[0].name,
+                          _songsOfPlaylist![_currentSongIndex].singers[0].name,
                           style: TextStyle(
                             color: Color(0x80FFFFFF),
                             fontFamily: 'Roboto',
@@ -200,9 +231,9 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                 height: 250.0,
                 width: double.infinity,
                 child: CarouselSlider.builder(
-                  carouselController: carouselController,
+                  carouselController: _carouselController,
                   options: CarouselOptions(
-                    initialPage: indexOfSelectedSong,
+                    initialPage: _currentSongIndex,
                     aspectRatio: 1.0,
                     viewportFraction: _userPlayingMode == 0 ? 0.8 : 0.6,
                     enlargeCenterPage: true,
@@ -248,7 +279,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                           child: Image.asset(
                             // (_userPlayingMode ==0)?
                             // songsOfPlaylist[itemIndex].coverUri
-                            songsOfPlaylist[itemIndex].coverUri,
+                            _songsOfPlaylist![itemIndex].coverUri,
                             fit: BoxFit.fitHeight,
                             height: 230.0,
                             width: 230.0,
@@ -257,7 +288,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                       ),
                     );
                   },
-                  itemCount: songsOfPlaylist.length,
+                  itemCount: _songsOfPlaylist!.length,
                 ),
               ),
             ),
@@ -282,36 +313,40 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                         divisions: 10,
                         min: 0.0,
                         max: 2.0,
-                        value: _player.volume,
+                        value: _appState.volume ?? 1.0,
                         stream: _player.volumeStream,
-                        onChanged: _player.setVolume,
+                        onChanged: (volume) {
+                          _player.setVolume(volume);
+                          _appState.volume = volume;
+                          _defaultVolume = volume;
+                        },
                       );
                     },
                   ),
-                  StreamBuilder<double>(
-                    stream: _player.speedStream,
-                    builder: (context, snapshot) => IconButton(
-                      icon: Text(
-                        "${snapshot.data?.toStringAsFixed(1)}x",
-                        style: const TextStyle(
-                          color: Color(0xE5FFFFFF),
-                          fontWeight: FontWeight.bold,
-                        ),
+                  IconButton(
+                    icon: Text(
+                      '${_appState.speed?.toStringAsFixed(1) ?? 1.0}x',
+                      style: const TextStyle(
+                        color: Color(0xE5FFFFFF),
+                        fontWeight: FontWeight.bold,
                       ),
-                      color: Color(0xE5FFFFFF),
-                      onPressed: () {
-                        showSliderDialog(
-                          context: context,
-                          title: "Adjust speed",
-                          divisions: 99,
-                          min: 0.1,
-                          max: 10.0,
-                          value: _player.speed,
-                          stream: _player.speedStream,
-                          onChanged: _player.setSpeed,
-                        );
-                      },
                     ),
+                    onPressed: () {
+                      showSliderDialog(
+                        context: context,
+                        title: "Adjust speed",
+                        divisions: 99,
+                        min: 0.1,
+                        max: 10.0,
+                        value: _appState.speed ?? 1.0,
+                        stream: _player.speedStream,
+                        onChanged: (speed) {
+                          _player.setSpeed(speed);
+                          _appState.speed = speed;
+                          _defaultSpeed = speed;
+                        },
+                      );
+                    },
                   ),
                   SizedBox(
                     width: 50.0,
@@ -384,6 +419,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                             onPressed: () {
                               setState(() {
                                 _userPlayingMode = 1;
+                                _appState!.userPlayingMode = _userPlayingMode;
                               });
                               _player.setShuffleModeEnabled(false);
                               _player.setLoopMode(LoopMode.all);
@@ -396,6 +432,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                             onPressed: () {
                               setState(() {
                                 _userPlayingMode = 2;
+                                _appState!.userPlayingMode = _userPlayingMode;
                               });
                               _player.setShuffleModeEnabled(false);
                               _player.setLoopMode(LoopMode.one);
@@ -408,6 +445,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                             onPressed: () {
                               setState(() {
                                 _userPlayingMode = 0;
+                                _appState!.userPlayingMode = _userPlayingMode;
                               });
                               _player.setShuffleModeEnabled(true);
                               _player.shuffle();
@@ -488,9 +526,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     onPressed: () {
                       print(_player.effectiveIndices);
                       showDialog(
-                          context: context,
-                          builder: (_) =>
-                              ShowQueueDialog(songsQueue: MockData.songs));
+                          context: context, builder: (_) => ShowQueueDialog());
                     },
                   ),
                 ],
