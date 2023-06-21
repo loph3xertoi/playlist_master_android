@@ -1,6 +1,6 @@
 # Playlist Master
 
-A new Flutter project.
+Playlist Master for android, dedicating to manage your playlists all in one.
 
 ## Getting Started
 
