@@ -155,11 +155,11 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                 height: 42.0,
                 child: Row(children: [
                   IconButton(
+                    color: Color(0xE5FFFFFF),
+                    icon: Icon(Icons.arrow_back_rounded),
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    color: Color(0xE5FFFFFF),
-                    icon: Icon(Icons.arrow_back_rounded),
                   ),
                   Expanded(
                     child: Column(
@@ -187,9 +187,9 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     ),
                   ),
                   IconButton(
-                    onPressed: () {},
                     color: Color(0xE5FFFFFF),
                     icon: Icon(Icons.share_rounded),
+                    onPressed: () {},
                   ),
                 ]),
               ),
@@ -274,14 +274,45 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: () {},
                     color: Color(0xE5FFFFFF),
                     icon: Icon(Icons.volume_up_rounded),
+                    onPressed: () {
+                      showSliderDialog(
+                        context: context,
+                        title: "Adjust volume",
+                        divisions: 10,
+                        min: 0.0,
+                        max: 2.0,
+                        value: _player.volume,
+                        stream: _player.volumeStream,
+                        onChanged: _player.setVolume,
+                      );
+                    },
                   ),
-                  IconButton(
-                    onPressed: () {},
-                    color: Color(0xE5FFFFFF),
-                    icon: Icon(MdiIcons.playSpeed),
+                  StreamBuilder<double>(
+                    stream: _player.speedStream,
+                    builder: (context, snapshot) => IconButton(
+                      icon: Text(
+                        "${snapshot.data?.toStringAsFixed(1)}x",
+                        style: const TextStyle(
+                          color: Color(0xE5FFFFFF),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      color: Color(0xE5FFFFFF),
+                      onPressed: () {
+                        showSliderDialog(
+                          context: context,
+                          title: "Adjust speed",
+                          divisions: 99,
+                          min: 0.1,
+                          max: 10.0,
+                          value: _player.speed,
+                          stream: _player.speedStream,
+                          onChanged: _player.setSpeed,
+                        );
+                      },
+                    ),
                   ),
                   SizedBox(
                     width: 50.0,
@@ -292,14 +323,14 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     ),
                   ),
                   IconButton(
-                    onPressed: () {},
                     color: Color(0xE5FFFFFF),
                     icon: Icon(Icons.download_rounded),
+                    onPressed: () {},
                   ),
                   IconButton(
-                    onPressed: () {},
                     color: Color(0xE5FFFFFF),
                     icon: Icon(Icons.more_vert_rounded),
+                    onPressed: () {},
                   ),
                 ],
               ),
