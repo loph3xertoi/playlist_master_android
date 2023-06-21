@@ -37,9 +37,13 @@ class LikeButton extends StatefulWidget {
     this.padding,
     this.countDecoration,
     this.postFrameCallback,
+    this.iconColor = const Color(0x42000000),
   })  : bubblesSize = bubblesSize ?? size * 2.0,
         circleSize = circleSize ?? size * 0.8,
         super(key: key);
+
+  /// color of icon
+  final Color iconColor;
 
   /// size of like widget
   final double size;
@@ -128,11 +132,13 @@ class LikeButtonState extends State<LikeButton> with TickerProviderStateMixin {
   AnimationController? get controller => _controller;
   AnimationController? get likeCountController => _likeCountController;
 
+  Color? _iconColor;
   bool? _isLiked = false;
   bool? _isPressed = false;
   int? _likeCount;
   int? _preLikeCount;
 
+  Color? get iconColor => _iconColor;
   bool? get isLiked => _isLiked;
   bool? get isPressed => _isPressed;
   int? get likeCount => _likeCount;
@@ -141,8 +147,8 @@ class LikeButtonState extends State<LikeButton> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
+    _iconColor = widget.iconColor;
     _isLiked = widget.isLiked;
-
     _likeCount = widget.likeCount;
     _preLikeCount = _likeCount;
 
@@ -164,6 +170,7 @@ class LikeButtonState extends State<LikeButton> with TickerProviderStateMixin {
 
   @override
   void didUpdateWidget(LikeButton oldWidget) {
+    _iconColor = widget.iconColor;
     _isLiked = widget.isLiked;
     _likeCount = widget.likeCount;
     _preLikeCount = _likeCount;
@@ -213,7 +220,11 @@ class LikeButtonState extends State<LikeButton> with TickerProviderStateMixin {
           final Widget likeWidget =
               widget.likeBuilder?.call(_isLiked ?? true) ??
                   defaultWidgetBuilder(
-                      _isLiked ?? true, _isPressed ?? false, widget.size);
+                    _isLiked ?? true,
+                    _isPressed ?? false,
+                    widget.size,
+                    iconColor,
+                  );
           return Stack(
             clipBehavior: Clip.none,
             children: <Widget>[

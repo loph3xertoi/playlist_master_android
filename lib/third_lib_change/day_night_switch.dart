@@ -328,7 +328,7 @@ class _DayNightSwitchPainter extends ToggleablePainter {
 
     final Offset trackPaintOffset =
         _computeTrackPaintOffset(size, _kTrackWidth, _kTrackHeight);
-    final double thumbRadius = _kThumbRadius;
+    const double thumbRadius = _kThumbRadius;
     final Offset thumbPaintOffset =
         _computeThumbPaintOffset(trackPaintOffset, visualPosition, thumbRadius);
     final Offset radialReactionOrigin =

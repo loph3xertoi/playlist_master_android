@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
+import 'package:playlistmaster/third_lib_change/like_button/like_button.dart';
 import 'package:playlistmaster/widgets/create_queue_popup.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -264,17 +266,30 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
 
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: 91.0,
+              horizontal: 12.0,
             ),
             child: SizedBox(
-              height: 40.0,
+              height: 50.0,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
                     onPressed: () {},
                     color: Color(0xE5FFFFFF),
-                    icon: Icon(Icons.favorite_outline_rounded),
+                    icon: Icon(Icons.volume_up_rounded),
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    color: Color(0xE5FFFFFF),
+                    icon: Icon(MdiIcons.playSpeed),
+                  ),
+                  SizedBox(
+                    width: 50.0,
+                    child: LikeButton(
+                      size: 24.0,
+                      isLiked: false,
+                      iconColor: Color(0xE5FFFFFF),
+                    ),
                   ),
                   IconButton(
                     onPressed: () {},

@@ -20,7 +20,6 @@ class MySearchBar extends StatefulWidget {
 class _MySearchBarState extends State<MySearchBar>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
-  late Animation<double> _menu_arrow_animation;
 
   @override
   void initState() {
@@ -29,8 +28,6 @@ class _MySearchBarState extends State<MySearchBar>
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
-    _menu_arrow_animation =
-        Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
   }
 
   @override

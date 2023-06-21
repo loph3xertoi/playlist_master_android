@@ -40,7 +40,7 @@ class SeekBarState extends State<SeekBar> {
     return Stack(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: SliderTheme(
             data: _sliderThemeData.copyWith(
               thumbShape: HiddenThumbComponentShape(),
@@ -72,7 +72,7 @@ class SeekBarState extends State<SeekBar> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: SliderTheme(
             data: _sliderThemeData.copyWith(
               trackHeight: 2.0,
