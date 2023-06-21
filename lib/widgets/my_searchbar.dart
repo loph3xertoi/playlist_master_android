@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'basic_info.dart';
+import 'package:playlistmaster/widgets/basic_info.dart';
 
 class MySearchBar extends StatefulWidget {
   final GlobalKey<ScaffoldState> myScaffoldKey;

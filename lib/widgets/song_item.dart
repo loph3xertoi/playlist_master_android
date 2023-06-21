@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/third_lib_change/like_button/like_button.dart';
-
-import '../entities/song.dart';
 
 class SongItem extends StatefulWidget {
   final int index;

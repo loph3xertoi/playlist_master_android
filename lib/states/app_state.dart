@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class MyAppState extends ChangeNotifier {
-  bool isShowBottomPlayer = true;
+  bool _isQueueEmpty = true;
 
-  get getIsShowBottomPlayer => isShowBottomPlayer;
+  bool get isQueueEmpty => _isQueueEmpty;
 
-  void setIsShowBottomPlayer(bool value) {
-    isShowBottomPlayer = value;
+  void toggleBottomPlayer() {
+    _isQueueEmpty = !_isQueueEmpty;
     notifyListeners();
   }
 }

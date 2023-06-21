@@ -1,9 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/third_lib_change/day_night_switch.dart';
 import 'package:playlistmaster/widgets/my_side_drawer.dart';
-
-import '../third_lib_change/day_night_switch.dart';
 
 class NightBackground extends StatefulWidget {
   const NightBackground({super.key});

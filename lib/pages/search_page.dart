@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/states/my_search_state.dart';
+import 'package:playlistmaster/widgets/my_searchbar.dart';
 import 'package:provider/provider.dart';
-
-import '../states/my_search_state.dart';
-import '../widgets/my_searchbar.dart';
-
 class SearchPage extends StatefulWidget {
   @override
   State<SearchPage> createState() => _SearchPageState();

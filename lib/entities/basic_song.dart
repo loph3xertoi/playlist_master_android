@@ -1,4 +1,4 @@
-import 'singer.dart';
+import 'package:playlistmaster/entities/singer.dart';
 
 class BasicSong {
   String songName;
@@ -7,7 +7,7 @@ class BasicSong {
   String mediaMid;
   List<Singer> singers;
   int payPlay;
-  
+
   BasicSong({
     required this.songName,
     required this.songId,

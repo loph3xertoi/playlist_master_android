@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';

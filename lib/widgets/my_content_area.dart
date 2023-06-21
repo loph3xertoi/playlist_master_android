@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/mock_data.dart';
+import 'package:playlistmaster/widgets/create_playlist_popup.dart';
 import 'package:playlistmaster/widgets/playlist_item.dart';
-
-import '../entities/playlist.dart';
-import 'create_playlist_popup.dart';
 
 class MyContentArea extends StatefulWidget {
   @override

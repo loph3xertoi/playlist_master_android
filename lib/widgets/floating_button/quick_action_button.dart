@@ -1,8 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/states/my_navigation_button_state.dart';
 import 'package:provider/provider.dart';
-import '../../states/my_navigation_button_state.dart';
+
 import 'quick_action.dart';
 import 'quick_action_icon.dart';
 

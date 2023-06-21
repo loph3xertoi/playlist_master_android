@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Playlist Master',
+        // darkTheme: ThemeData.dark(),
         theme: ThemeData(
           useMaterial3: true,
           // colorScheme: Colors.white,

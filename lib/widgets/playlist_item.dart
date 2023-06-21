@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../entities/playlist.dart';
+import 'package:playlistmaster/entities/playlist.dart';
 
 class PlaylistItem extends StatelessWidget {
   final Playlist playlist;
@@ -9,6 +8,7 @@ class PlaylistItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
+      color: Colors.transparent,
       child: InkWell(
         onTap: () {
           Navigator.pushNamed(context, '/playlist_detail', arguments: playlist);

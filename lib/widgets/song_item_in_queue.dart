@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../entities/singer.dart';
-import '../third_lib_change/music_visualizer.dart';
+import 'package:playlistmaster/entities/singer.dart';
+import 'package:playlistmaster/third_lib_change/music_visualizer.dart';
 
 class SongItemInQueue extends StatefulWidget {
   final String name;
@@ -34,8 +33,8 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
         children: <Widget>[
           widget.isPlaying
               ? Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: SizedBox(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SizedBox(
                     height: 12.0,
                     width: 12.0,
                     child: Align(
@@ -47,7 +46,7 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
                       ),
                     ),
                   ),
-              )
+                )
               : Container(),
           Text(
             widget.name,

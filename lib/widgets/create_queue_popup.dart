@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/widgets/song_item_in_queue.dart';
-import '../entities/song.dart';
 
 class ShowQueueDialog extends StatefulWidget {
   final List<Song> songsQueue;

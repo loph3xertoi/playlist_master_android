@@ -2,10 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:playlistmaster/mock_data.dart';
+import 'package:playlistmaster/states/app_state.dart';
+import 'package:playlistmaster/widgets/create_queue_popup.dart';
 import 'package:provider/provider.dart';
-
-import '../states/app_state.dart';
-import 'create_queue_popup.dart';
 
 class BottomPlayer extends StatefulWidget {
   @override
@@ -39,9 +38,20 @@ class _BottomPlayerState extends State<BottomPlayer>
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
-    return SizedBox(
+    return Container(
       height: 54.0,
       width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.transparent.withOpacity(0.2),
+            spreadRadius: 0.0,
+            blurRadius: 4.0,
+            offset: Offset(0.0, 0.0), // changes position of shadow
+          ),
+        ],
+      ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(10.0, 2.0, 8.0, 2.0),
         child: Row(

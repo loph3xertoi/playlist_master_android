@@ -2,14 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:playlistmaster/entities/playlist.dart';
+import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/mock_data.dart';
+import 'package:playlistmaster/states/my_search_state.dart';
+import 'package:playlistmaster/widgets/my_searchbar.dart';
 import 'package:playlistmaster/widgets/song_item.dart';
 import 'package:provider/provider.dart';
-
-import '../entities/song.dart';
-import '../states/my_search_state.dart';
-import '../widgets/my_searchbar.dart';
-
 class PlaylistDetailPage extends StatefulWidget {
   @override
   State<PlaylistDetailPage> createState() => _PlaylistDetailPageState();

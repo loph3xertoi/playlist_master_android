@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/states/app_state.dart';
+import 'package:playlistmaster/widgets/bottom_player.dart';
 import 'package:playlistmaster/widgets/floating_button/quick_action.dart';
 import 'package:playlistmaster/widgets/floating_button/quick_action_menu.dart';
+import 'package:playlistmaster/widgets/my_content_area.dart';
 import 'package:playlistmaster/widgets/my_footer.dart';
+import 'package:playlistmaster/widgets/my_searchbar.dart';
+import 'package:playlistmaster/widgets/night_background.dart';
 import 'package:provider/provider.dart';
-
-import '../states/app_state.dart';
-import '../widgets/bottom_player.dart';
-import '../widgets/night_background.dart';
-import '../widgets/my_content_area.dart';
-import '../widgets/my_searchbar.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -42,7 +41,9 @@ class _MyHomePageState extends State<MyHomePage>
         child: QuickActionMenu(
           backgroundColor: Colors.transparent,
           imageUri: 'assets/images/home_button.png',
-          onTap: () {},
+          onTap: () {
+            appState.toggleBottomPlayer();
+          },
           actions: [
             QuickAction(
               imageUri: 'assets/images/bilibili.png',
@@ -70,29 +71,36 @@ class _MyHomePageState extends State<MyHomePage>
                 notInHomepage: false,
                 inPlaylistDetailPage: false,
               ),
+              // SizedBox.expand(),
+
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Color(0xFF75B6F8),
-                        Color(0xFFD3EAFF),
-                        Color(0xFFF1F8FF),
-                        Color(0xFFFFFFFF),
-                        Color(0xFFFFEED9),
-                      ],
-                      stops: [0.0, 0.38, 0.6, 0.81, 1.0],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xFF75B6F8),
+                            Color(0xFFD3EAFF),
+                            Color(0xFFF1F8FF),
+                            Color(0xFFFFFFFF),
+                            Color(0xFFFFEED9),
+                          ],
+                          stops: [0.0, 0.38, 0.6, 0.81, 1.0],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
+                        child: MyContentArea(),
+                      ),
                     ),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
-                    child: MyContentArea(),
-                  ),
+                    appState.isQueueEmpty ? Container() : BottomPlayer(),
+                  ],
                 ),
               ),
-              appState.getIsShowBottomPlayer ? BottomPlayer() : Container(),
               MyFooter(),
             ],
           ),
