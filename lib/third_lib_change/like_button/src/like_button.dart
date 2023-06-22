@@ -324,8 +324,8 @@ class LikeButtonState extends State<LikeButton> with TickerProviderStateMixin {
               highlightColor: Color(0xFFFFC3AE),
               onTap: onTap,
               child: Ink(
-                width: 34.0,
-                height: 34.0,
+                width: 50.0,
+                height: 50.0,
                 child: result,
               ),
             ),
