@@ -36,9 +36,9 @@ flutter:
     - assets/images/qqmusic.png
     - assets/images/netease.png
     - assets/images/bilibili.png
-    - assets/images/songs_cover/parrot.png
-    - assets/images/songs_cover/tit.png
-    - assets/images/songs_cover/owl.png
+    - assets/images/songs_cover/parrot.jpeg
+    - assets/images/songs_cover/tit.jpeg
+    - assets/images/songs_cover/owl.jpeg
     - assets/images/songs_cover/budgerigar.jpeg
     - assets/images/songs_cover/bluejay.jpeg
     - assets/images/songs_cover/columbidae.jpeg

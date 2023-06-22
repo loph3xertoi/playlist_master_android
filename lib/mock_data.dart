@@ -60,19 +60,19 @@ class MockData {
     Song(
       name: 'Parrot',
       singers: [singers[0]],
-      coverUri: 'assets/images/songs_cover/parrot.png',
+      coverUri: 'assets/images/songs_cover/parrot.jpeg',
       link: 'assets/audios/parrot.mp3',
     ),
     Song(
       name: 'Tit',
       singers: [singers[1]],
-      coverUri: 'assets/images/songs_cover/tit.png',
+      coverUri: 'assets/images/songs_cover/tit.jpeg',
       link: 'assets/audios/tit.mp3',
     ),
     Song(
       name: 'Owl',
       singers: [singers[2]],
-      coverUri: 'assets/images/songs_cover/owl.png',
+      coverUri: 'assets/images/songs_cover/owl.jpeg',
       link: 'assets/audios/owl.mp3',
     ),
     Song(
