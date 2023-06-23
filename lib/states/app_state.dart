@@ -3,6 +3,10 @@ import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/entities/song.dart';
 
 class MyAppState extends ChangeNotifier {
+  String _currentPage = '/';
+
+  bool _isPlaying = false;
+
   // Volume of song player.
   double? _volume = 1.0;
 
@@ -14,8 +18,6 @@ class MyAppState extends ChangeNotifier {
 
   int _userPlayingMode = 0;
 
-  bool _isQueueEmpty = true;
-
   int _currentPlayingSongInQueue = 0;
 
   Playlist? _openedPlaylist;
@@ -24,13 +26,17 @@ class MyAppState extends ChangeNotifier {
 
   List<Song>? _queue;
 
+  String get currentPage => _currentPage;
+
+  bool get isPlaying => _isPlaying;
+
   bool get initSongPlayer => _initSongPlayer;
 
   int get userPlayingMode => _userPlayingMode;
 
   Playlist? get openedPlaylist => _openedPlaylist;
 
-  bool get isQueueEmpty => _isQueueEmpty;
+  bool get isQueueEmpty => _queue?.isEmpty ?? true;
 
   List<Song>? get queue => _queue;
 
@@ -41,6 +47,16 @@ class MyAppState extends ChangeNotifier {
   double? get volume => _volume;
 
   double? get speed => _speed;
+
+  set currentPage(String page) {
+    _currentPage = page;
+    notifyListeners();
+  }
+
+  set isPlaying(isPlaying) {
+    _isPlaying = isPlaying;
+    notifyListeners();
+  }
 
   set speed(speed) {
     _speed = speed;
@@ -62,19 +78,18 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  set openedPlaylist(playlist) {
+  set openedPlaylist(Playlist? playlist) {
     _openedPlaylist = playlist;
     notifyListeners();
   }
 
-  set setQueue(queue) {
-    _queue = queue;
-    _isQueueEmpty = _queue?.isEmpty ?? true;
+  set queue(queue) {
+    _queue = List.from(queue);
     notifyListeners();
   }
 
-  set setSongsOfPlaylist(songs) {
-    _songsOfPlaylist = songs;
+  set songsOfPlaylist(songs) {
+    _songsOfPlaylist = List.from(songs);
     notifyListeners();
   }
 
@@ -83,8 +98,8 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleBottomPlayer() {
-    _isQueueEmpty = !_isQueueEmpty;
-    notifyListeners();
-  }
+  // void toggleBottomPlayer() {
+  //   _isQueueEmpty = !_isQueueEmpty;
+  //   notifyListeners();
+  // }
 }

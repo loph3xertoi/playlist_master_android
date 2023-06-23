@@ -38,6 +38,7 @@ flutter:
     - assets/images/bilibili.png
     - assets/images/songs_cover/parrot.jpeg
     - assets/images/songs_cover/tit.jpeg
+    - assets/images/songs_cover/tit.png
     - assets/images/songs_cover/owl.jpeg
     - assets/images/songs_cover/budgerigar.jpeg
     - assets/images/songs_cover/bluejay.jpeg

@@ -44,7 +44,13 @@ class MyApp extends StatelessWidget {
           '/': (context) => MyHomePage(),
           '/search': (context) => SearchPage(),
           '/playlist_detail': (context) => PlaylistDetailPage(),
-          '/song_player': (context) => SongPlayerPage(),
+          '/song_player': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>;
+            return SongPlayerPage(
+              isPlaying: args['isPlaying'],
+            );
+          },
         },
         // home: SplashScreen(),
       ),

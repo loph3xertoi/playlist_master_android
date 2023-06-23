@@ -42,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage>
           backgroundColor: Colors.transparent,
           imageUri: 'assets/images/home_button.png',
           onTap: () {
-            appState.toggleBottomPlayer();
+            // appState.toggleBottomPlayer();
           },
           actions: [
             QuickAction(

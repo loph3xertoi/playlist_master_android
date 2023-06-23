@@ -30,8 +30,9 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     final Playlist playlist =
         ModalRoute.of(context)!.settings.arguments as Playlist;
     MyAppState appState = context.watch<MyAppState>();
-    List<Song>? queue = appState.queue;
-    int? queueLength = queue?.length ?? 0;
+    // appState.addListener(() {songs = appState.queue;})
+    // List<Song>? queue = appState.queue;
+    // int? queueLength = queue?.length ?? 0;
     return Material(
       child: Scaffold(
         key: _scaffoldKey,
@@ -184,18 +185,19 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                       child: InkWell(
                                                         onTap: () {
                                                           // TODO: fix this.
-                                                          appState.setQueue =
+                                                          appState.queue =
                                                               songs;
-                                                          appState.setSongsOfPlaylist =
+                                                          appState.songsOfPlaylist =
                                                               songs;
                                                           appState.currentPlayingSongInQueue =
                                                               index;
+                                                          appState.currentPage =
+                                                              '/song_player';
                                                           Navigator.pushNamed(
                                                             context,
                                                             '/song_player',
                                                             arguments: {
-                                                              'index': index,
-                                                              'songs': songs,
+                                                              'isPlaying': true,
                                                             },
                                                           );
                                                         },

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/widgets/create_queue_popup.dart';
 import 'package:provider/provider.dart';
@@ -14,7 +15,7 @@ class _BottomPlayerState extends State<BottomPlayer>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _songCoverRotateAnimation;
-  bool _isPlaying = true;
+  // bool _isPlaying = true;
 
   @override
   void initState() {
@@ -37,11 +38,16 @@ class _BottomPlayerState extends State<BottomPlayer>
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
+    int currentSongIndexInQueue = appState.currentPlayingSongInQueue;
+    bool isPlaying = appState.isPlaying;
+    List<Song>? queue = appState.queue;
+    Song currentSong = queue![currentSongIndexInQueue];
+
     return Container(
       height: 54.0,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.transparent,
         boxShadow: [
           BoxShadow(
             color: Colors.transparent.withOpacity(0.2),
@@ -51,84 +57,115 @@ class _BottomPlayerState extends State<BottomPlayer>
           ),
         ],
       ),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(10.0, 2.0, 8.0, 2.0),
-        child: Row(
-          children: [
-            // AnimatedRotation(
-            //   turns: 5,
-            //   duration: Duration(seconds: 100),
-            //   child: SizedBox(
-            //     height: 50.0,
-            //     width: 50.0,
-            //     child: Image.asset(
-            //       'assets/images/songs_cover/tit.png',
-            //       fit: BoxFit.fill,
-            //     ),
-            //   ),
-            // ),
-            AnimatedBuilder(
-              animation: _songCoverRotateAnimation,
-              builder: (BuildContext context, Widget? child) {
-                return Transform.rotate(
-                  angle: _songCoverRotateAnimation.value * 2 * pi,
-                  child: child,
-                );
+      child: Material(
+        color: Colors.white,
+        child: InkWell(
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              '/song_player',
+              arguments: {
+                'isPlaying': isPlaying,
               },
-              child: SizedBox(
-                height: 50.0,
-                width: 50.0,
-                child: Image.asset(
-                  'assets/images/songs_cover/tit.png',
-                  fit: BoxFit.fill,
+            );
+          },
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(10.0, 2.0, 8.0, 2.0),
+            child: Row(
+              children: [
+                // AnimatedRotation(
+                //   turns: 5,
+                //   duration: Duration(seconds: 100),
+                //   child: SizedBox(
+                //     height: 50.0,
+                //     width: 50.0,
+                //     child: Image.asset(
+                //       'assets/images/songs_cover/tit.png',
+                //       fit: BoxFit.fill,
+                //     ),
+                //   ),
+                // ),
+                AnimatedBuilder(
+                  animation: _songCoverRotateAnimation,
+                  builder: (BuildContext context, Widget? child) {
+                    return Transform.rotate(
+                      angle: _songCoverRotateAnimation.value * 2 * pi,
+                      child: child,
+                    );
+                  },
+                  child: SizedBox(
+                    height: 50.0,
+                    width: 50.0,
+                    child: ClipRRect(
+                        borderRadius: BorderRadius.all(Radius.circular(50.0)),
+                        child: Image.asset(
+                          currentSong.coverUri,
+                          fit: BoxFit.fill,
+                          // height: 230.0,
+                          // width: 230.0,
+                        )),
+                  ),
                 ),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Text(
-                    'Tit',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      color: Color(0xB2000000),
-                      letterSpacing: 0.25,
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            currentSong.name,
+                            style: TextStyle(
+                              fontSize: 15.0,
+                              color: Color(0xB2000000),
+                              letterSpacing: 0.25,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            ' - ${currentSong.singers[0].name}',
+                            style: TextStyle(
+                              fontSize: 12.0,
+                              color: Color(0x42000000),
+                              letterSpacing: 0.25,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Text(
-                    ' - Little Tit',
-                    style: TextStyle(
-                      fontSize: 12.0,
-                      color: Color(0x42000000),
-                      letterSpacing: 0.25,
-                    ),
-                  ),
-                ]),
-              ),
+                ),
+                IconButton(
+                  icon: isPlaying
+                      ? Icon(Icons.pause_circle_outline_rounded)
+                      : Icon(Icons.play_circle_outline_rounded),
+                  onPressed: () {
+                    setState(() {
+                      if (!isPlaying) {
+                        _controller.repeat();
+                      } else {
+                        _controller.stop();
+                      }
+                      isPlaying = !isPlaying;
+                      appState.isPlaying = isPlaying;
+                    });
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.queue_music_rounded),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => ShowQueueDialog(),
+                    );
+                  },
+                ),
+              ],
             ),
-            IconButton(
-              icon: _isPlaying
-                  ? Icon(Icons.pause_circle_outline_rounded)
-                  : Icon(Icons.play_circle_outline_rounded),
-              onPressed: () {
-                setState(() {
-                  if (!_isPlaying) {
-                    _controller.repeat();
-                  } else {
-                    _controller.stop();
-                  }
-                  _isPlaying = !_isPlaying;
-                });
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.queue_music_rounded),
-              onPressed: () {
-                showDialog(context: context, builder: (_) => ShowQueueDialog());
-              },
-            ),
-          ],
+          ),
         ),
       ),
     );

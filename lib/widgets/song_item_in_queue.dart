@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:playlistmaster/entities/singer.dart';
+import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/third_lib_change/music_visualizer.dart';
+import 'package:provider/provider.dart';
 
 class SongItemInQueue extends StatefulWidget {
   final String name;
   final List<Singer> singers;
   final String coverUri;
   final bool isPlaying;
+  final void Function()? onClose;
 
   const SongItemInQueue({
     super.key,
@@ -14,6 +17,7 @@ class SongItemInQueue extends StatefulWidget {
     required this.singers,
     required this.coverUri,
     required this.isPlaying,
+    required this.onClose,
   });
 
   @override
@@ -27,6 +31,7 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
 
   @override
   Widget build(BuildContext context) {
+    MyAppState appState = context.watch<MyAppState>();
     return SizedBox(
       height: 40.0,
       child: Row(
@@ -67,7 +72,7 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
           IconButton(
             color: Color(0x42000000),
             icon: Icon(Icons.close_rounded),
-            onPressed: () {},
+            onPressed: widget.onClose,
           ),
         ],
       ),
