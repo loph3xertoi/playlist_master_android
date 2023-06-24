@@ -89,11 +89,17 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                 appState.currentPlayingSongInQueue = index;
                                 // appState.carouselController.animateToPage(
                                 //     player!.effectiveIndices!.indexOf(index));
-                                if (appState.isPlayerPageOpened) {
-                                  appState.updateSong = true;
-                                } else {
-                                  player!.seek(Duration.zero, index: index);
-                                }
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
+                                  appState.player!
+                                      .seek(Duration.zero, index: index);
+                                  if (appState.isPlayerPageOpened) {
+                                    carouselController.animateToPage(
+                                      player!.effectiveIndices!.indexOf(index),
+                                    );
+                                  }
+                                });
+
                                 if (!player!.playerState.playing) {
                                   player.play();
                                   appState.isPlaying = true;
@@ -141,6 +147,19 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                         appState.isPlaying = true;
                                       }
                                     }
+                                    //TODO: fix bug: when the song is removed from the queue
+                                    // is above the current playing song in queue, and the song player
+                                    // is open, the song cover animation will be wired.
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                      if (appState.isPlayerPageOpened) {
+                                        carouselController.jumpToPage(
+                                          player!.effectiveIndices!.indexOf(
+                                              appState
+                                                  .currentPlayingSongInQueue!),
+                                        );
+                                      }
+                                    });
 
                                     Future.delayed(Duration(milliseconds: 200),
                                         () {

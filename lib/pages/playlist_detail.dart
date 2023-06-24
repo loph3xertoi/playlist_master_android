@@ -228,39 +228,66 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                   true;
                                                             }
                                                           } else {
+                                                            appState.queue = [];
+                                                            appState.isPlaying =
+                                                                false;
+                                                            appState.player!
+                                                                .stop();
+                                                            appState.player!
+                                                                .dispose();
+                                                            appState.player =
+                                                                null;
+                                                            appState.initQueue!
+                                                                .clear();
+
                                                             appState.openedPlaylist =
                                                                 playlist;
                                                             appState.songsOfPlaylist =
+                                                                songs;
+                                                            appState.queue =
                                                                 songs;
                                                             appState.currentPlayingSongInQueue =
                                                                 index;
                                                             appState.currentPage =
                                                                 '/song_player';
-
-                                                            appState.queue =
-                                                                songs;
-
-                                                            appState.initQueue!
-                                                                .clear();
-
-                                                            appState.initQueue!
-                                                                .addAll(appState
-                                                                    .queue!
-                                                                    .map(
-                                                                      (e) => AudioSource
-                                                                          .asset(
-                                                                              e.link),
-                                                                    )
-                                                                    .toList());
-                                                            if (!player!
-                                                                .playerState
-                                                                .playing) {
-                                                              player.play();
-                                                              appState.isPlaying =
-                                                                  true;
-                                                            }
-                                                            appState.updateSong =
+                                                            appState.isPlaying =
                                                                 true;
+                                                            appState
+                                                                .initAudioPlayer();
+                                                            // appState.openedPlaylist =
+                                                            //     playlist;
+                                                            // appState.songsOfPlaylist =
+                                                            //     songs;
+                                                            // appState.currentPlayingSongInQueue =
+                                                            //     index;
+                                                            // appState.currentPage =
+                                                            //     '/song_player';
+
+                                                            // appState.queue =
+                                                            //     songs;
+
+                                                            // appState.initQueue!
+                                                            //     .clear();
+
+                                                            // appState.initQueue!
+                                                            //     .addAll(appState
+                                                            //         .queue!
+                                                            //         .map(
+                                                            //           (e) => AudioSource
+                                                            //               .asset(
+                                                            //                   e.link),
+                                                            //         )
+                                                            //         .toList());
+
+                                                            // if (!player!
+                                                            //     .playerState
+                                                            //     .playing) {
+                                                            //   player.play();
+                                                            //   appState.isPlaying =
+                                                            //       true;
+                                                            // }
+                                                            // appState.updateSong =
+                                                            //     true;
                                                           }
                                                           appState.isPlayerPageOpened =
                                                               true;

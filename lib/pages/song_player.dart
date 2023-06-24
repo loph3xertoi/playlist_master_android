@@ -90,7 +90,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
       });
     }
 
-    if (updateSong) {
+    if (false) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // if (player!.currentIndex == currentPlayingSongInQueue) {
         //   return;
