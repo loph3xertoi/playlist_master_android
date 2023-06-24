@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:playlistmaster/entities/singer.dart';
-import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/third_lib_change/music_visualizer.dart';
-import 'package:provider/provider.dart';
 
 class SongItemInQueue extends StatefulWidget {
   final String name;
@@ -31,7 +29,7 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
 
   @override
   Widget build(BuildContext context) {
-    MyAppState appState = context.watch<MyAppState>();
+    // MyAppState appState = context.watch<MyAppState>();
     return SizedBox(
       height: 40.0,
       child: Row(

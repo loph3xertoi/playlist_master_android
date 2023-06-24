@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/widgets/create_queue_popup.dart';
 import 'package:provider/provider.dart';
@@ -38,10 +37,10 @@ class _BottomPlayerState extends State<BottomPlayer>
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
-    int currentSongIndexInQueue = appState.currentPlayingSongInQueue;
-    bool isPlaying = appState.isPlaying;
-    List<Song>? queue = appState.queue;
-    Song currentSong = queue![currentSongIndexInQueue];
+    var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
+    var isPlaying = appState.player!.playerState.playing;
+    var queue = appState.queue;
+    var currentSong = queue![currentPlayingSongInQueue!];
 
     return Container(
       height: 54.0,
@@ -61,13 +60,7 @@ class _BottomPlayerState extends State<BottomPlayer>
         color: Colors.white,
         child: InkWell(
           onTap: () {
-            Navigator.pushNamed(
-              context,
-              '/song_player',
-              arguments: {
-                'isPlaying': isPlaying,
-              },
-            );
+            Navigator.pushNamed(context, '/song_player');
           },
           child: Padding(
             padding: EdgeInsets.fromLTRB(10.0, 2.0, 8.0, 2.0),
@@ -150,7 +143,7 @@ class _BottomPlayerState extends State<BottomPlayer>
                         _controller.stop();
                       }
                       isPlaying = !isPlaying;
-                      appState.isPlaying = isPlaying;
+                      // appState.isPlaying = isPlaying;
                     });
                   },
                 ),

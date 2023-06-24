@@ -2,21 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:playlistmaster/third_lib_change/like_button/like_button.dart';
 import 'package:playlistmaster/widgets/create_queue_popup.dart';
 import 'package:provider/provider.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
 class SongPlayerPage extends StatefulWidget {
-  final bool isPlaying;
-  const SongPlayerPage({
-    super.key,
-    required this.isPlaying,
-  });
+  const SongPlayerPage({super.key});
 
   @override
   State<SongPlayerPage> createState() => _SongPlayerPageState();
@@ -24,193 +18,105 @@ class SongPlayerPage extends StatefulWidget {
 
 class _SongPlayerPageState extends State<SongPlayerPage> {
   // MyAppState _appState = context.watch<MyAppState>();;
-  late MyAppState _appState;
+  // late MyAppState _appState;
 
-  late AudioPlayer _player;
+  // late AudioPlayer _player;
 
   // Global playing mode, 0 for shuffle, 1 for repeat, 2 for repeat one.
   // 0 as default for the first using.
-  late int _userPlayingMode;
+  // late int _userPlayingMode;
 
-  late int _currentSongIndex;
+  // late int _currentSongIndex;
 
-  CarouselController _carouselController = CarouselController();
-
-  // Define the queue
-  late ConcatenatingAudioSource _initQueue;
+  // CarouselController _carouselController = CarouselController();
 
   // Songs of current queue.
-  late List<Song>? _queue;
-
-  // Previous queue for delete.
-  late List<Song>? _originQueue;
+  // late List<Song>? _queue;
 
   // Default volume.
-  late double? _defaultVolume;
+  // late double? _defaultVolume;
 
   // Default speed.
-  late double? _defaultSpeed;
+  // late double? _defaultSpeed;
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  // }
 
-  @override
-  void initState() {
-    super.initState();
-    final state = Provider.of<MyAppState>(context, listen: false);
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   // final state = Provider.of<MyAppState>(context, listen: false);
 
-    _currentSongIndex = state.currentPlayingSongInQueue;
-    _userPlayingMode = state.userPlayingMode;
-    _queue = state.songsOfPlaylist;
-    _originQueue = List.from(_queue!);
-    _defaultVolume = state.volume;
-    _defaultSpeed = state.speed;
-    _initAudioPlayer();
-  }
+  //   // _currentSongIndex = state.currentPlayingSongInQueue;
+  //   // _userPlayingMode = state.userPlayingMode;
+  //   // _queue = state.songsOfPlaylist;
 
-  Future<void> _initAudioPlayer() async {
-    _player = AudioPlayer();
-    // Listen to errors during playback.
-    _player.playbackEventStream.listen(
-      (event) {
-        bool skip = false;
-        if (_queue!.length != _originQueue!.length && _queue!.isNotEmpty) {
-          for (int i = 0; i < _originQueue!.length; i++) {
-            if (!_queue!.contains(_originQueue![i])) {
-              _initQueue.removeAt(i);
-              _originQueue!.removeAt(i);
-              // if (i <= _currentSongIndex) {
-              //   // TODO: fix bug: when call _initQueue.removeAt(i); the _currentSongIndex
-              //   // will be subtracted one more time.
-              //   // _player.seek(Duration.zero, index: _currentSongIndex);
-              //   skip = true;
-              //   return;
-              // }
-              break;
-            }
-          }
-        }
-        if (event.currentIndex != null &&
-            event.currentIndex != _currentSongIndex &&
-            event.currentIndex! < _queue!.length &&
-            true) {
-          _currentSongIndex = event.currentIndex!;
+  //   // _defaultVolume = state.volume;
+  //   // _defaultSpeed = state.speed;
+  //   // _initAudioPlayer();
+  // }
 
-          _carouselController.jumpToPage(_currentSongIndex);
-          Future.delayed(Duration(milliseconds: 300), () {
-            _appState.currentPlayingSongInQueue = _currentSongIndex;
-          });
-
-          if (_userPlayingMode == 0) {
-            // _player.shuffle();
-            // _player.seek(Duration.zero, index: _player.effectiveIndices?[0]);
-          }
-
-          setState(() {});
-        }
-      },
-      onError: (Object e, StackTrace stackTrace) {
-        print('A stream error occurred: $e');
-      },
-    );
-
-    // Try to load audio from a source and catch any errors.
-    try {
-      // AAC example: https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.aac
-      // await _player.setAudioSource(AudioSource.uri(Uri.parse(
-      //     "https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3")));
-      // await _player.setAsset('assets/audios/parrot.mp3');
-      _initQueue = ConcatenatingAudioSource(
-        // Start loading next item just before reaching it
-        useLazyPreparation: true,
-        // Customise the shuffle algorithm
-        shuffleOrder: DefaultShuffleOrder(),
-        // Specify the queue items
-        children: _queue!
-            .map(
-              (e) => AudioSource.asset(e.link),
-            )
-            .toList(),
-      );
-      await _player.setAudioSource(_initQueue,
-          initialIndex: _currentSongIndex, initialPosition: Duration.zero);
-
-      // Set the playing mode of the player.
-      if (_userPlayingMode == 0) {
-        await _player.setShuffleModeEnabled(true);
-        await _player.setLoopMode(LoopMode.all);
-      } else if (_userPlayingMode == 1) {
-        await _player.setShuffleModeEnabled(false);
-        await _player.setLoopMode(LoopMode.all);
-      } else if (_userPlayingMode == 2) {
-        await _player.setShuffleModeEnabled(false);
-        await _player.setLoopMode(LoopMode.one);
-      } else {
-        throw Exception('Invalid playing mode');
-      }
-
-      // Set the volume.
-      await _player.setVolume(_defaultVolume!);
-
-      // Set the speed.
-      await _player.setSpeed(_defaultSpeed!);
-
-      if (widget.isPlaying) await _player.play();
-    } catch (e) {
-      print("Error init audio player: $e");
-    }
-  }
-
-  @override
-  void dispose() {
-    // Release decoders and buffers back to the operating system making them
-    // available for other apps to use.
-    _player.dispose();
-    super.dispose();
-  }
-
-  /// Collects the data useful for displaying in a seek bar, using a handy
-  /// feature of rx_dart to combine the 3 streams of interest into one.
-  Stream<PositionData> get _positionDataStream =>
-      Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
-          _player.positionStream,
-          _player.bufferedPositionStream,
-          _player.durationStream,
-          (position, bufferedPosition, duration) => PositionData(
-              position, bufferedPosition, duration ?? Duration.zero));
+  // @override
+  // void dispose() {
+  //   // Release decoders and buffers back to the operating system making them
+  //   // available for other apps to use.
+  //   // _player.dispose();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
-    setState(() {
-      _appState = appState;
-    });
 
-    _queue = appState.queue;
-    if (_queue!.isEmpty) {
+    var player = appState.player;
+    var queue = appState.queue;
+    var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
+    var userPlayingMode = appState.userPlayingMode;
+    var volume = appState.volume;
+    var speed = appState.speed;
+    var positionDataStream = appState.positionDataStream;
+    var carouselController = appState.carouselController;
+    var updateSong = appState.updateSong;
+
+    if (queue!.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // Pop the song player page.
         Navigator.of(context).pop();
       });
     }
-    appState.addListener(() {
-      if (mounted && appState.currentPlayingSongInQueue != _currentSongIndex) {
-        _currentSongIndex = appState.currentPlayingSongInQueue;
-        Future.delayed(Duration(milliseconds: 0), () {
-          _player.seek(Duration.zero, index: _currentSongIndex);
-          _carouselController.jumpToPage(appState.currentPlayingSongInQueue);
-          if (!_player.playerState.playing) {
-            _player.play();
-          }
-        });
-        setState(() {});
-      }
-      if (mounted && appState.isPlaying != _player.playerState.playing) {
-        appState.isPlaying = _player.playerState.playing;
-      }
-    });
+
+    if (updateSong) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        player!.seek(Duration.zero, index: currentPlayingSongInQueue);
+        // TODO: fix bug: if the song removed from queue is over the current playing song, the
+        // animation will be wired.
+        carouselController.jumpToPage(
+            player.effectiveIndices!.indexOf(currentPlayingSongInQueue!));
+        appState.updateSong = false;
+      });
+    }
+    // appState.addListener(() {
+    //   if(currentPlayingSongInQueue != appState.currentPlayingSongInQueue){
+    //     print('daw---');
+    //   }
+    //   // if (mounted &&
+    //   //     currentPlayingSongInQueue != appState.currentPlayingSongInQueue) {
+    //   //   _currentSongIndex = appState.currentPlayingSongInQueue;
+    //   //   Future.delayed(Duration(milliseconds: 0), () {
+    //   //     _player.seek(Duration.zero, index: _currentSongIndex);
+    //   //     _carouselController.jumpToPage(appState.currentPlayingSongInQueue);
+    //   //     if (!_player.playerState.playing) {
+    //   //       _player.play();
+    //   //     }
+    //   //   });
+    //   //   setState(() {});
+    //   // }
+    //   // if (mounted && appState.isPlaying != _player.playerState.playing) {
+    //   //   appState.isPlaying = _player.playerState.playing;
+    //   // }
+    // });
 
     return Container(
       decoration: BoxDecoration(
@@ -241,7 +147,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     color: Color(0xE5FFFFFF),
                     icon: Icon(Icons.arrow_back_rounded),
                     onPressed: () {
-                      _appState.initSongPlayer = true;
+                      // _appState.initSongPlayer = true;
                       Navigator.pop(context);
                     },
                   ),
@@ -251,8 +157,8 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                       children: [
                         Expanded(
                           child: Text(
-                            _queue!.isNotEmpty
-                                ? _queue![_currentSongIndex].name
+                            queue.isNotEmpty
+                                ? queue[currentPlayingSongInQueue!].name
                                 : '',
                             style: TextStyle(
                               color: Color(0xE5FFFFFF),
@@ -262,8 +168,10 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                           ),
                         ),
                         Text(
-                          _queue!.isNotEmpty
-                              ? _queue![_currentSongIndex].singers[0].name
+                          queue.isNotEmpty
+                              ? queue[currentPlayingSongInQueue!]
+                                  .singers[0]
+                                  .name
                               : '',
                           style: TextStyle(
                             color: Color(0x80FFFFFF),
@@ -289,19 +197,22 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                 height: 250.0,
                 width: double.infinity,
                 child: CarouselSlider.builder(
-                  carouselController: _carouselController,
+                  carouselController: carouselController,
                   options: CarouselOptions(
-                    initialPage: _currentSongIndex,
+                    initialPage: player!.effectiveIndices!
+                        .indexOf(currentPlayingSongInQueue!),
                     aspectRatio: 1.0,
-                    viewportFraction: _userPlayingMode == 0 ? 0.8 : 0.6,
+                    viewportFraction: userPlayingMode == 0 ? 0.8 : 0.6,
                     enlargeCenterPage: true,
                     onPageChanged: (index, reason) {
                       if (reason == CarouselPageChangedReason.manual) {
-                        Future.delayed(Duration(milliseconds: 300), () {
-                          _player.seek(Duration.zero,
-                              index: _player.effectiveIndices![index]);
-                          if (!_player.playerState.playing) {
-                            _player.play();
+                        player.seek(Duration.zero,
+                            index: player.effectiveIndices![index]);
+                        Future.delayed(Duration(milliseconds: 700), () {
+                          appState.currentPlayingSongInQueue =
+                              player.effectiveIndices![index];
+                          if (!player.playerState.playing) {
+                            player.play();
                           }
                         });
                       }
@@ -342,8 +253,9 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                           child: Image.asset(
                             // (_userPlayingMode ==0)?
                             // songsOfPlaylist[itemIndex].coverUri
-                            _queue!.isNotEmpty
-                                ? _queue![itemIndex].coverUri
+                            queue.isNotEmpty
+                                ? queue[player!.effectiveIndices![itemIndex]]
+                                    .coverUri
                                 : 'assets/images/songs_cover/tit.jpeg',
                             fit: BoxFit.fitHeight,
                             height: 230.0,
@@ -353,7 +265,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                       ),
                     );
                   },
-                  itemCount: _queue!.length,
+                  itemCount: queue.length,
                 ),
               ),
             ),
@@ -372,25 +284,25 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     color: Color(0xE5FFFFFF),
                     icon: Icon(Icons.volume_up_rounded),
                     onPressed: () {
+                      //TODO: fix bug: volume more than 1 not works.
                       showSliderDialog(
                         context: context,
                         title: "Adjust volume",
                         divisions: 10,
                         min: 0.0,
-                        max: 2.0,
-                        value: _appState.volume ?? 1.0,
-                        stream: _player.volumeStream,
+                        max: 1.0,
+                        value: volume!,
+                        stream: player!.volumeStream,
                         onChanged: (volume) {
-                          _player.setVolume(volume);
-                          _appState.volume = volume;
-                          _defaultVolume = volume;
+                          player.setVolume(volume);
+                          appState.volume = volume;
                         },
                       );
                     },
                   ),
                   IconButton(
                     icon: Text(
-                      '${_appState.speed?.toStringAsFixed(1) ?? 1.0}x',
+                      '${speed!.toStringAsFixed(1)}x',
                       style: const TextStyle(
                         color: Color(0xE5FFFFFF),
                         fontWeight: FontWeight.bold,
@@ -403,12 +315,11 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                         divisions: 99,
                         min: 0.1,
                         max: 10.0,
-                        value: _appState.speed ?? 1.0,
-                        stream: _player.speedStream,
+                        value: speed,
+                        stream: player!.speedStream,
                         onChanged: (speed) {
-                          _player.setSpeed(speed);
-                          _appState.speed = speed;
-                          _defaultSpeed = speed;
+                          player.setSpeed(speed);
+                          appState.speed = speed;
                         },
                       );
                     },
@@ -426,7 +337,9 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     icon: Icon(Icons.download_rounded),
                     onPressed: () {
                       print(appState);
-                      print(_queue);
+                      print(queue);
+                      print(carouselController);
+                      print(player);
                       setState(() {});
                     },
                   ),
@@ -453,7 +366,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
               child: SizedBox(
                 height: 30.0,
                 child: StreamBuilder<PositionData>(
-                  stream: _positionDataStream,
+                  stream: positionDataStream,
                   builder: (context, snapshot) {
                     final positionData = snapshot.data;
                     return SeekBar(
@@ -461,7 +374,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                       position: positionData?.position ?? Duration.zero,
                       bufferedPosition:
                           positionData?.bufferedPosition ?? Duration.zero,
-                      onChangeEnd: _player.seek,
+                      onChangeEnd: player!.seek,
                     );
                   },
                 ),
@@ -482,45 +395,47 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     color: Colors.transparent,
                     child: Builder(
                       builder: (context) {
-                        if (_userPlayingMode == 0) {
-                          print('hello');
+                        if (userPlayingMode == 0) {
                           return IconButton(
                             icon: const Icon(Icons.shuffle_rounded),
                             color: Color(0xE5FFFFFF),
                             onPressed: () {
                               setState(() {
-                                _userPlayingMode = 1;
-                                _appState.userPlayingMode = _userPlayingMode;
+                                appState.userPlayingMode = 1;
                               });
-                              _player.setShuffleModeEnabled(false);
-                              _player.setLoopMode(LoopMode.all);
+                              player!.setShuffleModeEnabled(false);
+                              player.setLoopMode(LoopMode.all);
+                              carouselController.jumpToPage(player
+                                  .effectiveIndices!
+                                  .indexOf(player.currentIndex!));
                             },
                           );
-                        } else if (_userPlayingMode == 1) {
+                        } else if (userPlayingMode == 1) {
                           return IconButton(
                             icon: const Icon(Icons.repeat_rounded),
                             color: Color(0xE5FFFFFF),
                             onPressed: () {
                               setState(() {
-                                _userPlayingMode = 2;
-                                _appState.userPlayingMode = _userPlayingMode;
+                                appState.userPlayingMode = 2;
                               });
-                              _player.setShuffleModeEnabled(false);
-                              _player.setLoopMode(LoopMode.one);
+                              player!.setShuffleModeEnabled(false);
+                              player.setLoopMode(LoopMode.one);
                             },
                           );
-                        } else if (_userPlayingMode == 2) {
+                        } else if (userPlayingMode == 2) {
                           return IconButton(
                             icon: const Icon(Icons.repeat_one_rounded),
                             color: Color(0xE5FFFFFF),
                             onPressed: () {
                               setState(() {
-                                _userPlayingMode = 0;
-                                _appState.userPlayingMode = _userPlayingMode;
+                                appState.userPlayingMode = 0;
                               });
-                              _player.setShuffleModeEnabled(true);
-                              _player.shuffle();
-                              _player.setLoopMode(LoopMode.all);
+                              player!.setShuffleModeEnabled(true);
+                              player.shuffle();
+                              player.setLoopMode(LoopMode.all);
+                              carouselController.jumpToPage(player
+                                  .effectiveIndices!
+                                  .indexOf(player.currentIndex!));
                             },
                           );
                         } else {
@@ -533,17 +448,30 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     icon: const Icon(Icons.skip_previous_rounded),
                     color: Color(0xE5FFFFFF),
                     onPressed: () {
-                      _player.seekToPrevious();
-                      if (!_player.playerState.playing) {
-                        _player.play();
-                      }
+                      player!.seek(Duration.zero,
+                          index: userPlayingMode == 2
+                              ? (player.currentIndex! + queue.length - 1) %
+                                  queue.length
+                              : player.previousIndex);
+                      carouselController.animateToPage(player.effectiveIndices!
+                          .indexOf(userPlayingMode == 2
+                              ? (player.currentIndex! + queue.length - 1) %
+                                  queue.length
+                              : player.previousIndex!));
+                      Future.delayed(Duration(milliseconds: 700), () {
+                        appState.currentPlayingSongInQueue =
+                            player.currentIndex;
+                        if (!player.playerState.playing) {
+                          player.play();
+                        }
+                      });
                     },
                   ),
                   Material(
                     color: Colors.transparent,
                     child: Center(
                       child: StreamBuilder<PlayerState>(
-                        stream: _player.playerStateStream,
+                        stream: player!.playerStateStream,
                         builder: (context, snapshot) {
                           final playerState = snapshot.data;
                           final processingState = playerState?.processingState;
@@ -563,7 +491,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                                   const Icon(Icons.play_circle_outline_rounded),
                               iconSize: 50.0,
                               color: Color(0xE5FFFFFF),
-                              onPressed: _player.play,
+                              onPressed: player.play,
                             );
                           } else if (processingState !=
                               ProcessingState.completed) {
@@ -573,14 +501,14 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                                   Icons.pause_circle_outline_rounded),
                               iconSize: 50.0,
                               color: Color(0xE5FFFFFF),
-                              onPressed: _player.pause,
+                              onPressed: player.pause,
                             );
                           } else {
                             return IconButton(
                               icon: const Icon(Icons.replay_rounded),
                               iconSize: 40.0,
                               color: Color(0xE5FFFFFF),
-                              onPressed: () => _player.seek(Duration.zero),
+                              onPressed: () => player.seek(Duration.zero),
                             );
                           }
                         },
@@ -591,10 +519,21 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     icon: const Icon(Icons.skip_next_rounded),
                     color: Color(0xE5FFFFFF),
                     onPressed: () {
-                      _player.seekToNext();
-                      if (!_player.playerState.playing) {
-                        _player.play();
-                      }
+                      player.seek(Duration.zero,
+                          index: userPlayingMode == 2
+                              ? (player.currentIndex! + 1) % queue.length
+                              : player.nextIndex);
+                      carouselController.animateToPage(player.effectiveIndices!
+                          .indexOf(userPlayingMode == 2
+                              ? (player.currentIndex! + 1) % queue.length
+                              : player.nextIndex!));
+                      Future.delayed(Duration(milliseconds: 700), () {
+                        appState.currentPlayingSongInQueue =
+                            player.currentIndex;
+                        if (!player.playerState.playing) {
+                          player.play();
+                        }
+                      });
                     },
                   ),
                   IconButton(

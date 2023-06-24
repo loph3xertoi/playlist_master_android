@@ -25,6 +25,9 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void initState() {
     super.initState();
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   Provider.of<MyAppState>(context, listen: false).initAudioPlayer();
+    // });
   }
 
   @override
@@ -43,6 +46,7 @@ class _MyHomePageState extends State<MyHomePage>
           imageUri: 'assets/images/home_button.png',
           onTap: () {
             // appState.toggleBottomPlayer();
+            print('homepage button $appState');
           },
           actions: [
             QuickAction(

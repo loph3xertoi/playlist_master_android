@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/widgets/create_confirm_popup.dart';
 import 'package:playlistmaster/widgets/song_item_in_queue.dart';
@@ -15,10 +14,12 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
-    List<Song>? queue = appState.queue;
-    int? queueLength = queue?.length ?? 0;
-    int currentPlaying = appState.currentPlayingSongInQueue;
-    if (appState.queue!.isEmpty) {
+    var queue = appState.queue;
+    var queueLength = queue?.length ?? 0;
+    var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
+    var carouselController = appState.carouselController;
+    var player = appState.player;
+    if (queue!.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).pop();
       });
@@ -67,19 +68,23 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                     : ListView.builder(
                         itemCount: queueLength,
                         itemBuilder: (context, index) {
-                          var songName = queue![index].name;
+                          var songName = queue[index].name;
                           var singers = queue[index].singers;
                           var coverUri = queue[index].coverUri;
                           return Material(
                             color: Colors.transparent,
                             child: InkWell(
                               onTap: () {
-                                if (appState.currentPlayingSongInQueue ==
-                                    index) {
+                                if (currentPlayingSongInQueue == index) {
                                   return;
                                 }
                                 appState.currentPlayingSongInQueue = index;
-                                appState.isPlaying = true;
+                                carouselController.animateToPage(
+                                    player!.effectiveIndices!.indexOf(index));
+                                player.seek(Duration.zero, index: index);
+                                if (!player.playerState.playing) {
+                                  player.play();
+                                }
                               },
                               child: Container(
                                 margin:
@@ -89,19 +94,29 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                   coverUri: coverUri,
                                   singers: singers,
                                   isPlaying:
-                                      (currentPlaying == index) ? true : false,
+                                      (currentPlayingSongInQueue == index)
+                                          ? true
+                                          : false,
                                   onClose: () {
-                                    if (index < currentPlaying) {
-                                      currentPlaying--;
-                                    } else if (index > currentPlaying) {
-                                    } else if (currentPlaying ==
-                                        queueLength - 1) {
-                                      currentPlaying = 0;
+                                    if (index < currentPlayingSongInQueue!) {
+                                      appState.currentPlayingSongInQueue =
+                                          currentPlayingSongInQueue - 1;
+                                    } else if (index >
+                                        currentPlayingSongInQueue) {
+                                    } else if (index ==
+                                            currentPlayingSongInQueue &&
+                                        currentPlayingSongInQueue ==
+                                            queueLength - 1) {
+                                      appState.currentPlayingSongInQueue = 0;
                                     }
-                                    appState.queue!.removeAt(index);
-                                    appState.currentPlayingSongInQueue =
-                                        currentPlaying;
-                                    // setState(() {});
+
+                                    appState.removeSongInQueue(index);
+                                    appState.initQueue!.removeAt(index);
+                                    
+                                    appState.updateSong = true;
+                                    // TODO: fix bug, seek not working.
+                                    // player.seek(Duration.zero,
+                                    //     index: currentPlayingSongInQueue);
                                   },
                                 ),
                               ),

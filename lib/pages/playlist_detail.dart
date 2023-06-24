@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/mock_data.dart';
@@ -30,9 +31,11 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     final Playlist playlist =
         ModalRoute.of(context)!.settings.arguments as Playlist;
     MyAppState appState = context.watch<MyAppState>();
-    // appState.addListener(() {songs = appState.queue;})
-    // List<Song>? queue = appState.queue;
-    // int? queueLength = queue?.length ?? 0;
+
+    var openedPlaylist = appState.openedPlaylist;
+    var player = appState.player;
+    var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
+
     return Material(
       child: Scaffold(
         key: _scaffoldKey,
@@ -184,22 +187,77 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                       color: Colors.transparent,
                                                       child: InkWell(
                                                         onTap: () {
-                                                          // TODO: fix this.
-                                                          appState.queue =
-                                                              songs;
-                                                          appState.songsOfPlaylist =
-                                                              songs;
-                                                          appState.currentPlayingSongInQueue =
-                                                              index;
-                                                          appState.currentPage =
-                                                              '/song_player';
+                                                          // TODO: fix this, the songs should be real data.
+
+                                                          // Init audio player when no player instance exist, otherwise
+                                                          // update the queue only.
+                                                          if (appState.player ==
+                                                              null) {
+                                                            appState.openedPlaylist =
+                                                                playlist;
+                                                            appState.songsOfPlaylist =
+                                                                songs;
+                                                            appState.queue =
+                                                                songs;
+                                                            // appState.prevQueue =
+                                                            //     songs;
+                                                            appState.currentPlayingSongInQueue =
+                                                                index;
+                                                            appState.currentPage =
+                                                                '/song_player';
+                                                            appState
+                                                                .initAudioPlayer();
+                                                          } else if (playlist ==
+                                                                  openedPlaylist &&
+                                                              index ==
+                                                                  currentPlayingSongInQueue &&
+                                                              appState.queue!
+                                                                      .length ==
+                                                                  appState
+                                                                      .songsOfPlaylist!
+                                                                      .length) {
+                                                            if (!player!
+                                                                .playerState
+                                                                .playing) {
+                                                              player.play();
+                                                            }
+                                                          } else {
+                                                            appState.openedPlaylist =
+                                                                playlist;
+                                                            appState.songsOfPlaylist =
+                                                                songs;
+                                                            appState.currentPlayingSongInQueue =
+                                                                index;
+                                                            appState.currentPage =
+                                                                '/song_player';
+
+                                                            appState.queue =
+                                                                songs;
+
+                                                            appState.initQueue!
+                                                                .clear();
+
+                                                            appState.initQueue!
+                                                                .addAll(appState
+                                                                    .queue!
+                                                                    .map(
+                                                                      (e) => AudioSource
+                                                                          .asset(
+                                                                              e.link),
+                                                                    )
+                                                                    .toList());
+                                                            if (!player!
+                                                                .playerState
+                                                                .playing) {
+                                                              player.play();
+                                                            }
+                                                            appState.updateSong =
+                                                                true;
+                                                          }
+
                                                           Navigator.pushNamed(
-                                                            context,
-                                                            '/song_player',
-                                                            arguments: {
-                                                              'isPlaying': true,
-                                                            },
-                                                          );
+                                                              context,
+                                                              '/song_player');
                                                         },
                                                         child: SongItem(
                                                           index: index,
