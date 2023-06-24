@@ -205,6 +205,8 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                 index;
                                                             appState.currentPage =
                                                                 '/song_player';
+                                                            appState.isPlaying =
+                                                                true;
                                                             appState
                                                                 .initAudioPlayer();
                                                           } else if (playlist ==
@@ -220,6 +222,8 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                 .playerState
                                                                 .playing) {
                                                               player.play();
+                                                              appState.isPlaying =
+                                                                  true;
                                                             }
                                                           } else {
                                                             appState.openedPlaylist =
@@ -250,6 +254,8 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                 .playerState
                                                                 .playing) {
                                                               player.play();
+                                                              appState.isPlaying =
+                                                                  true;
                                                             }
                                                             appState.updateSong =
                                                                 true;

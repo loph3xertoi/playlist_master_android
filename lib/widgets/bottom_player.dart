@@ -14,7 +14,7 @@ class _BottomPlayerState extends State<BottomPlayer>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _songCoverRotateAnimation;
-  // bool _isPlaying = true;
+  var _isPlaying = true;
 
   @override
   void initState() {
@@ -38,10 +38,18 @@ class _BottomPlayerState extends State<BottomPlayer>
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
     var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
-    var isPlaying = appState.player!.playerState.playing;
     var queue = appState.queue;
     var currentSong = queue![currentPlayingSongInQueue!];
-
+    var isPlaying = appState.isPlaying;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (isPlaying == true && _isPlaying == false) {
+        _controller.repeat();
+        _isPlaying = true;
+      } else if (isPlaying == false && _isPlaying == true) {
+        _controller.stop();
+        _isPlaying = false;
+      }
+    });
     return Container(
       height: 54.0,
       width: double.infinity,
@@ -136,14 +144,17 @@ class _BottomPlayerState extends State<BottomPlayer>
                       ? Icon(Icons.pause_circle_outline_rounded)
                       : Icon(Icons.play_circle_outline_rounded),
                   onPressed: () {
+                    print(appState);
                     setState(() {
                       if (!isPlaying) {
                         _controller.repeat();
+                        appState.player!.play();
+                        appState.isPlaying = true;
                       } else {
                         _controller.stop();
+                        appState.player!.pause();
+                        appState.isPlaying = false;
                       }
-                      isPlaying = !isPlaying;
-                      // appState.isPlaying = isPlaying;
                     });
                   },
                 ),

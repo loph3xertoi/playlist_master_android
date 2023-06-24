@@ -84,6 +84,7 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                 player.seek(Duration.zero, index: index);
                                 if (!player.playerState.playing) {
                                   player.play();
+                                  appState.isPlaying = true;
                                 }
                               },
                               child: Container(
@@ -108,11 +109,22 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                         currentPlayingSongInQueue ==
                                             queueLength - 1) {
                                       appState.currentPlayingSongInQueue = 0;
+                                      if (!player!.playerState.playing) {
+                                        player.play();
+                                        appState.isPlaying = true;
+                                      }
+                                    } else if (index ==
+                                            currentPlayingSongInQueue &&
+                                        currentPlayingSongInQueue !=
+                                            queueLength - 1) {
+                                      if (!player!.playerState.playing) {
+                                        player.play();
+                                        appState.isPlaying = true;
+                                      }
                                     }
-
                                     appState.removeSongInQueue(index);
                                     appState.initQueue!.removeAt(index);
-                                    
+
                                     appState.updateSong = true;
                                     // TODO: fix bug, seek not working.
                                     // player.seek(Duration.zero,

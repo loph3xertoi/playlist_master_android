@@ -213,6 +213,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                               player.effectiveIndices![index];
                           if (!player.playerState.playing) {
                             player.play();
+                            appState.isPlaying = true;
                           }
                         });
                       }
@@ -448,7 +449,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     icon: const Icon(Icons.skip_previous_rounded),
                     color: Color(0xE5FFFFFF),
                     onPressed: () {
-                      player!.seek(Duration.zero,
+                      player.seek(Duration.zero,
                           index: userPlayingMode == 2
                               ? (player.currentIndex! + queue.length - 1) %
                                   queue.length
@@ -463,6 +464,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                             player.currentIndex;
                         if (!player.playerState.playing) {
                           player.play();
+                          appState.isPlaying = true;
                         }
                       });
                     },
@@ -471,7 +473,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     color: Colors.transparent,
                     child: Center(
                       child: StreamBuilder<PlayerState>(
-                        stream: player!.playerStateStream,
+                        stream: player.playerStateStream,
                         builder: (context, snapshot) {
                           final playerState = snapshot.data;
                           final processingState = playerState?.processingState;
@@ -491,7 +493,10 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                                   const Icon(Icons.play_circle_outline_rounded),
                               iconSize: 50.0,
                               color: Color(0xE5FFFFFF),
-                              onPressed: player.play,
+                              onPressed: () {
+                                player.play();
+                                appState.isPlaying = true;
+                              },
                             );
                           } else if (processingState !=
                               ProcessingState.completed) {
@@ -501,7 +506,10 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                                   Icons.pause_circle_outline_rounded),
                               iconSize: 50.0,
                               color: Color(0xE5FFFFFF),
-                              onPressed: player.pause,
+                              onPressed: () {
+                                player.pause();
+                                appState.isPlaying = false;
+                              },
                             );
                           } else {
                             return IconButton(
@@ -532,6 +540,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                             player.currentIndex;
                         if (!player.playerState.playing) {
                           player.play();
+                          appState.isPlaying = true;
                         }
                       });
                     },
