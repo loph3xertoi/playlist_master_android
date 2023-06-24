@@ -46,6 +46,7 @@ class _MyHomePageState extends State<MyHomePage>
           imageUri: 'assets/images/home_button.png',
           onTap: () {
             // appState.toggleBottomPlayer();
+            // appState.player!.seek(Duration.zero, index: 3);
             print('homepage button $appState');
           },
           actions: [

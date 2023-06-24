@@ -7,6 +7,9 @@ import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MyAppState extends ChangeNotifier {
+  // Is removing song from queue?
+  bool _isRemovingSongFromQueue = false;
+
   // If the song player page is opened.
   bool _isPlayerPageOpened = false;
 
@@ -64,6 +67,8 @@ class MyAppState extends ChangeNotifier {
 
   Playlist? _openedPlaylist;
 
+  bool get isRemovingSongFromQueue => _isRemovingSongFromQueue;
+
   bool get isPlayerPageOpened => _isPlayerPageOpened;
 
   bool get canSongPlayerPagePop => _canSongPlayerPagePop;
@@ -99,6 +104,11 @@ class MyAppState extends ChangeNotifier {
   double? get volume => _volume;
 
   double? get speed => _speed;
+
+  set isRemovingSongFromQueue(bool value) {
+    _isRemovingSongFromQueue = value;
+    notifyListeners();
+  }
 
   set isPlayerPageOpened(bool value) {
     _isPlayerPageOpened = value;
@@ -257,7 +267,8 @@ class MyAppState extends ChangeNotifier {
       // TODO: fix bug: when remove song in playlist, this function will also be called.
       _player!.positionDiscontinuityStream.listen((discontinuity) {
         if (discontinuity.reason == PositionDiscontinuityReason.autoAdvance &&
-            !_updateSong) {
+            !_updateSong &&
+            !_isRemovingSongFromQueue) {
           if (_userPlayingMode == 0) {
             _currentPlayingSongInQueue = _player!.nextIndex;
             notifyListeners();

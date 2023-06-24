@@ -113,13 +113,16 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                   onClose: () {
                                     appState.removeSongInQueue(index);
                                     appState.initQueue!.removeAt(index);
+                                    appState.isRemovingSongFromQueue = true;
                                     if (index < currentPlayingSongInQueue!) {
                                       appState.currentPlayingSongInQueue =
                                           currentPlayingSongInQueue - 1;
-                                      appState.updateSong = true;
+                                      // appState.updateSong = true;
                                     } else if (index >
                                         currentPlayingSongInQueue) {
-                                      appState.updateSong = true;
+                                      // player!.seek(Duration.zero,
+                                      //     index: 0);
+                                      // appState.updateSong = true;
                                     } else {
                                       // Set the new playing song to the first if the current
                                       // removed song is the last and is playing.
@@ -127,6 +130,11 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                           queueLength - 1) {
                                         appState.currentPlayingSongInQueue = 0;
                                       }
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback((_) {
+                                        appState.player!.seek(Duration.zero,
+                                            index: currentPlayingSongInQueue);
+                                      });
 
                                       if (!player!.playerState.playing) {
                                         player.play();
@@ -134,6 +142,10 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                       }
                                     }
 
+                                    Future.delayed(Duration(milliseconds: 200),
+                                        () {
+                                      appState.isRemovingSongFromQueue = false;
+                                    });
                                     // } else if (index ==
                                     //         currentPlayingSongInQueue &&
                                     //     currentPlayingSongInQueue ==
