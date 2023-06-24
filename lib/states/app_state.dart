@@ -7,8 +7,11 @@ import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MyAppState extends ChangeNotifier {
+  // If the song player page is opened.
+  bool _isPlayerPageOpened = false;
+
   // Make sure song player page pop once.
-  bool canSongPlayerPagePop = false;
+  bool _canSongPlayerPagePop = false;
 
   // If remove song in queue, this should be true for update the current song.
   bool _updateSong = false;
@@ -61,6 +64,10 @@ class MyAppState extends ChangeNotifier {
 
   Playlist? _openedPlaylist;
 
+  bool get isPlayerPageOpened => _isPlayerPageOpened;
+
+  bool get canSongPlayerPagePop => _canSongPlayerPagePop;
+
   bool get updateSong => _updateSong;
 
   CarouselController get carouselController => _carouselController;
@@ -92,6 +99,16 @@ class MyAppState extends ChangeNotifier {
   double? get volume => _volume;
 
   double? get speed => _speed;
+
+  set isPlayerPageOpened(bool value) {
+    _isPlayerPageOpened = value;
+    notifyListeners();
+  }
+
+  set canSongPlayerPagePop(bool value) {
+    _canSongPlayerPagePop = value;
+    notifyListeners();
+  }
 
   set updateSong(bool value) {
     _updateSong = value;

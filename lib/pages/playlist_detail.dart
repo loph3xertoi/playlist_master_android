@@ -262,7 +262,8 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                             appState.updateSong =
                                                                 true;
                                                           }
-
+                                                          appState.isPlayerPageOpened =
+                                                              true;
                                                           Navigator.pushNamed(
                                                               context,
                                                               '/song_player');

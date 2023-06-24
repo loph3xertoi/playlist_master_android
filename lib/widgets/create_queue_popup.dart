@@ -89,8 +89,11 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                 appState.currentPlayingSongInQueue = index;
                                 // appState.carouselController.animateToPage(
                                 //     player!.effectiveIndices!.indexOf(index));
-                                // player.seek(Duration.zero, index: index);
-                                appState.updateSong = true;
+                                if (appState.isPlayerPageOpened) {
+                                  appState.updateSong = true;
+                                } else {
+                                  player!.seek(Duration.zero, index: index);
+                                }
                                 if (!player!.playerState.playing) {
                                   player.play();
                                   appState.isPlaying = true;
@@ -108,13 +111,18 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                           ? true
                                           : false,
                                   onClose: () {
+                                    appState.removeSongInQueue(index);
+                                    appState.initQueue!.removeAt(index);
                                     if (index < currentPlayingSongInQueue!) {
                                       appState.currentPlayingSongInQueue =
                                           currentPlayingSongInQueue - 1;
+                                      appState.updateSong = true;
                                     } else if (index >
                                         currentPlayingSongInQueue) {
+                                      appState.updateSong = true;
                                     } else {
-                                      // remove current playing song.
+                                      // Set the new playing song to the first if the current
+                                      // removed song is the last and is playing.
                                       if (currentPlayingSongInQueue ==
                                           queueLength - 1) {
                                         appState.currentPlayingSongInQueue = 0;
@@ -124,8 +132,8 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                         player.play();
                                         appState.isPlaying = true;
                                       }
-                                      appState.updateSong = true;
                                     }
+
                                     // } else if (index ==
                                     //         currentPlayingSongInQueue &&
                                     //     currentPlayingSongInQueue ==
@@ -144,8 +152,6 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                     //     appState.isPlaying = true;
                                     //   }
                                     // }
-                                    appState.removeSongInQueue(index);
-                                    appState.initQueue!.removeAt(index);
 
                                     // appState.updateSong = true;
                                     // TODO: fix bug, seek not working.

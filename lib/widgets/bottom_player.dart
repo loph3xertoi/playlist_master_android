@@ -68,6 +68,7 @@ class _BottomPlayerState extends State<BottomPlayer>
         color: Colors.white,
         child: InkWell(
           onTap: () {
+            appState.isPlayerPageOpened = true;
             Navigator.pushNamed(context, '/song_player');
           },
           child: Padding(

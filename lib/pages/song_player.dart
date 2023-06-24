@@ -84,6 +84,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (appState.canSongPlayerPagePop) {
           Navigator.of(context).pop();
+          appState.isPlayerPageOpened = false;
           appState.canSongPlayerPagePop = false;
         }
       });
@@ -95,6 +96,8 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
         //   return;
         // }
         player!.seek(Duration.zero, index: currentPlayingSongInQueue);
+        // player!
+        //     .seek(appState.player!.duration, index: currentPlayingSongInQueue);
         // TODO: fix bug: if the song removed from queue is over the current playing song, the
         // animation will be wired.
         carouselController.jumpToPage(
@@ -153,6 +156,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     icon: Icon(Icons.arrow_back_rounded),
                     onPressed: () {
                       // _appState.initSongPlayer = true;
+                      appState.isPlayerPageOpened = false;
                       Navigator.pop(context);
                     },
                   ),
