@@ -21,7 +21,15 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
     var player = appState.player;
     if (queue!.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context).pop();
+        if (appState.player != null && mounted) {
+          appState.queue = [];
+          appState.isPlaying = false;
+          appState.player!.stop();
+          appState.player!.dispose();
+          appState.player = null;
+          appState.initQueue!.clear();
+          Navigator.of(context).pop();
+        }
       });
     }
     return Dialog(
@@ -79,10 +87,11 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                   return;
                                 }
                                 appState.currentPlayingSongInQueue = index;
-                                carouselController.animateToPage(
-                                    player!.effectiveIndices!.indexOf(index));
-                                player.seek(Duration.zero, index: index);
-                                if (!player.playerState.playing) {
+                                // appState.carouselController.animateToPage(
+                                //     player!.effectiveIndices!.indexOf(index));
+                                // player.seek(Duration.zero, index: index);
+                                appState.updateSong = true;
+                                if (!player!.playerState.playing) {
                                   player.play();
                                   appState.isPlaying = true;
                                 }
@@ -104,28 +113,41 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                           currentPlayingSongInQueue - 1;
                                     } else if (index >
                                         currentPlayingSongInQueue) {
-                                    } else if (index ==
-                                            currentPlayingSongInQueue &&
-                                        currentPlayingSongInQueue ==
-                                            queueLength - 1) {
-                                      appState.currentPlayingSongInQueue = 0;
+                                    } else {
+                                      // remove current playing song.
+                                      if (currentPlayingSongInQueue ==
+                                          queueLength - 1) {
+                                        appState.currentPlayingSongInQueue = 0;
+                                      }
+
                                       if (!player!.playerState.playing) {
                                         player.play();
                                         appState.isPlaying = true;
                                       }
-                                    } else if (index ==
-                                            currentPlayingSongInQueue &&
-                                        currentPlayingSongInQueue !=
-                                            queueLength - 1) {
-                                      if (!player!.playerState.playing) {
-                                        player.play();
-                                        appState.isPlaying = true;
-                                      }
+                                      appState.updateSong = true;
                                     }
+                                    // } else if (index ==
+                                    //         currentPlayingSongInQueue &&
+                                    //     currentPlayingSongInQueue ==
+                                    //         queueLength - 1) {
+                                    //   appState.currentPlayingSongInQueue = 0;
+                                    //   if (!player!.playerState.playing) {
+                                    //     player.play();
+                                    //     appState.isPlaying = true;
+                                    //   }
+                                    // } else if (index ==
+                                    //         currentPlayingSongInQueue &&
+                                    //     currentPlayingSongInQueue !=
+                                    //         queueLength - 1) {
+                                    //   if (!player!.playerState.playing) {
+                                    //     player.play();
+                                    //     appState.isPlaying = true;
+                                    //   }
+                                    // }
                                     appState.removeSongInQueue(index);
                                     appState.initQueue!.removeAt(index);
 
-                                    appState.updateSong = true;
+                                    // appState.updateSong = true;
                                     // TODO: fix bug, seek not working.
                                     // player.seek(Duration.zero,
                                     //     index: currentPlayingSongInQueue);

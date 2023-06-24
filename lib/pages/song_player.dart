@@ -82,13 +82,18 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
 
     if (queue!.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Pop the song player page.
-        Navigator.of(context).pop();
+        if (appState.canSongPlayerPagePop) {
+          Navigator.of(context).pop();
+          appState.canSongPlayerPagePop = false;
+        }
       });
     }
 
     if (updateSong) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        // if (player!.currentIndex == currentPlayingSongInQueue) {
+        //   return;
+        // }
         player!.seek(Duration.zero, index: currentPlayingSongInQueue);
         // TODO: fix bug: if the song removed from queue is over the current playing song, the
         // animation will be wired.
@@ -199,20 +204,21 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                 child: CarouselSlider.builder(
                   carouselController: carouselController,
                   options: CarouselOptions(
-                    initialPage: player!.effectiveIndices!
-                        .indexOf(currentPlayingSongInQueue!),
+                    initialPage: player?.effectiveIndices!
+                            .indexOf(currentPlayingSongInQueue!) ??
+                        0,
                     aspectRatio: 1.0,
                     viewportFraction: userPlayingMode == 0 ? 0.8 : 0.6,
                     enlargeCenterPage: true,
                     onPageChanged: (index, reason) {
                       if (reason == CarouselPageChangedReason.manual) {
-                        player.seek(Duration.zero,
+                        player?.seek(Duration.zero,
                             index: player.effectiveIndices![index]);
                         Future.delayed(Duration(milliseconds: 700), () {
                           appState.currentPlayingSongInQueue =
-                              player.effectiveIndices![index];
-                          if (!player.playerState.playing) {
-                            player.play();
+                              player?.effectiveIndices![index];
+                          if (!(player?.playerState.playing ?? true)) {
+                            player?.play();
                             appState.isPlaying = true;
                           }
                         });
@@ -375,7 +381,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                       position: positionData?.position ?? Duration.zero,
                       bufferedPosition:
                           positionData?.bufferedPosition ?? Duration.zero,
-                      onChangeEnd: player!.seek,
+                      onChangeEnd: player?.seek,
                     );
                   },
                 ),
@@ -449,21 +455,22 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     icon: const Icon(Icons.skip_previous_rounded),
                     color: Color(0xE5FFFFFF),
                     onPressed: () {
-                      player.seek(Duration.zero,
+                      player?.seek(Duration.zero,
                           index: userPlayingMode == 2
                               ? (player.currentIndex! + queue.length - 1) %
                                   queue.length
                               : player.previousIndex);
-                      carouselController.animateToPage(player.effectiveIndices!
-                          .indexOf(userPlayingMode == 2
-                              ? (player.currentIndex! + queue.length - 1) %
-                                  queue.length
-                              : player.previousIndex!));
+                      carouselController.animateToPage(player?.effectiveIndices!
+                              .indexOf(userPlayingMode == 2
+                                  ? (player.currentIndex! + queue.length - 1) %
+                                      queue.length
+                                  : player.previousIndex!) ??
+                          0);
                       Future.delayed(Duration(milliseconds: 700), () {
                         appState.currentPlayingSongInQueue =
-                            player.currentIndex;
-                        if (!player.playerState.playing) {
-                          player.play();
+                            player?.currentIndex;
+                        if (!(player?.playerState.playing ?? true)) {
+                          player?.play();
                           appState.isPlaying = true;
                         }
                       });
@@ -473,7 +480,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     color: Colors.transparent,
                     child: Center(
                       child: StreamBuilder<PlayerState>(
-                        stream: player.playerStateStream,
+                        stream: player?.playerStateStream,
                         builder: (context, snapshot) {
                           final playerState = snapshot.data;
                           final processingState = playerState?.processingState;
@@ -494,7 +501,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                               iconSize: 50.0,
                               color: Color(0xE5FFFFFF),
                               onPressed: () {
-                                player.play();
+                                player?.play();
                                 appState.isPlaying = true;
                               },
                             );
@@ -507,7 +514,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                               iconSize: 50.0,
                               color: Color(0xE5FFFFFF),
                               onPressed: () {
-                                player.pause();
+                                player?.pause();
                                 appState.isPlaying = false;
                               },
                             );
@@ -516,7 +523,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                               icon: const Icon(Icons.replay_rounded),
                               iconSize: 40.0,
                               color: Color(0xE5FFFFFF),
-                              onPressed: () => player.seek(Duration.zero),
+                              onPressed: () => player?.seek(Duration.zero),
                             );
                           }
                         },
@@ -527,19 +534,21 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     icon: const Icon(Icons.skip_next_rounded),
                     color: Color(0xE5FFFFFF),
                     onPressed: () {
-                      player.seek(Duration.zero,
+                      player?.seek(Duration.zero,
                           index: userPlayingMode == 2
                               ? (player.currentIndex! + 1) % queue.length
                               : player.nextIndex);
-                      carouselController.animateToPage(player.effectiveIndices!
-                          .indexOf(userPlayingMode == 2
-                              ? (player.currentIndex! + 1) % queue.length
-                              : player.nextIndex!));
+                      carouselController.animateToPage(player?.effectiveIndices!
+                              .indexOf(userPlayingMode == 2
+                                  ? (player.currentIndex! + 1) % queue.length
+                                  : player.nextIndex!) ??
+                          0);
                       Future.delayed(Duration(milliseconds: 700), () {
                         appState.currentPlayingSongInQueue =
-                            player.currentIndex;
-                        if (!player.playerState.playing) {
-                          player.play();
+                            player?.currentIndex;
+
+                        if (!(player?.playerState.playing ?? true)) {
+                          player?.play();
                           appState.isPlaying = true;
                         }
                       });

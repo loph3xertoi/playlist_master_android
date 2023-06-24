@@ -24,9 +24,7 @@ class ShowConfirmDialog extends StatelessWidget {
         TextButton(
           onPressed: () {
             appState.queue = [];
-            appState.player!.stop();
-            appState.initQueue!.clear();
-            Navigator.pop(context);
+            Navigator.of(context).pop();
           },
           child: Text(
             'Yes',

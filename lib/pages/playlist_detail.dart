@@ -193,6 +193,8 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                           // update the queue only.
                                                           if (appState.player ==
                                                               null) {
+                                                            appState.canSongPlayerPagePop =
+                                                                true;
                                                             appState.openedPlaylist =
                                                                 playlist;
                                                             appState.songsOfPlaylist =

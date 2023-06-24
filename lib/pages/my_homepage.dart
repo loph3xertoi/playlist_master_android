@@ -47,6 +47,7 @@ class _MyHomePageState extends State<MyHomePage>
           onTap: () {
             // appState.toggleBottomPlayer();
             print('homepage button $appState');
+            appState.initQueue!.clear();
           },
           actions: [
             QuickAction(

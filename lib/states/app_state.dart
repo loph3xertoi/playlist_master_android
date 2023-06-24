@@ -7,6 +7,9 @@ import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MyAppState extends ChangeNotifier {
+  // Make sure song player page pop once.
+  bool canSongPlayerPagePop = false;
+
   // If remove song in queue, this should be true for update the current song.
   bool _updateSong = false;
 
@@ -26,11 +29,12 @@ class MyAppState extends ChangeNotifier {
   /// feature of rx_dart to combine the 3 streams of interest into one.
   Stream<PositionData> get positionDataStream =>
       Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
-          _player!.positionStream,
-          _player!.bufferedPositionStream,
-          _player!.durationStream,
-          (position, bufferedPosition, duration) => PositionData(
-              position, bufferedPosition, duration ?? Duration.zero));
+        _player?.positionStream ?? Stream.empty(),
+        _player?.bufferedPositionStream ?? Stream.empty(),
+        _player?.durationStream ?? Stream.empty(),
+        (position, bufferedPosition, duration) =>
+            PositionData(position, bufferedPosition, duration ?? Duration.zero),
+      );
 
   bool _isPlaying = true;
 
