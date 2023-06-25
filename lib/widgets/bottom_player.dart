@@ -39,7 +39,7 @@ class _BottomPlayerState extends State<BottomPlayer>
     MyAppState appState = context.watch<MyAppState>();
     var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
     var queue = appState.queue;
-    var currentSong = queue![currentPlayingSongInQueue!];
+    var currentSong = appState.currentSong;
     var isPlaying = appState.isPlaying;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (isPlaying == true && _isPlaying == false) {
@@ -101,7 +101,7 @@ class _BottomPlayerState extends State<BottomPlayer>
                     child: ClipRRect(
                         borderRadius: BorderRadius.all(Radius.circular(50.0)),
                         child: Image.asset(
-                          currentSong.coverUri,
+                          currentSong!.coverUri,
                           fit: BoxFit.fill,
                           // height: 230.0,
                           // width: 230.0,
@@ -145,7 +145,6 @@ class _BottomPlayerState extends State<BottomPlayer>
                       ? Icon(Icons.pause_circle_outline_rounded)
                       : Icon(Icons.play_circle_outline_rounded),
                   onPressed: () {
-                    print(appState);
                     setState(() {
                       if (!isPlaying) {
                         _controller.repeat();

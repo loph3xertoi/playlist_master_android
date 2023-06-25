@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
@@ -16,7 +17,8 @@ class SongPlayerPage extends StatefulWidget {
   State<SongPlayerPage> createState() => _SongPlayerPageState();
 }
 
-class _SongPlayerPageState extends State<SongPlayerPage> {
+class _SongPlayerPageState extends State<SongPlayerPage>
+    with SingleTickerProviderStateMixin {
   // MyAppState _appState = context.watch<MyAppState>();;
   // late MyAppState _appState;
 
@@ -65,6 +67,27 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
   //   // _player.dispose();
   //   super.dispose();
   // }
+  late AnimationController _controller;
+  late Animation<double> _songCoverRotateAnimation;
+  bool _isFirstLoadSongPlayer = false;
+  // bool _oldPlayingState = false;
+
+  @override
+  void initState() {
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 20),
+    );
+    _songCoverRotateAnimation =
+        Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,14 +96,23 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
     var player = appState.player;
     var queue = appState.queue;
     var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
+    var currentSong = appState.currentSong;
     var userPlayingMode = appState.userPlayingMode;
     var volume = appState.volume;
     var speed = appState.speed;
     var positionDataStream = appState.positionDataStream;
     var carouselController = appState.carouselController;
+    _isFirstLoadSongPlayer = appState.isFirstLoadSongPlayer;
     var updateSong = appState.updateSong;
+    if (_isFirstLoadSongPlayer) {
+      _controller.repeat();
+    }
+    if ((queue?.isNotEmpty ?? false) &&
+        (currentSong!.name != queue?[currentPlayingSongInQueue!].name)) {
+      _controller.reset();
+    }
 
-    if (queue!.isEmpty) {
+    if (queue?.isEmpty ?? false) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (appState.canSongPlayerPagePop) {
           Navigator.of(context).pop();
@@ -89,6 +121,30 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
         }
       });
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // appState.coverRotatingController = _controller;
+      if ((queue?.isNotEmpty ?? false) &&
+          (currentSong!.name != queue?[currentPlayingSongInQueue!].name)) {
+        appState.currentSong = queue?[currentPlayingSongInQueue!];
+      }
+
+      if (!_isFirstLoadSongPlayer) {
+        // if (_oldPlayingState != appState.isPlaying) {
+        //   _controller.repeat();
+        //   appState._oldPlayingState = appState.isPlaying;
+        // }
+        if (player != null && player.playing == true) {
+          _controller.repeat();
+        } else {
+          _controller.stop();
+        }
+      } else {
+        Future.delayed(Duration(milliseconds: 200), () {
+          appState.isFirstLoadSongPlayer = false;
+        });
+      }
+    });
 
     if (false) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -166,8 +222,8 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                       children: [
                         Expanded(
                           child: Text(
-                            queue.isNotEmpty
-                                ? queue[currentPlayingSongInQueue!].name
+                            (queue?.isNotEmpty ?? false)
+                                ? (queue![currentPlayingSongInQueue!].name)
                                 : '',
                             style: TextStyle(
                               color: Color(0xE5FFFFFF),
@@ -177,10 +233,10 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                           ),
                         ),
                         Text(
-                          queue.isNotEmpty
-                              ? queue[currentPlayingSongInQueue!]
+                          (queue?.isNotEmpty ?? false)
+                              ? (queue![currentPlayingSongInQueue!]
                                   .singers[0]
-                                  .name
+                                  .name)
                               : '',
                           style: TextStyle(
                             color: Color(0x80FFFFFF),
@@ -221,6 +277,7 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                         Future.delayed(Duration(milliseconds: 700), () {
                           appState.currentPlayingSongInQueue =
                               player?.effectiveIndices![index];
+
                           if (!(player?.playerState.playing ?? true)) {
                             player?.play();
                             appState.isPlaying = true;
@@ -258,25 +315,59 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                             ),
                           ],
                         ),
-                        child: ClipRRect(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(150.0)),
-                          child: Image.asset(
-                            // (_userPlayingMode ==0)?
-                            // songsOfPlaylist[itemIndex].coverUri
-                            queue.isNotEmpty
-                                ? queue[player!.effectiveIndices![itemIndex]]
-                                    .coverUri
-                                : 'assets/images/songs_cover/tit.jpeg',
-                            fit: BoxFit.fitHeight,
-                            height: 230.0,
-                            width: 230.0,
-                          ),
-                        ),
+                        child: (player != null &&
+                                (player.effectiveIndices?.isNotEmpty ??
+                                    false) &&
+                                player.effectiveIndices![itemIndex] ==
+                                    currentPlayingSongInQueue)
+                            ? AnimatedBuilder(
+                                animation: _songCoverRotateAnimation,
+                                builder: (BuildContext context, Widget? child) {
+                                  return Transform.rotate(
+                                    angle: _songCoverRotateAnimation.value *
+                                        2 *
+                                        pi,
+                                    child: child,
+                                  );
+                                },
+                                child: ClipRRect(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(150.0)),
+                                  child: Image.asset(
+                                    // (_userPlayingMode ==0)?
+                                    // songsOfPlaylist[itemIndex].coverUri
+                                    (queue?.isNotEmpty ?? false)
+                                        ? (queue![player
+                                                .effectiveIndices![itemIndex]]
+                                            .coverUri)
+                                        : 'assets/images/songs_cover/tit.jpeg',
+                                    fit: BoxFit.fitHeight,
+                                    height: 230.0,
+                                    width: 230.0,
+                                  ),
+                                ),
+                              )
+                            : ClipRRect(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(150.0)),
+                                child: Image.asset(
+                                  // (_userPlayingMode ==0)?
+                                  // songsOfPlaylist[itemIndex].coverUri
+                                  (player != null &&
+                                          (queue?.isNotEmpty ?? false))
+                                      ? queue![player
+                                              .effectiveIndices![itemIndex]]
+                                          .coverUri
+                                      : 'assets/images/songs_cover/tit.jpeg',
+                                  fit: BoxFit.fitHeight,
+                                  height: 230.0,
+                                  width: 230.0,
+                                ),
+                              ),
                       ),
                     );
                   },
-                  itemCount: queue.length,
+                  itemCount: queue?.length,
                 ),
               ),
             ),
@@ -461,18 +552,23 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     onPressed: () {
                       player?.seek(Duration.zero,
                           index: userPlayingMode == 2
-                              ? (player.currentIndex! + queue.length - 1) %
-                                  queue.length
+                              ? (player.currentIndex! +
+                                      (queue?.length ?? 0) -
+                                      1) %
+                                  (queue?.length ?? 1)
                               : player.previousIndex);
                       carouselController.animateToPage(player?.effectiveIndices!
                               .indexOf(userPlayingMode == 2
-                                  ? (player.currentIndex! + queue.length - 1) %
-                                      queue.length
+                                  ? (player.currentIndex! +
+                                          (queue?.length ?? 0) -
+                                          1) %
+                                      (queue?.length ?? 1)
                                   : player.previousIndex!) ??
                           0);
                       Future.delayed(Duration(milliseconds: 700), () {
                         appState.currentPlayingSongInQueue =
                             player?.currentIndex;
+
                         if (!(player?.playerState.playing ?? true)) {
                           player?.play();
                           appState.isPlaying = true;
@@ -507,6 +603,9 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                               onPressed: () {
                                 player?.play();
                                 appState.isPlaying = true;
+                                setState(() {
+                                  _controller.repeat();
+                                });
                               },
                             );
                           } else if (processingState !=
@@ -520,6 +619,9 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                               onPressed: () {
                                 player?.pause();
                                 appState.isPlaying = false;
+                                setState(() {
+                                  _controller.stop();
+                                });
                               },
                             );
                           } else {
@@ -540,11 +642,13 @@ class _SongPlayerPageState extends State<SongPlayerPage> {
                     onPressed: () {
                       player?.seek(Duration.zero,
                           index: userPlayingMode == 2
-                              ? (player.currentIndex! + 1) % queue.length
+                              ? (player.currentIndex! + 1) %
+                                  (queue?.length ?? 1)
                               : player.nextIndex);
                       carouselController.animateToPage(player?.effectiveIndices!
                               .indexOf(userPlayingMode == 2
-                                  ? (player.currentIndex! + 1) % queue.length
+                                  ? (player.currentIndex! + 1) %
+                                      (queue?.length ?? 1)
                                   : player.nextIndex!) ??
                           0);
                       Future.delayed(Duration(milliseconds: 700), () {

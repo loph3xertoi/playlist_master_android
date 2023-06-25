@@ -186,6 +186,8 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                     return Material(
                                                       color: Colors.transparent,
                                                       child: InkWell(
+                                                        // TODO: fix bug: the init cover will be wrong sometimes when first loading
+                                                        // song player in shuffle mode.
                                                         onTap: () {
                                                           // TODO: fix this, the songs should be real data.
 
@@ -205,9 +207,14 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                             //     songs;
                                                             appState.currentPlayingSongInQueue =
                                                                 index;
+                                                            appState.currentSong =
+                                                                appState.queue![
+                                                                    index];
                                                             appState.currentPage =
                                                                 '/song_player';
                                                             appState.isPlaying =
+                                                                true;
+                                                            appState.isFirstLoadSongPlayer =
                                                                 true;
                                                             appState
                                                                 .initAudioPlayer();
@@ -248,9 +255,14 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                 songs;
                                                             appState.currentPlayingSongInQueue =
                                                                 index;
+                                                            appState.currentSong =
+                                                                appState.queue![
+                                                                    index];
                                                             appState.currentPage =
                                                                 '/song_player';
                                                             appState.isPlaying =
+                                                                true;
+                                                            appState.isFirstLoadSongPlayer =
                                                                 true;
                                                             appState
                                                                 .initAudioPlayer();

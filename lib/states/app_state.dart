@@ -7,6 +7,12 @@ import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MyAppState extends ChangeNotifier {
+  // Set true when init song player for cover animation forward.
+  bool _isFirstLoadSongPlayer = false;
+
+  // Current song in queue.
+  Song? _currentSong;
+
   // Is removing song from queue?
   bool _isRemovingSongFromQueue = false;
 
@@ -59,6 +65,9 @@ class MyAppState extends ChangeNotifier {
   // All songs of current playlist.
   List<Song>? _songsOfPlaylist;
 
+  // Cover rotating controller.
+  AnimationController? _coverRotatingController;
+
   CarouselController _carouselController = CarouselController();
 
   // // Init current song player only one time.
@@ -66,6 +75,12 @@ class MyAppState extends ChangeNotifier {
   String _currentPage = '/';
 
   Playlist? _openedPlaylist;
+
+  bool get isFirstLoadSongPlayer => _isFirstLoadSongPlayer;
+
+  Song? get currentSong => _currentSong;
+
+  AnimationController? get coverRotatingController => _coverRotatingController;
 
   bool get isRemovingSongFromQueue => _isRemovingSongFromQueue;
 
@@ -104,6 +119,21 @@ class MyAppState extends ChangeNotifier {
   double? get volume => _volume;
 
   double? get speed => _speed;
+
+  set isFirstLoadSongPlayer(bool value) {
+    _isFirstLoadSongPlayer = value;
+    notifyListeners();
+  }
+
+  set currentSong(Song? value) {
+    _currentSong = value;
+    notifyListeners();
+  }
+
+  set coverRotatingController(AnimationController? value) {
+    _coverRotatingController = value;
+    notifyListeners();
+  }
 
   set isRemovingSongFromQueue(bool value) {
     _isRemovingSongFromQueue = value;
@@ -186,7 +216,9 @@ class MyAppState extends ChangeNotifier {
   }
 
   void removeSongInQueue(int index) {
-    _queue!.removeAt(index);
+    if (_queue?.isNotEmpty ?? false) {
+      _queue!.removeAt(index);
+    }
     notifyListeners();
   }
 
@@ -266,6 +298,7 @@ class MyAppState extends ChangeNotifier {
       // _player!.currentIndexStream.listen((event) {});
       // TODO: fix bug: when remove song in playlist, this function will also be called.
       _player!.positionDiscontinuityStream.listen((discontinuity) {
+        // _coverRotatingController!.value = 0;
         if (discontinuity.reason == PositionDiscontinuityReason.autoAdvance &&
             !_updateSong &&
             !_isRemovingSongFromQueue) {
@@ -274,7 +307,6 @@ class MyAppState extends ChangeNotifier {
             notifyListeners();
             _carouselController.animateToPage(_player!.effectiveIndices!
                 .indexOf(_currentPlayingSongInQueue!));
-            print(_player);
           } else if (_userPlayingMode == 1) {
             _currentPlayingSongInQueue =
                 _player!.nextIndex ?? _currentPlayingSongInQueue;
@@ -307,7 +339,6 @@ class MyAppState extends ChangeNotifier {
       //       }
       //   }
       // });
-
       await _player!.play();
       // if (_isPlaying) {
       //   await _player!.play();

@@ -19,6 +19,7 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
     var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
     var carouselController = appState.carouselController;
     var player = appState.player;
+    var isPlayerPageOpened = appState.isPlayerPageOpened;
     if (queue!.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (appState.player != null && mounted) {
@@ -87,6 +88,9 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                   return;
                                 }
                                 appState.currentPlayingSongInQueue = index;
+                                if (!isPlayerPageOpened) {
+                                  appState.currentSong = queue[index];
+                                }
                                 // appState.carouselController.animateToPage(
                                 //     player!.effectiveIndices!.indexOf(index));
                                 WidgetsBinding.instance
@@ -123,6 +127,13 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                     if (index < currentPlayingSongInQueue!) {
                                       appState.currentPlayingSongInQueue =
                                           currentPlayingSongInQueue - 1;
+                                      if (!isPlayerPageOpened) {
+                                        appState.currentSong = (queue
+                                                .isNotEmpty)
+                                            ? queue[
+                                                currentPlayingSongInQueue - 1]
+                                            : null;
+                                      }
                                       // appState.updateSong = true;
                                     } else if (index >
                                         currentPlayingSongInQueue) {
@@ -135,11 +146,23 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                       if (currentPlayingSongInQueue ==
                                           queueLength - 1) {
                                         appState.currentPlayingSongInQueue = 0;
+                                        if (!isPlayerPageOpened) {
+                                          appState.currentSong =
+                                              (queue.isNotEmpty)
+                                                  ? queue[0]
+                                                  : null;
+                                        }
                                       }
                                       WidgetsBinding.instance
                                           .addPostFrameCallback((_) {
                                         appState.player!.seek(Duration.zero,
                                             index: currentPlayingSongInQueue);
+                                        if (!isPlayerPageOpened) {
+                                          appState.currentSong = (queue
+                                                  .isNotEmpty)
+                                              ? queue[currentPlayingSongInQueue]
+                                              : null;
+                                        }
                                       });
 
                                       if (!player!.playerState.playing) {
