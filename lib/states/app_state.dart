@@ -61,7 +61,7 @@ class MyAppState extends ChangeNotifier {
   double? _speed = 1.0;
 
   // User playing mode, 0 for shuffle, 1 for repeat, 2 for repeat one.
-  int _userPlayingMode = 0;
+  int _userPlayingMode = 1;
 
   // Current playing song in queue.
   int? _currentPlayingSongInQueue;

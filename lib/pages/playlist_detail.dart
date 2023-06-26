@@ -217,6 +217,12 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                             appState
                                                                 .initAudioPlayer();
                                                             appState.player!
+                                                                .seek(
+                                                                    Duration
+                                                                        .zero,
+                                                                    index:
+                                                                        index);
+                                                            appState.player!
                                                                 .play();
                                                           } else if (playlist ==
                                                                   openedPlaylist &&
@@ -260,6 +266,12 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                 true;
                                                             appState
                                                                 .initAudioPlayer();
+                                                            appState.player!
+                                                                .seek(
+                                                                    Duration
+                                                                        .zero,
+                                                                    index:
+                                                                        index);
                                                             appState.player!
                                                                 .play();
                                                             // appState.openedPlaylist =

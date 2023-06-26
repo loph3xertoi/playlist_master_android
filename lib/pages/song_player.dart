@@ -9,6 +9,7 @@ import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:playlistmaster/third_lib_change/like_button/like_button.dart';
 import 'package:playlistmaster/widgets/create_queue_popup.dart';
+import 'package:playlistmaster/widgets/my_lyrics_displayer.dart';
 import 'package:provider/provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
@@ -111,7 +112,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     _isPlaying = appState.isPlaying;
     // playProgress = appState.playProgress ?? 0;
     if (_isFirstLoadSongPlayer) {
-      player!.seek(Duration.zero);
+      player!.seek(Duration.zero, index: currentPlayingSongInQueue);
       _controller.repeat();
     }
     if ((queue?.isNotEmpty ?? false) &&
@@ -246,6 +247,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                       //   });
                       // });
                       // _controller.repeat();
+                      print(appState);
                       print('lyrics: $playProgress');
                       print('song: ${player!.position.inMilliseconds}');
                       print(
@@ -788,7 +790,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
   // bool isPlaying = false;
   // double max_value = 211658;
 // bool isTap = false;
-  var lyricUI = UINetease(
+  var lyricUI = MyLyricsDisplayer(
     defaultSize: 20.0,
     defaultExtSize: 14.0,
     otherMainSize: 18.0,
