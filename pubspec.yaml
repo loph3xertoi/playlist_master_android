@@ -19,6 +19,7 @@ dependencies:
   rxdart: ^0.27.7
   carousel_slider: ^4.2.1
   material_design_icons_flutter: ^7.0.7296
+  flutter_lyric: ^2.0.4+6
 
 dev_dependencies:
   flutter_test:
@@ -87,3 +88,4 @@ flutter:
     - assets/audios/toucans.mp3
     - assets/audios/finches.mp3
     - assets/audios/bluebirds.mp3
+    - assets/audios/lyrics.mp3

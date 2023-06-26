@@ -7,6 +7,9 @@ import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MyAppState extends ChangeNotifier {
+  // Current position in milliseconds.
+  int? _playProgress;
+
   // Set true when init song player for cover animation forward.
   bool _isFirstLoadSongPlayer = false;
 
@@ -28,9 +31,6 @@ class MyAppState extends ChangeNotifier {
   // Current song player.
   AudioPlayer? _player;
 
-  // // Previous queue.
-  // List<Song>? _prevQueue;
-
   // Current queue.
   List<Song>? _queue;
 
@@ -41,14 +41,18 @@ class MyAppState extends ChangeNotifier {
   /// feature of rx_dart to combine the 3 streams of interest into one.
   Stream<PositionData> get positionDataStream =>
       Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
-        _player?.positionStream ?? Stream.empty(),
+        _player?.createPositionStream(
+              minPeriod: Duration(milliseconds: 1),
+              maxPeriod: Duration(milliseconds: 1),
+            ) ??
+            Stream.empty(),
         _player?.bufferedPositionStream ?? Stream.empty(),
         _player?.durationStream ?? Stream.empty(),
         (position, bufferedPosition, duration) =>
             PositionData(position, bufferedPosition, duration ?? Duration.zero),
       );
 
-  bool _isPlaying = true;
+  bool _isPlaying = false;
 
   // Volume of song player.
   double? _volume = 1.0;
@@ -75,6 +79,8 @@ class MyAppState extends ChangeNotifier {
   String _currentPage = '/';
 
   Playlist? _openedPlaylist;
+
+  int? get playProgress => _playProgress;
 
   bool get isFirstLoadSongPlayer => _isFirstLoadSongPlayer;
 
@@ -119,6 +125,11 @@ class MyAppState extends ChangeNotifier {
   double? get volume => _volume;
 
   double? get speed => _speed;
+
+  set playProgress(int? value) {
+    _playProgress = value;
+    notifyListeners();
+  }
 
   set isFirstLoadSongPlayer(bool value) {
     _isFirstLoadSongPlayer = value;
@@ -321,25 +332,35 @@ class MyAppState extends ChangeNotifier {
           //     _player!.effectiveIndices!.indexOf(_player.nextIndex));
         }
       });
-      // _player!.playerStateStream.listen((state) {
-      //   if (state.playing) {
-      //   } else {}
-      //   switch (state.processingState) {
-      //     case ProcessingState.idle:
-      //       {}
-      //     case ProcessingState.loading:
-      //       {}
-      //     case ProcessingState.buffering:
-      //       {}
-      //     case ProcessingState.ready:
-      //       {}
-      //     case ProcessingState.completed:
-      //       {
-      //         print('completed');
-      //       }
-      //   }
+// audioPlayer?.onDurationChanged.listen((Duration event) {
+//                     setState(() {
+//                       max_value = event.inMilliseconds.toDouble();
+//                     });
+//                   });
+      //             audioPlayer?.onPositionChanged.listen((Duration event) {
+      //               if (isTap) return;
+      //               setState(() {
+      //                 sliderProgress = event.inMilliseconds.toDouble();
+      //                 playProgress = event.inMilliseconds;
+      //               });
+      //             });
+      // _player!.positionStream.listen((event) {
+      //   // _sliderProgress = event.inMilliseconds.toDouble();
+      //   _playProgress = event.inMilliseconds;
+      //   notifyListeners();
       // });
-      await _player!.play();
+      // _player!.positionStream.listen((event) {
+      //   // _sliderProgress = event.inMilliseconds.toDouble();
+      //     // _sliderProgress = event.inMilliseconds.toDouble();
+      //     playProgress = event.inMilliseconds;
+      // });
+      // _player!.durationStream.listen((event) {
+      //     max_value = event!.inMilliseconds.toDouble();
+      // });
+      _player!.playingStream.listen((playing) {
+        isPlaying = playing;
+      });
+      // await _player!.play();
       // if (_isPlaying) {
       //   await _player!.play();
       // }

@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_lyric/lyrics_reader.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:playlistmaster/third_lib_change/like_button/like_button.dart';
@@ -70,6 +72,9 @@ class _SongPlayerPageState extends State<SongPlayerPage>
   late AnimationController _controller;
   late Animation<double> _songCoverRotateAnimation;
   bool _isFirstLoadSongPlayer = false;
+  bool _toggleLyrics = false;
+  bool _isPlaying = false;
+  // int _playProgress = 0;
   // bool _oldPlayingState = false;
 
   @override
@@ -103,14 +108,20 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     var positionDataStream = appState.positionDataStream;
     var carouselController = appState.carouselController;
     _isFirstLoadSongPlayer = appState.isFirstLoadSongPlayer;
-    var updateSong = appState.updateSong;
+    _isPlaying = appState.isPlaying;
+    // playProgress = appState.playProgress ?? 0;
     if (_isFirstLoadSongPlayer) {
+      player!.seek(Duration.zero);
       _controller.repeat();
     }
     if ((queue?.isNotEmpty ?? false) &&
-        (currentSong!.name != queue?[currentPlayingSongInQueue!].name)) {
+        (queue!.length > currentPlayingSongInQueue!) &&
+        (currentSong!.name != queue[currentPlayingSongInQueue].name)) {
       _controller.reset();
     }
+    // player?.stream.listen((event) {
+
+    // });
 
     if (queue?.isEmpty ?? false) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -123,17 +134,12 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // appState.coverRotatingController = _controller;
       if ((queue?.isNotEmpty ?? false) &&
           (currentSong!.name != queue?[currentPlayingSongInQueue!].name)) {
         appState.currentSong = queue?[currentPlayingSongInQueue!];
       }
 
       if (!_isFirstLoadSongPlayer) {
-        // if (_oldPlayingState != appState.isPlaying) {
-        //   _controller.repeat();
-        //   appState._oldPlayingState = appState.isPlaying;
-        // }
         if (player != null && player.playing == true) {
           _controller.repeat();
         } else {
@@ -145,42 +151,19 @@ class _SongPlayerPageState extends State<SongPlayerPage>
         });
       }
     });
-
-    if (false) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        // if (player!.currentIndex == currentPlayingSongInQueue) {
-        //   return;
-        // }
-        player!.seek(Duration.zero, index: currentPlayingSongInQueue);
-        // player!
-        //     .seek(appState.player!.duration, index: currentPlayingSongInQueue);
-        // TODO: fix bug: if the song removed from queue is over the current playing song, the
-        // animation will be wired.
-        carouselController.jumpToPage(
-            player.effectiveIndices!.indexOf(currentPlayingSongInQueue!));
-        appState.updateSong = false;
-      });
-    }
-    // appState.addListener(() {
-    //   if(currentPlayingSongInQueue != appState.currentPlayingSongInQueue){
-    //     print('daw---');
-    //   }
-    //   // if (mounted &&
-    //   //     currentPlayingSongInQueue != appState.currentPlayingSongInQueue) {
-    //   //   _currentSongIndex = appState.currentPlayingSongInQueue;
-    //   //   Future.delayed(Duration(milliseconds: 0), () {
-    //   //     _player.seek(Duration.zero, index: _currentSongIndex);
-    //   //     _carouselController.jumpToPage(appState.currentPlayingSongInQueue);
-    //   //     if (!_player.playerState.playing) {
-    //   //       _player.play();
-    //   //     }
-    //   //   });
-    //   //   setState(() {});
-    //   // }
-    //   // if (mounted && appState.isPlaying != _player.playerState.playing) {
-    //   //   appState.isPlaying = _player.playerState.playing;
-    //   // }
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      //   player!.positionStream.listen((event) {
+      //     setState(() {
+      //       sliderProgress = event.inMilliseconds.toDouble();
+      //       playProgress = event.inMilliseconds;
+      //     });
+      //   });
+      //   player.durationStream.listen((event) {
+      //     setState(() {
+      //       max_value = event!.inMilliseconds.toDouble();
+      //     });
+      //   });
+    });
 
     return Container(
       decoration: BoxDecoration(
@@ -250,240 +233,339 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                   IconButton(
                     color: Color(0xE5FFFFFF),
                     icon: Icon(Icons.share_rounded),
-                    onPressed: () {},
+                    onPressed: () {
+                      // player
+                      //     ?.createPositionStream(
+                      //       steps: 2000,
+                      //   minPeriod: Duration(milliseconds: 10),
+                      //   maxPeriod: Duration(milliseconds: 10),
+                      // )
+                      //     .listen((event) {
+                      //   setState(() {
+                      //     playProgress = event.inMilliseconds;
+                      //   });
+                      // });
+                      // _controller.repeat();
+                      print('lyrics: $playProgress');
+                      print('song: ${player!.position.inMilliseconds}');
+                      print(
+                          'diff: ${playProgress - player.position.inMilliseconds}');
+                      setState(() {});
+                      // print(max_value);
+                    },
                   ),
                 ]),
               ),
             ),
           ),
           Expanded(
-            child: Center(
-              child: SizedBox(
-                height: 250.0,
-                width: double.infinity,
-                child: CarouselSlider.builder(
-                  carouselController: carouselController,
-                  options: CarouselOptions(
-                    initialPage: player?.effectiveIndices!
-                            .indexOf(currentPlayingSongInQueue!) ??
-                        0,
-                    aspectRatio: 1.0,
-                    viewportFraction: userPlayingMode == 0 ? 0.8 : 0.6,
-                    enlargeCenterPage: true,
-                    onPageChanged: (index, reason) {
-                      if (reason == CarouselPageChangedReason.manual) {
-                        player?.seek(Duration.zero,
-                            index: player.effectiveIndices![index]);
-                        Future.delayed(Duration(milliseconds: 700), () {
-                          appState.currentPlayingSongInQueue =
-                              player?.effectiveIndices![index];
-
-                          if (!(player?.playerState.playing ?? true)) {
-                            player?.play();
-                            appState.isPlaying = true;
-                          }
-                        });
-                      }
-                    },
-                    onScrolled: (position) {
-                      // print(position);
-                    },
-                    // enlargeStrategy: CenterPageEnlargeStrategy.scale,
-                    enlargeFactor: 0.45,
+            child: Stack(alignment: AlignmentDirectional.topCenter, children: [
+              Positioned(
+                top: 30.0,
+                // height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                // top: (MediaQuery.of(context).size.height - 500.0) / 2,
+                child: IgnorePointer(
+                  ignoring: !_toggleLyrics,
+                  child: AnimatedOpacity(
+                    opacity: _toggleLyrics ? 1.0 : 0.0,
+                    duration: Duration(milliseconds: 500),
+                    child: ShaderMask(
+                      shaderCallback: (rect) {
+                        return LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          stops: [0.0, 0.1, 0.9, 1.0],
+                          colors: [
+                            Colors.transparent,
+                            Colors.black,
+                            Colors.black,
+                            Colors.transparent
+                          ],
+                        ).createShader(
+                            Rect.fromLTRB(0, 0, rect.width, rect.height));
+                      },
+                      blendMode: BlendMode.dstIn,
+                      child: player != null
+                          ? buildReaderWidget(player)
+                          : Container(),
+                    ),
                   ),
-                  // items: imageSliders,
-                  itemBuilder:
-                      (BuildContext context, int itemIndex, int pageViewIndex) {
-                    return Padding(
-                      padding: const EdgeInsets.only(
-                        top: 10.0,
-                        bottom: 10.0,
+                ),
+              ),
+              Positioned(
+                top: (MediaQuery.of(context).size.height - 500.0) / 2,
+                width: MediaQuery.of(context).size.width,
+                child: IgnorePointer(
+                  ignoring: _toggleLyrics,
+                  child: AnimatedOpacity(
+                    opacity: _toggleLyrics ? 0.0 : 1.0,
+                    duration: Duration(milliseconds: 500),
+                    child: Center(
+                      child: SizedBox(
+                        height: 250.0,
+                        width: MediaQuery.of(context).size.width,
+                        child: CarouselSlider.builder(
+                          carouselController: carouselController,
+                          options: CarouselOptions(
+                            initialPage: player?.effectiveIndices!
+                                    .indexOf(currentPlayingSongInQueue!) ??
+                                0,
+                            aspectRatio: 1.0,
+                            viewportFraction: userPlayingMode == 0 ? 0.8 : 0.6,
+                            enlargeCenterPage: true,
+                            onPageChanged: (index, reason) {
+                              if (reason == CarouselPageChangedReason.manual) {
+                                player?.seek(Duration.zero,
+                                    index: player.effectiveIndices![index]);
+                                Future.delayed(Duration(milliseconds: 700), () {
+                                  appState.currentPlayingSongInQueue =
+                                      player?.effectiveIndices![index];
+
+                                  if (!(player?.playerState.playing ?? true)) {
+                                    player?.play();
+                                    appState.isPlaying = true;
+                                  }
+                                });
+                              }
+                            },
+                            onScrolled: (position) {
+                              // print(position);
+                            },
+                            // enlargeStrategy: CenterPageEnlargeStrategy.scale,
+                            enlargeFactor: 0.45,
+                          ),
+                          // items: imageSliders,
+                          itemBuilder: (BuildContext context, int itemIndex,
+                              int pageViewIndex) {
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                top: 10.0,
+                                bottom: 10.0,
+                              ),
+                              child: Container(
+                                width: 230.0,
+                                height: 230.0,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  // color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Color(0x40000000),
+                                      spreadRadius: 0.0,
+                                      blurRadius: 4.0,
+                                      offset: Offset(0.0,
+                                          4.0), // changes position of shadow
+                                    ),
+                                  ],
+                                ),
+                                child: (player != null &&
+                                        (player.effectiveIndices?.isNotEmpty ??
+                                            false) &&
+                                        player.effectiveIndices![itemIndex] ==
+                                            currentPlayingSongInQueue)
+                                    ? AnimatedBuilder(
+                                        animation: _songCoverRotateAnimation,
+                                        builder: (BuildContext context,
+                                            Widget? child) {
+                                          return Transform.rotate(
+                                            angle: _songCoverRotateAnimation
+                                                    .value *
+                                                2 *
+                                                pi,
+                                            child: child,
+                                          );
+                                        },
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(150.0)),
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                _toggleLyrics = true;
+                                              });
+                                              print(_toggleLyrics);
+                                            },
+                                            child: Image.asset(
+                                              // (_userPlayingMode ==0)?
+                                              // songsOfPlaylist[itemIndex].coverUri
+                                              (queue?.isNotEmpty ?? false)
+                                                  ? (queue![player
+                                                              .effectiveIndices![
+                                                          itemIndex]]
+                                                      .coverUri)
+                                                  : 'assets/images/songs_cover/tit.jpeg',
+                                              fit: BoxFit.fitHeight,
+                                              height: 230.0,
+                                              width: 230.0,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : ClipRRect(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(150.0)),
+                                        child: Image.asset(
+                                          // (_userPlayingMode ==0)?
+                                          // songsOfPlaylist[itemIndex].coverUri
+                                          (player != null &&
+                                                  (queue?.isNotEmpty ?? false))
+                                              ? queue![player.effectiveIndices![
+                                                      itemIndex]]
+                                                  .coverUri
+                                              : 'assets/images/songs_cover/tit.jpeg',
+                                          fit: BoxFit.fitHeight,
+                                          height: 230.0,
+                                          width: 230.0,
+                                        ),
+                                      ),
+                              ),
+                            );
+                          },
+                          itemCount: queue?.length,
+                        ),
                       ),
-                      child: Container(
-                        width: 230.0,
-                        height: 230.0,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          // color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0x40000000),
-                              spreadRadius: 0.0,
-                              blurRadius: 4.0,
-                              offset: Offset(
-                                  0.0, 4.0), // changes position of shadow
+                    ),
+                  ),
+                ),
+              ),
+              AnimatedPositioned(
+                duration: Duration(milliseconds: 500),
+                curve: Curves.fastOutSlowIn,
+                bottom: _toggleLyrics ? 20.0 : 90.0,
+                width: MediaQuery.of(context).size.width,
+                child: IgnorePointer(
+                  ignoring: _toggleLyrics,
+                  child: AnimatedOpacity(
+                    duration: Duration(milliseconds: 500),
+                    opacity: _toggleLyrics ? 0.0 : 1.0,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                      ),
+                      child: SizedBox(
+                        height: 50.0,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                              color: Color(0xE5FFFFFF),
+                              icon: Icon(Icons.volume_up_rounded),
+                              onPressed: () {
+                                //TODO: fix bug: volume more than 1 not works.
+                                showSliderDialog(
+                                  context: context,
+                                  title: "Adjust volume",
+                                  divisions: 10,
+                                  min: 0.0,
+                                  max: 1.0,
+                                  value: volume!,
+                                  stream: player!.volumeStream,
+                                  onChanged: (volume) {
+                                    player.setVolume(volume);
+                                    appState.volume = volume;
+                                  },
+                                );
+                              },
+                            ),
+                            IconButton(
+                              icon: Text(
+                                '${speed!.toStringAsFixed(1)}x',
+                                style: const TextStyle(
+                                  color: Color(0xE5FFFFFF),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              onPressed: () {
+                                showSliderDialog(
+                                  context: context,
+                                  title: "Adjust speed",
+                                  divisions: 99,
+                                  min: 0.1,
+                                  max: 10.0,
+                                  value: speed,
+                                  stream: player!.speedStream,
+                                  onChanged: (speed) {
+                                    player.setSpeed(speed);
+                                    appState.speed = speed;
+                                  },
+                                );
+                              },
+                            ),
+                            SizedBox(
+                              width: 50.0,
+                              child: LikeButton(
+                                size: 24.0,
+                                isLiked: false,
+                                iconColor: Color(0xE5FFFFFF),
+                              ),
+                            ),
+                            IconButton(
+                              color: Color(0xE5FFFFFF),
+                              icon: Icon(Icons.download_rounded),
+                              onPressed: () {
+                                print(appState);
+                                print(queue);
+                                print(carouselController);
+                                print(player);
+                                setState(() {});
+                              },
+                            ),
+                            IconButton(
+                              color: Color(0xE5FFFFFF),
+                              icon: Icon(Icons.more_vert_rounded),
+                              onPressed: () {
+                                setState(() {});
+                              },
                             ),
                           ],
                         ),
-                        child: (player != null &&
-                                (player.effectiveIndices?.isNotEmpty ??
-                                    false) &&
-                                player.effectiveIndices![itemIndex] ==
-                                    currentPlayingSongInQueue)
-                            ? AnimatedBuilder(
-                                animation: _songCoverRotateAnimation,
-                                builder: (BuildContext context, Widget? child) {
-                                  return Transform.rotate(
-                                    angle: _songCoverRotateAnimation.value *
-                                        2 *
-                                        pi,
-                                    child: child,
-                                  );
-                                },
-                                child: ClipRRect(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(150.0)),
-                                  child: Image.asset(
-                                    // (_userPlayingMode ==0)?
-                                    // songsOfPlaylist[itemIndex].coverUri
-                                    (queue?.isNotEmpty ?? false)
-                                        ? (queue![player
-                                                .effectiveIndices![itemIndex]]
-                                            .coverUri)
-                                        : 'assets/images/songs_cover/tit.jpeg',
-                                    fit: BoxFit.fitHeight,
-                                    height: 230.0,
-                                    width: 230.0,
-                                  ),
-                                ),
-                              )
-                            : ClipRRect(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(150.0)),
-                                child: Image.asset(
-                                  // (_userPlayingMode ==0)?
-                                  // songsOfPlaylist[itemIndex].coverUri
-                                  (player != null &&
-                                          (queue?.isNotEmpty ?? false))
-                                      ? queue![player
-                                              .effectiveIndices![itemIndex]]
-                                          .coverUri
-                                      : 'assets/images/songs_cover/tit.jpeg',
-                                  fit: BoxFit.fitHeight,
-                                  height: 230.0,
-                                  width: 230.0,
-                                ),
-                              ),
-                      ),
-                    );
-                  },
-                  itemCount: queue?.length,
-                ),
-              ),
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12.0,
-            ),
-            child: SizedBox(
-              height: 50.0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    color: Color(0xE5FFFFFF),
-                    icon: Icon(Icons.volume_up_rounded),
-                    onPressed: () {
-                      //TODO: fix bug: volume more than 1 not works.
-                      showSliderDialog(
-                        context: context,
-                        title: "Adjust volume",
-                        divisions: 10,
-                        min: 0.0,
-                        max: 1.0,
-                        value: volume!,
-                        stream: player!.volumeStream,
-                        onChanged: (volume) {
-                          player.setVolume(volume);
-                          appState.volume = volume;
-                        },
-                      );
-                    },
-                  ),
-                  IconButton(
-                    icon: Text(
-                      '${speed!.toStringAsFixed(1)}x',
-                      style: const TextStyle(
-                        color: Color(0xE5FFFFFF),
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    onPressed: () {
-                      showSliderDialog(
-                        context: context,
-                        title: "Adjust speed",
-                        divisions: 99,
-                        min: 0.1,
-                        max: 10.0,
-                        value: speed,
-                        stream: player!.speedStream,
-                        onChanged: (speed) {
-                          player.setSpeed(speed);
-                          appState.speed = speed;
-                        },
-                      );
-                    },
                   ),
-                  SizedBox(
-                    width: 50.0,
-                    child: LikeButton(
-                      size: 24.0,
-                      isLiked: false,
-                      iconColor: Color(0xE5FFFFFF),
-                    ),
-                  ),
-                  IconButton(
-                    color: Color(0xE5FFFFFF),
-                    icon: Icon(Icons.download_rounded),
-                    onPressed: () {
-                      print(appState);
-                      print(queue);
-                      print(carouselController);
-                      print(player);
-                      setState(() {});
-                    },
-                  ),
-                  IconButton(
-                    color: Color(0xE5FFFFFF),
-                    icon: Icon(Icons.more_vert_rounded),
-                    onPressed: () {
-                      setState(() {});
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Display seek bar.
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12.0,
-              vertical: 30.0,
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: SizedBox(
-                height: 30.0,
-                child: StreamBuilder<PositionData>(
-                  stream: positionDataStream,
-                  builder: (context, snapshot) {
-                    final positionData = snapshot.data;
-                    return SeekBar(
-                      duration: positionData?.duration ?? Duration.zero,
-                      position: positionData?.position ?? Duration.zero,
-                      bufferedPosition:
-                          positionData?.bufferedPosition ?? Duration.zero,
-                      onChangeEnd: player?.seek,
-                    );
-                  },
                 ),
               ),
-            ),
+              Positioned(
+                bottom: 0.0,
+                width: MediaQuery.of(context).size.width,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12.0,
+                    vertical: 30.0,
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: SizedBox(
+                      height: 30.0,
+                      child: StreamBuilder<PositionData>(
+                        stream: positionDataStream,
+                        builder: (context, snapshot) {
+                          final positionData = snapshot.data;
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (_toggleLyrics) {
+                              setState(() {
+                                // playProgress = player.positionStream.
+                                playProgress =
+                                    positionData?.position.inMilliseconds ?? 0;
+                                sliderProgress = playProgress.toDouble();
+                              });
+                            }
+                          });
+                          return SeekBar(
+                            duration: positionData?.duration ?? Duration.zero,
+                            position: positionData?.position ?? Duration.zero,
+                            bufferedPosition:
+                                positionData?.bufferedPosition ?? Duration.zero,
+                            onChangeEnd: player?.seek,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ]),
           ),
-
           Padding(
             padding: const EdgeInsets.fromLTRB(12.0, 0.0, 12.0, 22.0),
             child: SizedBox(
@@ -601,8 +683,23 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                               iconSize: 50.0,
                               color: Color(0xE5FFFFFF),
                               onPressed: () {
-                                player?.play();
-                                appState.isPlaying = true;
+                                player!.play();
+                                // appState.isPlaying = true;
+                                // player.positionStream.listen((event) {
+                                //   // _sliderProgress = event.inMilliseconds.toDouble();
+                                //   setState(() {
+                                //     sliderProgress =
+                                //         event.inMilliseconds.toDouble();
+                                //     playProgress = event.inMilliseconds;
+                                //     print(playProgress);
+                                //   });
+                                // });
+                                // player.durationStream.listen((event) {
+                                //   setState(() {
+                                //     max_value =
+                                //         event!.inMilliseconds.toDouble();
+                                //   });
+                                // });
                                 setState(() {
                                   _controller.repeat();
                                 });
@@ -618,7 +715,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                               color: Color(0xE5FFFFFF),
                               onPressed: () {
                                 player?.pause();
-                                appState.isPlaying = false;
+                                // appState.isPlaying = false;
                                 setState(() {
                                   _controller.stop();
                                 });
@@ -678,6 +775,101 @@ class _SongPlayerPageState extends State<SongPlayerPage>
           ),
         ],
       ),
+    );
+  }
+
+  var lyricPadding = 40.0;
+  var lyricModel = LyricsModelBuilder.create()
+      .bindLyricToMain(MockData.normalLyric)
+      .bindLyricToExt(MockData.transLyric)
+      .getModel();
+  double sliderProgress = 0;
+  int playProgress = 0;
+  // bool isPlaying = false;
+  // double max_value = 211658;
+// bool isTap = false;
+  var lyricUI = UINetease(
+    defaultSize: 20.0,
+    defaultExtSize: 14.0,
+    otherMainSize: 18.0,
+    inlineGap: 0.0,
+  );
+  // var myPlaying = false;
+
+  Stack buildReaderWidget(AudioPlayer? player) {
+    return Stack(
+      children: [
+        LyricsReader(
+          padding: EdgeInsets.symmetric(horizontal: lyricPadding),
+          model: lyricModel,
+          position: playProgress,
+          lyricUi: lyricUI,
+          playing: _isPlaying,
+          size:
+              Size(double.infinity, MediaQuery.of(context).size.height - 280.0),
+          onTap: () {
+            setState(() {
+              _toggleLyrics = !_toggleLyrics;
+            });
+          },
+          emptyBuilder: () => Center(
+            child: Text(
+              "No lyrics",
+              style: lyricUI.getOtherMainTextStyle(),
+            ),
+          ),
+          selectLineBuilder: (progress, confirm) {
+            return GestureDetector(
+              onTap: () {
+                LyricsLog.logD("Click event");
+                confirm.call();
+                setState(() {
+                  player?.seek(Duration(milliseconds: progress));
+                });
+              },
+              child: Container(
+                color: Colors.transparent,
+                child: Row(
+                  children: [
+                    IconButton(
+                        onPressed: () {
+                          LyricsLog.logD("Click event");
+                          confirm.call();
+                          setState(() {
+                            player?.seek(Duration(milliseconds: progress));
+                          });
+                        },
+                        icon: Icon(Icons.play_arrow_rounded,
+                            color: Colors.white.withOpacity(0.25))),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.amber.withOpacity(0.25)),
+                        height: 1.0,
+                        width: double.infinity,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10.0, right: 5.0),
+                      child: Text(
+                        RegExp(r'((^0*[1-9]\d*:)?\d{2}:\d{2})\.\d+$')
+                                .firstMatch(
+                                    "${Duration(milliseconds: playProgress)}")
+                                ?.group(1) ??
+                            '${Duration(milliseconds: playProgress)}',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.25),
+                          fontSize: 12.0,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }

@@ -122,7 +122,9 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                           : false,
                                   onClose: () {
                                     appState.removeSongInQueue(index);
-                                    appState.initQueue!.removeAt(index);
+                                    if (appState.initQueue?.length != 0) {
+                                      appState.initQueue!.removeAt(index);
+                                    }
                                     appState.isRemovingSongFromQueue = true;
                                     if (index < currentPlayingSongInQueue!) {
                                       appState.currentPlayingSongInQueue =

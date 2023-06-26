@@ -212,12 +212,12 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                     index];
                                                             appState.currentPage =
                                                                 '/song_player';
-                                                            appState.isPlaying =
-                                                                true;
                                                             appState.isFirstLoadSongPlayer =
                                                                 true;
                                                             appState
                                                                 .initAudioPlayer();
+                                                            appState.player!
+                                                                .play();
                                                           } else if (playlist ==
                                                                   openedPlaylist &&
                                                               index ==
@@ -231,13 +231,9 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                 .playerState
                                                                 .playing) {
                                                               player.play();
-                                                              appState.isPlaying =
-                                                                  true;
                                                             }
                                                           } else {
                                                             appState.queue = [];
-                                                            appState.isPlaying =
-                                                                false;
                                                             appState.player!
                                                                 .stop();
                                                             appState.player!
@@ -260,12 +256,12 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                     index];
                                                             appState.currentPage =
                                                                 '/song_player';
-                                                            appState.isPlaying =
-                                                                true;
                                                             appState.isFirstLoadSongPlayer =
                                                                 true;
                                                             appState
                                                                 .initAudioPlayer();
+                                                            appState.player!
+                                                                .play();
                                                             // appState.openedPlaylist =
                                                             //     playlist;
                                                             // appState.songsOfPlaylist =
