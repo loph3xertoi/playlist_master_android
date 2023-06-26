@@ -53,6 +53,35 @@ class MyApp extends StatelessWidget {
           //   );
           // },
         },
+        // onGenerateRoute: (settings) {
+        //   switch (settings.name) {
+        //     case '/search':
+        //       return PageTransition(
+        //         child: SearchPage(),
+        //         type: PageTransitionType.fade,
+        //         settings: settings,
+        //         reverseDuration: Duration(seconds: 1),
+        //       );
+        //     case '/playlist_detail':
+        //       return PageTransition(
+        //         child: PlaylistDetailPage(),
+        //         type: PageTransitionType.topToBottomJoined,
+        //         childCurrent: this,
+        //         settings: settings,
+        //         reverseDuration: Duration(seconds: 1),
+        //       );
+        //     case '/song_player':
+        //       return PageTransition(
+        //         child: SongPlayerPage(),
+        //         type: PageTransitionType.topToBottomJoined,
+        //         childCurrent: this,
+        //         settings: settings,
+        //         reverseDuration: Duration(seconds: 1),
+        //       );
+        //     default:
+        //       return null;
+        //   }
+        // },
         // home: SplashScreen(),
       ),
     );

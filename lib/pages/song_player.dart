@@ -9,6 +9,7 @@ import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:playlistmaster/third_lib_change/like_button/like_button.dart';
 import 'package:playlistmaster/widgets/create_queue_popup.dart';
+import 'package:playlistmaster/widgets/create_songplayer_menu_popup.dart';
 import 'package:playlistmaster/widgets/my_lyrics_displayer.dart';
 import 'package:provider/provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -110,6 +111,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     var carouselController = appState.carouselController;
     _isFirstLoadSongPlayer = appState.isFirstLoadSongPlayer;
     _isPlaying = appState.isPlaying;
+
     // playProgress = appState.playProgress ?? 0;
     if (_isFirstLoadSongPlayer) {
       player!.seek(Duration.zero, index: currentPlayingSongInQueue);
@@ -149,6 +151,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
       } else {
         Future.delayed(Duration(milliseconds: 200), () {
           appState.isFirstLoadSongPlayer = false;
+          // appState.coverRotatingController = _controller;
         });
       }
     });
@@ -517,7 +520,13 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                               color: Color(0xE5FFFFFF),
                               icon: Icon(Icons.more_vert_rounded),
                               onPressed: () {
-                                setState(() {});
+                                showDialog(
+                                  context: context,
+                                  // builder: (context) => Dialog(
+                                  //   child: Text('hello'),
+                                  // ),
+                                  builder: (_) => CreateSongplayerMenuDialog(),
+                                );
                               },
                             ),
                           ],
