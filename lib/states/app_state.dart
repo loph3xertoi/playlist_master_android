@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
@@ -238,7 +243,7 @@ class MyAppState extends ChangeNotifier {
 
     // Try to load audio from a source and catch any errors.
     try {
-      initTheQueue();
+      _initQueue = await initTheQueue();
       await _player!.setAudioSource(_initQueue!,
           initialIndex: _currentPlayingSongInQueue,
           initialPosition: Duration.zero);
@@ -314,15 +319,15 @@ class MyAppState extends ChangeNotifier {
             !_updateSong &&
             !_isRemovingSongFromQueue) {
           if (_userPlayingMode == 0) {
-            _currentPlayingSongInQueue = _player!.nextIndex;
-            notifyListeners();
-            _carouselController.animateToPage(_player!.effectiveIndices!
-                .indexOf(_currentPlayingSongInQueue!));
+            currentPlayingSongInQueue = discontinuity.event.currentIndex;
+            currentSong = _queue![currentPlayingSongInQueue!];
+            // _carouselController.animateToPage(_player!.effectiveIndices!
+            // .indexOf(_currentPlayingSongInQueue!));
           } else if (_userPlayingMode == 1) {
-            _currentPlayingSongInQueue =
-                _player!.nextIndex ?? _currentPlayingSongInQueue;
-            notifyListeners();
-            _carouselController.animateToPage(_currentPlayingSongInQueue!);
+            currentPlayingSongInQueue =
+                discontinuity.event.currentIndex ?? _currentPlayingSongInQueue;
+            currentSong = _queue![currentPlayingSongInQueue!];
+            // _carouselController.animateToPage(_currentPlayingSongInQueue!);
           } else {
             return;
           }
@@ -374,18 +379,47 @@ class MyAppState extends ChangeNotifier {
     // }
   }
 
-  void initTheQueue() {
-    _initQueue = ConcatenatingAudioSource(
+  Future<ConcatenatingAudioSource?> initTheQueue() async {
+    List<AudioSource> queueList;
+    // Uri uri = await getImageFileFromAssets();
+    queueList = await Future.wait(_queue!
+        .map(
+          (e) async => AudioSource.asset(
+            e.link,
+            tag: MediaItem(
+              // Specify a unique ID for each media item:
+              id: _queue!.indexOf(e).toString(),
+              // Metadata to display in the notification:
+              album: "Album name",
+              title: e.name,
+              artUri:
+                  await getImageFileFromAssets(e.coverUri, _queue!.indexOf(e)),
+              // artUri: Uri.parse(
+              //     'https://pub.dev/static/hash-upjs5ooo/img/pub-dev-logo-2x.png'),
+            ),
+          ),
+        )
+        .toList());
+
+    return ConcatenatingAudioSource(
       // Start loading next item just before reaching it
       useLazyPreparation: true,
       // Customise the shuffle algorithm
       shuffleOrder: DefaultShuffleOrder(),
       // Specify the queue items
-      children: _queue!
-          .map(
-            (e) => AudioSource.asset(e.link),
-          )
-          .toList(),
+      children: queueList,
     );
+  }
+
+  Future<Uri> getImageFileFromAssets(String imageAssets, int index) async {
+    final byteData = await rootBundle.load(imageAssets);
+    final buffer = byteData.buffer;
+    Directory tempDir = await getApplicationDocumentsDirectory();
+    String tempPath = tempDir.path;
+    var filePath =
+        '$tempPath/image_tmp_$index.png'; // image_tmp.png is dump file, can be anything
+    return (await File(filePath).writeAsBytes(
+            buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes)))
+        .uri;
   }
 }

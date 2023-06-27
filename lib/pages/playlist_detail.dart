@@ -188,7 +188,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                       child: InkWell(
                                                         // TODO: fix bug: the init cover will be wrong sometimes when first loading
                                                         // song player in shuffle mode.
-                                                        onTap: () {
+                                                        onTap: () async {
                                                           // TODO: fix this, the songs should be real data.
 
                                                           // Init audio player when no player instance exist, otherwise
@@ -214,14 +214,14 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                 '/song_player';
                                                             appState.isFirstLoadSongPlayer =
                                                                 true;
-                                                            appState
+                                                            await appState
                                                                 .initAudioPlayer();
-                                                            appState.player!
-                                                                .seek(
-                                                                    Duration
-                                                                        .zero,
-                                                                    index:
-                                                                        index);
+                                                            // appState.player!
+                                                            //     .seek(
+                                                            //         Duration
+                                                            //             .zero,
+                                                            //         index:
+                                                            //             index);
                                                             appState.player!
                                                                 .play();
                                                           } else if (playlist ==
@@ -264,14 +264,14 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                 '/song_player';
                                                             appState.isFirstLoadSongPlayer =
                                                                 true;
-                                                            appState
+                                                            await appState
                                                                 .initAudioPlayer();
-                                                            appState.player!
-                                                                .seek(
-                                                                    Duration
-                                                                        .zero,
-                                                                    index:
-                                                                        index);
+                                                            // appState.player!
+                                                            //     .seek(
+                                                            //         Duration
+                                                            //             .zero,
+                                                            //         index:
+                                                            //             index);
                                                             appState.player!
                                                                 .play();
                                                             // appState.openedPlaylist =

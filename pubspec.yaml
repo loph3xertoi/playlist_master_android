@@ -21,6 +21,8 @@ dependencies:
   material_design_icons_flutter: ^7.0.7296
   flutter_lyric: ^2.0.4+6
   animations: ^2.0.7
+  just_audio_background: ^0.0.1-beta.10
+  path_provider: ^2.0.15
 
 dev_dependencies:
   flutter_test:

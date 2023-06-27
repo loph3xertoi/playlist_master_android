@@ -76,6 +76,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
   bool _isFirstLoadSongPlayer = false;
   bool _toggleLyrics = false;
   bool _isPlaying = false;
+  int _prevSongIndex = 0;
   // int _playProgress = 0;
   // bool _oldPlayingState = false;
 
@@ -156,6 +157,11 @@ class _SongPlayerPageState extends State<SongPlayerPage>
       }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_prevSongIndex != currentPlayingSongInQueue) {
+        // carouselController.
+        carouselController.jumpToPage(currentPlayingSongInQueue!);
+        _prevSongIndex = currentPlayingSongInQueue;
+      }
       //   player!.positionStream.listen((event) {
       //     setState(() {
       //       sliderProgress = event.inMilliseconds.toDouble();
@@ -168,6 +174,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
       //     });
       //   });
     });
+    print(appState);
 
     return Container(
       decoration: BoxDecoration(

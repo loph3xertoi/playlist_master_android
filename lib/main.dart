@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:playlistmaster/pages/my_homepage.dart';
 import 'package:playlistmaster/pages/playlist_detail.dart';
 import 'package:playlistmaster/pages/search_page.dart';
@@ -9,7 +10,12 @@ import 'package:playlistmaster/states/my_navigation_button_state.dart';
 import 'package:playlistmaster/states/my_search_state.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+Future<void> main() async {
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.daw.playlistmaster.channel',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+  );
   runApp(MyApp());
 }
 
