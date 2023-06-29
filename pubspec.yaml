@@ -24,6 +24,7 @@ dependencies:
   just_audio_background: ^0.0.1-beta.10
   path_provider: ^2.0.15
   http: ^0.13.0
+  dio: ^5.2.1+1
 
 dev_dependencies:
   flutter_test:

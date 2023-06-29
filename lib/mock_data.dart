@@ -1,3 +1,5 @@
+import 'package:playlistmaster/entities/detail_playlist.dart';
+
 import 'entities/playlist.dart';
 import 'entities/singer.dart';
 import 'entities/song.dart';
@@ -125,10 +127,7 @@ class MockData {
     Playlist(
       name: 'Bird',
       coverImage: 'assets/images/playlist_cover/bird.png',
-      description:
-          'A bird does not sing because it has an answer, it sings because it has a song.',
       songsCount: 20,
-      listenNum: 10,
       dirId: 1,
       tid: '1',
     ),
@@ -136,7 +135,6 @@ class MockData {
       name: 'Zebra',
       coverImage: 'assets/images/playlist_cover/zebra.png',
       songsCount: 24,
-      listenNum: 10,
       dirId: 2,
       tid: '2',
     ),
@@ -144,7 +142,6 @@ class MockData {
       name: 'Cat',
       coverImage: 'assets/images/playlist_cover/cat.png',
       songsCount: 3,
-      listenNum: 10,
       dirId: 3,
       tid: '3',
     ),
@@ -152,7 +149,6 @@ class MockData {
       name: 'Owl',
       coverImage: 'assets/images/playlist_cover/owl.png',
       songsCount: 68,
-      listenNum: 10,
       dirId: 4,
       tid: '4',
     ),
@@ -160,7 +156,6 @@ class MockData {
       name: 'Shark',
       coverImage: 'assets/images/playlist_cover/shark.png',
       songsCount: 23,
-      listenNum: 10,
       dirId: 5,
       tid: '5',
     ),
@@ -168,7 +163,6 @@ class MockData {
       name: 'Panther',
       coverImage: 'assets/images/playlist_cover/panther.png',
       songsCount: 30,
-      listenNum: 10,
       dirId: 6,
       tid: '6',
     ),
@@ -176,7 +170,6 @@ class MockData {
       name: 'Lion',
       coverImage: 'assets/images/playlist_cover/lion.png',
       songsCount: 89,
-      listenNum: 10,
       dirId: 7,
       tid: '7',
     ),
@@ -184,7 +177,6 @@ class MockData {
       name: 'Fox',
       coverImage: 'assets/images/playlist_cover/fox.png',
       songsCount: 169,
-      listenNum: 10,
       dirId: 8,
       tid: '8',
     ),
@@ -192,7 +184,6 @@ class MockData {
       name: 'Dog',
       coverImage: 'assets/images/playlist_cover/dog.png',
       songsCount: 72,
-      listenNum: 10,
       dirId: 9,
       tid: '9',
     ),
@@ -200,7 +191,6 @@ class MockData {
       name: 'Dolphin',
       coverImage: 'assets/images/playlist_cover/dolphin.png',
       songsCount: 83,
-      listenNum: 10,
       dirId: 10,
       tid: '10',
     ),
@@ -208,7 +198,6 @@ class MockData {
       name: 'Rabbit',
       coverImage: 'assets/images/playlist_cover/rabbit.png',
       songsCount: 24,
-      listenNum: 10,
       dirId: 11,
       tid: '11',
     ),
@@ -216,7 +205,6 @@ class MockData {
       name: 'Elephant',
       coverImage: 'assets/images/playlist_cover/elephant.png',
       songsCount: 75,
-      listenNum: 10,
       dirId: 12,
       tid: '12',
     ),
@@ -224,7 +212,6 @@ class MockData {
       name: 'Wolf',
       coverImage: 'assets/images/playlist_cover/wolf.png',
       songsCount: 98,
-      listenNum: 10,
       dirId: 13,
       tid: '13',
     ),
@@ -232,7 +219,6 @@ class MockData {
       name: 'Dove',
       coverImage: 'assets/images/playlist_cover/dove.png',
       songsCount: 56,
-      listenNum: 10,
       dirId: 14,
       tid: '14',
     ),
@@ -240,7 +226,6 @@ class MockData {
       name: 'Snake',
       coverImage: 'assets/images/playlist_cover/snake.png',
       songsCount: 65,
-      listenNum: 10,
       dirId: 15,
       tid: '15',
     ),
@@ -248,7 +233,6 @@ class MockData {
       name: 'Bear',
       coverImage: 'assets/images/playlist_cover/bear.png',
       songsCount: 32,
-      listenNum: 10,
       dirId: 16,
       tid: '16',
     ),
@@ -256,7 +240,6 @@ class MockData {
       name: 'Bee',
       coverImage: 'assets/images/playlist_cover/bee.png',
       songsCount: 58,
-      listenNum: 10,
       dirId: 17,
       tid: '17',
     ),
@@ -264,7 +247,6 @@ class MockData {
       name: 'Panda',
       coverImage: 'assets/images/playlist_cover/panda.png',
       songsCount: 80,
-      listenNum: 10,
       dirId: 18,
       tid: '18',
     ),
@@ -272,7 +254,6 @@ class MockData {
       name: 'Koala',
       coverImage: 'assets/images/playlist_cover/koala.png',
       songsCount: 7,
-      listenNum: 10,
       dirId: 19,
       tid: '19',
     ),
@@ -280,11 +261,21 @@ class MockData {
       name: 'Lizard',
       coverImage: 'assets/images/playlist_cover/lizard.png',
       songsCount: 73,
-      listenNum: 10,
       dirId: 20,
       tid: '20',
     ),
   ];
+
+  static DetailPlaylist detail_playlist = DetailPlaylist(
+    name: 'Bird',
+    description:
+        'A bird does not sing because it has an answer, it sings because it has a song.',
+    coverImage: 'assets/images/playlist_cover/bird.png',
+    songsCount: 20,
+    dirId: 1,
+    tid: '1',
+    songs: songs,
+  );
 
   static const normalLyric = """[ti:If I Didn't Love You]
 [ar:Jason Aldean/Carrie Underwood]

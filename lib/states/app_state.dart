@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:rxdart/rxdart.dart';
@@ -83,7 +82,7 @@ class MyAppState extends ChangeNotifier {
   // bool _initSongPlayer = true;
   String _currentPage = '/';
 
-  Playlist? _openedPlaylist;
+  int? _openedPlaylistDirId;
 
   int? get playProgress => _playProgress;
 
@@ -115,7 +114,7 @@ class MyAppState extends ChangeNotifier {
 
   int get userPlayingMode => _userPlayingMode;
 
-  Playlist? get openedPlaylist => _openedPlaylist;
+  int? get openedPlaylistDirId => _openedPlaylistDirId;
 
   bool get isQueueEmpty => _queue?.isEmpty ?? true;
 
@@ -206,8 +205,8 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  set openedPlaylist(Playlist? playlist) {
-    _openedPlaylist = playlist;
+  set openedPlaylistDirId(int? dirIdOfPlaylist) {
+    _openedPlaylistDirId = dirIdOfPlaylist;
     notifyListeners();
   }
 

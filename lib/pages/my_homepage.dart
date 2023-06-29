@@ -1,4 +1,9 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:playlistmaster/http/api.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/widgets/bottom_player.dart';
 import 'package:playlistmaster/widgets/floating_button/quick_action.dart';
@@ -44,10 +49,22 @@ class _MyHomePageState extends State<MyHomePage>
         child: QuickActionMenu(
           backgroundColor: Colors.transparent,
           imageUri: 'assets/images/home_button.png',
-          onTap: () {
-            // appState.toggleBottomPlayer();
-            // appState.player!.seek(Duration.zero, index: 3);
+          onTap: () async {
             print('homepage button $appState');
+            // final dio = Dio();
+
+            // final response = await dio.get('http://192.168.8.171:8080/hello');
+            // print(response);
+
+            var url = Uri.http(
+              '192.168.8.171:8080',
+              '${API.playlists}/2804161589/1',
+              // {'id': '2804161589'},
+            );
+            var response = await http.get(url);
+            var decodedResponse =
+                jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+            print(decodedResponse);
           },
           actions: [
             QuickAction(

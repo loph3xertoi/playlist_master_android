@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:playlistmaster/entities/playlist.dart';
+import 'package:playlistmaster/http/api.dart';
+import 'package:http/http.dart' as http;
 import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/widgets/create_playlist_popup.dart';
 import 'package:playlistmaster/widgets/playlist_item.dart';
@@ -11,6 +15,21 @@ class MyContentArea extends StatefulWidget {
 
 class _MyContentAreaState extends State<MyContentArea> {
   List<Playlist> _playlists = MockData.playlists;
+  // late List<Playlist> _playlists;
+
+  @override
+  void initState() {
+    super.initState();
+    // var url = Uri.http(
+    //   API.host,
+    //   '${API.playlists}/2804161589/1',
+    //   // {'id': '2804161589'},
+    // );
+    // var response = await http.get(url);
+    // var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+    // print(decodedResponse);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(

@@ -1,9 +1,13 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:playlistmaster/entities/detail_playlist.dart';
 import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/entities/song.dart';
+import 'package:playlistmaster/http/api.dart';
+import 'package:http/http.dart' as http;
 import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/states/my_search_state.dart';
@@ -19,20 +23,31 @@ class PlaylistDetailPage extends StatefulWidget {
 
 class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  List<Song> songs = MockData.songs;
+  DetailPlaylist _detailPlaylist = MockData.detail_playlist;
+
+  late List<Song> _songs;
+  late String _tid;
 
   @override
   void initState() {
     super.initState();
+    _songs = _detailPlaylist.songs;
+    // _tid = ModalRoute.of(context)!.settings.arguments as String;
+    // var url = Uri.http(
+    //   '192.168.8.171:8080',
+    //   '${API.detailPlaylist}/$_tid/1',
+    //   // {'id': '2804161589'},
+    // );
+    // var response = await http.get(url);
+    // var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+    // print(decodedResponse);
   }
 
   @override
   Widget build(BuildContext context) {
-    final Playlist playlist =
-        ModalRoute.of(context)!.settings.arguments as Playlist;
     MyAppState appState = context.watch<MyAppState>();
 
-    var openedPlaylist = appState.openedPlaylist;
+    var openedPlaylistDirId = appState.openedPlaylistDirId;
     var player = appState.player;
     var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
 
@@ -87,7 +102,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                               right: 12.0,
                                             ),
                                             child: Image.asset(
-                                                playlist.coverImage),
+                                                _detailPlaylist.coverImage),
                                           ),
                                           Expanded(
                                             child: Column(
@@ -95,7 +110,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  playlist.name,
+                                                  _detailPlaylist.name,
                                                   style: TextStyle(
                                                     fontSize: 20.0,
                                                     height: 1.0,
@@ -104,7 +119,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                       TextOverflow.ellipsis,
                                                 ),
                                                 Text(
-                                                  '${playlist.songsCount} songs',
+                                                  '${_detailPlaylist.songsCount} songs',
                                                   textAlign: TextAlign.start,
                                                   style: TextStyle(
                                                     fontSize: 11.0,
@@ -119,7 +134,8 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                         const EdgeInsets.only(
                                                             top: 12.0),
                                                     child: Text(
-                                                      playlist.description!,
+                                                      _detailPlaylist
+                                                          .description!,
                                                       style: TextStyle(
                                                         fontSize: 13.0,
                                                         color:
@@ -140,7 +156,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                     ),
                                   ),
                                   Expanded(
-                                    child: playlist.songsCount != 0
+                                    child: _detailPlaylist.songsCount != 0
                                         ? Column(
                                             children: [
                                               SizedBox(
@@ -178,9 +194,11 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                               Expanded(
                                                 child: ListView.builder(
                                                   // TODO: fix this. Mock.songs have 10 songs only.
-                                                  // itemCount: playlist.songsCount,
+                                                  // itemCount: _detailPlaylist.songsCount,
                                                   itemCount: min(
-                                                      playlist.songsCount, 10),
+                                                      _detailPlaylist
+                                                          .songsCount,
+                                                      10),
                                                   itemBuilder:
                                                       (context, index) {
                                                     return Material(
@@ -197,14 +215,13 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                               null) {
                                                             appState.canSongPlayerPagePop =
                                                                 true;
-                                                            appState.openedPlaylist =
-                                                                playlist;
+                                                            appState.openedPlaylistDirId =
+                                                                _detailPlaylist
+                                                                    .dirId;
                                                             appState.songsOfPlaylist =
-                                                                songs;
+                                                                _songs;
                                                             appState.queue =
-                                                                songs;
-                                                            // appState.prevQueue =
-                                                            //     songs;
+                                                                _songs;
                                                             appState.currentPlayingSongInQueue =
                                                                 index;
                                                             appState.currentSong =
@@ -224,8 +241,9 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                             //             index);
                                                             appState.player!
                                                                 .play();
-                                                          } else if (playlist ==
-                                                                  openedPlaylist &&
+                                                          } else if (_detailPlaylist
+                                                                      .dirId ==
+                                                                  openedPlaylistDirId &&
                                                               index ==
                                                                   currentPlayingSongInQueue &&
                                                               appState.queue!
@@ -249,12 +267,12 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                             appState.initQueue!
                                                                 .clear();
 
-                                                            appState.openedPlaylist =
-                                                                playlist;
+                                                            appState.openedPlaylistDirId =
+                                                                _detailPlaylist.dirId;
                                                             appState.songsOfPlaylist =
-                                                                songs;
+                                                                _songs;
                                                             appState.queue =
-                                                                songs;
+                                                                _songs;
                                                             appState.currentPlayingSongInQueue =
                                                                 index;
                                                             appState.currentSong =
@@ -317,7 +335,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                         },
                                                         child: SongItem(
                                                           index: index,
-                                                          song: songs[index],
+                                                          song: _songs[index],
                                                         ),
                                                       ),
                                                     );

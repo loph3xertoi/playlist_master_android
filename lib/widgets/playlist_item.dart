@@ -11,7 +11,7 @@ class PlaylistItem extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          Navigator.pushNamed(context, '/playlist_detail', arguments: playlist);
+          Navigator.pushNamed(context, '/playlist_detail', arguments: playlist.tid);
         },
         child: Ink(
           height: 60.0,
