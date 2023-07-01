@@ -29,7 +29,9 @@ class MyAppState extends ChangeNotifier {
 
   // Default image for cover.
   static const String defaultCoverImage =
-      'https://www.worldwildlife.org/assets/structure/unique/logo-c562409bb6158bf64e5f8b1be066dbd5983d75f5ce7c9935a5afffbcc03f8e5d.png';
+      'https://img0.baidu.com/it/u=819122015,412168181&fm=253&fmt=auto&app=138&f=JPEG?w=320&h=320';
+  // static const String defaultCoverImage =
+  //     'https://www.worldwildlife.org/assets/structure/unique/logo-c562409bb6158bf64e5f8b1be066dbd5983d75f5ce7c9935a5afffbcc03f8e5d.png';
 
   // // Current position in milliseconds.
   // int? _playProgress;
@@ -104,11 +106,19 @@ class MyAppState extends ChangeNotifier {
 
   CarouselController _carouselController = CarouselController();
 
+  // Previous carousel index.
+  int _prevCarouselIndex = 0;
+
   // // Init current song player only one time.
   // bool _initSongPlayer = true;
   // String _currentPage = '/';
 
   Playlist? _openedPlaylist;
+
+  // Set true if click song that is taken down in queue popup list.
+  bool _isSkipTakenDownSong = false;
+
+  int get prevCarouselIndex => _prevCarouselIndex;
 
   Song? get prevSong => _prevSong;
 
@@ -163,6 +173,18 @@ class MyAppState extends ChangeNotifier {
   double? get volume => _volume;
 
   double? get speed => _speed;
+
+  bool get isSkipTakenDownSong => _isSkipTakenDownSong;
+
+  set isSkipTakenDownSong(bool value) {
+    _isSkipTakenDownSong = value;
+    notifyListeners();
+  }
+
+  set prevCarouselIndex(int value) {
+    _prevCarouselIndex = value;
+    notifyListeners();
+  }
 
   set prevSong(Song? value) {
     _prevSong = value;
@@ -338,12 +360,16 @@ class MyAppState extends ChangeNotifier {
           if (_userPlayingMode == 0) {
             currentPlayingSongInQueue = discontinuity.event.currentIndex;
             currentSong = _queue![currentPlayingSongInQueue!];
+            prevSong = currentSong;
+            prevCarouselIndex = currentPlayingSongInQueue!;
             // _carouselController.animateToPage(_player!.effectiveIndices!
             // .indexOf(_currentPlayingSongInQueue!));
           } else if (_userPlayingMode == 1) {
             currentPlayingSongInQueue =
                 discontinuity.event.currentIndex ?? _currentPlayingSongInQueue;
             currentSong = _queue![currentPlayingSongInQueue!];
+            prevSong = currentSong;
+            prevCarouselIndex = currentPlayingSongInQueue!;
             // _carouselController.animateToPage(_currentPlayingSongInQueue!);
           } else {
             return;
@@ -405,11 +431,11 @@ class MyAppState extends ChangeNotifier {
         var songlink = decodedResponse['data'];
         if (songlink.isEmpty) {
           song.isTakenDown = true;
-          return Future.value(MockData.links[0]);
+          return Future.value('1');
         }
         return Future.value(songlink);
       } else {
-        return Future.value(MockData.links[0]);
+        return Future.value('2');
       }
     } finally {
       client.close();
@@ -428,7 +454,7 @@ class MyAppState extends ChangeNotifier {
                     // Specify a unique ID for each media item:
                     id: _queue!.indexOf(e).toString(),
                     // Metadata to display in the notification:
-                    album: "Album name",
+                    album: 'Album name',
                     artist: e.singers.map((e) => e.name).join(','),
                     title: e.name,
                     artUri: await getImageFileFromAssets(

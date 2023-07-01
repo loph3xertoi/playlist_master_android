@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/retry.dart';
 import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/http/api.dart';
 import 'package:http/http.dart' as http;
 import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/states/app_state.dart';
+import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:playlistmaster/widgets/create_playlist_popup.dart';
 import 'package:playlistmaster/widgets/playlist_item.dart';
 import 'package:provider/provider.dart';
@@ -51,6 +53,9 @@ class _MyContentAreaState extends State<MyContentArea> {
         // return Future.value(MockData.playlists);
         return null;
       }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      throw Exception(e);
     } finally {
       client.close();
     }

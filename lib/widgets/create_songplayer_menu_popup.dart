@@ -64,40 +64,9 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
               ),
               onTap: () {
                 print('remove from queue');
-                if (appState.queue!.length != 1) {
-                  if (appState.currentPlayingSongInQueue ==
-                      appState.queue!.length - 1) {
-                    appState.currentPlayingSongInQueue = 0;
-                    appState.currentSong = (appState.queue!.isNotEmpty)
-                        ? appState.queue![0]
-                        : null;
-                  } else {
-                    appState.currentSong = (appState.queue!.isNotEmpty)
-                        ? appState.queue![appState.currentPlayingSongInQueue!]
-                        : null;
-                  }
-                  appState.isRemovingSongFromQueue = true;
 
-                  appState
-                      .removeSongInQueue(appState.currentPlayingSongInQueue!);
-                  if (appState.initQueue?.length != 0) {
-                    appState.initQueue!
-                        .removeAt(appState.currentPlayingSongInQueue!);
-                  }
-                  Future.delayed(Duration(milliseconds: 200), () {
-                    appState.isRemovingSongFromQueue = false;
-                  });
-
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    // appState.coverRotatingController!.reset();
-                    appState.player!.seek(Duration.zero,
-                        index: appState.currentPlayingSongInQueue);
-                    appState.carouselController
-                        .jumpToPage(appState.currentPlayingSongInQueue!);
-                  });
-                } else {
+                if (appState.queue!.length == 1) {
                   appState.queue = [];
-                  appState.currentDetailSong = null;
                   appState.currentPlayingSongInQueue = -1;
                   appState.currentSong = null;
                   appState.prevSong = null;
@@ -106,9 +75,97 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                   appState.player!.dispose();
                   appState.player = null;
                   appState.initQueue!.clear();
+                  Navigator.pop(context);
+                  return;
                 }
 
-                Navigator.pop(context);
+                appState.isRemovingSongFromQueue = true;
+                appState.removeSongInQueue(appState.currentPlayingSongInQueue!);
+                if (appState.initQueue?.length != 0) {
+                  appState.initQueue!
+                      .removeAt(appState.currentPlayingSongInQueue!);
+                }
+                Future.delayed(Duration(milliseconds: 200), () {
+                  appState.isRemovingSongFromQueue = false;
+                });
+
+                if (appState.currentPlayingSongInQueue ==
+                    appState.queue!.length) {
+                  if (appState.queue![0].isTakenDown &&
+                      appState.queue!.length == 1) {
+                    appState.queue = [];
+                    appState.currentPlayingSongInQueue = -1;
+                    appState.currentSong = null;
+                    appState.prevSong = null;
+                    appState.isPlaying = false;
+                    appState.player!.stop();
+                    appState.player!.dispose();
+                    appState.player = null;
+                    appState.initQueue!.clear();
+                    Navigator.pop(context);
+                    return;
+                  }
+                  if (appState.queue![0].isTakenDown &&
+                      appState.queue!.length > 1) {
+                    appState.currentPlayingSongInQueue = 1;
+                    appState.currentSong = appState.queue![1];
+                  } else {
+                    appState.currentPlayingSongInQueue = 0;
+                    appState.currentSong = appState.queue![0];
+                  }
+                } else {
+                  if(appState.queue![appState.currentPlayingSongInQueue!].isTakenDown){
+                    appState.currentPlayingSongInQueue = (appState.currentPlayingSongInQueue! + 1) % appState.queue!.length;
+                    appState.currentSong = appState.queue![appState.currentPlayingSongInQueue!];
+                  }
+                }
+
+                appState.player!.seek(Duration.zero,
+                    index: appState.currentPlayingSongInQueue);
+                appState.carouselController
+                    .jumpToPage(appState.currentPlayingSongInQueue!);
+                // WidgetsBinding.instance.addPostFrameCallback((_) {
+                //   // appState.coverRotatingController!.reset();
+                //   if (appState.queue![appState.currentPlayingSongInQueue!]
+                //       .isTakenDown) {
+                //     if (appState.queue!.length == 1) {
+                //       appState.queue = [];
+                //       // appState.currentDetailSong = null;
+                //       appState.currentPlayingSongInQueue = -1;
+                //       appState.currentSong = null;
+                //       appState.prevSong = null;
+                //       appState.isPlaying = false;
+                //       appState.player!.stop();
+                //       appState.player!.dispose();
+                //       appState.player = null;
+                //       appState.initQueue!.clear();
+                //     } else {
+                //       appState.currentPlayingSongInQueue =
+                //           (appState.currentPlayingSongInQueue! + 1) %
+                //               appState.queue!.length;
+                //       appState.currentSong =
+                //           appState.queue![appState.currentPlayingSongInQueue!];
+                //       // appState.prevCarouselIndex
+                //       // appState.prevSong
+                //     }
+                //   }
+                //   appState.player!.seek(Duration.zero,
+                //       index: appState.currentPlayingSongInQueue);
+                //   appState.carouselController
+                //       .jumpToPage(appState.currentPlayingSongInQueue!);
+                // });
+                // appState.queue = [];
+                // // appState.currentDetailSong = null;
+                // appState.currentPlayingSongInQueue = -1;
+                // appState.currentSong = null;
+                // appState.prevSong = null;
+                // appState.isPlaying = false;
+                // appState.player!.stop();
+                // appState.player!.dispose();
+                // appState.player = null;
+                // appState.initQueue!.clear();
+
+                // Navigator.pop(context);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),

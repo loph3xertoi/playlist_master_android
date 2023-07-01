@@ -25,6 +25,7 @@ dependencies:
   path_provider: ^2.0.15
   http: ^0.13.0
   dio: ^5.2.1+1
+  fluttertoast: ^8.2.2
 
 dev_dependencies:
   flutter_test:

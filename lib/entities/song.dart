@@ -8,7 +8,7 @@ class Song {
   String mediaMid;
   List<Singer> singers;
   String coverUri;
-  bool? isTakenDown = false;
+  bool isTakenDown = false;
 
   /// 0 for free, 1 for pay.
   int payPlay;

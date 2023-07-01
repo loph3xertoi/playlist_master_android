@@ -24,7 +24,7 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (appState.player != null && mounted) {
           appState.queue = [];
-          appState.currentDetailSong = null;
+          // appState.currentDetailSong = null;
           appState.currentPlayingSongInQueue = -1;
           appState.currentSong = null;
           appState.prevSong = null;
@@ -92,13 +92,21 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                   return;
                                 }
                                 appState.currentPlayingSongInQueue = index;
-                                if (!isPlayerPageOpened) {
-                                  appState.currentSong = queue[index];
-                                }
+                                // if (!isPlayerPageOpened) {
+                                appState.currentSong = queue[index];
+                                // }
                                 // appState.carouselController.animateToPage(
                                 //     player!.effectiveIndices!.indexOf(index));
                                 WidgetsBinding.instance
                                     .addPostFrameCallback((_) {
+                                  if (queue[index].isTakenDown) {
+                                    index = (index + 1) % queue.length;
+                                    appState.currentPlayingSongInQueue = index;
+                                    // if (!isPlayerPageOpened) {
+                                    appState.currentSong = queue[index];
+                                    // }
+                                    appState.isSkipTakenDownSong = true;
+                                  }
                                   appState.player!
                                       .seek(Duration.zero, index: index);
                                   Future.delayed(Duration(seconds: 1), () {
@@ -135,17 +143,20 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                     appState.isRemovingSongFromQueue = true;
                                     if (index < currentPlayingSongInQueue!) {
                                       appState.currentPlayingSongInQueue =
-                                          currentPlayingSongInQueue - 1;
-                                      if (!isPlayerPageOpened) {
-                                        appState.currentSong = (queue
-                                                .isNotEmpty)
-                                            ? queue[
-                                                currentPlayingSongInQueue - 1]
-                                            : null;
-                                      }
+                                          (currentPlayingSongInQueue! - 1) %
+                                              queue.length;
+                                      currentPlayingSongInQueue =
+                                          appState.currentPlayingSongInQueue;
+                                      // if (!isPlayerPageOpened) {
+                                      appState.currentSong = (queue.isNotEmpty)
+                                          ? queue[
+                                              (currentPlayingSongInQueue! - 1) %
+                                                  queue.length]
+                                          : null;
+                                      // }
                                       // appState.updateSong = true;
                                     } else if (index >
-                                        currentPlayingSongInQueue) {
+                                        currentPlayingSongInQueue!) {
                                       // player!.seek(Duration.zero,
                                       //     index: 0);
                                       // appState.updateSong = true;
@@ -155,22 +166,38 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                       if (currentPlayingSongInQueue ==
                                           queueLength - 1) {
                                         appState.currentPlayingSongInQueue = 0;
-                                        if (!isPlayerPageOpened) {
-                                          appState.currentSong =
-                                              (queue.isNotEmpty)
-                                                  ? queue[0]
-                                                  : null;
-                                        }
+                                        currentPlayingSongInQueue = 0;
+                                        // if (!isPlayerPageOpened) {
+                                        appState.currentSong =
+                                            (queue.isNotEmpty)
+                                                ? queue[0]
+                                                : null;
+                                        // }
                                       }
                                       WidgetsBinding.instance
                                           .addPostFrameCallback((_) {
-                                        appState.player!.seek(Duration.zero,
-                                            index: currentPlayingSongInQueue);
-                                        if (!isPlayerPageOpened) {
+                                        if (queue.isNotEmpty) {
+                                          if (queue[currentPlayingSongInQueue!]
+                                              .isTakenDown) {
+                                            if (queue.length == 1) {
+                                              appState.queue = [];
+                                            }
+                                            currentPlayingSongInQueue =
+                                                (currentPlayingSongInQueue! +
+                                                        1) %
+                                                    queue.length;
+                                          }
+                                          appState.player!.seek(Duration.zero,
+                                              index: currentPlayingSongInQueue);
+                                          // if (!isPlayerPageOpened) {
                                           appState.currentSong = (queue
                                                   .isNotEmpty)
-                                              ? queue[currentPlayingSongInQueue]
+                                              ? queue[
+                                                  currentPlayingSongInQueue!]
                                               : null;
+                                          // }
+                                          appState.currentPlayingSongInQueue =
+                                              currentPlayingSongInQueue;
                                         }
                                       });
 
@@ -197,24 +224,6 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                         () {
                                       appState.isRemovingSongFromQueue = false;
                                     });
-                                    // } else if (index ==
-                                    //         currentPlayingSongInQueue &&
-                                    //     currentPlayingSongInQueue ==
-                                    //         queueLength - 1) {
-                                    //   appState.currentPlayingSongInQueue = 0;
-                                    //   if (!player!.playerState.playing) {
-                                    //     player.play();
-                                    //     appState.isPlaying = true;
-                                    //   }
-                                    // } else if (index ==
-                                    //         currentPlayingSongInQueue &&
-                                    //     currentPlayingSongInQueue !=
-                                    //         queueLength - 1) {
-                                    //   if (!player!.playerState.playing) {
-                                    //     player.play();
-                                    //     appState.isPlaying = true;
-                                    //   }
-                                    // }
 
                                     // appState.updateSong = true;
                                     // TODO: fix bug, seek not working.

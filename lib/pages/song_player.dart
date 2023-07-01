@@ -6,15 +6,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lyric/lyrics_reader.dart';
 import 'package:flutter_lyric/lyrics_reader_model.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/retry.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:playlistmaster/entities/detail_song.dart';
+import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/http/api.dart';
 import 'package:http/http.dart' as http;
 import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:playlistmaster/third_lib_change/like_button/like_button.dart';
+import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:playlistmaster/widgets/create_queue_popup.dart';
 import 'package:playlistmaster/widgets/create_songplayer_menu_popup.dart';
 import 'package:playlistmaster/widgets/my_lyrics_displayer.dart';
@@ -37,6 +41,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
   bool _toggleLyrics = false;
   bool _isPlaying = false;
   int _prevSongIndex = 0;
+  // True for return original page as all songs are taken down.
+  bool _return = false;
 
   var _lyricPadding = 40.0;
   LyricsReaderModel? _lyricModel;
@@ -45,7 +51,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
   int _playProgress = 0;
 
   Future<DetailSong?>? _detailSong;
-  Future<DetailSong?>? _futureDetailSong;
+  DetailSong? _simpleDetailSong;
   // bool isPlaying = false;
   // double max_value = 211658;
 // bool isTap = false;
@@ -130,13 +136,46 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     var speed = appState.speed;
     var positionDataStream = appState.positionDataStream;
     var carouselController = appState.carouselController;
+    var prevCarouselIndex = appState.prevCarouselIndex;
+    var isSkipTakenDownSong = appState.isSkipTakenDownSong;
+
     _isFirstLoadSongPlayer = appState.isFirstLoadSongPlayer;
     _isPlaying = appState.isPlaying;
 
+    if (_simpleDetailSong != currentDetailSong || isSkipTakenDownSong) {
+      _simpleDetailSong = currentDetailSong;
+      _detailSong = Future.value(currentDetailSong);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        appState.isSkipTakenDownSong = false;
+      });
+    }
+
     if (_isFirstLoadSongPlayer) {
-      player!.seek(Duration.zero, index: currentPlayingSongInQueue);
+      if (!(currentSong!.isTakenDown)) {
+        player!.seek(Duration.zero, index: currentPlayingSongInQueue);
+      } else if (queue!.length > 1) {
+        MyToast.showToast('Current song is taken down, skip to next.');
+        currentPlayingSongInQueue =
+            (currentPlayingSongInQueue! + 1) % queue.length;
+        currentSong = queue[currentPlayingSongInQueue];
+        prevSong = currentSong;
+        prevCarouselIndex = (prevCarouselIndex + 1) % queue.length;
+        player!.seek(Duration.zero, index: currentPlayingSongInQueue);
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          appState.currentPlayingSongInQueue = currentPlayingSongInQueue;
+          appState.currentSong = currentSong;
+          appState.prevSong = prevSong;
+          appState.prevCarouselIndex = prevCarouselIndex;
+          carouselController.animateToPage(currentPlayingSongInQueue!);
+        });
+      } else {
+        MyToast.showToast('All songs is taken down, returning to origin page.');
+        _return = true;
+      }
       _controller.repeat();
     }
+
     if ((queue?.isNotEmpty ?? false) &&
         (queue!.length > currentPlayingSongInQueue!) &&
         (currentSong!.name != queue[currentPlayingSongInQueue].name)) {
@@ -154,6 +193,21 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_return) {
+        appState.queue = [];
+        appState.currentDetailSong = null;
+        appState.currentPlayingSongInQueue = -1;
+        appState.currentSong = null;
+        appState.prevSong = null;
+        appState.isPlaying = false;
+        appState.player!.stop();
+        appState.player!.dispose();
+        appState.player = null;
+        appState.initQueue!.clear();
+        appState.isPlayerPageOpened = false;
+        appState.canSongPlayerPagePop = false;
+        Navigator.of(context).pop();
+      }
       if ((queue?.isNotEmpty ?? false) &&
           (currentSong != queue?[currentPlayingSongInQueue!])) {
         appState.currentSong = queue?[currentPlayingSongInQueue!];
@@ -203,7 +257,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
           ? Future.value(MockData.detailSong)
           : fetchDetailSong(currentSong!.songMid);
     }
-
+    print(_detailSong);
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -249,6 +303,9 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                 }
                 if (prevSong != currentSong) {
                   appState.prevSong = currentSong;
+                }
+                if (prevCarouselIndex != currentPlayingSongInQueue) {
+                  appState.prevCarouselIndex = currentPlayingSongInQueue!;
                 }
               });
 
@@ -305,6 +362,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                             color: Color(0xE5FFFFFF),
                             icon: Icon(Icons.share_rounded),
                             onPressed: () {
+                              MyToast.showToast(
+                                  'Network error, try again later.');
                               print(appState);
                               print('lyrics: $_playProgress');
                               print('song: ${player!.position.inMilliseconds}');
@@ -379,24 +438,140 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                         viewportFraction:
                                             userPlayingMode == 0 ? 0.8 : 0.6,
                                         enlargeCenterPage: true,
-                                        onPageChanged: (index, reason) {
+                                        onPageChanged: (index, reason) async {
                                           if (reason ==
                                               CarouselPageChangedReason
                                                   .manual) {
-                                            player?.seek(Duration.zero,
-                                                index: player
-                                                    .effectiveIndices![index]);
+                                            int nextIndex = player!
+                                                .effectiveIndices![index];
+
+                                            bool isForward =
+                                                (index > prevCarouselIndex &&
+                                                        index != 0) ||
+                                                    (index == 0 &&
+                                                        prevCarouselIndex ==
+                                                            queue!.length - 1);
+                                            appState.prevCarouselIndex = index;
+                                            Song? nextSong = queue![nextIndex];
+                                            // AudioSource nextAudioSource =
+                                            //     appState.initQueue![nextIndex];
+
+                                            ProgressiveAudioSource
+                                                nextAudioSource = (player
+                                                        .audioSource!
+                                                        .sequence[nextIndex]
+                                                    as ProgressiveAudioSource);
+                                            var songUri = nextAudioSource.uri;
+
+                                            // Network error. Show toast and retrieve the song again.
+                                            if (songUri is String &&
+                                                (songUri as String) == '2') {
+                                              print(
+                                                  'Network error, try again later.');
+                                              MyToast.showToast(
+                                                  'Network error, try again later.');
+                                              String songLinkString =
+                                                  await appState.fetchSongLink(
+                                                      nextSong, '128', 1);
+                                              MediaItem originTag =
+                                                  nextAudioSource.tag
+                                                      as MediaItem;
+                                              if (songLinkString != '2') {
+                                                var newAudioSource =
+                                                    AudioSource.uri(
+                                                  Uri.parse(songLinkString),
+                                                  tag: MediaItem(
+                                                    id: nextIndex.toString(),
+                                                    album: originTag.album,
+                                                    artist: originTag.artist,
+                                                    title: originTag.title,
+                                                    artUri: originTag.artUri,
+                                                  ),
+                                                );
+                                                appState.initQueue!
+                                                    .removeAt(nextIndex);
+                                                appState.initQueue!.insert(
+                                                    nextIndex, newAudioSource);
+                                                player.seek(Duration.zero,
+                                                    index: nextIndex);
+                                                Future.delayed(
+                                                    Duration(milliseconds: 700),
+                                                    () {
+                                                  appState.currentPlayingSongInQueue =
+                                                      nextIndex;
+                                                  if (!(player
+                                                      .playerState.playing)) {
+                                                    player.play();
+                                                    appState.isPlaying = true;
+                                                  }
+                                                });
+                                                return;
+                                              } else {
+                                                // Network error still.
+                                                int nextIndex = isForward
+                                                    ? player.effectiveIndices![
+                                                        (index + 1) %
+                                                            queue.length]
+                                                    : player.effectiveIndices![
+                                                        (index - 1) %
+                                                            queue.length];
+                                                player.seek(Duration.zero,
+                                                    index: nextIndex);
+                                                Future.delayed(
+                                                    Duration(milliseconds: 700),
+                                                    () {
+                                                  appState.currentPlayingSongInQueue =
+                                                      nextIndex;
+                                                  if (!(player
+                                                      .playerState.playing)) {
+                                                    player.play();
+                                                    appState.isPlaying = true;
+                                                  }
+                                                });
+                                                return;
+                                              }
+                                            }
+
+                                            // Next song is taken down.
+                                            if (nextSong.isTakenDown) {
+                                              MyToast.showToast(
+                                                  'Current song is taken down, skip to next.');
+                                              int nextIndex = isForward
+                                                  ? player.effectiveIndices![
+                                                      (index + 1) %
+                                                          queue.length]
+                                                  : player.effectiveIndices![
+                                                      (index - 1) %
+                                                          queue.length];
+                                              player.seek(Duration.zero,
+                                                  index: nextIndex);
+                                              carouselController
+                                                  .jumpToPage(nextIndex);
+                                              Future.delayed(
+                                                  Duration(milliseconds: 700),
+                                                  () {
+                                                appState.currentPlayingSongInQueue =
+                                                    nextIndex;
+                                                if (!(player
+                                                    .playerState.playing)) {
+                                                  player.play();
+                                                  appState.isPlaying = true;
+                                                }
+                                              });
+                                              return;
+                                            }
+
+                                            player.seek(Duration.zero,
+                                                index: nextIndex);
+
                                             Future.delayed(
                                                 Duration(milliseconds: 700),
                                                 () {
                                               appState.currentPlayingSongInQueue =
-                                                  player?.effectiveIndices![
-                                                      index];
-
+                                                  nextIndex;
                                               if (!(player
-                                                      ?.playerState.playing ??
-                                                  true)) {
-                                                player?.play();
+                                                  .playerState.playing)) {
+                                                player.play();
                                                 appState.isPlaying = true;
                                               }
                                             });
@@ -769,32 +944,141 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                           IconButton(
                             icon: const Icon(Icons.skip_previous_rounded),
                             color: Color(0xE5FFFFFF),
-                            onPressed: () {
-                              player?.seek(Duration.zero,
-                                  index: userPlayingMode == 2
-                                      ? (player.currentIndex! +
-                                              (queue?.length ?? 0) -
-                                              1) %
-                                          (queue?.length ?? 1)
-                                      : player.previousIndex);
-                              carouselController.animateToPage(player
-                                      ?.effectiveIndices!
-                                      .indexOf(userPlayingMode == 2
-                                          ? (player.currentIndex! +
-                                                  (queue?.length ?? 0) -
-                                                  1) %
-                                              (queue?.length ?? 1)
-                                          : player.previousIndex!) ??
-                                  0);
-                              Future.delayed(Duration(milliseconds: 700), () {
-                                appState.currentPlayingSongInQueue =
-                                    player?.currentIndex;
+                            onPressed: () async {
+                              int? nextIndex = userPlayingMode == 2
+                                  ? (player!.currentIndex! - 1) %
+                                      (queue?.length ?? 1)
+                                  : player!.previousIndex!;
 
-                                if (!(player?.playerState.playing ?? true)) {
-                                  player?.play();
+                              // appState.prevCarouselIndex = index;
+                              Song? nextSong = queue![nextIndex];
+
+                              ProgressiveAudioSource nextAudioSource =
+                                  (player.audioSource!.sequence[nextIndex]
+                                      as ProgressiveAudioSource);
+                              var songUri = nextAudioSource.uri;
+
+                              // Network error. Show toast and retrieve the song again.
+                              if (songUri is String &&
+                                  (songUri as String) == '2') {
+                                print('Network error, try again later.');
+                                MyToast.showToast(
+                                    'Network error, try again later.');
+                                String songLinkString = await appState
+                                    .fetchSongLink(nextSong, '128', 1);
+                                MediaItem originTag =
+                                    nextAudioSource.tag as MediaItem;
+                                if (songLinkString != '2') {
+                                  var newAudioSource = AudioSource.uri(
+                                    Uri.parse(songLinkString),
+                                    tag: MediaItem(
+                                      id: nextIndex.toString(),
+                                      album: originTag.album,
+                                      artist: originTag.artist,
+                                      title: originTag.title,
+                                      artUri: originTag.artUri,
+                                    ),
+                                  );
+                                  appState.initQueue!.removeAt(nextIndex);
+                                  appState.initQueue!
+                                      .insert(nextIndex, newAudioSource);
+                                  player.seek(Duration.zero, index: nextIndex);
+                                  Future.delayed(Duration(milliseconds: 700),
+                                      () {
+                                    appState.currentPlayingSongInQueue =
+                                        nextIndex;
+                                    if (!(player.playerState.playing)) {
+                                      player.play();
+                                      appState.isPlaying = true;
+                                    }
+                                  });
+                                  carouselController.animateToPage(player
+                                      .effectiveIndices!
+                                      .indexOf(nextIndex));
+                                  return;
+                                } else {
+                                  // Network error still.
+                                  int? nextIndex = userPlayingMode == 2
+                                      ? (player.currentIndex! - 2) %
+                                          queue.length
+                                      : (player.previousIndex! - 1) %
+                                          queue.length;
+                                  player.seek(Duration.zero, index: nextIndex);
+                                  Future.delayed(Duration(milliseconds: 700),
+                                      () {
+                                    appState.currentPlayingSongInQueue =
+                                        nextIndex;
+                                    if (!(player.playerState.playing)) {
+                                      player.play();
+                                      appState.isPlaying = true;
+                                    }
+                                  });
+                                  carouselController.animateToPage(player
+                                      .effectiveIndices!
+                                      .indexOf(nextIndex));
+                                  return;
+                                }
+                              }
+
+                              // Next song is taken down.
+                              if (nextSong.isTakenDown) {
+                                MyToast.showToast(
+                                    'Current song is taken down, skip to next.');
+                                int? nextIndex = userPlayingMode == 2
+                                    ? (player.currentIndex! - 2) % queue.length
+                                    : (player.previousIndex! - 1) %
+                                        queue.length;
+                                player.seek(Duration.zero, index: nextIndex);
+                                Future.delayed(Duration(milliseconds: 700), () {
+                                  appState.currentPlayingSongInQueue =
+                                      nextIndex;
+                                  if (!(player.playerState.playing)) {
+                                    player.play();
+                                    appState.isPlaying = true;
+                                  }
+                                });
+                                carouselController.animateToPage(player
+                                    .effectiveIndices!
+                                    .indexOf(nextIndex));
+                                return;
+                              }
+
+                              player.seek(Duration.zero, index: nextIndex);
+
+                              Future.delayed(Duration(milliseconds: 700), () {
+                                appState.currentPlayingSongInQueue = nextIndex;
+                                if (!(player.playerState.playing)) {
+                                  player.play();
                                   appState.isPlaying = true;
                                 }
                               });
+                              carouselController.animateToPage(
+                                  player.effectiveIndices!.indexOf(nextIndex));
+                              // player?.seek(Duration.zero,
+                              //     index: userPlayingMode == 2
+                              //         ? (player.currentIndex! +
+                              //                 (queue?.length ?? 0) -
+                              //                 1) %
+                              //             (queue?.length ?? 1)
+                              //         : player.previousIndex);
+                              // carouselController.animateToPage(player
+                              //         ?.effectiveIndices!
+                              //         .indexOf(userPlayingMode == 2
+                              //             ? (player.currentIndex! +
+                              //                     (queue?.length ?? 0) -
+                              //                     1) %
+                              //                 (queue?.length ?? 1)
+                              //             : player.previousIndex!) ??
+                              //     0);
+                              // Future.delayed(Duration(milliseconds: 700), () {
+                              //   appState.currentPlayingSongInQueue =
+                              //       player?.currentIndex;
+
+                              //   if (!(player?.playerState.playing ?? true)) {
+                              //     player?.play();
+                              //     appState.isPlaying = true;
+                              //   }
+                              // });
                             },
                           ),
                           Material(
@@ -879,28 +1163,136 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                           IconButton(
                             icon: const Icon(Icons.skip_next_rounded),
                             color: Color(0xE5FFFFFF),
-                            onPressed: () {
-                              player?.seek(Duration.zero,
-                                  index: userPlayingMode == 2
-                                      ? (player.currentIndex! + 1) %
-                                          (queue?.length ?? 1)
-                                      : player.nextIndex);
-                              carouselController.animateToPage(player
-                                      ?.effectiveIndices!
-                                      .indexOf(userPlayingMode == 2
-                                          ? (player.currentIndex! + 1) %
-                                              (queue?.length ?? 1)
-                                          : player.nextIndex!) ??
-                                  0);
-                              Future.delayed(Duration(milliseconds: 700), () {
-                                appState.currentPlayingSongInQueue =
-                                    player?.currentIndex;
+                            onPressed: () async {
+                              int? nextIndex = userPlayingMode == 2
+                                  ? (player!.currentIndex! + 1) %
+                                      (queue?.length ?? 1)
+                                  : player!.nextIndex!;
 
-                                if (!(player?.playerState.playing ?? true)) {
-                                  player?.play();
+                              // appState.prevCarouselIndex = index;
+                              Song? nextSong = queue![nextIndex];
+
+                              ProgressiveAudioSource nextAudioSource =
+                                  (player.audioSource!.sequence[nextIndex]
+                                      as ProgressiveAudioSource);
+                              var songUri = nextAudioSource.uri;
+
+                              // Network error. Show toast and retrieve the song again.
+                              if (songUri is String &&
+                                  (songUri as String) == '2') {
+                                print('Network error, try again later.');
+                                MyToast.showToast(
+                                    'Network error, try again later.');
+                                String songLinkString = await appState
+                                    .fetchSongLink(nextSong, '128', 1);
+                                MediaItem originTag =
+                                    nextAudioSource.tag as MediaItem;
+                                if (songLinkString != '2') {
+                                  var newAudioSource = AudioSource.uri(
+                                    Uri.parse(songLinkString),
+                                    tag: MediaItem(
+                                      id: nextIndex.toString(),
+                                      album: originTag.album,
+                                      artist: originTag.artist,
+                                      title: originTag.title,
+                                      artUri: originTag.artUri,
+                                    ),
+                                  );
+                                  appState.initQueue!.removeAt(nextIndex);
+                                  appState.initQueue!
+                                      .insert(nextIndex, newAudioSource);
+                                  player.seek(Duration.zero, index: nextIndex);
+                                  Future.delayed(Duration(milliseconds: 700),
+                                      () {
+                                    appState.currentPlayingSongInQueue =
+                                        nextIndex;
+                                    if (!(player.playerState.playing)) {
+                                      player.play();
+                                      appState.isPlaying = true;
+                                    }
+                                  });
+                                  carouselController.animateToPage(player
+                                      .effectiveIndices!
+                                      .indexOf(nextIndex));
+                                  return;
+                                } else {
+                                  // Network error still.
+                                  int? nextIndex = userPlayingMode == 2
+                                      ? (player.currentIndex! + 2) %
+                                          queue.length
+                                      : (player.nextIndex! + 1) % queue.length;
+                                  player.seek(Duration.zero, index: nextIndex);
+                                  Future.delayed(Duration(milliseconds: 700),
+                                      () {
+                                    appState.currentPlayingSongInQueue =
+                                        nextIndex;
+                                    if (!(player.playerState.playing)) {
+                                      player.play();
+                                      appState.isPlaying = true;
+                                    }
+                                  });
+                                  carouselController.animateToPage(player
+                                      .effectiveIndices!
+                                      .indexOf(nextIndex));
+                                  return;
+                                }
+                              }
+
+                              // Next song is taken down.
+                              if (nextSong.isTakenDown) {
+                                MyToast.showToast(
+                                    'Current song is taken down, skip to next.');
+                                int? nextIndex = userPlayingMode == 2
+                                    ? (player.currentIndex! + 2) % queue.length
+                                    : (player.nextIndex! + 1) % queue.length;
+                                player.seek(Duration.zero, index: nextIndex);
+                                Future.delayed(Duration(milliseconds: 700), () {
+                                  appState.currentPlayingSongInQueue =
+                                      nextIndex;
+                                  if (!(player.playerState.playing)) {
+                                    player.play();
+                                    appState.isPlaying = true;
+                                  }
+                                });
+                                carouselController.animateToPage(player
+                                    .effectiveIndices!
+                                    .indexOf(nextIndex));
+                                return;
+                              }
+
+                              player.seek(Duration.zero, index: nextIndex);
+
+                              Future.delayed(Duration(milliseconds: 700), () {
+                                appState.currentPlayingSongInQueue = nextIndex;
+                                if (!(player.playerState.playing)) {
+                                  player.play();
                                   appState.isPlaying = true;
                                 }
                               });
+                              carouselController.animateToPage(
+                                  player.effectiveIndices!.indexOf(nextIndex));
+
+                              // player?.seek(Duration.zero,
+                              //     index: userPlayingMode == 2
+                              //         ? (player.currentIndex! + 1) %
+                              //             (queue?.length ?? 1)
+                              //         : player.nextIndex);
+                              // carouselController.animateToPage(player
+                              //         ?.effectiveIndices!
+                              //         .indexOf(userPlayingMode == 2
+                              //             ? (player.currentIndex! + 1) %
+                              //                 (queue?.length ?? 1)
+                              //             : player.nextIndex!) ??
+                              //     0);
+                              // Future.delayed(Duration(milliseconds: 700), () {
+                              //   appState.currentPlayingSongInQueue =
+                              //       player?.currentIndex;
+
+                              //   if (!(player?.playerState.playing ?? true)) {
+                              //     player?.play();
+                              //     appState.isPlaying = true;
+                              //   }
+                              // });
                             },
                           ),
                           IconButton(
