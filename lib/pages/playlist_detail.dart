@@ -161,14 +161,14 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                           CrossAxisAlignment
                                                               .start,
                                                       children: [
-                                                        Text(
+                                                        SelectableText(
                                                           detailPlaylist.name,
                                                           style: TextStyle(
                                                             fontSize: 20.0,
                                                             height: 1.0,
                                                           ),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
+                                                          // overflow: TextOverflow
+                                                          //     .ellipsis,
                                                         ),
                                                         Text(
                                                           '${detailPlaylist.songsCount} songs',

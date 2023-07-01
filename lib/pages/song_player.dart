@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_lyric/lyrics_reader.dart';
 import 'package:flutter_lyric/lyrics_reader_model.dart';
 import 'package:http/retry.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:playlistmaster/entities/detail_song.dart';
-import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/http/api.dart';
 import 'package:http/http.dart' as http;
 import 'package:playlistmaster/mock_data.dart';
@@ -227,11 +227,11 @@ class _SongPlayerPageState extends State<SongPlayerPage>
               );
             } else if (snapshot.hasError) {
               return Center(
-                child: Text('Error: ${snapshot.error}'),
+                child: SelectableText('Error: ${snapshot.error}'),
               );
             } else {
               DetailSong detailSong = snapshot.data as DetailSong;
-              
+
               if (_lyricModel == null || prevSong != currentSong) {
                 _lyricModel = LyricsModelBuilder.create()
                     .bindLyricToMain(isUsingMockData
@@ -277,17 +277,17 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Expanded(
-                                  child: Text(
+                                  child: SelectableText(
                                     detailSong.name,
                                     style: TextStyle(
                                       color: Color(0xE5FFFFFF),
                                       fontFamily: 'Roboto',
                                       fontSize: 18.0,
                                     ),
-                                    overflow: TextOverflow.ellipsis,
+                                    // overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                Text(
+                                SelectableText(
                                   detailSong.singers
                                       .map((e) => e.name)
                                       .join(','),
@@ -296,7 +296,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                     fontFamily: 'Roboto',
                                     fontSize: 12.0,
                                   ),
-                                  overflow: TextOverflow.ellipsis,
+                                  // overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
@@ -941,7 +941,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
             });
           },
           emptyBuilder: () => Center(
-            child: Text(
+            child: SelectableText(
               "No lyrics",
               style: _lyricUI.getOtherMainTextStyle(),
             ),
@@ -954,6 +954,23 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                 setState(() {
                   player?.seek(Duration(milliseconds: progress));
                 });
+              },
+              onLongPress: () {
+                LyricsLog.logD("Longpress event");
+                confirm.call();
+                String copied = '';
+                int index = _lyricModel!.getCurrentLine(progress);
+                LyricsLineModel selectedLine = _lyricModel!.lyrics[index];
+                if (selectedLine.hasMain && selectedLine.hasExt) {
+                  copied = '${selectedLine.mainText}\n${selectedLine.extText}';
+                } else if (selectedLine.hasMain && !selectedLine.hasExt) {
+                  copied = selectedLine.mainText!;
+                } else if (!selectedLine.hasMain && selectedLine.hasExt) {
+                  copied = selectedLine.extText!;
+                } else {
+                  copied = 'No lyrics found.';
+                }
+                Clipboard.setData(ClipboardData(text: copied));
               },
               child: Container(
                 color: Colors.transparent,
