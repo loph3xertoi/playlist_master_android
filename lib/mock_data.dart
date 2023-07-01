@@ -1,4 +1,9 @@
+import 'dart:ffi';
+import 'dart:math';
+
 import 'package:playlistmaster/entities/detail_playlist.dart';
+import 'package:playlistmaster/entities/detail_song.dart';
+import 'package:playlistmaster/entities/lyrics.dart';
 
 import 'entities/playlist.dart';
 import 'entities/singer.dart';
@@ -58,68 +63,111 @@ class MockData {
     ),
   ];
 
+  // TODO: fix this, test lyrics.
+  // link: 'assets/audios/parrot.mp3',
+  static List<String> links = [
+    'assets/audios/lyrics.mp3',
+    'assets/audios/tit.mp3',
+    'assets/audios/owl.mp3',
+    'assets/audios/budgerigar.mp3',
+    'assets/audios/bluejay.mp3',
+    'assets/audios/columbidae.mp3',
+    'assets/audios/hummingbirds.mp3',
+    'assets/audios/toucans.mp3',
+    'assets/audios/finches.mp3',
+    'assets/audios/bluebirds.mp3',
+  ];
+
   static List<Song> songs = [
     Song(
       name: 'Parrot',
+      songId: '0',
+      songMid: '0',
+      mediaMid: '0',
       singers: [singers[0]],
       coverUri: 'assets/images/songs_cover/parrot.jpeg',
-      link: 'assets/audios/lyrics.mp3',
-      // TODO: fix this, test lyrics.
-      // link: 'assets/audios/parrot.mp3',
+      payPlay: 0,
     ),
     Song(
       name: 'Tit',
+      songId: '1',
+      songMid: '1',
+      mediaMid: '1',
       singers: [singers[1]],
       coverUri: 'assets/images/songs_cover/tit.jpeg',
-      link: 'assets/audios/tit.mp3',
+      payPlay: 0,
     ),
     Song(
       name: 'Owl',
+      songId: '2',
+      songMid: '2',
+      mediaMid: '2',
       singers: [singers[2]],
       coverUri: 'assets/images/songs_cover/owl.jpeg',
-      link: 'assets/audios/owl.mp3',
+      payPlay: 1,
     ),
     Song(
       name: 'Budgerigar',
+      songId: '3',
+      songMid: '3',
+      mediaMid: '3',
       singers: [singers[3]],
       coverUri: 'assets/images/songs_cover/budgerigar.jpeg',
-      link: 'assets/audios/budgerigar.mp3',
+      payPlay: 0,
     ),
     Song(
       name: 'Blue Jay',
+      songId: '4',
+      songMid: '4',
+      mediaMid: '4',
       singers: [singers[4]],
       coverUri: 'assets/images/songs_cover/bluejay.jpeg',
-      link: 'assets/audios/bluejay.mp3',
+      payPlay: 0,
     ),
     Song(
       name: 'Columbidae',
+      songId: '5',
+      songMid: '5',
+      mediaMid: '5',
       singers: [singers[5]],
       coverUri: 'assets/images/songs_cover/columbidae.jpeg',
-      link: 'assets/audios/columbidae.mp3',
+      payPlay: 0,
     ),
     Song(
       name: 'Hummingbirds',
+      songId: '6',
+      songMid: '6',
+      mediaMid: '6',
       singers: [singers[6]],
       coverUri: 'assets/images/songs_cover/hummingbirds.jpeg',
-      link: 'assets/audios/hummingbirds.mp3',
+      payPlay: 0,
     ),
     Song(
       name: 'Toucans',
+      songId: '7',
+      songMid: '7',
+      mediaMid: '7',
       singers: [singers[7]],
       coverUri: 'assets/images/songs_cover/toucans.jpeg',
-      link: 'assets/audios/toucans.mp3',
+      payPlay: 0,
     ),
     Song(
       name: 'Finches',
+      songId: '8',
+      songMid: '8',
+      mediaMid: '8',
       singers: [singers[8]],
       coverUri: 'assets/images/songs_cover/finches.jpeg',
-      link: 'assets/audios/finches.mp3',
+      payPlay: 1,
     ),
     Song(
       name: 'Bluebirds',
+      songId: '9',
+      songMid: '9',
+      mediaMid: '9',
       singers: [singers[9]],
       coverUri: 'assets/images/songs_cover/bluebirds.jpeg',
-      link: 'assets/audios/bluebirds.mp3',
+      payPlay: 0,
     ),
   ];
 
@@ -266,15 +314,38 @@ class MockData {
     ),
   ];
 
-  static DetailPlaylist detail_playlist = DetailPlaylist(
+  static DetailPlaylist detailPlaylist = DetailPlaylist(
     name: 'Bird',
     description:
         'A bird does not sing because it has an answer, it sings because it has a song.',
     coverImage: 'assets/images/playlist_cover/bird.png',
-    songsCount: 20,
+    songsCount: 10,
+    listenNum: 23,
     dirId: 1,
     tid: '1',
     songs: songs,
+  );
+
+  static DetailSong detailSong = DetailSong(
+    name: 'Parrot',
+    title: 'Parrot',
+    albumName: 'Bird',
+    coverUri: 'assets/images/songs_cover/parrot.jpeg',
+    singers: [singers[0]],
+    payPlay: 0,
+    songId: '0',
+    songMid: '0',
+    mediaMid: '0',
+    vid: '0',
+    duration: 212,
+    description: 'Giant Parrot!',
+    pubTime: '2010-10-04',
+    lyrics: Lyrics(lyric: normalLyric, trans: transLyric),
+    pmPlaylists: [],
+    size128: pow(2, 20).toInt(),
+    size320: pow(2, 20).toInt(),
+    sizeApe: pow(2, 20).toInt(),
+    sizeFlac: pow(2, 20).toInt(),
   );
 
   static const normalLyric = """[ti:If I Didn't Love You]

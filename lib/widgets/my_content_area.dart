@@ -1,12 +1,15 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:http/retry.dart';
 import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/http/api.dart';
 import 'package:http/http.dart' as http;
 import 'package:playlistmaster/mock_data.dart';
+import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/widgets/create_playlist_popup.dart';
 import 'package:playlistmaster/widgets/playlist_item.dart';
+import 'package:provider/provider.dart';
 
 class MyContentArea extends StatefulWidget {
   @override
@@ -14,86 +17,124 @@ class MyContentArea extends StatefulWidget {
 }
 
 class _MyContentAreaState extends State<MyContentArea> {
-  List<Playlist> _playlists = MockData.playlists;
+  late Future<List<Playlist>?> _playlists;
   // late List<Playlist> _playlists;
 
   @override
   void initState() {
     super.initState();
-    // var url = Uri.http(
-    //   API.host,
-    //   '${API.playlists}/2804161589/1',
-    //   // {'id': '2804161589'},
-    // );
-    // var response = await http.get(url);
-    // var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-    // print(decodedResponse);
+    final state = Provider.of<MyAppState>(context, listen: false);
+    var isUsingMockData = state.isUsingMockData;
+    if (isUsingMockData) {
+      _playlists = Future.value(MockData.playlists);
+    } else {
+      _playlists = fetchPlaylists();
+    }
+  }
+
+  Future<List<Playlist>?> fetchPlaylists() async {
+    // Future<List<Playlist>> playlists;
+    var url = Uri.http(
+      API.host,
+      '${API.playlists}/2804161589/1',
+      // {'id': '2804161589'},
+    );
+
+    final client = RetryClient(http.Client());
+    try {
+      var response = await client.get(url);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        List<dynamic> jsonList = decodedResponse['data'];
+        return Future.value(jsonList.map((e) => Playlist.fromJson(e)).toList());
+      } else {
+        // return Future.value(MockData.playlists);
+        return null;
+      }
+    } finally {
+      client.close();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      // height: 587.0,
-      child: Column(
-        children: [
-          SizedBox(
-            height: 40.0,
-            child: Row(children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 13.0),
-                  child: Text(
-                    'Create Playlists (${_playlists.length})',
-                    style: TextStyle(
-                      fontSize: 12.0,
-                      letterSpacing: 0.25,
-                      color: Color(0x59000000),
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
+    return FutureBuilder(
+        future: _playlists,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
+          } else {
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10.0),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+              // height: 587.0,
+              child: Column(
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.library_add_rounded),
-                    color: Color(0x42000000),
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (_) => CreatePlaylistDialog());
-                    },
+                  SizedBox(
+                    height: 40.0,
+                    child: Row(children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 13.0),
+                          child: Text(
+                            'Create Playlists (${(snapshot.data as List<Playlist>).length})',
+                            style: TextStyle(
+                              fontSize: 12.0,
+                              letterSpacing: 0.25,
+                              color: Color(0x59000000),
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.library_add_rounded),
+                            color: Color(0x42000000),
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (_) => CreatePlaylistDialog());
+                            },
+                          ),
+                          IconButton(
+                            color: Color(0x42000000),
+                            icon: Icon(Icons.more_vert_rounded),
+                            onPressed: () {
+                              // Add your search icon onPressed logic here
+                            },
+                          ),
+                        ],
+                      ),
+                    ]),
                   ),
-                  IconButton(
-                    color: Color(0x42000000),
-                    icon: Icon(Icons.more_vert_rounded),
-                    onPressed: () {
-                      // Add your search icon onPressed logic here
-                    },
+                  Expanded(
+                    child: (snapshot.data as List<Playlist>).isNotEmpty
+                        ? ListView.builder(
+                            itemCount: (snapshot.data as List<Playlist>).length,
+                            itemBuilder: (context, index) {
+                              return PlaylistItem(
+                                playlist:
+                                    (snapshot.data as List<Playlist>)[index],
+                              );
+                            },
+                          )
+                        : Center(child: Text('Empty Playlists')),
                   ),
                 ],
               ),
-            ]),
-          ),
-          Expanded(
-            child: _playlists.isNotEmpty
-                ? ListView.builder(
-                    itemCount: _playlists.length,
-                    itemBuilder: (context, index) {
-                      return PlaylistItem(
-                        playlist: _playlists[index],
-                      );
-                    },
-                  )
-                : Center(child: Text('Empty Playlists')),
-          ),
-        ],
-      ),
-    );
+            );
+          }
+        });
   }
 }

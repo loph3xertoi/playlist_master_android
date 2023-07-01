@@ -1,6 +1,5 @@
-import 'dart:convert';
+import 'dart:math';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:playlistmaster/http/api.dart';
@@ -50,21 +49,34 @@ class _MyHomePageState extends State<MyHomePage>
           backgroundColor: Colors.transparent,
           imageUri: 'assets/images/home_button.png',
           onTap: () async {
+            print(pow(2, 20).toInt());
+            showDialog(
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text(
+                    'Test network image',
+                    textAlign: TextAlign.center,
+                  ),
+                  content: Image.network(MyAppState.defaultCoverImage),
+                );
+              },
+              context: context,
+            );
             print('homepage button $appState');
             // final dio = Dio();
 
             // final response = await dio.get('http://192.168.8.171:8080/hello');
             // print(response);
 
-            var url = Uri.http(
-              '192.168.8.171:8080',
-              '${API.playlists}/2804161589/1',
-              // {'id': '2804161589'},
-            );
-            var response = await http.get(url);
-            var decodedResponse =
-                jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-            print(decodedResponse);
+            // var url = Uri.http(
+            //   '192.168.8.171:8080',
+            //   '${API.playlists}/2804161589/1',
+            //   // {'id': '2804161589'},
+            // );
+            // var response = await http.get(url);
+            // var decodedResponse =
+            //     jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+            // print(decodedResponse);
           },
           actions: [
             QuickAction(

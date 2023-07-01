@@ -1,35 +1,61 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/retry.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:playlistmaster/entities/detail_song.dart';
+import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/entities/song.dart';
+import 'package:playlistmaster/http/api.dart';
+import 'package:http/http.dart' as http;
+import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MyAppState extends ChangeNotifier {
-  // Current position in milliseconds.
-  int? _playProgress;
+  // Using mock data.
+  bool _isUsingMockData = false;
+
+  // The current platform, 0 for pm server, 1 for qq music, 2 for netease music, 3 for bilibili.
+  int _currentPlatform = 0;
+
+  // The dirId fo playlist which current playing song belongs to.
+  int? _ownerDirIdOfCurrentPlayingSong;
+
+  // Default image for cover.
+  static const String defaultCoverImage =
+      'https://www.worldwildlife.org/assets/structure/unique/logo-c562409bb6158bf64e5f8b1be066dbd5983d75f5ce7c9935a5afffbcc03f8e5d.png';
+
+  // // Current position in milliseconds.
+  // int? _playProgress;
 
   // Set true when init song player for cover animation forward.
   bool _isFirstLoadSongPlayer = false;
 
-  // Current song in queue.
+  // Current basic playing song.
   Song? _currentSong;
+
+  // Previous basic playing song.
+  Song? _prevSong;
+
+  // Current detail playing song.
+  DetailSong? _currentDetailSong;
 
   // Is removing song from queue?
   bool _isRemovingSongFromQueue = false;
 
-  // If the song player page is opened.
+  // Whether the song player page is opened.
   bool _isPlayerPageOpened = false;
 
   // Make sure song player page pop once.
   bool _canSongPlayerPagePop = false;
 
-  // If remove song in queue, this should be true for update the current song.
+  // Whether remove song in queue, this should be true for update the current song.
   bool _updateSong = false;
 
   // Current song player.
@@ -71,7 +97,7 @@ class MyAppState extends ChangeNotifier {
   int? _currentPlayingSongInQueue;
 
   // All songs of current playlist.
-  List<Song>? _songsOfPlaylist;
+  // List<Song>? _songsOfPlaylist;
 
   // Cover rotating controller.
   AnimationController? _coverRotatingController;
@@ -80,11 +106,19 @@ class MyAppState extends ChangeNotifier {
 
   // // Init current song player only one time.
   // bool _initSongPlayer = true;
-  String _currentPage = '/';
+  // String _currentPage = '/';
 
-  int? _openedPlaylistDirId;
+  Playlist? _openedPlaylist;
 
-  int? get playProgress => _playProgress;
+  Song? get prevSong => _prevSong;
+
+  DetailSong? get currentDetailSong => _currentDetailSong;
+
+  int? get ownerDirIdOfCurrentPlayingSong => _ownerDirIdOfCurrentPlayingSong;
+
+  bool get isUsingMockData => _isUsingMockData;
+
+  // int? get playProgress => _playProgress;
 
   bool get isFirstLoadSongPlayer => _isFirstLoadSongPlayer;
 
@@ -104,7 +138,7 @@ class MyAppState extends ChangeNotifier {
 
   AudioPlayer? get player => _player;
 
-  String get currentPage => _currentPage;
+  // String get currentPage => _currentPage;
 
   bool get isPlaying => _isPlaying;
 
@@ -114,7 +148,7 @@ class MyAppState extends ChangeNotifier {
 
   int get userPlayingMode => _userPlayingMode;
 
-  int? get openedPlaylistDirId => _openedPlaylistDirId;
+  Playlist? get openedPlaylist => _openedPlaylist;
 
   bool get isQueueEmpty => _queue?.isEmpty ?? true;
 
@@ -122,7 +156,7 @@ class MyAppState extends ChangeNotifier {
 
   // List<Song>? get prevQueue => _prevQueue;
 
-  List<Song>? get songsOfPlaylist => _songsOfPlaylist;
+  // List<Song>? get songsOfPlaylist => _songsOfPlaylist;
 
   int? get currentPlayingSongInQueue => _currentPlayingSongInQueue;
 
@@ -130,10 +164,30 @@ class MyAppState extends ChangeNotifier {
 
   double? get speed => _speed;
 
-  set playProgress(int? value) {
-    _playProgress = value;
+  set prevSong(Song? value) {
+    _prevSong = value;
     notifyListeners();
   }
+
+  set currentDetailSong(DetailSong? value) {
+    _currentDetailSong = value;
+    notifyListeners();
+  }
+
+  set ownerDirIdOfCurrentPlayingSong(int? value) {
+    _ownerDirIdOfCurrentPlayingSong = value;
+    notifyListeners();
+  }
+
+  set isUsingMockData(bool value) {
+    _isUsingMockData = value;
+    notifyListeners();
+  }
+
+  // set playProgress(int? value) {
+  //   _playProgress = value;
+  //   notifyListeners();
+  // }
 
   set isFirstLoadSongPlayer(bool value) {
     _isFirstLoadSongPlayer = value;
@@ -175,10 +229,10 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  set currentPage(String page) {
-    _currentPage = page;
-    notifyListeners();
-  }
+  // set currentPage(String page) {
+  //   _currentPage = page;
+  //   notifyListeners();
+  // }
 
   set isPlaying(isPlaying) {
     _isPlaying = isPlaying;
@@ -205,8 +259,8 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  set openedPlaylistDirId(int? dirIdOfPlaylist) {
-    _openedPlaylistDirId = dirIdOfPlaylist;
+  set openedPlaylist(Playlist? playlist) {
+    _openedPlaylist = playlist;
     notifyListeners();
   }
 
@@ -220,10 +274,10 @@ class MyAppState extends ChangeNotifier {
   //   notifyListeners();
   // }
 
-  set songsOfPlaylist(songs) {
-    _songsOfPlaylist = List.from(songs);
-    notifyListeners();
-  }
+  // set songsOfPlaylist(songs) {
+  //   _songsOfPlaylist = List.from(songs);
+  //   notifyListeners();
+  // }
 
   set currentPlayingSongInQueue(index) {
     _currentPlayingSongInQueue = index;
@@ -268,48 +322,12 @@ class MyAppState extends ChangeNotifier {
 
       // Listen to errors during playback.
       _player!.playbackEventStream.listen(
-        (event) {
-          // bool skip = false;
-          // if (_queue!.length != _originQueue!.length && _queue!.isNotEmpty) {
-          //   for (int i = 0; i < _originQueue!.length; i++) {
-          //     if (!_queue!.contains(_originQueue![i])) {
-          //       _initQueue.removeAt(i);
-          //       _originQueue!.removeAt(i);
-          //       // if (i <= _currentSongIndex) {
-          //       //   // TODO: fix bug: when call _initQueue.removeAt(i); the _currentSongIndex
-          //       //   // will be subtracted one more time.
-          //       //   // _player.seek(Duration.zero, index: _currentSongIndex);
-          //       //   skip = true;
-          //       //   return;
-          //       // }
-          //       break;
-          //     }
-          //   }
-          // }
-          // if ( //event.currentIndex != null &&
-          // event.currentIndex != _currentPlayingSongInQueue // &&
-          // event.currentIndex! < _queue!.length &&
-          // ) {
-          // _currentPlayingSongInQueue = event.currentIndex!;
-          // _carouselController.nextPage();
-          // notifyListeners();
-          // _carouselController.jumpToPage(_currentSongIndex);
-          // Future.delayed(Duration(milliseconds: 300), () {
-          //   _appState.currentPlayingSongInQueue = _currentSongIndex;
-          // });
-
-          //   if (_userPlayingMode == 0) {
-          //     _player.shuffle();
-          //     // _player.seek(Duration.zero, index: _player.effectiveIndices?[0]);
-          //   }
-
-          //   setState(() {});
-          // }
-        },
+        (event) {},
         onError: (Object e, StackTrace stackTrace) {
           print('A stream error occurred: $e');
         },
       );
+
       // _player!.currentIndexStream.listen((event) {});
       // TODO: fix bug: when remove song in playlist, this function will also be called.
       _player!.positionDiscontinuityStream.listen((discontinuity) {
@@ -371,11 +389,31 @@ class MyAppState extends ChangeNotifier {
     } catch (e) {
       print("Error init audio player: $e");
     }
+  }
 
-    // void toggleBottomPlayer() {
-    //   _isQueueEmpty = !_isQueueEmpty;
-    //   notifyListeners();
-    // }
+  Future<String> fetchSongLink(Song song, String quality, int platform) async {
+    var url = Uri.http(API.host, '${API.songlink}/$platform', {
+      'songMid': song.songMid,
+      'mediaMid': song.mediaMid,
+      'type': quality,
+    });
+    final client = RetryClient(http.Client());
+    try {
+      var response = await client.get(url);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        var songlink = decodedResponse['data'];
+        if (songlink.isEmpty) {
+          song.isTakenDown = true;
+          return Future.value(MockData.links[0]);
+        }
+        return Future.value(songlink);
+      } else {
+        return Future.value(MockData.links[0]);
+      }
+    } finally {
+      client.close();
+    }
   }
 
   Future<ConcatenatingAudioSource?> initTheQueue() async {
@@ -383,20 +421,32 @@ class MyAppState extends ChangeNotifier {
     // Uri uri = await getImageFileFromAssets();
     queueList = await Future.wait(_queue!
         .map(
-          (e) async => AudioSource.asset(
-            e.link,
-            tag: MediaItem(
-              // Specify a unique ID for each media item:
-              id: _queue!.indexOf(e).toString(),
-              // Metadata to display in the notification:
-              album: "Album name",
-              title: e.name,
-              artUri:
-                  await getImageFileFromAssets(e.coverUri, _queue!.indexOf(e)),
-              // artUri: Uri.parse(
-              //     'https://pub.dev/static/hash-upjs5ooo/img/pub-dev-logo-2x.png'),
-            ),
-          ),
+          (e) async => isUsingMockData
+              ? AudioSource.asset(
+                  MockData.links[_queue!.indexOf(e)],
+                  tag: MediaItem(
+                    // Specify a unique ID for each media item:
+                    id: _queue!.indexOf(e).toString(),
+                    // Metadata to display in the notification:
+                    album: "Album name",
+                    artist: e.singers.map((e) => e.name).join(','),
+                    title: e.name,
+                    artUri: await getImageFileFromAssets(
+                        e.coverUri, _queue!.indexOf(e)),
+                    // artUri: Uri.parse(
+                    //     'https://pub.dev/static/hash-upjs5ooo/img/pub-dev-logo-2x.png'),
+                  ),
+                )
+              : AudioSource.uri(
+                  Uri.parse(await fetchSongLink(e, '128', 1)),
+                  tag: MediaItem(
+                    id: _queue!.indexOf(e).toString(),
+                    album: "Album name",
+                    artist: e.singers.map((e) => e.name).join(','),
+                    title: e.name,
+                    artUri: Uri.parse(e.coverUri),
+                  ),
+                ),
         )
         .toList());
 

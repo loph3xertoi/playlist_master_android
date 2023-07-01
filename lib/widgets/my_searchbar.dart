@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/widgets/basic_info.dart';
+import 'package:provider/provider.dart';
 
 class MySearchBar extends StatefulWidget {
   final GlobalKey<ScaffoldState> myScaffoldKey;
@@ -66,6 +68,8 @@ class _MySearchBarState extends State<MySearchBar>
   Widget build(BuildContext context) {
     // final mySearchState = context.watch<MySearchState>();
     // bool isSearching = mySearchState.isSearching;
+    MyAppState appState = context.watch<MyAppState>();
+    var isUsingMockData = appState.isUsingMockData;
     return Container(
       height: 40.0,
       margin: EdgeInsets.all(12.0),
@@ -128,8 +132,10 @@ class _MySearchBarState extends State<MySearchBar>
                           padding: EdgeInsets.zero,
                           icon: CircleAvatar(
                             radius: 15.0,
-                            backgroundImage:
-                                AssetImage('assets/images/avatar.png'),
+                            backgroundImage: isUsingMockData
+                                ? Image.asset('assets/images/avatar.png').image
+                                : Image.network(MyAppState.defaultCoverImage)
+                                    .image,
                           ),
                           onPressed: _onAvatarPressed,
                         ),

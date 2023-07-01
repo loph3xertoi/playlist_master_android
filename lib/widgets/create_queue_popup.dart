@@ -24,6 +24,10 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (appState.player != null && mounted) {
           appState.queue = [];
+          appState.currentDetailSong = null;
+          appState.currentPlayingSongInQueue = -1;
+          appState.currentSong = null;
+          appState.prevSong = null;
           appState.isPlaying = false;
           appState.player!.stop();
           appState.player!.dispose();
@@ -97,11 +101,14 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                     .addPostFrameCallback((_) {
                                   appState.player!
                                       .seek(Duration.zero, index: index);
-                                  if (appState.isPlayerPageOpened) {
-                                    carouselController.animateToPage(
-                                      player!.effectiveIndices!.indexOf(index),
-                                    );
-                                  }
+                                  Future.delayed(Duration(seconds: 1), () {
+                                    if (appState.isPlayerPageOpened) {
+                                      carouselController.animateToPage(
+                                        player!.effectiveIndices!
+                                            .indexOf(index),
+                                      );
+                                    }
+                                  });
                                 });
 
                                 if (!player!.playerState.playing) {

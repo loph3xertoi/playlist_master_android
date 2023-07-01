@@ -8,6 +8,7 @@ import 'package:playlistmaster/pages/splash_screen.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/states/my_navigation_button_state.dart';
 import 'package:playlistmaster/states/my_search_state.dart';
+import 'package:playlistmaster/widgets/theme.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
@@ -41,9 +42,9 @@ class MyApp extends StatelessWidget {
         // darkTheme: ThemeData.dark(),
         theme: ThemeData(
           useMaterial3: true,
-          // colorScheme: Colors.white,
-          // colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
+          colorSchemeSeed: Colors.green,
         ),
+        // theme: MyThemes.darkTheme,
         initialRoute: '/splashscreen',
         routes: {
           '/splashscreen': (context) => SplashScreen(),

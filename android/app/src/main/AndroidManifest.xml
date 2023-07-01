@@ -2,11 +2,13 @@
   xmlns:tools="http://schemas.android.com/tools">
   <uses-permission android:name="android.permission.WAKE_LOCK" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.INTERNET" />
   <application
     android:label="Playlist Master"
     android:name="${applicationName}"
     android:icon="@mipmap/ic_launcher"
-    android:roundIcon="@mipmap/ic_launcher_round">
+    android:roundIcon="@mipmap/ic_launcher_round"
+    android:usesCleartextTraffic="true">
     <activity
       android:name="com.ryanheise.audioservice.AudioServiceActivity"
       android:exported="true"

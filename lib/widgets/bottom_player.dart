@@ -37,6 +37,7 @@ class _BottomPlayerState extends State<BottomPlayer>
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
+    var isUsingMockData = appState.isUsingMockData;
     var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
     var queue = appState.queue;
     var currentSong = appState.currentSong;
@@ -100,12 +101,19 @@ class _BottomPlayerState extends State<BottomPlayer>
                     width: 50.0,
                     child: ClipRRect(
                         borderRadius: BorderRadius.all(Radius.circular(50.0)),
-                        child: Image.asset(
-                          currentSong!.coverUri,
-                          fit: BoxFit.fill,
-                          // height: 230.0,
-                          // width: 230.0,
-                        )),
+                        child: isUsingMockData
+                            ? Image.asset(
+                                currentSong!.coverUri,
+                                fit: BoxFit.fill,
+                                // height: 230.0,
+                                // width: 230.0,
+                              )
+                            : Image.network(
+                                currentSong!.coverUri.isNotEmpty
+                                    ? currentSong.coverUri
+                                    : MyAppState.defaultCoverImage,
+                                fit: BoxFit.fill,
+                              )),
                   ),
                 ),
                 Expanded(

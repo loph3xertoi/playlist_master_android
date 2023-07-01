@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:playlistmaster/entities/playlist.dart';
+import 'package:playlistmaster/states/app_state.dart';
+import 'package:provider/provider.dart';
 
 class PlaylistItem extends StatelessWidget {
   final Playlist playlist;
@@ -7,11 +9,17 @@ class PlaylistItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    MyAppState appState = context.watch<MyAppState>();
+    var isUsingMockData = appState.isUsingMockData;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          Navigator.pushNamed(context, '/playlist_detail', arguments: playlist.tid);
+          appState.openedPlaylist = playlist;
+          Navigator.pushNamed(
+            context,
+            '/playlist_detail',
+          );
         },
         child: Ink(
           height: 60.0,
@@ -25,7 +33,11 @@ class PlaylistItem extends StatelessWidget {
                   child: SizedBox(
                     width: 46.0,
                     height: 46.0,
-                    child: Image.asset(playlist.coverImage),
+                    child: isUsingMockData
+                        ? Image.asset(playlist.coverImage)
+                        : Image.network(playlist.coverImage.isNotEmpty
+                            ? playlist.coverImage
+                            : MyAppState.defaultCoverImage),
                   ),
                 ),
                 Expanded(
