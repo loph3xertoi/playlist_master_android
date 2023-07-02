@@ -15,6 +15,7 @@ import 'package:playlistmaster/http/api.dart';
 import 'package:http/http.dart' as http;
 import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
+import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MyAppState extends ChangeNotifier {
@@ -359,16 +360,28 @@ class MyAppState extends ChangeNotifier {
             !_isRemovingSongFromQueue) {
           if (_userPlayingMode == 0) {
             currentPlayingSongInQueue = discontinuity.event.currentIndex;
+            if (_queue![currentPlayingSongInQueue!].isTakenDown) {
+              MyToast.showToast('Current song is taken down, skip to next.');
+              currentPlayingSongInQueue =
+                  (currentPlayingSongInQueue! + 1) % queue!.length;
+            }
             currentSong = _queue![currentPlayingSongInQueue!];
-            prevSong = currentSong;
+            // currentDetailSong = null;
+            // prevSong = currentSong;
             prevCarouselIndex = currentPlayingSongInQueue!;
             // _carouselController.animateToPage(_player!.effectiveIndices!
             // .indexOf(_currentPlayingSongInQueue!));
           } else if (_userPlayingMode == 1) {
             currentPlayingSongInQueue =
                 discontinuity.event.currentIndex ?? _currentPlayingSongInQueue;
+            if (_queue![currentPlayingSongInQueue!].isTakenDown) {
+              MyToast.showToast('Current song is taken down, skip to next.');
+              currentPlayingSongInQueue =
+                  (currentPlayingSongInQueue! + 1) % queue!.length;
+            }
             currentSong = _queue![currentPlayingSongInQueue!];
-            prevSong = currentSong;
+            // currentDetailSong = null;
+            // prevSong = currentSong;
             prevCarouselIndex = currentPlayingSongInQueue!;
             // _carouselController.animateToPage(_currentPlayingSongInQueue!);
           } else {
