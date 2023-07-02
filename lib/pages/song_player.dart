@@ -58,6 +58,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
 
   Future<DetailSong?>? _detailSong;
   DetailSong? _simpleDetailSong;
+  bool _hasLyrics = true;
   // bool isPlaying = false;
   // double max_value = 211658;
 // bool isTap = false;
@@ -177,6 +178,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     var carouselController = appState.carouselController;
     var prevCarouselIndex = appState.prevCarouselIndex;
     var isSkipTakenDownSong = appState.isSkipTakenDownSong;
+    String? mainLyrics;
 
     _isFirstLoadSongPlayer = appState.isFirstLoadSongPlayer;
     _isPlaying = appState.isPlaying;
@@ -350,16 +352,24 @@ class _SongPlayerPageState extends State<SongPlayerPage>
               );
             } else {
               DetailSong detailSong = snapshot.data as DetailSong;
-
+              mainLyrics = detailSong.lyrics.lyric;
               if (_lyricModel == null || prevSong != currentSong) {
-                _lyricModel = LyricsModelBuilder.create()
-                    .bindLyricToMain(isUsingMockData
-                        ? MockData.normalLyric
-                        : detailSong.lyrics.lyric)
-                    .bindLyricToExt(isUsingMockData
-                        ? MockData.transLyric
-                        : detailSong.lyrics.trans)
-                    .getModel();
+                if (!isUsingMockData) {
+                  if (mainLyrics == '[00:00:00]此歌曲为没有填词的纯音乐，请您欣赏') {
+                    _hasLyrics = false;
+                  } else {
+                    _hasLyrics = true;
+                    _lyricModel = LyricsModelBuilder.create()
+                        .bindLyricToMain(detailSong.lyrics.lyric)
+                        .bindLyricToExt(detailSong.lyrics.trans)
+                        .getModel();
+                  }
+                } else {
+                  _lyricModel = LyricsModelBuilder.create()
+                      .bindLyricToMain(MockData.normalLyric)
+                      .bindLyricToExt(MockData.transLyric)
+                      .getModel();
+                }
               }
 
               WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -472,9 +482,36 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                         0, 0, rect.width, rect.height));
                                   },
                                   blendMode: BlendMode.dstIn,
-                                  child: player != null
+                                  child: player != null && _hasLyrics
                                       ? buildReaderWidget(player)
-                                      : Container(),
+                                      : Center(
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                _toggleLyrics = !_toggleLyrics;
+                                              });
+                                            },
+                                            child: Container(
+                                              width: MediaQuery.of(context)
+                                                  .size
+                                                  .width,
+                                              height: 500.0,
+                                              color: Colors.transparent,
+                                              child: Center(
+                                                child: Text(
+                                                  mainLyrics!.substring(
+                                                      mainLyrics!.indexOf(']') +
+                                                          1),
+                                                  style: TextStyle(
+                                                    color: Colors.white54,
+                                                    fontFamily: 'Roboto',
+                                                    fontSize: 16.0,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                 ),
                               ),
                             ),
@@ -521,11 +558,11 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                             // AudioSource nextAudioSource =
                                             //     appState.initQueue![nextIndex];
 
-                                            ProgressiveAudioSource
+                                            LockCachingAudioSource
                                                 nextAudioSource = (player
                                                         .audioSource!
                                                         .sequence[nextIndex]
-                                                    as ProgressiveAudioSource);
+                                                    as LockCachingAudioSource);
                                             var songUri = nextAudioSource.uri;
 
                                             // Network error. Show toast and retrieve the song again.
@@ -822,7 +859,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                             errorWidget: (context,
                                                                     url,
                                                                     error) =>
-                                                                Icon(MdiIcons.debian),
+                                                                Icon(MdiIcons
+                                                                    .debian),
                                                           ),
                                                     // : Image(
                                                     //     image: CachedNetworkImageProvider(((player !=
@@ -1095,9 +1133,9 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                               // appState.prevCarouselIndex = index;
                               Song? nextSong = queue![nextIndex];
 
-                              ProgressiveAudioSource nextAudioSource =
+                              LockCachingAudioSource nextAudioSource =
                                   (player.audioSource!.sequence[nextIndex]
-                                      as ProgressiveAudioSource);
+                                      as LockCachingAudioSource);
                               var songUri = nextAudioSource.uri;
 
                               // Network error. Show toast and retrieve the song again.
@@ -1314,9 +1352,9 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                               // appState.prevCarouselIndex = index;
                               Song? nextSong = queue![nextIndex];
 
-                              ProgressiveAudioSource nextAudioSource =
+                              LockCachingAudioSource nextAudioSource =
                                   (player.audioSource!.sequence[nextIndex]
-                                      as ProgressiveAudioSource);
+                                      as LockCachingAudioSource);
                               var songUri = nextAudioSource.uri;
 
                               // Network error. Show toast and retrieve the song again.

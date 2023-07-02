@@ -518,7 +518,7 @@ class MyAppState extends ChangeNotifier {
                     //     'https://pub.dev/static/hash-upjs5ooo/img/pub-dev-logo-2x.png'),
                   ),
                 )
-              : AudioSource.uri(
+              : LockCachingAudioSource(
                   Uri.parse(await fetchSongLink(e, '128', 1)),
                   tag: MediaItem(
                     id: _queue!.indexOf(e).toString(),
