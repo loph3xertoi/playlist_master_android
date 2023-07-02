@@ -434,16 +434,16 @@ class MyAppState extends ChangeNotifier {
   }
 
   Future<String> fetchSongLink(Song song, String quality, int platform) async {
-    DefaultCacheManager cacheManger = MyHttp.cacheManger;
+    DefaultCacheManager cacheManager = MyHttp.cacheManager;
     Uri url = Uri.http(API.host, '${API.songlink}/$platform', {
       'songMid': song.songMid,
       'mediaMid': song.mediaMid,
       'type': quality,
     });
     String urlString = url.toString();
-    dynamic result = await cacheManger.getFileFromMemory(urlString);
+    dynamic result = await cacheManager.getFileFromMemory(urlString);
     if (result == null) {
-      result = await cacheManger.getFileFromCache(urlString);
+      result = await cacheManager.getFileFromCache(urlString);
       if (result == null) {
         MyLogger.logger.d('Loading songlink from network...');
         final client = RetryClient(http.Client());
@@ -454,7 +454,7 @@ class MyAppState extends ChangeNotifier {
           if (response.statusCode == 200 &&
               decodedResponse['success'] == true) {
             String songlink = decodedResponse['data'];
-            await cacheManger.putFile(
+            await cacheManager.putFile(
               urlString,
               response.bodyBytes,
               fileExtension: 'json',

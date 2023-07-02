@@ -1,4 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:playlistmaster/http/my_http.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/widgets/basic_info.dart';
 import 'package:provider/provider.dart';
@@ -134,8 +137,11 @@ class _MySearchBarState extends State<MySearchBar>
                             radius: 15.0,
                             backgroundImage: isUsingMockData
                                 ? Image.asset('assets/images/avatar.png').image
-                                : Image.network(MyAppState.defaultCoverImage)
-                                    .image,
+                                : CachedNetworkImageProvider(
+                                    MyAppState.defaultCoverImage,
+                                  ),
+                            // : Image.network(MyAppState.defaultCoverImage)
+                            //     .image,
                           ),
                           onPressed: _onAvatarPressed,
                         ),

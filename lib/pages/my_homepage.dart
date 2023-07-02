@@ -44,11 +44,11 @@ class _MyHomePageState extends State<MyHomePage>
           backgroundColor: Colors.transparent,
           imageUri: 'assets/images/home_button.png',
           onTap: () async {
-            MyHttp.cacheManger.emptyCache();
-            FileInfo? file = await MyHttp.cacheManger.getFileFromCache(
+            MyHttp.cacheManager.emptyCache();
+            FileInfo? file = await MyHttp.cacheManager.getFileFromCache(
                 'https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png');
             print(file);
-            FileInfo? file2 = await MyHttp.cacheManger.getFileFromMemory(
+            FileInfo? file2 = await MyHttp.cacheManager.getFileFromMemory(
                 'https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png');
             print(file2);
 

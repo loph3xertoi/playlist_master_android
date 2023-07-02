@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/states/app_state.dart';
@@ -35,9 +36,16 @@ class PlaylistItem extends StatelessWidget {
                     height: 46.0,
                     child: isUsingMockData
                         ? Image.asset(playlist.coverImage)
-                        : Image.network(playlist.coverImage.isNotEmpty
-                            ? playlist.coverImage
-                            : MyAppState.defaultCoverImage),
+                        : Image(
+                            image: CachedNetworkImageProvider(
+                              playlist.coverImage.isNotEmpty
+                                  ? playlist.coverImage
+                                  : MyAppState.defaultCoverImage,
+                            ),
+                          ),
+                    // : Image.network(playlist.coverImage.isNotEmpty
+                    //     ? playlist.coverImage
+                    //     : MyAppState.defaultCoverImage),
                   ),
                 ),
                 Expanded(

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -105,15 +106,15 @@ class _SongPlayerPageState extends State<SongPlayerPage>
   }
 
   Future<DetailSong?> fetchDetailSong(String songMid) async {
-    DefaultCacheManager cacheManger = MyHttp.cacheManger;
+    DefaultCacheManager cacheManager = MyHttp.cacheManager;
     Uri url = Uri.http(
       API.host,
       '${API.detailSong}/$songMid/1',
     );
     String urlString = url.toString();
-    dynamic result = await cacheManger.getFileFromMemory(urlString);
+    dynamic result = await cacheManager.getFileFromMemory(urlString);
     if (result == null) {
-      result = await cacheManger.getFileFromCache(urlString);
+      result = await cacheManager.getFileFromCache(urlString);
       if (result == null) {
         MyLogger.logger.d('Loading detail song from network...');
         final client = RetryClient(http.Client());
@@ -124,7 +125,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
           if (response.statusCode == 200 &&
               decodedResponse['success'] == true) {
             result = DetailSong.fromJson(decodedResponse['data']);
-            await cacheManger.putFile(
+            await cacheManager.putFile(
               urlString,
               response.bodyBytes,
               fileExtension: 'json',
@@ -721,8 +722,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                                 height: 230.0,
                                                                 width: 230.0,
                                                               )
-                                                            : Image.network(
-                                                                ((queue?.isNotEmpty ??
+                                                            : Image(
+                                                                image: CachedNetworkImageProvider(((queue?.isNotEmpty ??
                                                                             false) &&
                                                                         queue![player.effectiveIndices![itemIndex]]
                                                                             .coverUri
@@ -731,12 +732,24 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                                             itemIndex]]
                                                                         .coverUri)
                                                                     : MyAppState
-                                                                        .defaultCoverImage,
-                                                                fit: BoxFit
-                                                                    .fitHeight,
-                                                                height: 230.0,
-                                                                width: 230.0,
+                                                                        .defaultCoverImage),
                                                               ),
+                                                        // : Image.network(
+                                                        //     ((queue?.isNotEmpty ??
+                                                        //                 false) &&
+                                                        //             queue![player.effectiveIndices![itemIndex]]
+                                                        //                 .coverUri
+                                                        //                 .isNotEmpty)
+                                                        //         ? (queue[player.effectiveIndices![
+                                                        //                 itemIndex]]
+                                                        //             .coverUri)
+                                                        //         : MyAppState
+                                                        //             .defaultCoverImage,
+                                                        //     fit: BoxFit
+                                                        //         .fitHeight,
+                                                        //     height: 230.0,
+                                                        //     width: 230.0,
+                                                        //   ),
                                                       ),
                                                     ),
                                                   )
@@ -762,8 +775,9 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                             height: 230.0,
                                                             width: 230.0,
                                                           )
-                                                        : Image.network(
-                                                            ((player != null &&
+                                                        : Image(
+                                                            image: CachedNetworkImageProvider(((player !=
+                                                                            null &&
                                                                         (queue?.isNotEmpty ??
                                                                             false)) &&
                                                                     queue![player.effectiveIndices![
@@ -775,12 +789,27 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                                         itemIndex]]
                                                                     .coverUri
                                                                 : MyAppState
-                                                                    .defaultCoverImage,
-                                                            fit: BoxFit
-                                                                .fitHeight,
-                                                            height: 230.0,
-                                                            width: 230.0,
+                                                                    .defaultCoverImage),
                                                           ),
+                                                    // : Image.network(
+                                                    //     ((player != null &&
+                                                    //                 (queue?.isNotEmpty ??
+                                                    //                     false)) &&
+                                                    //             queue![player.effectiveIndices![
+                                                    //                     itemIndex]]
+                                                    //                 .coverUri
+                                                    //                 .isNotEmpty)
+                                                    //         ? queue[player
+                                                    //                     .effectiveIndices![
+                                                    //                 itemIndex]]
+                                                    //             .coverUri
+                                                    //         : MyAppState
+                                                    //             .defaultCoverImage,
+                                                    //     fit: BoxFit
+                                                    //         .fitHeight,
+                                                    //     height: 230.0,
+                                                    //     width: 230.0,
+                                                    //   ),
                                                   ),
                                           ),
                                         );

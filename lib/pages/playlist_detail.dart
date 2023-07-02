@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/retry.dart';
@@ -33,15 +34,15 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   // late String _tid;
 
   Future<DetailPlaylist?> fetchDetailPlaylist(String tid) async {
-    DefaultCacheManager cacheManger = MyHttp.cacheManger;
+    DefaultCacheManager cacheManager = MyHttp.cacheManager;
     Uri url = Uri.http(
       API.host,
       '${API.detailPlaylist}/$tid/1',
     );
     String urlString = url.toString();
-    dynamic result = await cacheManger.getFileFromMemory(urlString);
+    dynamic result = await cacheManager.getFileFromMemory(urlString);
     if (result == null) {
-      result = await cacheManger.getFileFromCache(urlString);
+      result = await cacheManager.getFileFromCache(urlString);
       if (result == null) {
         MyLogger.logger.d('Loading detail playlist from network...');
         final client = RetryClient(http.Client());
@@ -52,7 +53,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
           if (response.statusCode == 200 &&
               decodedResponse['success'] == true) {
             result = DetailPlaylist.fromJson(decodedResponse['data']);
-            await cacheManger.putFile(
+            await cacheManager.putFile(
               urlString,
               response.bodyBytes,
               fileExtension: 'json',
@@ -196,28 +197,57 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                         children: [
                                           SizedBox(
                                             height: 130.0,
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
                                             child: Padding(
                                               padding:
                                                   const EdgeInsets.all(15.0),
                                               child: Row(
+                                                mainAxisSize: MainAxisSize.max,
                                                 children: [
                                                   Padding(
                                                     padding:
                                                         const EdgeInsets.only(
                                                       right: 12.0,
                                                     ),
-                                                    child: isUsingMockData
-                                                        ? Image.asset(
-                                                            detailPlaylist
-                                                                .coverImage)
-                                                        : Image.network(
-                                                            detailPlaylist
-                                                                    .coverImage
-                                                                    .isNotEmpty
-                                                                ? detailPlaylist
-                                                                    .coverImage
-                                                                : MyAppState
-                                                                    .defaultCoverImage),
+                                                    child: Container(
+                                                      width: 100.0,
+                                                      height: 100.0,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(
+                                                          4.0,
+                                                        ),
+                                                      ),
+                                                      child: ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(4.0),
+                                                        child: isUsingMockData
+                                                            ? Image.asset(
+                                                                detailPlaylist
+                                                                    .coverImage)
+                                                            : Image(
+                                                                image: CachedNetworkImageProvider(detailPlaylist
+                                                                        .coverImage
+                                                                        .isNotEmpty
+                                                                    ? detailPlaylist
+                                                                        .coverImage
+                                                                    : MyAppState
+                                                                        .defaultCoverImage),
+                                                              ),
+
+                                                        // : Image.network(detailPlaylist
+                                                        //         .coverImage
+                                                        //         .isNotEmpty
+                                                        //     ? detailPlaylist
+                                                        //         .coverImage
+                                                        //     : MyAppState
+                                                        //         .defaultCoverImage),
+                                                      ),
+                                                    ),
                                                   ),
                                                   Expanded(
                                                     child: Column(

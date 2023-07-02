@@ -38,15 +38,15 @@ class _MyContentAreaState extends State<MyContentArea> {
   }
 
   Future<List<Playlist>?> fetchPlaylists() async {
-    DefaultCacheManager cacheManger = MyHttp.cacheManger;
+    DefaultCacheManager cacheManager = MyHttp.cacheManager;
     Uri url = Uri.http(
       API.host,
       '${API.playlists}/${API.uid}/1',
     );
     String urlString = url.toString();
-    dynamic result = await cacheManger.getFileFromMemory(urlString);
+    dynamic result = await cacheManager.getFileFromMemory(urlString);
     if (result == null) {
-      result = await cacheManger.getFileFromCache(urlString);
+      result = await cacheManager.getFileFromCache(urlString);
       if (result == null) {
         MyLogger.logger.d('Loading playlists from network...');
         final client = RetryClient(http.Client());
@@ -58,7 +58,7 @@ class _MyContentAreaState extends State<MyContentArea> {
               decodedResponse['success'] == true) {
             List<dynamic> jsonList = decodedResponse['data'];
             result = jsonList.map((e) => Playlist.fromJson(e)).toList();
-            await cacheManger.putFile(
+            await cacheManager.putFile(
               urlString,
               response.bodyBytes,
               fileExtension: 'json',

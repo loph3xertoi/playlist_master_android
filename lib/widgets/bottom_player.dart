@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/widgets/create_queue_popup.dart';
@@ -100,20 +101,28 @@ class _BottomPlayerState extends State<BottomPlayer>
                     height: 50.0,
                     width: 50.0,
                     child: ClipRRect(
-                        borderRadius: BorderRadius.all(Radius.circular(50.0)),
-                        child: isUsingMockData
-                            ? Image.asset(
-                                currentSong!.coverUri,
-                                fit: BoxFit.fill,
-                                // height: 230.0,
-                                // width: 230.0,
-                              )
-                            : Image.network(
+                      borderRadius: BorderRadius.all(Radius.circular(50.0)),
+                      child: isUsingMockData
+                          ? Image.asset(
+                              currentSong!.coverUri,
+                              fit: BoxFit.fill,
+                              // height: 230.0,
+                              // width: 230.0,
+                            )
+                          : Image(
+                              image: CachedNetworkImageProvider(
                                 currentSong!.coverUri.isNotEmpty
                                     ? currentSong.coverUri
                                     : MyAppState.defaultCoverImage,
-                                fit: BoxFit.fill,
-                              )),
+                              ),
+                            ),
+                      // : Image.network(
+                      //     currentSong!.coverUri.isNotEmpty
+                      //         ? currentSong.coverUri
+                      //         : MyAppState.defaultCoverImage,
+                      //     fit: BoxFit.fill,
+                      //   ),
+                    ),
                   ),
                 ),
                 Expanded(
