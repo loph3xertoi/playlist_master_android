@@ -1,14 +1,16 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/retry.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/http/api.dart';
 import 'package:http/http.dart' as http;
+import 'package:playlistmaster/http/my_http.dart';
 import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/states/app_state.dart';
+import 'package:playlistmaster/utils/my_logger.dart';
 import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:playlistmaster/widgets/create_playlist_popup.dart';
 import 'package:playlistmaster/widgets/playlist_item.dart';
@@ -36,30 +38,59 @@ class _MyContentAreaState extends State<MyContentArea> {
   }
 
   Future<List<Playlist>?> fetchPlaylists() async {
-    // Future<List<Playlist>> playlists;
-    var url = Uri.http(
+    DefaultCacheManager cacheManger = MyHttp.cacheManger;
+    Uri url = Uri.http(
       API.host,
-      '${API.playlists}/2804161589/1',
-      // {'id': '2804161589'},
+      '${API.playlists}/${API.uid}/1',
     );
-
-    final client = RetryClient(http.Client());
-    try {
-      var response = await client.get(url);
-      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        List<dynamic> jsonList = decodedResponse['data'];
-        return Future.value(jsonList.map((e) => Playlist.fromJson(e)).toList());
+    String urlString = url.toString();
+    dynamic result = await cacheManger.getFileFromMemory(urlString);
+    if (result == null) {
+      result = await cacheManger.getFileFromCache(urlString);
+      if (result == null) {
+        MyLogger.logger.d('Loading playlists from network...');
+        final client = RetryClient(http.Client());
+        try {
+          var response = await client.get(url);
+          var decodedResponse =
+              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+          if (response.statusCode == 200 &&
+              decodedResponse['success'] == true) {
+            List<dynamic> jsonList = decodedResponse['data'];
+            result = jsonList.map((e) => Playlist.fromJson(e)).toList();
+            await cacheManger.putFile(
+              urlString,
+              response.bodyBytes,
+              fileExtension: 'json',
+            );
+          } else {
+            MyLogger.logger
+                .e('Response error with code: ${response.statusCode}');
+            result = null;
+          }
+        } catch (e) {
+          MyToast.showToast('Exception thrown: $e');
+          MyLogger.logger.e('Network error with exception: $e');
+          throw Exception(e);
+        } finally {
+          client.close();
+        }
       } else {
-        // return Future.value(MockData.playlists);
-        return null;
+        MyLogger.logger.d('Loading playlists from cache...');
       }
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      throw Exception(e);
-    } finally {
-      client.close();
+    } else {
+      MyLogger.logger.d('Loading playlists from memory...');
     }
+    if (result is List<Playlist>) {
+      result = Future.value(result);
+    } else if (result is FileInfo) {
+      var decodedResponse =
+          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
+      List<dynamic> jsonList = decodedResponse['data'];
+      result = jsonList.map((e) => Playlist.fromJson(e)).toList();
+      result = Future.value(result);
+    } else {}
+    return result;
   }
 
   @override

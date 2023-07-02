@@ -2,15 +2,18 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/retry.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/entities/detail_playlist.dart';
 import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/http/api.dart';
 import 'package:http/http.dart' as http;
+import 'package:playlistmaster/http/my_http.dart';
 import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/states/my_search_state.dart';
+import 'package:playlistmaster/utils/my_logger.dart';
 import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:playlistmaster/widgets/bottom_player.dart';
 import 'package:playlistmaster/widgets/my_searchbar.dart';
@@ -30,24 +33,57 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   // late String _tid;
 
   Future<DetailPlaylist?> fetchDetailPlaylist(String tid) async {
-    var url = Uri.http(
+    DefaultCacheManager cacheManger = MyHttp.cacheManger;
+    Uri url = Uri.http(
       API.host,
       '${API.detailPlaylist}/$tid/1',
     );
-    final client = RetryClient(http.Client());
-    try {
-      var response = await client.get(url);
-      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        var detailPlaylist = decodedResponse['data'];
-        return Future.value(DetailPlaylist.fromJson(detailPlaylist));
+    String urlString = url.toString();
+    dynamic result = await cacheManger.getFileFromMemory(urlString);
+    if (result == null) {
+      result = await cacheManger.getFileFromCache(urlString);
+      if (result == null) {
+        MyLogger.logger.d('Loading detail playlist from network...');
+        final client = RetryClient(http.Client());
+        try {
+          var response = await client.get(url);
+          var decodedResponse =
+              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+          if (response.statusCode == 200 &&
+              decodedResponse['success'] == true) {
+            result = DetailPlaylist.fromJson(decodedResponse['data']);
+            await cacheManger.putFile(
+              urlString,
+              response.bodyBytes,
+              fileExtension: 'json',
+            );
+          } else {
+            MyLogger.logger
+                .e('Response error with code: ${response.statusCode}');
+            result = null;
+          }
+        } catch (e) {
+          MyToast.showToast('Exception thrown: $e');
+          MyLogger.logger.e('Network error with exception: $e');
+          throw Exception(e);
+        } finally {
+          client.close();
+        }
       } else {
-        return null;
-        // return Future.value(MockData.detailPlaylist);
+        MyLogger.logger.d('Loading detail playlist from cache...');
       }
-    } finally {
-      client.close();
+    } else {
+      MyLogger.logger.d('Loading detail playlist from memory...');
     }
+    if (result is DetailPlaylist) {
+      result = Future.value(result);
+    } else if (result is FileInfo) {
+      var decodedResponse =
+          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
+      result = DetailPlaylist.fromJson(decodedResponse['data']);
+      result = Future.value(result);
+    } else {}
+    return result;
   }
 
   @override
@@ -342,6 +378,9 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                         appState.prevSong =
                                                                             appState.currentSong;
 
+                                                                        appState.currentDetailSong =
+                                                                            null;
+
                                                                         // appState.currentPage =
                                                                         //     '/song_player';
                                                                         appState.ownerDirIdOfCurrentPlayingSong =
@@ -441,6 +480,9 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                             .currentSong = appState
                                                                                 .queue![
                                                                             index];
+
+                                                                        appState.currentDetailSong =
+                                                                            null;
 
                                                                         appState.prevSong =
                                                                             appState.currentSong;

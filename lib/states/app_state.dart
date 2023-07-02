@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/retry.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -13,8 +14,10 @@ import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/http/api.dart';
 import 'package:http/http.dart' as http;
+import 'package:playlistmaster/http/my_http.dart';
 import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
+import 'package:playlistmaster/utils/my_logger.dart';
 import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -431,28 +434,67 @@ class MyAppState extends ChangeNotifier {
   }
 
   Future<String> fetchSongLink(Song song, String quality, int platform) async {
-    var url = Uri.http(API.host, '${API.songlink}/$platform', {
+    DefaultCacheManager cacheManger = MyHttp.cacheManger;
+    Uri url = Uri.http(API.host, '${API.songlink}/$platform', {
       'songMid': song.songMid,
       'mediaMid': song.mediaMid,
       'type': quality,
     });
-    final client = RetryClient(http.Client());
-    try {
-      var response = await client.get(url);
-      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        var songlink = decodedResponse['data'];
-        if (songlink.isEmpty) {
-          song.isTakenDown = true;
-          return Future.value('1');
+    String urlString = url.toString();
+    dynamic result = await cacheManger.getFileFromMemory(urlString);
+    if (result == null) {
+      result = await cacheManger.getFileFromCache(urlString);
+      if (result == null) {
+        MyLogger.logger.d('Loading songlink from network...');
+        final client = RetryClient(http.Client());
+        try {
+          var response = await client.get(url);
+          var decodedResponse =
+              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+          if (response.statusCode == 200 &&
+              decodedResponse['success'] == true) {
+            String songlink = decodedResponse['data'];
+            await cacheManger.putFile(
+              urlString,
+              response.bodyBytes,
+              fileExtension: 'json',
+            );
+            if (songlink.isEmpty) {
+              song.isTakenDown = true;
+              result = '1';
+            } else {
+              result = songlink;
+            }
+          } else {
+            MyLogger.logger
+                .e('Response error with code: ${response.statusCode}');
+            result = '2';
+          }
+        } catch (e) {
+          MyToast.showToast('Exception thrown: $e');
+          MyLogger.logger.e('Network error with exception: $e');
+          throw Exception(e);
+        } finally {
+          client.close();
         }
-        return Future.value(songlink);
       } else {
-        return Future.value('2');
+        MyLogger.logger.d('Loading songlink from cache...');
       }
-    } finally {
-      client.close();
+    } else {
+      MyLogger.logger.d('Loading songlink from memory...');
     }
+    if (result is String) {
+      result = Future.value(result);
+    } else if (result is FileInfo) {
+      var decodedResponse =
+          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
+      result = decodedResponse['data'].toString();
+      if (result.isEmpty) {
+        song.isTakenDown = true;
+      }
+      result = Future.value(result);
+    } else {}
+    return result;
   }
 
   Future<ConcatenatingAudioSource?> initTheQueue() async {

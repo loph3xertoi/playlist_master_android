@@ -1,8 +1,6 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:playlistmaster/http/api.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:playlistmaster/http/my_http.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/widgets/bottom_player.dart';
 import 'package:playlistmaster/widgets/floating_button/quick_action.dart';
@@ -29,9 +27,6 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void initState() {
     super.initState();
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   Provider.of<MyAppState>(context, listen: false).initAudioPlayer();
-    // });
   }
 
   @override
@@ -49,34 +44,28 @@ class _MyHomePageState extends State<MyHomePage>
           backgroundColor: Colors.transparent,
           imageUri: 'assets/images/home_button.png',
           onTap: () async {
-            print(pow(2, 20).toInt());
-            showDialog(
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: Text(
-                    'Test network image',
-                    textAlign: TextAlign.center,
-                  ),
-                  content: Image.network(MyAppState.defaultCoverImage),
-                );
-              },
-              context: context,
-            );
-            print('homepage button $appState');
-            // final dio = Dio();
+            MyHttp.cacheManger.emptyCache();
+            FileInfo? file = await MyHttp.cacheManger.getFileFromCache(
+                'https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png');
+            print(file);
+            FileInfo? file2 = await MyHttp.cacheManger.getFileFromMemory(
+                'https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png');
+            print(file2);
 
-            // final response = await dio.get('http://192.168.8.171:8080/hello');
-            // print(response);
-
-            // var url = Uri.http(
-            //   '192.168.8.171:8080',
-            //   '${API.playlists}/2804161589/1',
-            //   // {'id': '2804161589'},
+            // showDialog(
+            //   builder: (BuildContext context) {
+            //     return AlertDialog(
+            //       title: Text(
+            //         'Test network image',
+            //         textAlign: TextAlign.center,
+            //       ),
+            //       // content: Image.network(MyAppState.defaultCoverImage),
+            //       content: Image.file(file.originalUrl),
+            //     );
+            //   },
+            //   context: context,
             // );
-            // var response = await http.get(url);
-            // var decodedResponse =
-            //     jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-            // print(decodedResponse);
+            print('homepage button $appState');
           },
           actions: [
             QuickAction(

@@ -8,7 +8,6 @@ import 'package:playlistmaster/pages/splash_screen.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/states/my_navigation_button_state.dart';
 import 'package:playlistmaster/states/my_search_state.dart';
-import 'package:playlistmaster/widgets/theme.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
@@ -48,7 +47,7 @@ class MyApp extends StatelessWidget {
         initialRoute: '/splashscreen',
         routes: {
           '/splashscreen': (context) => SplashScreen(),
-          '/': (context) => MyHomePage(),
+          '/home': (context) => MyHomePage(),
           '/search': (context) => SearchPage(),
           '/playlist_detail': (context) => PlaylistDetailPage(),
           '/song_player': (context) => SongPlayerPage(),

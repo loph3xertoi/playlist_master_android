@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_lyric/lyrics_reader.dart';
 import 'package:flutter_lyric/lyrics_reader_model.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -15,10 +17,12 @@ import 'package:playlistmaster/entities/detail_song.dart';
 import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/http/api.dart';
 import 'package:http/http.dart' as http;
+import 'package:playlistmaster/http/my_http.dart';
 import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:playlistmaster/third_lib_change/like_button/like_button.dart';
+import 'package:playlistmaster/utils/my_logger.dart';
 import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:playlistmaster/widgets/create_queue_popup.dart';
 import 'package:playlistmaster/widgets/create_songplayer_menu_popup.dart';
@@ -101,24 +105,57 @@ class _SongPlayerPageState extends State<SongPlayerPage>
   }
 
   Future<DetailSong?> fetchDetailSong(String songMid) async {
-    var url = Uri.http(
+    DefaultCacheManager cacheManger = MyHttp.cacheManger;
+    Uri url = Uri.http(
       API.host,
       '${API.detailSong}/$songMid/1',
     );
-    final client = RetryClient(http.Client());
-    try {
-      var response = await client.get(url);
-      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        var detailSong = decodedResponse['data'];
-        return Future.value(DetailSong.fromJson(detailSong));
+    String urlString = url.toString();
+    dynamic result = await cacheManger.getFileFromMemory(urlString);
+    if (result == null) {
+      result = await cacheManger.getFileFromCache(urlString);
+      if (result == null) {
+        MyLogger.logger.d('Loading detail song from network...');
+        final client = RetryClient(http.Client());
+        try {
+          var response = await client.get(url);
+          var decodedResponse =
+              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+          if (response.statusCode == 200 &&
+              decodedResponse['success'] == true) {
+            result = DetailSong.fromJson(decodedResponse['data']);
+            await cacheManger.putFile(
+              urlString,
+              response.bodyBytes,
+              fileExtension: 'json',
+            );
+          } else {
+            MyLogger.logger
+                .e('Response error with code: ${response.statusCode}');
+            result = null;
+          }
+        } catch (e) {
+          MyToast.showToast('Exception thrown: $e');
+          MyLogger.logger.e('Network error with exception: $e');
+          rethrow;
+        } finally {
+          client.close();
+        }
       } else {
-        return null;
-        // return Future.value(MockData.detailSong);
+        MyLogger.logger.d('Loading detail song from cache...');
       }
-    } finally {
-      client.close();
+    } else {
+      MyLogger.logger.d('Loading detail song from memory...');
     }
+    if (result is DetailSong) {
+      result = Future.value(result);
+    } else if (result is FileInfo) {
+      var decodedResponse =
+          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
+      result = DetailSong.fromJson(decodedResponse['data']);
+      result = Future.value(result);
+    } else {}
+    return result;
   }
 
   @override
@@ -251,14 +288,16 @@ class _SongPlayerPageState extends State<SongPlayerPage>
       //   });
     });
 
-    print(appState);
-
-    if (currentDetailSong == null || prevSong != currentSong) {
-      _detailSong = isUsingMockData
-          ? Future.value(MockData.detailSong)
-          : fetchDetailSong(currentSong!.songMid);
+    try {
+      if (currentDetailSong == null || prevSong != currentSong) {
+        _detailSong = isUsingMockData
+            ? Future.value(MockData.detailSong)
+            : fetchDetailSong(currentSong!.songMid);
+      }
+    } on SocketException catch (e) {
+      MyLogger.logger.e(e);
     }
-    print(_detailSong);
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
