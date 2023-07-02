@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:http/retry.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/entities/detail_playlist.dart';
 import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/http/api.dart';
@@ -118,7 +119,33 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                     );
                                   } else if (snapshot.hasError) {
                                     return Center(
-                                      child: Text('Error: ${snapshot.error}'),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SelectableText(
+                                            'Exception: ${snapshot.error}',
+                                            style: TextStyle(
+                                              color: Colors.white70,
+                                              fontFamily: 'Roboto',
+                                              fontSize: 16.0,
+                                            ),
+                                          ),
+                                          TextButton.icon(
+                                            style: TextButton.styleFrom(
+                                              foregroundColor: Colors.white70,
+                                            ),
+                                            icon: Icon(MdiIcons.webRefresh),
+                                            label: Text('Retry'),
+                                            onPressed: () {
+                                              setState(() {
+                                                _detailPlaylist =
+                                                    fetchDetailPlaylist(
+                                                        openedPlaylist!.tid);
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      ),
                                     );
                                   } else {
                                     DetailPlaylist detailPlaylist =
@@ -347,7 +374,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                           if (appState.queue!.length ==
                                                                               1) {
                                                                             MyToast.showToast('All songs in playlist is taken down.');
-                                                                            
+
                                                                             return;
                                                                           }
                                                                           index =

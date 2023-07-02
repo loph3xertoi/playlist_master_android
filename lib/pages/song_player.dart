@@ -10,6 +10,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/retry.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/entities/detail_song.dart';
 import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/http/api.dart';
@@ -281,7 +282,31 @@ class _SongPlayerPageState extends State<SongPlayerPage>
               );
             } else if (snapshot.hasError) {
               return Center(
-                child: SelectableText('Error: ${snapshot.error}'),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SelectableText(
+                      'Exception: ${snapshot.error}',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontFamily: 'Roboto',
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white70,
+                      ),
+                      icon: Icon(MdiIcons.webRefresh),
+                      label: Text('Retry'),
+                      onPressed: () {
+                        setState(() {
+                          _detailSong = fetchDetailSong(currentSong!.songMid);
+                        });
+                      },
+                    ),
+                  ],
+                ),
               );
             } else {
               DetailSong detailSong = snapshot.data as DetailSong;

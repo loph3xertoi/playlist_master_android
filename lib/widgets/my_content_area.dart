@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/retry.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/http/api.dart';
 import 'package:http/http.dart' as http;
@@ -72,7 +73,31 @@ class _MyContentAreaState extends State<MyContentArea> {
             );
           } else if (snapshot.hasError) {
             return Center(
-              child: Text('Error: ${snapshot.error}'),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SelectableText(
+                    '${snapshot.error}',
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontFamily: 'Roboto',
+                      fontSize: 16.0,
+                    ),
+                  ),
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.black54,
+                    ),
+                    icon: Icon(MdiIcons.webRefresh),
+                    label: Text('Retry'),
+                    onPressed: () {
+                      setState(() {
+                        _playlists = fetchPlaylists();
+                      });
+                    },
+                  ),
+                ],
+              ),
             );
           } else {
             return Container(
