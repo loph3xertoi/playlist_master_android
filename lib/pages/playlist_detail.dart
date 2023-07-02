@@ -229,15 +229,35 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                             ? Image.asset(
                                                                 detailPlaylist
                                                                     .coverImage)
-                                                            : Image(
-                                                                image: CachedNetworkImageProvider(detailPlaylist
+                                                            : CachedNetworkImage(
+                                                                imageUrl: detailPlaylist
                                                                         .coverImage
                                                                         .isNotEmpty
                                                                     ? detailPlaylist
                                                                         .coverImage
                                                                     : MyAppState
-                                                                        .defaultCoverImage),
+                                                                        .defaultCoverImage,
+                                                                progressIndicatorBuilder: (context,
+                                                                        url,
+                                                                        downloadProgress) =>
+                                                                    CircularProgressIndicator(
+                                                                        value: downloadProgress
+                                                                            .progress),
+                                                                errorWidget: (context,
+                                                                        url,
+                                                                        error) =>
+                                                                    Icon(MdiIcons
+                                                                        .debian),
                                                               ),
+                                                        // : Image(
+                                                        //     image: CachedNetworkImageProvider(detailPlaylist
+                                                        //             .coverImage
+                                                        //             .isNotEmpty
+                                                        //         ? detailPlaylist
+                                                        //             .coverImage
+                                                        //         : MyAppState
+                                                        //             .defaultCoverImage),
+                                                        //   ),
 
                                                         // : Image.network(detailPlaylist
                                                         //         .coverImage

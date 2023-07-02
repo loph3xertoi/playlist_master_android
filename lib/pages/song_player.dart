@@ -722,8 +722,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                                 height: 230.0,
                                                                 width: 230.0,
                                                               )
-                                                            : Image(
-                                                                image: CachedNetworkImageProvider(((queue?.isNotEmpty ??
+                                                            : CachedNetworkImage(
+                                                                imageUrl: ((queue?.isNotEmpty ??
                                                                             false) &&
                                                                         queue![player.effectiveIndices![itemIndex]]
                                                                             .coverUri
@@ -732,8 +732,31 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                                             itemIndex]]
                                                                         .coverUri)
                                                                     : MyAppState
-                                                                        .defaultCoverImage),
+                                                                        .defaultCoverImage,
+                                                                progressIndicatorBuilder: (context,
+                                                                        url,
+                                                                        downloadProgress) =>
+                                                                    CircularProgressIndicator(
+                                                                        value: downloadProgress
+                                                                            .progress),
+                                                                errorWidget: (context,
+                                                                        url,
+                                                                        error) =>
+                                                                    Icon(MdiIcons
+                                                                        .debian),
                                                               ),
+                                                        // : Image(
+                                                        //     image: CachedNetworkImageProvider(((queue?.isNotEmpty ??
+                                                        //                 false) &&
+                                                        //             queue![player.effectiveIndices![itemIndex]]
+                                                        //                 .coverUri
+                                                        //                 .isNotEmpty)
+                                                        //         ? (queue[player.effectiveIndices![
+                                                        //                 itemIndex]]
+                                                        //             .coverUri)
+                                                        //         : MyAppState
+                                                        //             .defaultCoverImage),
+                                                        //   ),
                                                         // : Image.network(
                                                         //     ((queue?.isNotEmpty ??
                                                         //                 false) &&
@@ -775,8 +798,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                             height: 230.0,
                                                             width: 230.0,
                                                           )
-                                                        : Image(
-                                                            image: CachedNetworkImageProvider(((player !=
+                                                        : CachedNetworkImage(
+                                                            imageUrl: ((player !=
                                                                             null &&
                                                                         (queue?.isNotEmpty ??
                                                                             false)) &&
@@ -789,8 +812,34 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                                         itemIndex]]
                                                                     .coverUri
                                                                 : MyAppState
-                                                                    .defaultCoverImage),
+                                                                    .defaultCoverImage,
+                                                            progressIndicatorBuilder: (context,
+                                                                    url,
+                                                                    downloadProgress) =>
+                                                                CircularProgressIndicator(
+                                                                    value: downloadProgress
+                                                                        .progress),
+                                                            errorWidget: (context,
+                                                                    url,
+                                                                    error) =>
+                                                                Icon(MdiIcons.debian),
                                                           ),
+                                                    // : Image(
+                                                    //     image: CachedNetworkImageProvider(((player !=
+                                                    //                     null &&
+                                                    //                 (queue?.isNotEmpty ??
+                                                    //                     false)) &&
+                                                    //             queue![player.effectiveIndices![
+                                                    //                     itemIndex]]
+                                                    //                 .coverUri
+                                                    //                 .isNotEmpty)
+                                                    //         ? queue[player
+                                                    //                     .effectiveIndices![
+                                                    //                 itemIndex]]
+                                                    //             .coverUri
+                                                    //         : MyAppState
+                                                    //             .defaultCoverImage),
+                                                    //   ),
                                                     // : Image.network(
                                                     //     ((player != null &&
                                                     //                 (queue?.isNotEmpty ??

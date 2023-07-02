@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/http/my_http.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/widgets/bottom_player.dart';
@@ -44,27 +45,31 @@ class _MyHomePageState extends State<MyHomePage>
           backgroundColor: Colors.transparent,
           imageUri: 'assets/images/home_button.png',
           onTap: () async {
-            MyHttp.cacheManager.emptyCache();
-            FileInfo? file = await MyHttp.cacheManager.getFileFromCache(
-                'https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png');
-            print(file);
-            FileInfo? file2 = await MyHttp.cacheManager.getFileFromMemory(
-                'https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png');
-            print(file2);
+            // MyHttp.cacheManager.emptyCache();
 
-            // showDialog(
-            //   builder: (BuildContext context) {
-            //     return AlertDialog(
-            //       title: Text(
-            //         'Test network image',
-            //         textAlign: TextAlign.center,
-            //       ),
-            //       // content: Image.network(MyAppState.defaultCoverImage),
-            //       content: Image.file(file.originalUrl),
-            //     );
-            //   },
-            //   context: context,
-            // );
+            showDialog(
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text(
+                    'Test network image',
+                    textAlign: TextAlign.center,
+                  ),
+                  // content: Image.network(MyAppState.defaultCoverImage),
+                  content: Column(
+                    children: [
+                      Icon(MdiIcons.debian),
+                      Icon(Icons.image_outlined),
+                      Icon(MdiIcons.shieldSword),
+                      Icon(MdiIcons.rotate3DVariant),
+                      Icon(MdiIcons.rotateOrbit),
+                      Icon(MdiIcons.cropRotate),
+                      Icon(MdiIcons.phoneRotateLandscape),
+                    ],
+                  ),
+                );
+              },
+              context: context,
+            );
             print('homepage button $appState');
           },
           actions: [

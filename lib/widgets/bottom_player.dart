@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/widgets/create_queue_popup.dart';
 import 'package:provider/provider.dart';
@@ -109,13 +110,24 @@ class _BottomPlayerState extends State<BottomPlayer>
                               // height: 230.0,
                               // width: 230.0,
                             )
-                          : Image(
-                              image: CachedNetworkImageProvider(
-                                currentSong!.coverUri.isNotEmpty
-                                    ? currentSong.coverUri
-                                    : MyAppState.defaultCoverImage,
-                              ),
+                          : CachedNetworkImage(
+                              imageUrl: currentSong!.coverUri.isNotEmpty
+                                  ? currentSong.coverUri
+                                  : MyAppState.defaultCoverImage,
+                              progressIndicatorBuilder:
+                                  (context, url, downloadProgress) =>
+                                      CircularProgressIndicator(
+                                          value: downloadProgress.progress),
+                              errorWidget: (context, url, error) =>
+                                  Icon(MdiIcons.debian),
                             ),
+                      // : Image(
+                      //     image: CachedNetworkImageProvider(
+                      //       currentSong!.coverUri.isNotEmpty
+                      //           ? currentSong.coverUri
+                      //           : MyAppState.defaultCoverImage,
+                      //     ),
+                      //   ),
                       // : Image.network(
                       //     currentSong!.coverUri.isNotEmpty
                       //         ? currentSong.coverUri

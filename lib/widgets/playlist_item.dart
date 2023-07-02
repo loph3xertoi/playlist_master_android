@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:provider/provider.dart';
@@ -36,13 +37,24 @@ class PlaylistItem extends StatelessWidget {
                     height: 46.0,
                     child: isUsingMockData
                         ? Image.asset(playlist.coverImage)
-                        : Image(
-                            image: CachedNetworkImageProvider(
-                              playlist.coverImage.isNotEmpty
-                                  ? playlist.coverImage
-                                  : MyAppState.defaultCoverImage,
-                            ),
+                        : CachedNetworkImage(
+                            imageUrl: playlist.coverImage.isNotEmpty
+                                ? playlist.coverImage
+                                : MyAppState.defaultCoverImage,
+                            progressIndicatorBuilder:
+                                (context, url, downloadProgress) =>
+                                    CircularProgressIndicator(
+                                        value: downloadProgress.progress),
+                            errorWidget: (context, url, error) =>
+                                Icon(MdiIcons.debian),
                           ),
+                    // : Image(
+                    //     image: CachedNetworkImageProvider(
+                    //       playlist.coverImage.isNotEmpty
+                    //           ? playlist.coverImage
+                    //           : MyAppState.defaultCoverImage,
+                    //     ),
+                    //   ),
                     // : Image.network(playlist.coverImage.isNotEmpty
                     //     ? playlist.coverImage
                     //     : MyAppState.defaultCoverImage),
