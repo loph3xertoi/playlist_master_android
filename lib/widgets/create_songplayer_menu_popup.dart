@@ -67,7 +67,7 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
 
                 if (appState.queue!.length == 1) {
                   appState.queue = [];
-                  appState.currentPlayingSongInQueue = -1;
+                  appState.currentPlayingSongInQueue = 0;
                   appState.currentSong = null;
                   appState.prevSong = null;
                   appState.isPlaying = false;
@@ -94,7 +94,7 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                   if (appState.queue![0].isTakenDown &&
                       appState.queue!.length == 1) {
                     appState.queue = [];
-                    appState.currentPlayingSongInQueue = -1;
+                    appState.currentPlayingSongInQueue = 0;
                     appState.currentSong = null;
                     appState.prevSong = null;
                     appState.isPlaying = false;

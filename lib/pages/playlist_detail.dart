@@ -9,6 +9,7 @@ import 'package:http/retry.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/entities/detail_playlist.dart';
 import 'package:playlistmaster/entities/playlist.dart';
+import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/http/api.dart';
 import 'package:http/http.dart' as http;
 import 'package:playlistmaster/http/my_http.dart';
@@ -93,7 +94,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
         } catch (e) {
           MyToast.showToast('Exception thrown: $e');
           MyLogger.logger.e('Network error with exception: $e');
-          throw Exception(e);
+          rethrow;
         } finally {
           client.close();
         }
@@ -139,6 +140,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
     var ownerDirIdOfCurrentPlayingSong =
         appState.ownerDirIdOfCurrentPlayingSong;
+    var rawQueue = appState.rawQueue;
 
     return Material(
       child: Scaffold(
@@ -402,10 +404,13 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                 .builder(
                                                               // TODO: fix this. Mock.songs have 10 songs only.
                                                               // itemCount: _detailPlaylist.songsCount,
-                                                              itemCount: min(
-                                                                  detailPlaylist
+                                                              itemCount: isUsingMockData
+                                                                  ? min(
+                                                                      detailPlaylist
+                                                                          .songsCount,
+                                                                      10)
+                                                                  : detailPlaylist
                                                                       .songsCount,
-                                                                  10),
                                                               itemBuilder:
                                                                   (context,
                                                                       index) {
@@ -429,16 +434,33 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                         appState.queue =
                                                                             detailPlaylist.songs;
 
-                                                                        if (appState
-                                                                            .queue![index]
-                                                                            .isTakenDown) {
-                                                                          if (appState.queue!.length ==
-                                                                              1) {
+                                                                        appState.rawQueue =
+                                                                            detailPlaylist.songs;
+
+                                                                        await appState
+                                                                            .initAudioPlayer();
+
+                                                                        if (true) {
+                                                                          bool
+                                                                              hasValidSong =
+                                                                              false;
+                                                                          for (int i = index;
+                                                                              i < index + detailPlaylist.songsCount;
+                                                                              i++) {
+                                                                            if (appState.rawQueue![i % detailPlaylist.songsCount].isTakenDown) {
+                                                                              continue;
+                                                                            }
+                                                                            hasValidSong =
+                                                                                true;
+                                                                            index =
+                                                                                appState.queue!.indexOf(appState.rawQueue![i % detailPlaylist.songsCount]);
+                                                                            break;
+                                                                          }
+
+                                                                          if (!hasValidSong) {
                                                                             MyToast.showToast('All songs in playlist is taken down.');
                                                                             return;
                                                                           }
-                                                                          index =
-                                                                              (index + 1) % appState.queue!.length;
                                                                         }
 
                                                                         appState.canSongPlayerPagePop =
@@ -466,8 +488,6 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                         appState.isFirstLoadSongPlayer =
                                                                             true;
 
-                                                                        await appState
-                                                                            .initAudioPlayer();
                                                                         // appState.player!
                                                                         //     .seek(
                                                                         //         Duration
@@ -480,30 +500,8 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                       } else if (ownerDirIdOfCurrentPlayingSong ==
                                                                               openedPlaylist!
                                                                                   .dirId &&
-                                                                          index ==
-                                                                              currentPlayingSongInQueue &&
-                                                                          appState.queue!.length ==
-                                                                              detailPlaylist.songsCount) {
-                                                                        if (appState
-                                                                            .queue![index]
-                                                                            .isTakenDown) {
-                                                                          if (appState.queue!.length ==
-                                                                              1) {
-                                                                            MyToast.showToast('All songs in playlist is taken down.');
-
-                                                                            return;
-                                                                          }
-                                                                          index =
-                                                                              (index + 1) % appState.queue!.length;
-                                                                          appState.currentPlayingSongInQueue =
-                                                                              index;
-                                                                          appState.currentSong =
-                                                                              appState.queue![index];
-                                                                          appState.prevCarouselIndex =
-                                                                              appState.currentPlayingSongInQueue!;
-                                                                          appState.prevSong =
-                                                                              appState.currentSong;
-                                                                        }
+                                                                          (index = appState.queue!.indexOf(appState.rawQueue![index])) ==
+                                                                              currentPlayingSongInQueue) {
                                                                         if (!player!
                                                                             .playerState
                                                                             .playing) {
@@ -535,16 +533,33 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                         appState.queue =
                                                                             detailPlaylist.songs;
 
-                                                                        if (appState
-                                                                            .queue![index]
-                                                                            .isTakenDown) {
-                                                                          if (appState.queue!.length ==
-                                                                              1) {
+                                                                        appState.rawQueue =
+                                                                            detailPlaylist.songs;
+
+                                                                        await appState
+                                                                            .initAudioPlayer();
+
+                                                                        if (true) {
+                                                                          bool
+                                                                              hasValidSong =
+                                                                              false;
+                                                                          for (int i = index;
+                                                                              i < index + detailPlaylist.songsCount;
+                                                                              i++) {
+                                                                            if (appState.rawQueue![i % detailPlaylist.songsCount].isTakenDown) {
+                                                                              continue;
+                                                                            }
+                                                                            hasValidSong =
+                                                                                true;
+                                                                            index =
+                                                                                appState.queue!.indexOf(appState.rawQueue![i % detailPlaylist.songsCount]);
+                                                                            break;
+                                                                          }
+
+                                                                          if (!hasValidSong) {
                                                                             MyToast.showToast('All songs in playlist is taken down.');
                                                                             return;
                                                                           }
-                                                                          index =
-                                                                              (index + 1) % appState.queue!.length;
                                                                         }
 
                                                                         appState.ownerDirIdOfCurrentPlayingSong =
@@ -567,8 +582,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                         //     '/song_player';
                                                                         appState.isFirstLoadSongPlayer =
                                                                             true;
-                                                                        await appState
-                                                                            .initAudioPlayer();
+
                                                                         // appState.player!
                                                                         //     .seek(
                                                                         //         Duration

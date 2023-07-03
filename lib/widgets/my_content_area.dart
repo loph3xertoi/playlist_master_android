@@ -73,7 +73,7 @@ class _MyContentAreaState extends State<MyContentArea> {
         } catch (e) {
           MyToast.showToast('Exception thrown: $e');
           MyLogger.logger.e('Network error with exception: $e');
-          throw Exception(e);
+          rethrow;
         } finally {
           client.close();
         }

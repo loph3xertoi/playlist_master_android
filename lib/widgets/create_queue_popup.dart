@@ -25,7 +25,7 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
         if (appState.player != null && mounted) {
           appState.queue = [];
           // appState.currentDetailSong = null;
-          appState.currentPlayingSongInQueue = -1;
+          appState.currentPlayingSongInQueue = 0;
           appState.currentSong = null;
           appState.prevSong = null;
           appState.isPlaying = false;

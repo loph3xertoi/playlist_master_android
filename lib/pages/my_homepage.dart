@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/http/my_http.dart';
 import 'package:playlistmaster/states/app_state.dart';
@@ -45,8 +46,13 @@ class _MyHomePageState extends State<MyHomePage>
           backgroundColor: Colors.transparent,
           imageUri: 'assets/images/home_button.png',
           onTap: () async {
-            // MyHttp.cacheManager.emptyCache();
+            MyHttp.cacheManager.emptyCache();
+            await AudioPlayer.clearAssetCache();
+            // Clear the asset cache directory
 
+            // final audioSource =
+            //     LockCachingAudioSource('https://foo.com/bar.mp3');
+            //     audioSource.clearCache();
             showDialog(
               builder: (BuildContext context) {
                 return AlertDialog(

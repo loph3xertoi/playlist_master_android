@@ -70,6 +70,9 @@ class MyAppState extends ChangeNotifier {
   // Current queue.
   List<Song>? _queue;
 
+  // Raw queue of the playlist.
+  List<Song>? _rawQueue;
+
   // Define the queue.
   ConcatenatingAudioSource? _initQueue;
 
@@ -100,7 +103,7 @@ class MyAppState extends ChangeNotifier {
   int _userPlayingMode = 1;
 
   // Current playing song in queue.
-  int? _currentPlayingSongInQueue;
+  int _currentPlayingSongInQueue = 0;
 
   // All songs of current playlist.
   // List<Song>? _songsOfPlaylist;
@@ -168,6 +171,8 @@ class MyAppState extends ChangeNotifier {
 
   List<Song>? get queue => _queue;
 
+  List<Song>? get rawQueue => _rawQueue;
+
   // List<Song>? get prevQueue => _prevQueue;
 
   // List<Song>? get songsOfPlaylist => _songsOfPlaylist;
@@ -179,6 +184,11 @@ class MyAppState extends ChangeNotifier {
   double? get speed => _speed;
 
   bool get isSkipTakenDownSong => _isSkipTakenDownSong;
+
+  set rawQueue(List<Song>? value) {
+    _rawQueue = value;
+    notifyListeners();
+  }
 
   set isSkipTakenDownSong(bool value) {
     _isSkipTakenDownSong = value;
@@ -430,6 +440,7 @@ class MyAppState extends ChangeNotifier {
       // }
     } catch (e) {
       print("Error init audio player: $e");
+      rethrow;
     }
   }
 
@@ -475,7 +486,7 @@ class MyAppState extends ChangeNotifier {
         } catch (e) {
           MyToast.showToast('Exception thrown: $e');
           MyLogger.logger.e('Network error with exception: $e');
-          throw Exception(e);
+          rethrow;
         } finally {
           client.close();
         }
@@ -501,37 +512,50 @@ class MyAppState extends ChangeNotifier {
 
   Future<ConcatenatingAudioSource?> initTheQueue() async {
     List<AudioSource> queueList;
-    // Uri uri = await getImageFileFromAssets();
-    queueList = await Future.wait(_queue!
-        .map(
-          (e) async => isUsingMockData
-              ? AudioSource.asset(
-                  MockData.links[_queue!.indexOf(e)],
-                  tag: MediaItem(
-                    // Specify a unique ID for each media item:
-                    id: _queue!.indexOf(e).toString(),
-                    // Metadata to display in the notification:
-                    album: 'Album name',
-                    artist: e.singers.map((e) => e.name).join(','),
-                    title: e.name,
-                    artUri: await getImageFileFromAssets(
-                        e.coverUri, _queue!.indexOf(e)),
-                    // artUri: Uri.parse(
-                    //     'https://pub.dev/static/hash-upjs5ooo/img/pub-dev-logo-2x.png'),
-                  ),
-                )
-              : LockCachingAudioSource(
-                  Uri.parse(await fetchSongLink(e, '128', 1)),
-                  tag: MediaItem(
-                    id: _queue!.indexOf(e).toString(),
-                    album: "Album name",
-                    artist: e.singers.map((e) => e.name).join(','),
-                    title: e.name,
-                    artUri: Uri.parse(e.coverUri),
-                  ),
+    List<Future<AudioSource>> songs = [];
+    if (isUsingMockData) {
+      songs = _queue!
+          .map((e) async => AudioSource.asset(
+                MockData.links[_queue!.indexOf(e)],
+                tag: MediaItem(
+                  // Specify a unique ID for each media item:
+                  id: _queue!.indexOf(e).toString(),
+                  // Metadata to display in the notification:
+                  album: 'Album name',
+                  artist: e.singers.map((e) => e.name).join(','),
+                  title: e.name,
+                  artUri: await getImageFileFromAssets(
+                      e.coverUri, _queue!.indexOf(e)),
+                  // artUri: Uri.parse(
+                  //     'https://pub.dev/static/hash-upjs5ooo/img/pub-dev-logo-2x.png'),
+                  // -1
                 ),
-        )
-        .toList());
+              ))
+          .toList();
+    } else {
+      for (int i = 0; i < _queue!.length; i++) {
+        Song song = _queue![i];
+        String songlink = await fetchSongLink(song, '128', 1);
+        if (songlink == '1' || songlink.isEmpty) {
+          removeSongInQueue(i--);
+        } else if (songlink == '2') {
+        } else {
+          var audioSource = LockCachingAudioSource(
+            Uri.parse(songlink),
+            tag: MediaItem(
+              id: i.toString(),
+              album: 'Album name',
+              artist: song.singers.map((e) => e.name).join(','),
+              title: song.name,
+              artUri: Uri.parse(song.coverUri),
+            ),
+          );
+          songs.add(Future.value(audioSource));
+        }
+      }
+    }
+
+    queueList = await Future.wait(songs);
 
     return ConcatenatingAudioSource(
       // Start loading next item just before reaching it

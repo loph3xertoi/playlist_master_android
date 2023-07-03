@@ -239,7 +239,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
       if (_return) {
         appState.queue = [];
         appState.currentDetailSong = null;
-        appState.currentPlayingSongInQueue = -1;
+        appState.currentPlayingSongInQueue = 0;
         appState.currentSong = null;
         appState.prevSong = null;
         appState.isPlaying = false;
@@ -302,6 +302,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     } on SocketException catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e(e);
+      rethrow;
     }
 
     return Container(

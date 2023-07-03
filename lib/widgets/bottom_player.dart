@@ -111,9 +111,10 @@ class _BottomPlayerState extends State<BottomPlayer>
                               // width: 230.0,
                             )
                           : CachedNetworkImage(
-                              imageUrl: currentSong!.coverUri.isNotEmpty
-                                  ? currentSong.coverUri
-                                  : MyAppState.defaultCoverImage,
+                              imageUrl:
+                                  currentSong?.coverUri.isNotEmpty ?? false
+                                      ? currentSong!.coverUri
+                                      : MyAppState.defaultCoverImage,
                               progressIndicatorBuilder:
                                   (context, url, downloadProgress) =>
                                       CircularProgressIndicator(
@@ -146,7 +147,7 @@ class _BottomPlayerState extends State<BottomPlayer>
                         Flexible(
                           flex: 3,
                           child: Text(
-                            currentSong.name,
+                            currentSong?.name ?? '',
                             style: TextStyle(
                               fontSize: 15.0,
                               color: Color(0xB2000000),
@@ -159,7 +160,7 @@ class _BottomPlayerState extends State<BottomPlayer>
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              ' - ${currentSong.singers[0].name}',
+                              ' - ${currentSong?.singers[0].name}',
                               style: TextStyle(
                                 fontSize: 12.0,
                                 color: Color(0x42000000),
