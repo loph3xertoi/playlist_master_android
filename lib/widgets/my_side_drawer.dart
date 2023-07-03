@@ -69,8 +69,8 @@ class _MySideDrawerState extends State<MySideDrawer> {
                     decoration: BoxDecoration(
                       color: Colors.transparent,
                     ),
-                    accountName: Text('John Doe'),
-                    accountEmail: Text('johndoe@example.com'),
+                    accountName: Text('Daw Loph'),
+                    accountEmail: Text('loph3xertoi@gmail.com'),
                     currentAccountPicture: CircleAvatar(
                       backgroundImage: AssetImage(
                         'assets/images/qqmusic.png',

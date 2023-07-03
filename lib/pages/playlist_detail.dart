@@ -121,8 +121,9 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     final state = Provider.of<MyAppState>(context, listen: false);
     var isUsingMockData = state.isUsingMockData;
     var openedPlaylist = state.openedPlaylist;
+    var rawQueue = state.rawQueue;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      var rawQueue = state.rawQueue;
+      state.rawQueue = null;
     });
     // _tid = ModalRoute.of(context)!.settings.arguments as String;
     if (isUsingMockData) {
