@@ -114,9 +114,9 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     );
     String urlString = url.toString();
     dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null) {
+    if (result == null || !(result as FileInfo).file.existsSync()) {
       result = await cacheManager.getFileFromCache(urlString);
-      if (result == null) {
+      if (result == null || !(result as FileInfo).file.existsSync()) {
         MyLogger.logger.d('Loading detail song from network...');
         final client = RetryClient(http.Client());
         try {
@@ -132,6 +132,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
               fileExtension: 'json',
             );
           } else {
+            MyToast.showToast(
+                'Response error with code: ${response.statusCode}');
             MyLogger.logger
                 .e('Response error with code: ${response.statusCode}');
             result = null;
@@ -298,6 +300,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
             : fetchDetailSong(currentSong!.songMid);
       }
     } on SocketException catch (e) {
+      MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e(e);
     }
 

@@ -22,15 +22,33 @@ class DetailPlaylist {
     required this.songs,
   });
 
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'desc': description,
+      'coverImage': coverImage,
+      'songCount': songsCount,
+      'listenNum': listenNum,
+      'dirId': dirId,
+      'tid': tid,
+      'songs': songs,
+    };
+  }
+
   factory DetailPlaylist.fromJson(Map<String, dynamic> json) {
-    List<dynamic> songsJson = json['songs'];
-    List<Song> songs =
-        songsJson.map((songJson) => Song.fromJson(songJson)).toList();
+    int songsCount = json['songCount'];
+    List<Song> songs;
+    if (songsCount != 0) {
+      List<dynamic> songsJson = json['songs'];
+      songs = songsJson.map((songJson) => Song.fromJson(songJson)).toList();
+    } else {
+      songs = [];
+    }
     return DetailPlaylist(
       name: json['name'],
       description: json['desc'],
       coverImage: json['coverImage'],
-      songsCount: json['songCount'],
+      songsCount: songsCount,
       listenNum: json['listenNum'],
       dirId: json['dirId'],
       tid: json['tid'],

@@ -40,7 +40,7 @@ class PlaylistItem extends StatelessWidget {
                         : CachedNetworkImage(
                             imageUrl: playlist.coverImage.isNotEmpty
                                 ? playlist.coverImage
-                                : MyAppState.defaultCoverImage,
+                                : MyAppState.defaultPlaylistCover,
                             progressIndicatorBuilder:
                                 (context, url, downloadProgress) =>
                                     CircularProgressIndicator(

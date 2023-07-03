@@ -45,9 +45,9 @@ class _MyContentAreaState extends State<MyContentArea> {
     );
     String urlString = url.toString();
     dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null) {
+    if (result == null || !(result as FileInfo).file.existsSync()) {
       result = await cacheManager.getFileFromCache(urlString);
-      if (result == null) {
+      if (result == null || !(result as FileInfo).file.existsSync()) {
         MyLogger.logger.d('Loading playlists from network...');
         final client = RetryClient(http.Client());
         try {
@@ -64,6 +64,8 @@ class _MyContentAreaState extends State<MyContentArea> {
               fileExtension: 'json',
             );
           } else {
+            MyToast.showToast(
+                'Response error with code: ${response.statusCode}');
             MyLogger.logger
                 .e('Response error with code: ${response.statusCode}');
             result = null;

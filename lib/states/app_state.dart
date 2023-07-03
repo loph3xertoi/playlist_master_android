@@ -37,8 +37,8 @@ class MyAppState extends ChangeNotifier {
   // static const String defaultCoverImage =
   //     'https://www.worldwildlife.org/assets/structure/unique/logo-c562409bb6158bf64e5f8b1be066dbd5983d75f5ce7c9935a5afffbcc03f8e5d.png';
 
-  // // Current position in milliseconds.
-  // int? _playProgress;
+  static const String defaultPlaylistCover =
+      'http://y.gtimg.cn/mediastyle/global/img/cover_playlist.png?max_age=31536000';
 
   // Set true when init song player for cover animation forward.
   bool _isFirstLoadSongPlayer = false;
@@ -442,9 +442,9 @@ class MyAppState extends ChangeNotifier {
     });
     String urlString = url.toString();
     dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null) {
+    if (result == null || !(result as FileInfo).file.existsSync()) {
       result = await cacheManager.getFileFromCache(urlString);
-      if (result == null) {
+      if (result == null || !(result as FileInfo).file.existsSync()) {
         MyLogger.logger.d('Loading songlink from network...');
         final client = RetryClient(http.Client());
         try {
@@ -466,6 +466,8 @@ class MyAppState extends ChangeNotifier {
               result = songlink;
             }
           } else {
+            MyToast.showToast(
+                'Response error with code: ${response.statusCode}');
             MyLogger.logger
                 .e('Response error with code: ${response.statusCode}');
             result = '2';

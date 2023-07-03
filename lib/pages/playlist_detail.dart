@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/retry.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/entities/detail_playlist.dart';
+import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/http/api.dart';
 import 'package:http/http.dart' as http;
 import 'package:playlistmaster/http/my_http.dart';
@@ -32,17 +34,17 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   // late List<Song> _songs;
   // late String _tid;
 
-  Future<DetailPlaylist?> fetchDetailPlaylist(String tid) async {
+  Future<DetailPlaylist?> fetchDetailPlaylist(Playlist playlist) async {
     DefaultCacheManager cacheManager = MyHttp.cacheManager;
     Uri url = Uri.http(
       API.host,
-      '${API.detailPlaylist}/$tid/1',
+      '${API.detailPlaylist}/${playlist.tid}/1',
     );
     String urlString = url.toString();
     dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null) {
+    if (result == null || !(result as FileInfo).file.existsSync()) {
       result = await cacheManager.getFileFromCache(urlString);
-      if (result == null) {
+      if (result == null || !(result as FileInfo).file.existsSync()) {
         MyLogger.logger.d('Loading detail playlist from network...');
         final client = RetryClient(http.Client());
         try {
@@ -57,7 +59,33 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
               response.bodyBytes,
               fileExtension: 'json',
             );
+          } else if (response.statusCode == 200 &&
+              decodedResponse['success'] == false) {
+            MyToast.showToast('Request failure, tid is 0');
+            MyLogger.logger.e('Request failure, tid is 0');
+
+            DetailPlaylist detailPlaylist = DetailPlaylist(
+              name: playlist.name,
+              coverImage: playlist.coverImage,
+              songsCount: playlist.songsCount,
+              listenNum: 0,
+              dirId: playlist.dirId,
+              tid: playlist.tid,
+              songs: [],
+            );
+            result = detailPlaylist;
+            decodedResponse['data'] = detailPlaylist.toJson();
+            String jsonString = jsonEncode(decodedResponse);
+            List<int> bodyBytes = utf8.encode(jsonString);
+            Uint8List uint8List = Uint8List.fromList(bodyBytes);
+            await cacheManager.putFile(
+              urlString,
+              uint8List,
+              fileExtension: 'json',
+            );
           } else {
+            MyToast.showToast(
+                'Response error with code: ${response.statusCode}');
             MyLogger.logger
                 .e('Response error with code: ${response.statusCode}');
             result = null;
@@ -97,7 +125,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     if (isUsingMockData) {
       _detailPlaylist = Future.value(MockData.detailPlaylist);
     } else {
-      _detailPlaylist = fetchDetailPlaylist(openedPlaylist!.tid);
+      _detailPlaylist = fetchDetailPlaylist(openedPlaylist!);
     }
   }
 
@@ -176,7 +204,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                               setState(() {
                                                 _detailPlaylist =
                                                     fetchDetailPlaylist(
-                                                        openedPlaylist!.tid);
+                                                        openedPlaylist!);
                                               });
                                             },
                                           ),
