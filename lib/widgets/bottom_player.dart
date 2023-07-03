@@ -141,9 +141,10 @@ class _BottomPlayerState extends State<BottomPlayer>
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: MainAxisSize.max,
                       children: [
                         Flexible(
+                          flex: 3,
                           child: Text(
                             currentSong.name,
                             style: TextStyle(
@@ -155,14 +156,17 @@ class _BottomPlayerState extends State<BottomPlayer>
                           ),
                         ),
                         Expanded(
-                          child: Text(
-                            ' - ${currentSong.singers[0].name}',
-                            style: TextStyle(
-                              fontSize: 12.0,
-                              color: Color(0x42000000),
-                              letterSpacing: 0.25,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              ' - ${currentSong.singers[0].name}',
+                              style: TextStyle(
+                                fontSize: 12.0,
+                                color: Color(0x42000000),
+                                letterSpacing: 0.25,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],

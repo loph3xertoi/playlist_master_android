@@ -68,12 +68,15 @@ class PlaylistItem extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(
-                          playlist.name,
-                          style: TextStyle(
-                            fontSize: 12.0,
-                            letterSpacing: 0.25,
-                            height: 1.2,
+                        Flexible(
+                          child: Text(
+                            playlist.name,
+                            style: TextStyle(
+                              fontSize: 12.0,
+                              letterSpacing: 0.25,
+                              height: 1.2,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Text(

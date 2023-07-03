@@ -49,6 +49,7 @@ class _SongItemState extends State<SongItem> {
                   style: TextStyle(
                     fontSize: 14.0,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   widget.song.singers[0].name,
@@ -56,6 +57,7 @@ class _SongItemState extends State<SongItem> {
                     fontSize: 10.0,
                     color: Color(0x42000000),
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

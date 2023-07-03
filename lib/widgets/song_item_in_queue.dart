@@ -51,20 +51,34 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
                   ),
                 )
               : Container(),
-          Text(
-            widget.name,
-            style: TextStyle(
-              fontSize: 15.0,
-              color: widget.isPlaying ? Color(0xFFFF0000) : Colors.black,
-            ),
-          ),
           Expanded(
-            child: Text(
-              '·${widget.singers[0].name}',
-              style: TextStyle(
-                fontSize: 10.0,
-                color: widget.isPlaying ? Color(0xFFFF0000) : Color(0x42000000),
-              ),
+            child: Row(
+              children: [
+                Flexible(
+                  flex: 5,
+                  child: Text(
+                    widget.name,
+                    style: TextStyle(
+                      fontSize: 15.0,
+                      color:
+                          widget.isPlaying ? Color(0xFFFF0000) : Colors.black,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    '·${widget.singers[0].name}',
+                    style: TextStyle(
+                      fontSize: 10.0,
+                      color: widget.isPlaying
+                          ? Color(0xFFFF0000)
+                          : Color(0x42000000),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
           ),
           IconButton(
