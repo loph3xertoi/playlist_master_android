@@ -32,7 +32,9 @@ class _SongItemState extends State<SongItem> {
                 child: Text(
                   (widget.index + 1).toString(),
                   style: TextStyle(
-                    color: Color(0x4D000000),
+                    color: widget.song.isTakenDown || widget.song.payPlay == 1
+                        ? Color(0x42000000)
+                        : Color(0x4D000000),
                     fontSize: 15.0,
                   ),
                 ),
@@ -48,6 +50,9 @@ class _SongItemState extends State<SongItem> {
                   widget.song.name,
                   style: TextStyle(
                     fontSize: 14.0,
+                    color: widget.song.isTakenDown || widget.song.payPlay == 1
+                        ? Color(0x42000000)
+                        : Colors.black,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),

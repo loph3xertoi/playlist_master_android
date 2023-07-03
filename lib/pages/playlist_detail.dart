@@ -9,7 +9,6 @@ import 'package:http/retry.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/entities/detail_playlist.dart';
 import 'package:playlistmaster/entities/playlist.dart';
-import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/http/api.dart';
 import 'package:http/http.dart' as http;
 import 'package:playlistmaster/http/my_http.dart';
@@ -122,6 +121,9 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     final state = Provider.of<MyAppState>(context, listen: false);
     var isUsingMockData = state.isUsingMockData;
     var openedPlaylist = state.openedPlaylist;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      var rawQueue = state.rawQueue;
+    });
     // _tid = ModalRoute.of(context)!.settings.arguments as String;
     if (isUsingMockData) {
       _detailPlaylist = Future.value(MockData.detailPlaylist);
@@ -250,51 +252,58 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                           4.0,
                                                         ),
                                                       ),
-                                                      child: ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(4.0),
-                                                        child: isUsingMockData
-                                                            ? Image.asset(
-                                                                detailPlaylist
-                                                                    .coverImage)
-                                                            : CachedNetworkImage(
-                                                                imageUrl: detailPlaylist
-                                                                        .coverImage
-                                                                        .isNotEmpty
-                                                                    ? detailPlaylist
-                                                                        .coverImage
-                                                                    : MyAppState
-                                                                        .defaultCoverImage,
-                                                                progressIndicatorBuilder: (context,
-                                                                        url,
-                                                                        downloadProgress) =>
-                                                                    CircularProgressIndicator(
-                                                                        value: downloadProgress
-                                                                            .progress),
-                                                                errorWidget: (context,
-                                                                        url,
-                                                                        error) =>
-                                                                    Icon(MdiIcons
-                                                                        .debian),
-                                                              ),
-                                                        // : Image(
-                                                        //     image: CachedNetworkImageProvider(detailPlaylist
-                                                        //             .coverImage
-                                                        //             .isNotEmpty
-                                                        //         ? detailPlaylist
-                                                        //             .coverImage
-                                                        //         : MyAppState
-                                                        //             .defaultCoverImage),
-                                                        //   ),
+                                                      child: GestureDetector(
+                                                        onTap: () {
+                                                          print(appState);
+                                                          setState(() {});
+                                                        },
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      4.0),
+                                                          child: isUsingMockData
+                                                              ? Image.asset(
+                                                                  detailPlaylist
+                                                                      .coverImage)
+                                                              : CachedNetworkImage(
+                                                                  imageUrl: detailPlaylist
+                                                                          .coverImage
+                                                                          .isNotEmpty
+                                                                      ? detailPlaylist
+                                                                          .coverImage
+                                                                      : MyAppState
+                                                                          .defaultCoverImage,
+                                                                  progressIndicatorBuilder: (context,
+                                                                          url,
+                                                                          downloadProgress) =>
+                                                                      CircularProgressIndicator(
+                                                                          value:
+                                                                              downloadProgress.progress),
+                                                                  errorWidget: (context,
+                                                                          url,
+                                                                          error) =>
+                                                                      Icon(MdiIcons
+                                                                          .debian),
+                                                                ),
+                                                          // : Image(
+                                                          //     image: CachedNetworkImageProvider(detailPlaylist
+                                                          //             .coverImage
+                                                          //             .isNotEmpty
+                                                          //         ? detailPlaylist
+                                                          //             .coverImage
+                                                          //         : MyAppState
+                                                          //             .defaultCoverImage),
+                                                          //   ),
 
-                                                        // : Image.network(detailPlaylist
-                                                        //         .coverImage
-                                                        //         .isNotEmpty
-                                                        //     ? detailPlaylist
-                                                        //         .coverImage
-                                                        //     : MyAppState
-                                                        //         .defaultCoverImage),
+                                                          // : Image.network(detailPlaylist
+                                                          //         .coverImage
+                                                          //         .isNotEmpty
+                                                          //     ? detailPlaylist
+                                                          //         .coverImage
+                                                          //     : MyAppState
+                                                          //         .defaultCoverImage),
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
@@ -603,9 +612,12 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                         SongItem(
                                                                       index:
                                                                           index,
-                                                                      song: detailPlaylist
-                                                                              .songs[
-                                                                          index],
+                                                                      song: rawQueue ==
+                                                                              null
+                                                                          ? detailPlaylist.songs[
+                                                                              index]
+                                                                          : appState
+                                                                              .rawQueue![index],
                                                                     ),
                                                                   ),
                                                                 );
