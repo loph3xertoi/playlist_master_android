@@ -55,7 +55,7 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
             child: Row(
               children: [
                 Flexible(
-                  flex: 5,
+                  flex: 3,
                   child: Text(
                     widget.name,
                     style: TextStyle(
