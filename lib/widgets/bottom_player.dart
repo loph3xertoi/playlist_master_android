@@ -40,8 +40,6 @@ class _BottomPlayerState extends State<BottomPlayer>
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
     var isUsingMockData = appState.isUsingMockData;
-    var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
-    var queue = appState.queue;
     var currentSong = appState.currentSong;
     var isPlaying = appState.isPlaying;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -53,6 +51,7 @@ class _BottomPlayerState extends State<BottomPlayer>
         _isPlaying = false;
       }
     });
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       height: 54.0,
       width: double.infinity,
@@ -68,7 +67,7 @@ class _BottomPlayerState extends State<BottomPlayer>
         ],
       ),
       child: Material(
-        color: Colors.white,
+        // color: Colors.white,
         child: InkWell(
           onTap: () {
             appState.isPlayerPageOpened = true;
@@ -78,18 +77,6 @@ class _BottomPlayerState extends State<BottomPlayer>
             padding: EdgeInsets.fromLTRB(10.0, 2.0, 8.0, 2.0),
             child: Row(
               children: [
-                // AnimatedRotation(
-                //   turns: 5,
-                //   duration: Duration(seconds: 100),
-                //   child: SizedBox(
-                //     height: 50.0,
-                //     width: 50.0,
-                //     child: Image.asset(
-                //       'assets/images/songs_cover/tit.png',
-                //       fit: BoxFit.fill,
-                //     ),
-                //   ),
-                // ),
                 AnimatedBuilder(
                   animation: _songCoverRotateAnimation,
                   builder: (BuildContext context, Widget? child) {
@@ -107,8 +94,6 @@ class _BottomPlayerState extends State<BottomPlayer>
                           ? Image.asset(
                               currentSong!.coverUri,
                               fit: BoxFit.fill,
-                              // height: 230.0,
-                              // width: 230.0,
                             )
                           : CachedNetworkImage(
                               imageUrl:
@@ -122,19 +107,6 @@ class _BottomPlayerState extends State<BottomPlayer>
                               errorWidget: (context, url, error) =>
                                   Icon(MdiIcons.debian),
                             ),
-                      // : Image(
-                      //     image: CachedNetworkImageProvider(
-                      //       currentSong!.coverUri.isNotEmpty
-                      //           ? currentSong.coverUri
-                      //           : MyAppState.defaultCoverImage,
-                      //     ),
-                      //   ),
-                      // : Image.network(
-                      //     currentSong!.coverUri.isNotEmpty
-                      //         ? currentSong.coverUri
-                      //         : MyAppState.defaultCoverImage,
-                      //     fit: BoxFit.fill,
-                      //   ),
                     ),
                   ),
                 ),
@@ -143,6 +115,7 @@ class _BottomPlayerState extends State<BottomPlayer>
                     padding: const EdgeInsets.all(10.0),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Flexible(
                           flex: 3,
@@ -150,8 +123,8 @@ class _BottomPlayerState extends State<BottomPlayer>
                             currentSong?.name ?? '',
                             style: TextStyle(
                               fontSize: 15.0,
-                              color: Color(0xB2000000),
-                              letterSpacing: 0.25,
+                              color: colorScheme.onSecondary,
+                              textBaseline: TextBaseline.alphabetic,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -159,14 +132,17 @@ class _BottomPlayerState extends State<BottomPlayer>
                         Expanded(
                           child: Align(
                             alignment: Alignment.centerLeft,
-                            child: Text(
-                              ' - ${currentSong?.singers[0].name}',
-                              style: TextStyle(
-                                fontSize: 12.0,
-                                color: Color(0x42000000),
-                                letterSpacing: 0.25,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 2.0),
+                              child: Text(
+                                ' - ${currentSong?.singers[0].name}',
+                                style: TextStyle(
+                                  fontSize: 12.0,
+                                  color: colorScheme.onSecondary,
+                                  textBaseline: TextBaseline.alphabetic,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ),
@@ -175,6 +151,7 @@ class _BottomPlayerState extends State<BottomPlayer>
                   ),
                 ),
                 IconButton(
+                  color: colorScheme.tertiary,
                   icon: isPlaying
                       ? Icon(Icons.pause_circle_outline_rounded)
                       : Icon(Icons.play_circle_outline_rounded),
@@ -193,6 +170,7 @@ class _BottomPlayerState extends State<BottomPlayer>
                   },
                 ),
                 IconButton(
+                  color: colorScheme.tertiary,
                   icon: Icon(Icons.queue_music_rounded),
                   onPressed: () {
                     showDialog(

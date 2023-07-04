@@ -22,6 +22,9 @@ import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MyAppState extends ChangeNotifier {
+  // Dark mode.
+  bool? _isDarkMode;
+
   // Using mock data.
   bool _isUsingMockData = false;
 
@@ -125,6 +128,8 @@ class MyAppState extends ChangeNotifier {
   // Set true if click song that is taken down in queue popup list.
   bool _isSkipTakenDownSong = false;
 
+  bool? get isDarkMode => _isDarkMode;
+
   int get prevCarouselIndex => _prevCarouselIndex;
 
   Song? get prevSong => _prevSong;
@@ -184,6 +189,11 @@ class MyAppState extends ChangeNotifier {
   double? get speed => _speed;
 
   bool get isSkipTakenDownSong => _isSkipTakenDownSong;
+
+  set isDarkMode(bool? value) {
+    _isDarkMode = value;
+    notifyListeners();
+  }
 
   set rawQueue(List<Song>? value) {
     _rawQueue = value;

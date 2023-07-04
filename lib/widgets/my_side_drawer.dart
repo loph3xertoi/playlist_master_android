@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/utils/theme_manager.dart';
+import 'package:provider/provider.dart';
 
 class MySideDrawer extends StatefulWidget {
   @override

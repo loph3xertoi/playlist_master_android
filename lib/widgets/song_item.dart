@@ -19,6 +19,7 @@ class SongItem extends StatefulWidget {
 class _SongItemState extends State<SongItem> {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: 50.0,
       child: Row(
@@ -33,8 +34,8 @@ class _SongItemState extends State<SongItem> {
                   (widget.index + 1).toString(),
                   style: TextStyle(
                     color: widget.song.isTakenDown || widget.song.payPlay == 1
-                        ? Color(0x42000000)
-                        : Color(0x4D000000),
+                        ? colorScheme.onTertiary
+                        : colorScheme.onSecondary,
                     fontSize: 15.0,
                   ),
                 ),
@@ -51,8 +52,8 @@ class _SongItemState extends State<SongItem> {
                   style: TextStyle(
                     fontSize: 14.0,
                     color: widget.song.isTakenDown || widget.song.payPlay == 1
-                        ? Color(0x42000000)
-                        : Colors.black,
+                        ? colorScheme.onTertiary
+                        : colorScheme.onSecondary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -60,7 +61,9 @@ class _SongItemState extends State<SongItem> {
                   widget.song.singers[0].name,
                   style: TextStyle(
                     fontSize: 10.0,
-                    color: Color(0x42000000),
+                    color: widget.song.isTakenDown || widget.song.payPlay == 1
+                        ? colorScheme.onTertiary
+                        : colorScheme.onSecondary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -73,19 +76,26 @@ class _SongItemState extends State<SongItem> {
               Padding(
                 padding: const EdgeInsets.only(right: 5.0),
                 child: LikeButton(
+                  iconColor: widget.song.isTakenDown || widget.song.payPlay == 1
+                      ? colorScheme.onTertiary
+                      : colorScheme.tertiary,
                   size: 24.0,
                   isLiked: false,
                 ),
               ),
               IconButton(
                   onPressed: () {},
-                  color: Color(0x42000000),
+                  color: widget.song.isTakenDown || widget.song.payPlay == 1
+                      ? colorScheme.onTertiary
+                      : colorScheme.tertiary,
                   icon: Icon(
                     Icons.playlist_add_rounded,
                   )),
               IconButton(
                   onPressed: () {},
-                  color: Color(0x42000000),
+                  color: widget.song.isTakenDown || widget.song.payPlay == 1
+                      ? colorScheme.onTertiary
+                      : colorScheme.tertiary,
                   icon: Icon(
                     Icons.more_vert_rounded,
                   )),

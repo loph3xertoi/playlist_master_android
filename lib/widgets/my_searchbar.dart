@@ -73,12 +73,14 @@ class _MySearchBarState extends State<MySearchBar>
     // bool isSearching = mySearchState.isSearching;
     MyAppState appState = context.watch<MyAppState>();
     var isUsingMockData = appState.isUsingMockData;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Container(
       height: 40.0,
       margin: EdgeInsets.all(12.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28.0),
-        color: Color(0xFFF0E6E9),
+        color: colorScheme.secondary,
       ),
       child: TextField(
         textAlignVertical: TextAlignVertical.top,
@@ -89,6 +91,7 @@ class _MySearchBarState extends State<MySearchBar>
           floatingLabelAlignment: FloatingLabelAlignment.center,
           hintText:
               widget.inPlaylistDetailPage ? 'Search Playlist' : 'Search Music',
+          hintStyle: textTheme.titleMedium,
           prefixIcon: GestureDetector(
             child: Ink(
               decoration: ShapeDecoration(
@@ -96,6 +99,7 @@ class _MySearchBarState extends State<MySearchBar>
                 shape: CircleBorder(),
               ),
               child: IconButton(
+                color: colorScheme.tertiary,
                 icon: widget.notInHomepage
                     ? Icon(Icons.arrow_back_rounded)
                     : Icon(Icons.menu_rounded),
@@ -120,6 +124,7 @@ class _MySearchBarState extends State<MySearchBar>
                     shape: CircleBorder(),
                   ),
                   child: IconButton(
+                    color: colorScheme.tertiary,
                     icon: Icon(Icons.search_rounded),
                     onPressed: _onSearchIconPressed,
                   ),
@@ -152,6 +157,7 @@ class _MySearchBarState extends State<MySearchBar>
           ),
           // Set the border width to 0.
           border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(vertical: 12.0),
         ),
         onTap: _onSearchAreaPressed,
       ),

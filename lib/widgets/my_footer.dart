@@ -11,14 +11,16 @@ class _MyFooterState extends State<MyFooter> {
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Container(
       width: double.infinity,
       height: 70.0,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.primary,
         border: Border.all(
           width: 0,
-          color: Colors.white,
+          color: colorScheme.primary,
         ),
         boxShadow: [
           appState.isQueueEmpty

@@ -178,10 +178,22 @@ void showSliderDialog({
   required Stream<double> stream,
   required ValueChanged<double> onChanged,
 }) {
+  final colorScheme = Theme.of(context).colorScheme;
+  final textTheme = Theme.of(context).textTheme;
   showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text(title, textAlign: TextAlign.center),
+      // backgroundColor: colorScheme.primary,
+      surfaceTintColor: colorScheme.primary == Colors.white
+          ? Colors.black
+          : colorScheme.primary,
+      title: Text(
+        title,
+        textAlign: TextAlign.center,
+        style: textTheme.labelMedium!.copyWith(
+          fontSize: 24.0,
+        ),
+      ),
       content: StreamBuilder<double>(
         stream: stream,
         builder: (context, snapshot) => SizedBox(
@@ -190,7 +202,7 @@ void showSliderDialog({
             children: [
               Text('${snapshot.data?.toStringAsFixed(1)}$valueSuffix',
                   style: const TextStyle(
-                      fontFamily: 'Fixed',
+                      fontFamily: 'Roboto',
                       fontWeight: FontWeight.bold,
                       fontSize: 24.0)),
               Slider(
@@ -199,6 +211,12 @@ void showSliderDialog({
                 max: max,
                 value: snapshot.data ?? value,
                 onChanged: onChanged,
+                activeColor: colorScheme.primary == Colors.white
+                    ? Color(0xFF212121)
+                    : Color(0xFF141414),
+                inactiveColor: colorScheme.primary == Colors.white
+                    ? Colors.black38
+                    : Colors.amber,
               ),
             ],
           ),

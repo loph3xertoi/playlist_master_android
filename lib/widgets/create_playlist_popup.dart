@@ -11,8 +11,10 @@ class CreatePlaylistDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Dialog(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white,
       insetPadding: EdgeInsets.all(0.0),
       alignment: Alignment.bottomCenter,
       child: Material(
@@ -28,36 +30,42 @@ class CreatePlaylistDialog extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextButton(
+                  style: ButtonStyle(
+                    shadowColor: MaterialStateProperty.all(
+                      colorScheme.primary,
+                    ),
+                    overlayColor: MaterialStateProperty.all(
+                      Colors.grey,
+                    ),
+                  ),
                   onPressed: () => _onCancelPressed(context),
                   child: Text(
                     'Cancel',
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      letterSpacing: 0.1,
-                      color: Colors.black,
-                    ),
+                    style: textTheme.labelSmall,
                   ),
                 ),
                 Expanded(
                   child: Text(
                     'Add new playlist:',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16.0,
-                      letterSpacing: 0.25,
-                    ),
+                    style: textTheme.labelMedium,
                   ),
                 ),
                 TextButton(
+                  style: ButtonStyle(
+                    shadowColor: MaterialStateProperty.all(
+                      colorScheme.primary,
+                    ),
+                    overlayColor: MaterialStateProperty.all(
+                      Colors.grey,
+                    ),
+                  ),
                   onPressed: () {
                     _onFinishPressed(context);
                   },
                   child: Text(
                     'Finish',
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      letterSpacing: 0.1,
+                    style: textTheme.labelSmall!.copyWith(
                       color: Color(0xFF0066FF),
                     ),
                   ),
@@ -70,19 +78,21 @@ class CreatePlaylistDialog extends StatelessWidget {
                 height: 32.0,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8.0),
-                  color: Color(0x0D000000),
+                  color: colorScheme.secondary,
                 ),
                 child: TextField(
                   autofocus: true,
                   textAlignVertical: TextAlignVertical.center,
+                  cursorColor: textTheme.titleMedium!.color,
                   decoration: InputDecoration(
                     alignLabelWithHint: true,
                     floatingLabelAlignment: FloatingLabelAlignment.center,
                     hintText: 'New Playlist',
+                    hintStyle: textTheme.titleMedium,
                     contentPadding:
-                        EdgeInsets.symmetric(vertical: 9.0, horizontal: 10.0),
+                        EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
                     suffixIcon: Icon(Icons.cancel_rounded),
-                    suffixIconColor: Color(0xFFC2CADC),
+                    suffixIconColor: colorScheme.tertiary,
                     border: InputBorder.none,
                   ),
                   onTap: null,

@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:playlistmaster/entities/lyrics.dart';
 import 'package:playlistmaster/entities/singer.dart';
 

@@ -4,6 +4,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/http/my_http.dart';
 import 'package:playlistmaster/states/app_state.dart';
+import 'package:playlistmaster/utils/theme_manager.dart';
 import 'package:playlistmaster/widgets/bottom_player.dart';
 import 'package:playlistmaster/widgets/floating_button/quick_action.dart';
 import 'package:playlistmaster/widgets/floating_button/quick_action_menu.dart';
@@ -12,6 +13,7 @@ import 'package:playlistmaster/widgets/my_footer.dart';
 import 'package:playlistmaster/widgets/my_searchbar.dart';
 import 'package:playlistmaster/widgets/night_background.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -34,110 +36,130 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
-    return Scaffold(
-      key: _scaffoldKey,
-      drawer: Drawer(
-        backgroundColor: Colors.transparent,
-        width: MediaQuery.of(context).size.width * 0.75,
-        child: NightBackground(),
-      ),
-      body: SafeArea(
-        child: QuickActionMenu(
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Consumer<ThemeNotifier>(
+      builder: (context, theme, _) => Scaffold(
+        key: _scaffoldKey,
+        drawer: Drawer(
           backgroundColor: Colors.transparent,
-          imageUri: 'assets/images/home_button.png',
-          onTap: () async {
-            MyHttp.cacheManager.emptyCache();
-            await AudioPlayer.clearAssetCache();
-            // Clear the asset cache directory
+          width: MediaQuery.of(context).size.width * 0.75,
+          child: NightBackground(),
+        ),
+        body: SafeArea(
+          child: QuickActionMenu(
+            backgroundColor: Colors.transparent,
+            imageUri: 'assets/images/home_button.png',
+            onTap: () async {
+              // Clear the asset cache directory
 
-            // final audioSource =
-            //     LockCachingAudioSource('https://foo.com/bar.mp3');
-            //     audioSource.clearCache();
-            showDialog(
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: Text(
-                    'Test network image',
-                    textAlign: TextAlign.center,
-                  ),
-                  // content: Image.network(MyAppState.defaultCoverImage),
-                  content: Column(
-                    children: [
-                      Icon(MdiIcons.debian),
-                      Icon(Icons.image_outlined),
-                      Icon(MdiIcons.shieldSword),
-                      Icon(MdiIcons.rotate3DVariant),
-                      Icon(MdiIcons.rotateOrbit),
-                      Icon(MdiIcons.cropRotate),
-                      Icon(MdiIcons.phoneRotateLandscape),
-                    ],
-                  ),
-                );
-              },
-              context: context,
-            );
-            print('homepage button $appState');
-          },
-          actions: [
-            QuickAction(
-              imageUri: 'assets/images/bilibili.png',
-              onTap: () {
-                print('bilibili');
-              },
-            ),
-            QuickAction(
-              imageUri: 'assets/images/netease.png',
-              onTap: () {
-                print('netease');
-              },
-            ),
-            QuickAction(
-              imageUri: 'assets/images/qqmusic.png',
-              onTap: () {
-                print('qqmusic');
-              },
-            ),
-          ],
-          child: Column(
-            children: [
-              MySearchBar(
-                myScaffoldKey: _scaffoldKey,
-                notInHomepage: false,
-                inPlaylistDetailPage: false,
-              ),
-              // SizedBox.expand(),
-
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Color(0xFF75B6F8),
-                        Color(0xFFD3EAFF),
-                        Color(0xFFF1F8FF),
-                        Color(0xFFFFFFFF),
-                        Color(0xFFFFEED9),
-                      ],
-                      stops: [0.0, 0.38, 0.6, 0.81, 1.0],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
+              // final audioSource =
+              //     LockCachingAudioSource('https://foo.com/bar.mp3');
+              //     audioSource.clearCache();
+              final prefs = await SharedPreferences.getInstance();
+              print(prefs);
+              showDialog(
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text(
+                      'Test network image',
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          margin: EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
-                          child: MyContentArea(),
+                    // content: Image.network(MyAppState.defaultCoverImage),
+                    content: Column(
+                      children: [
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () async {
+                              MyHttp.cacheManager.emptyCache();
+                              await AudioPlayer.clearAssetCache();
+                            },
+                            child: TextButton(
+                              style: ButtonStyle(
+                                shadowColor: MaterialStateProperty.all(
+                                  colorScheme.primary,
+                                ),
+                                overlayColor: MaterialStateProperty.all(
+                                  Colors.grey,
+                                ),
+                              ),
+                              onPressed: () {},
+                              child: Text(
+                                'Clear cache',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                      appState.isQueueEmpty ? Container() : BottomPlayer(),
-                    ],
+                      ],
+                    ),
+                  );
+                },
+                context: context,
+              );
+              print('homepage button $appState');
+            },
+            actions: [
+              QuickAction(
+                imageUri: 'assets/images/bilibili.png',
+                onTap: () {
+                  print('bilibili');
+                },
+              ),
+              QuickAction(
+                imageUri: 'assets/images/netease.png',
+                onTap: () {
+                  print('netease');
+                },
+              ),
+              QuickAction(
+                imageUri: 'assets/images/qqmusic.png',
+                onTap: () {
+                  print('qqmusic');
+                },
+              ),
+            ],
+            child: Column(
+              children: [
+                Container(
+                  color: colorScheme.primary,
+                  child: MySearchBar(
+                    myScaffoldKey: _scaffoldKey,
+                    notInHomepage: false,
+                    inPlaylistDetailPage: false,
                   ),
                 ),
-              ),
-              MyFooter(),
-            ],
+                // SizedBox.expand(),
+
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: theme.homepageBg!,
+                        stops: [0.0, 0.38, 0.6, 0.81, 1.0],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            margin: EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
+                            child: MyContentArea(),
+                          ),
+                        ),
+                        appState.isQueueEmpty ? Container() : BottomPlayer(),
+                      ],
+                    ),
+                  ),
+                ),
+                MyFooter(),
+              ],
+            ),
           ),
         ),
       ),

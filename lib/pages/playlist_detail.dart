@@ -17,6 +17,7 @@ import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/states/my_search_state.dart';
 import 'package:playlistmaster/utils/my_logger.dart';
 import 'package:playlistmaster/utils/my_toast.dart';
+import 'package:playlistmaster/utils/theme_manager.dart';
 import 'package:playlistmaster/widgets/bottom_player.dart';
 import 'package:playlistmaster/widgets/my_searchbar.dart';
 import 'package:playlistmaster/widgets/song_item.dart';
@@ -136,6 +137,8 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     var isUsingMockData = appState.isUsingMockData;
     var openedPlaylist = appState.openedPlaylist;
@@ -145,525 +148,486 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
         appState.ownerDirIdOfCurrentPlayingSong;
     var rawQueue = appState.rawQueue;
 
-    return Material(
-      child: Scaffold(
-        key: _scaffoldKey,
-        body: SafeArea(
-          child: ChangeNotifierProvider(
-            create: (context) => MySearchState(),
-            child: Column(
-              children: [
-                MySearchBar(
-                  myScaffoldKey: _scaffoldKey,
-                  notInHomepage: true,
-                  inPlaylistDetailPage: true,
-                ),
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Color(0xFF1B3142),
-                          Color(0xFF355467),
-                          Color(0xFF5E777A),
-                          Color(0xFFCE8B46),
-                        ],
-                        stops: [0.0, 0.33, 0.67, 1.0],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
+    return Consumer<ThemeNotifier>(
+      builder: (context, theme, _) => Material(
+        child: Scaffold(
+          key: _scaffoldKey,
+          body: SafeArea(
+            child: ChangeNotifierProvider(
+              create: (context) => MySearchState(),
+              child: Column(
+                children: [
+                  Container(
+                    color: colorScheme.primary,
+                    child: MySearchBar(
+                      myScaffoldKey: _scaffoldKey,
+                      notInHomepage: true,
+                      inPlaylistDetailPage: true,
                     ),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            margin: EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
-                            child: FutureBuilder(
-                                future: _detailPlaylist,
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  } else if (snapshot.hasError) {
-                                    return Center(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          SelectableText(
-                                            'Exception: ${snapshot.error}',
-                                            style: TextStyle(
-                                              color: Colors.white70,
-                                              fontFamily: 'Roboto',
-                                              fontSize: 16.0,
+                  ),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: theme.playlistDetailPageBg!,
+                          stops: [0.0, 0.33, 0.67, 1.0],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              margin:
+                                  EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
+                              child: FutureBuilder(
+                                  future: _detailPlaylist,
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return Center(
+                                        child: CircularProgressIndicator(),
+                                      );
+                                    } else if (snapshot.hasError) {
+                                      return Center(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            SelectableText(
+                                              'Exception: ${snapshot.error}',
+                                              style: TextStyle(
+                                                color: Colors.white70,
+                                                fontFamily: 'Roboto',
+                                                fontSize: 16.0,
+                                              ),
                                             ),
-                                          ),
-                                          TextButton.icon(
-                                            style: TextButton.styleFrom(
-                                              foregroundColor: Colors.white70,
+                                            TextButton.icon(
+                                              style: TextButton.styleFrom(
+                                                foregroundColor: Colors.white70,
+                                              ),
+                                              icon: Icon(MdiIcons.webRefresh),
+                                              label: Text('Retry'),
+                                              onPressed: () {
+                                                setState(() {
+                                                  _detailPlaylist =
+                                                      fetchDetailPlaylist(
+                                                          openedPlaylist!);
+                                                });
+                                              },
                                             ),
-                                            icon: Icon(MdiIcons.webRefresh),
-                                            label: Text('Retry'),
-                                            onPressed: () {
-                                              setState(() {
-                                                _detailPlaylist =
-                                                    fetchDetailPlaylist(
-                                                        openedPlaylist!);
-                                              });
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  } else {
-                                    DetailPlaylist detailPlaylist =
-                                        snapshot.data as DetailPlaylist;
-                                    return Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius:
-                                            BorderRadius.circular(10.0),
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          SizedBox(
-                                            height: 130.0,
-                                            width: MediaQuery.of(context)
-                                                .size
-                                                .width,
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(15.0),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                children: [
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                      right: 12.0,
-                                                    ),
-                                                    child: Container(
-                                                      width: 100.0,
-                                                      height: 100.0,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(
-                                                          4.0,
-                                                        ),
+                                          ],
+                                        ),
+                                      );
+                                    } else {
+                                      DetailPlaylist detailPlaylist =
+                                          snapshot.data as DetailPlaylist;
+                                      return Container(
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.primary,
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            SizedBox(
+                                              height: 130.0,
+                                              width: MediaQuery.of(context)
+                                                  .size
+                                                  .width,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(15.0),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.max,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                        right: 12.0,
                                                       ),
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          print(appState);
-                                                          setState(() {});
-                                                        },
-                                                        child: ClipRRect(
+                                                      child: Container(
+                                                        width: 100.0,
+                                                        height: 100.0,
+                                                        decoration:
+                                                            BoxDecoration(
                                                           borderRadius:
                                                               BorderRadius
                                                                   .circular(
-                                                                      4.0),
-                                                          child: isUsingMockData
-                                                              ? Image.asset(
-                                                                  detailPlaylist
-                                                                      .coverImage)
-                                                              : CachedNetworkImage(
-                                                                  imageUrl: detailPlaylist
-                                                                          .coverImage
-                                                                          .isNotEmpty
-                                                                      ? detailPlaylist
-                                                                          .coverImage
-                                                                      : MyAppState
-                                                                          .defaultCoverImage,
-                                                                  progressIndicatorBuilder: (context,
-                                                                          url,
-                                                                          downloadProgress) =>
-                                                                      CircularProgressIndicator(
-                                                                          value:
-                                                                              downloadProgress.progress),
-                                                                  errorWidget: (context,
-                                                                          url,
-                                                                          error) =>
-                                                                      Icon(MdiIcons
-                                                                          .debian),
-                                                                ),
-                                                          // : Image(
-                                                          //     image: CachedNetworkImageProvider(detailPlaylist
-                                                          //             .coverImage
-                                                          //             .isNotEmpty
-                                                          //         ? detailPlaylist
-                                                          //             .coverImage
-                                                          //         : MyAppState
-                                                          //             .defaultCoverImage),
-                                                          //   ),
-
-                                                          // : Image.network(detailPlaylist
-                                                          //         .coverImage
-                                                          //         .isNotEmpty
-                                                          //     ? detailPlaylist
-                                                          //         .coverImage
-                                                          //     : MyAppState
-                                                          //         .defaultCoverImage),
+                                                            4.0,
+                                                          ),
+                                                        ),
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            print(appState);
+                                                            setState(() {});
+                                                          },
+                                                          child: ClipRRect(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        4.0),
+                                                            child:
+                                                                isUsingMockData
+                                                                    ? Image.asset(
+                                                                        detailPlaylist
+                                                                            .coverImage)
+                                                                    : CachedNetworkImage(
+                                                                        imageUrl: detailPlaylist.coverImage.isNotEmpty
+                                                                            ? detailPlaylist.coverImage
+                                                                            : MyAppState.defaultCoverImage,
+                                                                        progressIndicatorBuilder: (context,
+                                                                                url,
+                                                                                downloadProgress) =>
+                                                                            CircularProgressIndicator(value: downloadProgress.progress),
+                                                                        errorWidget: (context,
+                                                                                url,
+                                                                                error) =>
+                                                                            Icon(MdiIcons.debian),
+                                                                      ),
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
-                                                  ),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        SelectableText(
-                                                          detailPlaylist.name,
-                                                          style: TextStyle(
-                                                            fontSize: 20.0,
-                                                            height: 1.0,
-                                                          ),
-                                                          // overflow: TextOverflow
-                                                          //     .ellipsis,
-                                                        ),
-                                                        Text(
-                                                          '${detailPlaylist.songsCount} songs',
-                                                          textAlign:
-                                                              TextAlign.start,
-                                                          style: TextStyle(
-                                                            fontSize: 11.0,
-                                                            color: Color(
-                                                                0x42000000),
-                                                          ),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                        ),
-                                                        Expanded(
-                                                          child: Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                        .only(
-                                                                    top: 12.0),
-                                                            child: Text(
-                                                              detailPlaylist
-                                                                  .description!,
-                                                              style: TextStyle(
-                                                                fontSize: 13.0,
-                                                                color: Color(
-                                                                    0xBF000000),
-                                                                height: 1.2,
-                                                              ),
-                                                              maxLines: 3,
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child:
-                                                detailPlaylist.songsCount != 0
-                                                    ? Column(
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
-                                                          SizedBox(
-                                                            height: 40.0,
-                                                            child: Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .end,
-                                                              children: [
-                                                                IconButton(
-                                                                  onPressed:
-                                                                      () {},
-                                                                  icon: Icon(
-                                                                    Icons
-                                                                        .playlist_play_rounded,
-                                                                  ),
-                                                                  color: Color(
-                                                                      0x42000000),
-                                                                ),
-                                                                IconButton(
-                                                                  onPressed:
-                                                                      () {},
-                                                                  icon: Icon(
-                                                                    Icons
-                                                                        .playlist_add_check_rounded,
-                                                                  ),
-                                                                  color: Color(
-                                                                      0x42000000),
-                                                                ),
-                                                                IconButton(
-                                                                  onPressed:
-                                                                      () {},
-                                                                  icon: Icon(
-                                                                    Icons
-                                                                        .more_vert_rounded,
-                                                                  ),
-                                                                  color: Color(
-                                                                      0x42000000),
-                                                                ),
-                                                              ],
+                                                          SelectableText(
+                                                            detailPlaylist.name,
+                                                            style: TextStyle(
+                                                              fontSize: 20.0,
+                                                              height: 1.0,
                                                             ),
+                                                            // overflow: TextOverflow
+                                                            //     .ellipsis,
+                                                          ),
+                                                          Text(
+                                                            '${detailPlaylist.songsCount} songs',
+                                                            textAlign:
+                                                                TextAlign.start,
+                                                            style: textTheme
+                                                                .titleSmall,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
                                                           ),
                                                           Expanded(
-                                                            child: ListView
-                                                                .builder(
-                                                              // TODO: fix this. Mock.songs have 10 songs only.
-                                                              // itemCount: _detailPlaylist.songsCount,
-                                                              itemCount: isUsingMockData
-                                                                  ? min(
-                                                                      detailPlaylist
-                                                                          .songsCount,
-                                                                      10)
-                                                                  : detailPlaylist
-                                                                      .songsCount,
-                                                              itemBuilder:
-                                                                  (context,
-                                                                      index) {
-                                                                return Material(
-                                                                  color: Colors
-                                                                      .transparent,
-                                                                  child:
-                                                                      InkWell(
-                                                                    // TODO: fix bug: the init cover will be wrong sometimes when first loading
-                                                                    // song player in shuffle mode.
-                                                                    onTap:
-                                                                        () async {
-                                                                      // TODO: fix this, the songs should be real data.
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                          .only(
+                                                                      top:
+                                                                          12.0),
+                                                              child: Text(
+                                                                detailPlaylist
+                                                                    .description!,
+                                                                style: textTheme
+                                                                    .bodyLarge,
+                                                                maxLines: 3,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child:
+                                                  detailPlaylist.songsCount != 0
+                                                      ? Column(
+                                                          children: [
+                                                            SizedBox(
+                                                              height: 40.0,
+                                                              child: Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .end,
+                                                                children: [
+                                                                  IconButton(
+                                                                    onPressed:
+                                                                        () {},
+                                                                    icon: Icon(
+                                                                      Icons
+                                                                          .playlist_play_rounded,
+                                                                    ),
+                                                                    color: colorScheme
+                                                                        .tertiary,
+                                                                  ),
+                                                                  IconButton(
+                                                                    onPressed:
+                                                                        () {},
+                                                                    icon: Icon(
+                                                                      Icons
+                                                                          .playlist_add_check_rounded,
+                                                                    ),
+                                                                    color: colorScheme
+                                                                        .tertiary,
+                                                                  ),
+                                                                  IconButton(
+                                                                    onPressed:
+                                                                        () {},
+                                                                    icon: Icon(
+                                                                      Icons
+                                                                          .more_vert_rounded,
+                                                                    ),
+                                                                    color: colorScheme
+                                                                        .tertiary,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            Expanded(
+                                                              child: ListView
+                                                                  .builder(
+                                                                // TODO: fix this. Mock.songs have 10 songs only.
+                                                                // itemCount: _detailPlaylist.songsCount,
+                                                                itemCount: isUsingMockData
+                                                                    ? min(
+                                                                        detailPlaylist
+                                                                            .songsCount,
+                                                                        10)
+                                                                    : detailPlaylist
+                                                                        .songsCount,
+                                                                itemBuilder:
+                                                                    (context,
+                                                                        index) {
+                                                                  return Material(
+                                                                    color: Colors
+                                                                        .transparent,
+                                                                    child:
+                                                                        InkWell(
+                                                                      // TODO: fix bug: the init cover will be wrong sometimes when first loading
+                                                                      // song player in shuffle mode.
+                                                                      onTap:
+                                                                          () async {
+                                                                        // TODO: fix this, the songs should be real data.
 
-                                                                      // Init audio player when no player instance exist, otherwise
-                                                                      // update the queue only.
+                                                                        // Init audio player when no player instance exist, otherwise
+                                                                        // update the queue only.
 
-                                                                      if (appState
-                                                                              .player ==
-                                                                          null) {
-                                                                        appState.queue =
-                                                                            detailPlaylist.songs;
+                                                                        if (appState.player ==
+                                                                            null) {
+                                                                          appState.queue =
+                                                                              detailPlaylist.songs;
 
-                                                                        appState.rawQueue =
-                                                                            detailPlaylist.songs;
+                                                                          appState.rawQueue =
+                                                                              detailPlaylist.songs;
 
-                                                                        await appState
-                                                                            .initAudioPlayer();
+                                                                          await appState
+                                                                              .initAudioPlayer();
 
-                                                                        if (true) {
-                                                                          bool
-                                                                              hasValidSong =
-                                                                              false;
-                                                                          for (int i = index;
-                                                                              i < index + detailPlaylist.songsCount;
-                                                                              i++) {
-                                                                            if (appState.rawQueue![i % detailPlaylist.songsCount].isTakenDown) {
-                                                                              continue;
+                                                                          if (true) {
+                                                                            bool
+                                                                                hasValidSong =
+                                                                                false;
+                                                                            for (int i = index;
+                                                                                i < index + detailPlaylist.songsCount;
+                                                                                i++) {
+                                                                              if (appState.rawQueue![i % detailPlaylist.songsCount].isTakenDown) {
+                                                                                continue;
+                                                                              }
+                                                                              hasValidSong = true;
+                                                                              index = appState.queue!.indexOf(appState.rawQueue![i % detailPlaylist.songsCount]);
+                                                                              break;
                                                                             }
-                                                                            hasValidSong =
-                                                                                true;
-                                                                            index =
-                                                                                appState.queue!.indexOf(appState.rawQueue![i % detailPlaylist.songsCount]);
-                                                                            break;
+
+                                                                            if (!hasValidSong) {
+                                                                              MyToast.showToast('All songs in playlist is taken down.');
+                                                                              return;
+                                                                            }
                                                                           }
 
-                                                                          if (!hasValidSong) {
-                                                                            MyToast.showToast('All songs in playlist is taken down.');
-                                                                            return;
+                                                                          appState.canSongPlayerPagePop =
+                                                                              true;
+
+                                                                          appState.currentPlayingSongInQueue =
+                                                                              index;
+
+                                                                          appState.currentSong =
+                                                                              appState.queue![index];
+
+                                                                          appState.prevSong =
+                                                                              appState.currentSong;
+
+                                                                          appState.currentDetailSong =
+                                                                              null;
+
+                                                                          // appState.currentPage =
+                                                                          //     '/song_player';
+                                                                          appState.ownerDirIdOfCurrentPlayingSong =
+                                                                              detailPlaylist.dirId;
+
+                                                                          appState.isFirstLoadSongPlayer =
+                                                                              true;
+
+                                                                          // appState.player!
+                                                                          //     .seek(
+                                                                          //         Duration
+                                                                          //             .zero,
+                                                                          //         index:
+                                                                          //             index);
+                                                                          appState
+                                                                              .player!
+                                                                              .play();
+                                                                        } else if (ownerDirIdOfCurrentPlayingSong == openedPlaylist!.dirId &&
+                                                                            (index = appState.queue!.indexOf(appState.rawQueue![index])) ==
+                                                                                currentPlayingSongInQueue) {
+                                                                          if (!player!
+                                                                              .playerState
+                                                                              .playing) {
+                                                                            player.play();
                                                                           }
-                                                                        }
+                                                                        } else {
+                                                                          appState.canSongPlayerPagePop =
+                                                                              true;
 
-                                                                        appState.canSongPlayerPagePop =
-                                                                            true;
+                                                                          appState.queue =
+                                                                              [];
 
-                                                                        appState.currentPlayingSongInQueue =
-                                                                            index;
+                                                                          appState
+                                                                              .player!
+                                                                              .stop();
 
-                                                                        appState
-                                                                            .currentSong = appState
-                                                                                .queue![
-                                                                            index];
+                                                                          appState
+                                                                              .player!
+                                                                              .dispose();
 
-                                                                        appState.prevSong =
-                                                                            appState.currentSong;
+                                                                          appState.player =
+                                                                              null;
 
-                                                                        appState.currentDetailSong =
-                                                                            null;
+                                                                          appState
+                                                                              .initQueue!
+                                                                              .clear();
 
-                                                                        // appState.currentPage =
-                                                                        //     '/song_player';
-                                                                        appState.ownerDirIdOfCurrentPlayingSong =
-                                                                            detailPlaylist.dirId;
+                                                                          appState.queue =
+                                                                              detailPlaylist.songs;
 
-                                                                        appState.isFirstLoadSongPlayer =
-                                                                            true;
+                                                                          appState.rawQueue =
+                                                                              detailPlaylist.songs;
 
-                                                                        // appState.player!
-                                                                        //     .seek(
-                                                                        //         Duration
-                                                                        //             .zero,
-                                                                        //         index:
-                                                                        //             index);
-                                                                        appState
-                                                                            .player!
-                                                                            .play();
-                                                                      } else if (ownerDirIdOfCurrentPlayingSong ==
-                                                                              openedPlaylist!
-                                                                                  .dirId &&
-                                                                          (index = appState.queue!.indexOf(appState.rawQueue![index])) ==
-                                                                              currentPlayingSongInQueue) {
-                                                                        if (!player!
-                                                                            .playerState
-                                                                            .playing) {
-                                                                          player
+                                                                          await appState
+                                                                              .initAudioPlayer();
+
+                                                                          if (true) {
+                                                                            bool
+                                                                                hasValidSong =
+                                                                                false;
+                                                                            for (int i = index;
+                                                                                i < index + detailPlaylist.songsCount;
+                                                                                i++) {
+                                                                              if (appState.rawQueue![i % detailPlaylist.songsCount].isTakenDown) {
+                                                                                continue;
+                                                                              }
+                                                                              hasValidSong = true;
+                                                                              index = appState.queue!.indexOf(appState.rawQueue![i % detailPlaylist.songsCount]);
+                                                                              break;
+                                                                            }
+
+                                                                            if (!hasValidSong) {
+                                                                              MyToast.showToast('All songs in playlist is taken down.');
+                                                                              return;
+                                                                            }
+                                                                          }
+
+                                                                          appState.ownerDirIdOfCurrentPlayingSong =
+                                                                              detailPlaylist.dirId;
+
+                                                                          appState.currentPlayingSongInQueue =
+                                                                              index;
+
+                                                                          appState.currentSong =
+                                                                              appState.queue![index];
+
+                                                                          appState.currentDetailSong =
+                                                                              null;
+
+                                                                          appState.prevSong =
+                                                                              appState.currentSong;
+                                                                          // appState.currentPage =
+                                                                          //     '/song_player';
+                                                                          appState.isFirstLoadSongPlayer =
+                                                                              true;
+
+                                                                          // appState.player!
+                                                                          //     .seek(
+                                                                          //         Duration
+                                                                          //             .zero,
+                                                                          //         index:
+                                                                          //             index);
+                                                                          appState
+                                                                              .player!
                                                                               .play();
                                                                         }
-                                                                      } else {
-                                                                        appState.canSongPlayerPagePop =
+                                                                        appState.isPlayerPageOpened =
                                                                             true;
-
-                                                                        appState.queue =
-                                                                            [];
-
-                                                                        appState
-                                                                            .player!
-                                                                            .stop();
-
-                                                                        appState
-                                                                            .player!
-                                                                            .dispose();
-
-                                                                        appState.player =
-                                                                            null;
-
-                                                                        appState
-                                                                            .initQueue!
-                                                                            .clear();
-
-                                                                        appState.queue =
-                                                                            detailPlaylist.songs;
-
-                                                                        appState.rawQueue =
-                                                                            detailPlaylist.songs;
-
-                                                                        await appState
-                                                                            .initAudioPlayer();
-
-                                                                        if (true) {
-                                                                          bool
-                                                                              hasValidSong =
-                                                                              false;
-                                                                          for (int i = index;
-                                                                              i < index + detailPlaylist.songsCount;
-                                                                              i++) {
-                                                                            if (appState.rawQueue![i % detailPlaylist.songsCount].isTakenDown) {
-                                                                              continue;
-                                                                            }
-                                                                            hasValidSong =
-                                                                                true;
-                                                                            index =
-                                                                                appState.queue!.indexOf(appState.rawQueue![i % detailPlaylist.songsCount]);
-                                                                            break;
-                                                                          }
-
-                                                                          if (!hasValidSong) {
-                                                                            MyToast.showToast('All songs in playlist is taken down.');
-                                                                            return;
-                                                                          }
-                                                                        }
-
-                                                                        appState.ownerDirIdOfCurrentPlayingSong =
-                                                                            detailPlaylist.dirId;
-
-                                                                        appState.currentPlayingSongInQueue =
-                                                                            index;
-
-                                                                        appState
-                                                                            .currentSong = appState
-                                                                                .queue![
-                                                                            index];
-
-                                                                        appState.currentDetailSong =
-                                                                            null;
-
-                                                                        appState.prevSong =
-                                                                            appState.currentSong;
-                                                                        // appState.currentPage =
-                                                                        //     '/song_player';
-                                                                        appState.isFirstLoadSongPlayer =
-                                                                            true;
-
-                                                                        // appState.player!
-                                                                        //     .seek(
-                                                                        //         Duration
-                                                                        //             .zero,
-                                                                        //         index:
-                                                                        //             index);
-                                                                        appState
-                                                                            .player!
-                                                                            .play();
-                                                                      }
-                                                                      appState.isPlayerPageOpened =
-                                                                          true;
-                                                                      Navigator.pushNamed(
-                                                                          context,
-                                                                          '/song_player');
-                                                                    },
-                                                                    child:
-                                                                        SongItem(
-                                                                      index:
-                                                                          index,
-                                                                      song: rawQueue ==
-                                                                              null
-                                                                          ? detailPlaylist.songs[
-                                                                              index]
-                                                                          : appState
-                                                                              .rawQueue![index],
+                                                                        Navigator.pushNamed(
+                                                                            context,
+                                                                            '/song_player');
+                                                                      },
+                                                                      child:
+                                                                          SongItem(
+                                                                        index:
+                                                                            index,
+                                                                        song: rawQueue ==
+                                                                                null
+                                                                            ? detailPlaylist.songs[index]
+                                                                            : appState.rawQueue![index],
+                                                                      ),
                                                                     ),
-                                                                  ),
-                                                                );
-                                                              },
-                                                            ),
-                                                          )
-                                                        ],
-                                                      )
-                                                    : Center(
-                                                        child: TextButton(
-                                                          onPressed: () {},
-                                                          style: ButtonStyle(
-                                                              overlayColor:
-                                                                  MaterialStateProperty
-                                                                      .all(
-                                                                Colors.grey,
+                                                                  );
+                                                                },
                                                               ),
-                                                              backgroundColor:
-                                                                  MaterialStateProperty
-                                                                      .all(
-                                                                Colors.white,
-                                                              )),
-                                                          child: Text(
-                                                            'Add songs',
-                                                            style: TextStyle(
-                                                              color:
-                                                                  Colors.black,
+                                                            )
+                                                          ],
+                                                        )
+                                                      : Center(
+                                                          child: TextButton(
+                                                            onPressed: () {},
+                                                            style: ButtonStyle(
+                                                                overlayColor:
+                                                                    MaterialStateProperty
+                                                                        .all(
+                                                                  Colors.grey,
+                                                                ),
+                                                                backgroundColor:
+                                                                    MaterialStateProperty
+                                                                        .all(
+                                                                  Colors.white,
+                                                                )),
+                                                            child: Text(
+                                                              'Add songs',
+                                                              style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                              ),
                                                             ),
                                                           ),
                                                         ),
-                                                      ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  }
-                                }),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                  }),
+                            ),
                           ),
-                        ),
-                        appState.isQueueEmpty ? Container() : BottomPlayer(),
-                      ],
+                          appState.isQueueEmpty ? Container() : BottomPlayer(),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

@@ -97,6 +97,9 @@ class _MyContentAreaState extends State<MyContentArea> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    // final buttonTheme = Theme.of(context).buttonTheme;
     return FutureBuilder(
         future: _playlists,
         builder: (context, snapshot) {
@@ -135,7 +138,7 @@ class _MyContentAreaState extends State<MyContentArea> {
           } else {
             return Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.primary,
                 borderRadius: BorderRadius.circular(10.0),
               ),
               // height: 587.0,
@@ -149,11 +152,7 @@ class _MyContentAreaState extends State<MyContentArea> {
                           padding: const EdgeInsets.only(left: 13.0),
                           child: Text(
                             'Create Playlists (${(snapshot.data as List<Playlist>).length})',
-                            style: TextStyle(
-                              fontSize: 12.0,
-                              letterSpacing: 0.25,
-                              color: Color(0x59000000),
-                            ),
+                            style: textTheme.titleMedium,
                             textAlign: TextAlign.left,
                           ),
                         ),
@@ -163,7 +162,7 @@ class _MyContentAreaState extends State<MyContentArea> {
                         children: [
                           IconButton(
                             icon: Icon(Icons.library_add_rounded),
-                            color: Color(0x42000000),
+                            color: colorScheme.tertiary,
                             onPressed: () {
                               showDialog(
                                   context: context,
@@ -171,7 +170,7 @@ class _MyContentAreaState extends State<MyContentArea> {
                             },
                           ),
                           IconButton(
-                            color: Color(0x42000000),
+                            color: colorScheme.tertiary,
                             icon: Icon(Icons.more_vert_rounded),
                             onPressed: () {
                               // Add your search icon onPressed logic here

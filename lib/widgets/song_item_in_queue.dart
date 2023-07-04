@@ -30,6 +30,8 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
   @override
   Widget build(BuildContext context) {
     // MyAppState appState = context.watch<MyAppState>();
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return SizedBox(
       height: 40.0,
       child: Row(
@@ -60,29 +62,36 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
                     widget.name,
                     style: TextStyle(
                       fontSize: 15.0,
-                      color:
-                          widget.isPlaying ? Color(0xFFFF0000) : Colors.black,
+                      color: widget.isPlaying
+                          ? Color(0xFFFF0000)
+                          : colorScheme.onSecondary,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Expanded(
-                  child: Text(
-                    '·${widget.singers[0].name}',
-                    style: TextStyle(
-                      fontSize: 10.0,
-                      color: widget.isPlaying
-                          ? Color(0xFFFF0000)
-                          : Color(0x42000000),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Text(
+                        ' · ${widget.singers[0].name}',
+                        style: TextStyle(
+                          fontSize: 10.0,
+                          color: widget.isPlaying
+                              ? Color(0xFFFF0000)
+                              : colorScheme.onPrimary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
           ),
           IconButton(
-            color: Color(0x42000000),
+            color: colorScheme.onPrimary,
             icon: Icon(Icons.close_rounded),
             onPressed: widget.onClose,
           ),

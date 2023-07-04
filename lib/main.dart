@@ -8,6 +8,7 @@ import 'package:playlistmaster/pages/splash_screen.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/states/my_navigation_button_state.dart';
 import 'package:playlistmaster/states/my_search_state.dart';
+import 'package:playlistmaster/utils/theme_manager.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
@@ -16,7 +17,10 @@ Future<void> main() async {
     androidNotificationChannelName: 'Audio playback',
     androidNotificationOngoing: true,
   );
-  runApp(MyApp());
+  runApp(ChangeNotifierProvider<ThemeNotifier>(
+    create: (_) => ThemeNotifier(),
+    child: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -36,59 +40,24 @@ class MyApp extends StatelessWidget {
           create: (_) => MyAppState(),
         ),
       ],
-      child: MaterialApp(
-        title: 'Playlist Master',
-        // darkTheme: ThemeData.dark(),
-        theme: ThemeData(
-          useMaterial3: true,
-          colorSchemeSeed: Colors.green,
+      child: Consumer<ThemeNotifier>(
+        builder: (context, theme, _) => MaterialApp(
+          // themeMode: ThemeMode.system,
+          theme: theme.getTheme(),
+          title: 'Playlist Master',
+          // theme: ThemeData(
+          //   useMaterial3: true,
+          //   colorSchemeSeed: Colors.green,
+          // ),
+          initialRoute: '/splashscreen',
+          routes: {
+            '/splashscreen': (context) => SplashScreen(),
+            '/home': (context) => MyHomePage(),
+            '/search': (context) => SearchPage(),
+            '/playlist_detail': (context) => PlaylistDetailPage(),
+            '/song_player': (context) => SongPlayerPage(),
+          },
         ),
-        // theme: MyThemes.darkTheme,
-        initialRoute: '/splashscreen',
-        routes: {
-          '/splashscreen': (context) => SplashScreen(),
-          '/home': (context) => MyHomePage(),
-          '/search': (context) => SearchPage(),
-          '/playlist_detail': (context) => PlaylistDetailPage(),
-          '/song_player': (context) => SongPlayerPage(),
-          // '/song_player': (context) {
-          //   final args = ModalRoute.of(context)!.settings.arguments
-          //       as Map<String, dynamic>;
-          //   return SongPlayerPage(
-          //     // isPlaying: args['isPlaying'],
-          //   );
-          // },
-        },
-        // onGenerateRoute: (settings) {
-        //   switch (settings.name) {
-        //     case '/search':
-        //       return PageTransition(
-        //         child: SearchPage(),
-        //         type: PageTransitionType.fade,
-        //         settings: settings,
-        //         reverseDuration: Duration(seconds: 1),
-        //       );
-        //     case '/playlist_detail':
-        //       return PageTransition(
-        //         child: PlaylistDetailPage(),
-        //         type: PageTransitionType.topToBottomJoined,
-        //         childCurrent: this,
-        //         settings: settings,
-        //         reverseDuration: Duration(seconds: 1),
-        //       );
-        //     case '/song_player':
-        //       return PageTransition(
-        //         child: SongPlayerPage(),
-        //         type: PageTransitionType.topToBottomJoined,
-        //         childCurrent: this,
-        //         settings: settings,
-        //         reverseDuration: Duration(seconds: 1),
-        //       );
-        //     default:
-        //       return null;
-        //   }
-        // },
-        // home: SplashScreen(),
       ),
     );
   }

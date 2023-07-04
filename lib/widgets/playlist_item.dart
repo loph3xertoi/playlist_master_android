@@ -13,6 +13,8 @@ class PlaylistItem extends StatelessWidget {
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
     var isUsingMockData = appState.isUsingMockData;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -48,16 +50,6 @@ class PlaylistItem extends StatelessWidget {
                             errorWidget: (context, url, error) =>
                                 Icon(MdiIcons.debian),
                           ),
-                    // : Image(
-                    //     image: CachedNetworkImageProvider(
-                    //       playlist.coverImage.isNotEmpty
-                    //           ? playlist.coverImage
-                    //           : MyAppState.defaultCoverImage,
-                    //     ),
-                    //   ),
-                    // : Image.network(playlist.coverImage.isNotEmpty
-                    //     ? playlist.coverImage
-                    //     : MyAppState.defaultCoverImage),
                   ),
                 ),
                 Expanded(
@@ -71,29 +63,21 @@ class PlaylistItem extends StatelessWidget {
                         Flexible(
                           child: Text(
                             playlist.name,
-                            style: TextStyle(
-                              fontSize: 12.0,
-                              letterSpacing: 0.25,
-                              height: 1.2,
-                            ),
+                            style: textTheme.bodyMedium,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Text(
                           '${playlist.songsCount} songs',
-                          style: TextStyle(
-                            fontSize: 11.0,
-                            letterSpacing: 0.25,
-                            color: Color(0x42000000),
-                            height: 1.2,
-                          ),
+                          style: textTheme.bodySmall,
                         ),
                       ],
                     ),
                   ),
                 ),
                 PopupMenuButton(
-                  color: Color(0x42000000),
+                  color: colorScheme.tertiary,
+                  shadowColor: Colors.transparent,
                   itemBuilder: (context) => [
                     PopupMenuItem(
                       value: 1,
@@ -111,6 +95,7 @@ class PlaylistItem extends StatelessWidget {
                   onSelected: (value) {
                     // Handle selection in the popup menu
                   },
+                  padding: EdgeInsets.zero,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.0),
                   ),

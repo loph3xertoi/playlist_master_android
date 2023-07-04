@@ -14,12 +14,14 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Dialog(
       // backgroundColor: Colors.white,
       insetPadding: EdgeInsets.all(0.0),
       alignment: Alignment.bottomCenter,
       child: Material(
-        color: Colors.white,
+        color: colorScheme.primary,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(10.0),
           topRight: Radius.circular(10.0),
@@ -42,15 +44,14 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                   children: [
                     IconButton(
                       icon: Icon(Icons.playlist_add_rounded),
-                      disabledColor: Colors.black.withOpacity(0.7),
-                      onPressed: null,
+                      color: colorScheme.tertiary,
+                      onPressed: () {},
                     ),
                     Expanded(
                       child: Text(
                         'Add to playlist',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontFamily: 'Roboto',
+                        style: textTheme.labelMedium!.copyWith(
+                          color: colorScheme.onSecondary,
                         ),
                       ),
                     ),
@@ -114,9 +115,13 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                     appState.currentSong = appState.queue![0];
                   }
                 } else {
-                  if(appState.queue![appState.currentPlayingSongInQueue!].isTakenDown){
-                    appState.currentPlayingSongInQueue = (appState.currentPlayingSongInQueue! + 1) % appState.queue!.length;
-                    appState.currentSong = appState.queue![appState.currentPlayingSongInQueue!];
+                  if (appState.queue![appState.currentPlayingSongInQueue!]
+                      .isTakenDown) {
+                    appState.currentPlayingSongInQueue =
+                        (appState.currentPlayingSongInQueue! + 1) %
+                            appState.queue!.length;
+                    appState.currentSong =
+                        appState.queue![appState.currentPlayingSongInQueue!];
                   }
                 }
 
@@ -124,48 +129,6 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                     index: appState.currentPlayingSongInQueue);
                 appState.carouselController
                     .jumpToPage(appState.currentPlayingSongInQueue!);
-                // WidgetsBinding.instance.addPostFrameCallback((_) {
-                //   // appState.coverRotatingController!.reset();
-                //   if (appState.queue![appState.currentPlayingSongInQueue!]
-                //       .isTakenDown) {
-                //     if (appState.queue!.length == 1) {
-                //       appState.queue = [];
-                //       // appState.currentDetailSong = null;
-                //       appState.currentPlayingSongInQueue = -1;
-                //       appState.currentSong = null;
-                //       appState.prevSong = null;
-                //       appState.isPlaying = false;
-                //       appState.player!.stop();
-                //       appState.player!.dispose();
-                //       appState.player = null;
-                //       appState.initQueue!.clear();
-                //     } else {
-                //       appState.currentPlayingSongInQueue =
-                //           (appState.currentPlayingSongInQueue! + 1) %
-                //               appState.queue!.length;
-                //       appState.currentSong =
-                //           appState.queue![appState.currentPlayingSongInQueue!];
-                //       // appState.prevCarouselIndex
-                //       // appState.prevSong
-                //     }
-                //   }
-                //   appState.player!.seek(Duration.zero,
-                //       index: appState.currentPlayingSongInQueue);
-                //   appState.carouselController
-                //       .jumpToPage(appState.currentPlayingSongInQueue!);
-                // });
-                // appState.queue = [];
-                // // appState.currentDetailSong = null;
-                // appState.currentPlayingSongInQueue = -1;
-                // appState.currentSong = null;
-                // appState.prevSong = null;
-                // appState.isPlaying = false;
-                // appState.player!.stop();
-                // appState.player!.dispose();
-                // appState.player = null;
-                // appState.initQueue!.clear();
-
-                // Navigator.pop(context);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -173,15 +136,14 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                   children: [
                     IconButton(
                       icon: Icon(Icons.remove_from_queue_rounded),
-                      disabledColor: Colors.black.withOpacity(0.7),
-                      onPressed: null,
+                      color: colorScheme.tertiary,
+                      onPressed: () {},
                     ),
                     Expanded(
                       child: Text(
                         'Remove from queue',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontFamily: 'Roboto',
+                        style: textTheme.labelMedium!.copyWith(
+                          color: colorScheme.onSecondary,
                         ),
                       ),
                     ),
@@ -202,15 +164,14 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                   children: [
                     IconButton(
                       icon: Icon(Icons.description_rounded),
-                      disabledColor: Colors.black.withOpacity(0.7),
-                      onPressed: null,
+                      color: colorScheme.tertiary,
+                      onPressed: () {},
                     ),
                     Expanded(
                       child: Text(
                         'Song\'s detail',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontFamily: 'Roboto',
+                        style: textTheme.labelMedium!.copyWith(
+                          color: colorScheme.onSecondary,
                         ),
                       ),
                     ),

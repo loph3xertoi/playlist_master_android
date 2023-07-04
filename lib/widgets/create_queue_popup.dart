@@ -19,7 +19,6 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
     var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
     var carouselController = appState.carouselController;
     var player = appState.player;
-    var isPlayerPageOpened = appState.isPlayerPageOpened;
     if (queue!.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (appState.player != null && mounted) {
@@ -37,11 +36,14 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
         }
       });
     }
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Dialog(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.black  ,
       insetPadding: EdgeInsets.all(0.0),
       alignment: Alignment.bottomCenter,
       child: Material(
+        color: colorScheme.primary,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(10.0),
           topRight: Radius.circular(10.0),
@@ -58,14 +60,14 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                     child: Text(
                       'Queue($queueLength)',
                       style: TextStyle(
-                        color: Color(0x42000000),
+                        color: colorScheme.onPrimary,
                         fontSize: 12.0,
                       ),
                     ),
                   ),
                   IconButton(
                     icon: Icon(Icons.delete_outline_rounded),
-                    color: Color(0x42000000),
+                    color: colorScheme.onPrimary,
                     onPressed: () {
                       showDialog(
                         context: context,
