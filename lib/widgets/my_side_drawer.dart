@@ -23,10 +23,11 @@ class _MySideDrawerState extends State<MySideDrawer> {
   }
 
   Widget _buildMenuTile(String title, IconData icon, bool isSelected) {
+    final textTheme = Theme.of(context).textTheme;
     return ListTile(
       title: Text(
         title,
-        style: TextStyle(
+        style: textTheme.labelMedium!.copyWith(
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),
@@ -50,6 +51,7 @@ class _MySideDrawerState extends State<MySideDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return SizedBox(
       child: Drawer(
         backgroundColor: Colors.transparent,
@@ -71,8 +73,14 @@ class _MySideDrawerState extends State<MySideDrawer> {
                     decoration: BoxDecoration(
                       color: Colors.transparent,
                     ),
-                    accountName: Text('Daw Loph'),
-                    accountEmail: Text('loph3xertoi@gmail.com'),
+                    accountName: Text(
+                      'Daw Loph',
+                      style: textTheme.labelMedium,
+                    ),
+                    accountEmail: Text(
+                      'loph3xertoi@gmail.com',
+                      style: textTheme.labelMedium,
+                    ),
                     currentAccountPicture: CircleAvatar(
                       backgroundImage: AssetImage(
                         'assets/images/qqmusic.png',
@@ -105,7 +113,10 @@ class _MySideDrawerState extends State<MySideDrawer> {
                   ),
                   Divider(),
                   ListTile(
-                    title: Text('Log out'),
+                    title: Text(
+                      'Log out',
+                      style: textTheme.labelMedium,
+                    ),
                     leading: Icon(Icons.logout),
                     onTap: () {
                       // TODO: Implement log out functionality

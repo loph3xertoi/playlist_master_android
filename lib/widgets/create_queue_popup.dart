@@ -59,9 +59,9 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                   Expanded(
                     child: Text(
                       'Queue($queueLength)',
-                      style: TextStyle(
+                      style: textTheme.labelMedium!.copyWith(
+                        fontSize: 14.0,
                         color: colorScheme.onPrimary,
-                        fontSize: 12.0,
                       ),
                     ),
                   ),
@@ -79,7 +79,11 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
               ),
               Expanded(
                 child: (appState.isQueueEmpty)
-                    ? Center(child: Text('Empty Queue'))
+                    ? Center(
+                        child: Text(
+                        'Empty Queue',
+                        style: textTheme.labelMedium,
+                      ))
                     : ListView.builder(
                         itemCount: queueLength,
                         itemBuilder: (context, index) {

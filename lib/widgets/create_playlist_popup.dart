@@ -83,7 +83,7 @@ class CreatePlaylistDialog extends StatelessWidget {
                 child: TextField(
                   autofocus: true,
                   textAlignVertical: TextAlignVertical.center,
-                  cursorColor: textTheme.titleMedium!.color,
+                  cursorColor: colorScheme.onPrimary,
                   decoration: InputDecoration(
                     alignLabelWithHint: true,
                     floatingLabelAlignment: FloatingLabelAlignment.center,

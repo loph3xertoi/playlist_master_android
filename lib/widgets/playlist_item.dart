@@ -63,13 +63,14 @@ class PlaylistItem extends StatelessWidget {
                         Flexible(
                           child: Text(
                             playlist.name,
-                            style: textTheme.bodyMedium,
+                            style:
+                                textTheme.labelSmall!.copyWith(fontSize: 13.0),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Text(
                           '${playlist.songsCount} songs',
-                          style: textTheme.bodySmall,
+                          style: textTheme.labelSmall!.copyWith(fontSize: 11.0),
                         ),
                       ],
                     ),
@@ -81,15 +82,24 @@ class PlaylistItem extends StatelessWidget {
                   itemBuilder: (context) => [
                     PopupMenuItem(
                       value: 1,
-                      child: Text('Option 1'),
+                      child: Text(
+                        'Option 1',
+                        style: textTheme.labelSmall,
+                      ),
                     ),
                     PopupMenuItem(
                       value: 2,
-                      child: Text('Option 2'),
+                      child: Text(
+                        'Option 2',
+                        style: textTheme.labelSmall,
+                      ),
                     ),
                     PopupMenuItem(
                       value: 3,
-                      child: Text('Option 3'),
+                      child: Text(
+                        'Option 3',
+                        style: textTheme.labelSmall,
+                      ),
                     ),
                   ],
                   onSelected: (value) {

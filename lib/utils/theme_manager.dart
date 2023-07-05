@@ -78,7 +78,7 @@ class ThemeNotifier with ChangeNotifier {
       titleSmall: TextStyle(
         fontSize: 11.0,
         fontFamily: 'Roboto',
-        color: Color(0x42000000),
+        color: Colors.black54,
       ),
 
       bodyLarge: TextStyle(
@@ -111,6 +111,12 @@ class ThemeNotifier with ChangeNotifier {
       // Popup title.
       labelMedium: TextStyle(
         fontSize: 16.0,
+        fontFamily: 'Roboto',
+        letterSpacing: 0.25,
+        color: Colors.black,
+      ),
+      labelLarge: TextStyle(
+        fontSize: 20.0,
         fontFamily: 'Roboto',
         letterSpacing: 0.25,
         color: Colors.black,
@@ -172,6 +178,12 @@ class ThemeNotifier with ChangeNotifier {
       // Popup title.
       labelMedium: TextStyle(
         fontSize: 16.0,
+        fontFamily: 'Roboto',
+        letterSpacing: 0.25,
+        color: Colors.white,
+      ),
+      labelLarge: TextStyle(
+        fontSize: 20.0,
         fontFamily: 'Roboto',
         letterSpacing: 0.25,
         color: Colors.white,

@@ -52,6 +52,7 @@ class _BottomPlayerState extends State<BottomPlayer>
       }
     });
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Container(
       height: 54.0,
       width: double.infinity,
@@ -121,7 +122,7 @@ class _BottomPlayerState extends State<BottomPlayer>
                           flex: 3,
                           child: Text(
                             currentSong?.name ?? '',
-                            style: TextStyle(
+                            style: textTheme.labelMedium!.copyWith(
                               fontSize: 15.0,
                               color: colorScheme.onSecondary,
                               textBaseline: TextBaseline.alphabetic,
@@ -133,10 +134,10 @@ class _BottomPlayerState extends State<BottomPlayer>
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: Padding(
-                              padding: const EdgeInsets.only(top: 2.0),
+                              padding: const EdgeInsets.only(top: 5.0),
                               child: Text(
                                 ' - ${currentSong?.singers[0].name}',
-                                style: TextStyle(
+                                style: textTheme.labelMedium!.copyWith(
                                   fontSize: 12.0,
                                   color: colorScheme.onSecondary,
                                   textBaseline: TextBaseline.alphabetic,

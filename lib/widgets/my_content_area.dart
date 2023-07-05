@@ -121,11 +121,19 @@ class _MyContentAreaState extends State<MyContentArea> {
                     ),
                   ),
                   TextButton.icon(
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.black54,
+                    style: ButtonStyle(
+                      shadowColor: MaterialStateProperty.all(
+                        colorScheme.primary,
+                      ),
+                      overlayColor: MaterialStateProperty.all(
+                        Colors.grey,
+                      ),
                     ),
                     icon: Icon(MdiIcons.webRefresh),
-                    label: Text('Retry'),
+                    label: Text(
+                      'Retry',
+                      style: textTheme.labelMedium,
+                    ),
                     onPressed: () {
                       setState(() {
                         _playlists = fetchPlaylists();
@@ -191,7 +199,11 @@ class _MyContentAreaState extends State<MyContentArea> {
                               );
                             },
                           )
-                        : Center(child: Text('Empty Playlists')),
+                        : Center(
+                            child: Text(
+                            'Empty Playlists',
+                            style: textTheme.labelMedium,
+                          )),
                   ),
                 ],
               ),

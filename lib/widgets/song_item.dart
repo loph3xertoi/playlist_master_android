@@ -20,6 +20,7 @@ class _SongItemState extends State<SongItem> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return SizedBox(
       height: 50.0,
       child: Row(
@@ -32,12 +33,18 @@ class _SongItemState extends State<SongItem> {
               child: Center(
                 child: Text(
                   (widget.index + 1).toString(),
-                  style: TextStyle(
-                    color: widget.song.isTakenDown || widget.song.payPlay == 1
-                        ? colorScheme.onTertiary
-                        : colorScheme.onSecondary,
-                    fontSize: 15.0,
-                  ),
+                  style: widget.song.isTakenDown || widget.song.payPlay == 1
+                      ? textTheme.labelSmall!.copyWith(
+                          color: colorScheme.onTertiary,
+                        )
+                      : textTheme.labelSmall,
+                  // style: TextStyle(
+                  //   color: widget.song.isTakenDown || widget.song.payPlay == 1
+                  //       ? colorScheme.onTertiary
+                  //       : colorScheme.onSecondary,
+                  //   fontSize: 15.0,
+                  //   fontFamily: 'Roboto',
+                  // ),
                 ),
               ),
             ),
@@ -49,22 +56,37 @@ class _SongItemState extends State<SongItem> {
               children: [
                 Text(
                   widget.song.name,
-                  style: TextStyle(
-                    fontSize: 14.0,
-                    color: widget.song.isTakenDown || widget.song.payPlay == 1
-                        ? colorScheme.onTertiary
-                        : colorScheme.onSecondary,
-                  ),
+                  style: widget.song.isTakenDown || widget.song.payPlay == 1
+                      ? textTheme.labelMedium!.copyWith(
+                          color: colorScheme.onTertiary,
+                        )
+                      : textTheme.labelMedium,
+                  // style: TextStyle(
+                  //   fontSize: 14.0,
+                  //   fontFamily: 'Roboto',
+                  //   color: widget.song.isTakenDown || widget.song.payPlay == 1
+                  //       ? colorScheme.onTertiary
+                  //       : colorScheme.onSecondary,
+                  // ),
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   widget.song.singers[0].name,
-                  style: TextStyle(
-                    fontSize: 10.0,
-                    color: widget.song.isTakenDown || widget.song.payPlay == 1
-                        ? colorScheme.onTertiary
-                        : colorScheme.onSecondary,
-                  ),
+                  style: widget.song.isTakenDown || widget.song.payPlay == 1
+                      ? textTheme.labelSmall!.copyWith(
+                          fontSize: 10.0,
+                          color: colorScheme.onTertiary,
+                        )
+                      : textTheme.labelSmall!.copyWith(
+                          fontSize: 10.0,
+                        ),
+                  // style: TextStyle(
+                  //   fontSize: 10.0,
+                  //   fontFamily: 'Roboto',
+                  //   color: widget.song.isTakenDown || widget.song.payPlay == 1
+                  //       ? colorScheme.onTertiary
+                  //       : colorScheme.onSecondary,
+                  // ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ],

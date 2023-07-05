@@ -61,9 +61,6 @@ class _MySearchBarState extends State<MySearchBar>
   }
 
   void _onAvatarPressed() {
-    // AlertDialog alert = AlertDialog(
-    //   title: Text('Avatar'),
-    // );
     showDialog(context: context, builder: (context) => BasicInfo());
   }
 
@@ -85,6 +82,7 @@ class _MySearchBarState extends State<MySearchBar>
       child: TextField(
         textAlignVertical: TextAlignVertical.top,
         enabled: true,
+        cursorColor: colorScheme.onPrimary,
         readOnly: widget.notInHomepage ? false : true,
         decoration: InputDecoration(
           alignLabelWithHint: true,

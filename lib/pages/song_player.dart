@@ -280,18 +280,6 @@ class _SongPlayerPageState extends State<SongPlayerPage>
           _prevSongIndex = currentPlayingSongInQueue!;
         }
       });
-
-      //   player!.positionStream.listen((event) {
-      //     setState(() {
-      //       _sliderProgress = event.inMilliseconds.toDouble();
-      //       _playProgress = event.inMilliseconds;
-      //     });
-      //   });
-      //   player.durationStream.listen((event) {
-      //     setState(() {
-      //       max_value = event!.inMilliseconds.toDouble();
-      //     });
-      //   });
     });
 
     try {
@@ -305,7 +293,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
       MyLogger.logger.e(e);
       rethrow;
     }
-
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Consumer<ThemeNotifier>(
       builder: (context, theme, _) => Container(
         decoration: BoxDecoration(
@@ -330,18 +319,27 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                     children: [
                       SelectableText(
                         'Exception: ${snapshot.error}',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontFamily: 'Roboto',
-                          fontSize: 16.0,
-                        ),
+                        style: textTheme.labelLarge,
+                        // style: TextStyle(
+                        //   color: Colors.white70,
+                        //   fontFamily: 'Roboto',
+                        //   fontSize: 16.0,
+                        // ),
                       ),
                       TextButton.icon(
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white70,
+                        style: ButtonStyle(
+                          shadowColor: MaterialStateProperty.all(
+                            colorScheme.primary,
+                          ),
+                          overlayColor: MaterialStateProperty.all(
+                            Colors.grey,
+                          ),
                         ),
                         icon: Icon(MdiIcons.webRefresh),
-                        label: Text('Retry'),
+                        label: Text(
+                          'Retry',
+                          style: textTheme.labelMedium,
+                        ),
                         onPressed: () {
                           setState(() {
                             _detailSong = fetchDetailSong(currentSong!.songMid);
@@ -412,11 +410,14 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                   Expanded(
                                     child: SelectableText(
                                       detailSong.name,
-                                      style: TextStyle(
-                                        color: Color(0xE5FFFFFF),
-                                        fontFamily: 'Roboto',
-                                        fontSize: 18.0,
+                                      style: textTheme.labelMedium!.copyWith(
+                                        overflow: TextOverflow.ellipsis,
                                       ),
+                                      // style: TextStyle(
+                                      //   color: Color(0xE5FFFFFF),
+                                      //   fontFamily: 'Roboto',
+                                      //   fontSize: 18.0,
+                                      // ),
                                       // overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
@@ -424,11 +425,15 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                     detailSong.singers
                                         .map((e) => e.name)
                                         .join(','),
-                                    style: TextStyle(
-                                      color: Color(0x80FFFFFF),
-                                      fontFamily: 'Roboto',
+                                    style: textTheme.labelSmall!.copyWith(
                                       fontSize: 12.0,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
+                                    // style: TextStyle(
+                                    //   color: Color(0x80FFFFFF),
+                                    //   fontFamily: 'Roboto',
+                                    //   fontSize: 12.0,
+                                    // ),
                                     // overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
@@ -506,9 +511,10 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                         mainLyrics!
                                                                 .indexOf(']') +
                                                             1),
-                                                    style: TextStyle(
+                                                    style: textTheme
+                                                        .labelMedium!
+                                                        .copyWith(
                                                       color: Colors.white54,
-                                                      fontFamily: 'Roboto',
                                                       fontSize: 16.0,
                                                     ),
                                                   ),

@@ -60,7 +60,7 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
                   flex: 3,
                   child: Text(
                     widget.name,
-                    style: TextStyle(
+                    style: textTheme.labelMedium!.copyWith(
                       fontSize: 15.0,
                       color: widget.isPlaying
                           ? Color(0xFFFF0000)
@@ -76,7 +76,7 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
                       padding: const EdgeInsets.only(top: 4.0),
                       child: Text(
                         ' · ${widget.singers[0].name}',
-                        style: TextStyle(
+                        style: textTheme.labelMedium!.copyWith(
                           fontSize: 10.0,
                           color: widget.isPlaying
                               ? Color(0xFFFF0000)

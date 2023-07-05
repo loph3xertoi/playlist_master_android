@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/http/my_http.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/utils/theme_manager.dart';
@@ -13,7 +11,6 @@ import 'package:playlistmaster/widgets/my_footer.dart';
 import 'package:playlistmaster/widgets/my_searchbar.dart';
 import 'package:playlistmaster/widgets/night_background.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -37,6 +34,7 @@ class _MyHomePageState extends State<MyHomePage>
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Consumer<ThemeNotifier>(
       builder: (context, theme, _) => Scaffold(
@@ -51,19 +49,14 @@ class _MyHomePageState extends State<MyHomePage>
             backgroundColor: Colors.transparent,
             imageUri: 'assets/images/home_button.png',
             onTap: () async {
-              // Clear the asset cache directory
-
-              // final audioSource =
-              //     LockCachingAudioSource('https://foo.com/bar.mp3');
-              //     audioSource.clearCache();
-              final prefs = await SharedPreferences.getInstance();
-              print(prefs);
+              appState.currentPlatform = 0;
               showDialog(
                 builder: (BuildContext context) {
                   return AlertDialog(
                     title: Text(
                       'Test network image',
                       textAlign: TextAlign.center,
+                      style: textTheme.labelMedium,
                     ),
                     // content: Image.network(MyAppState.defaultCoverImage),
                     content: Column(
@@ -87,9 +80,7 @@ class _MyHomePageState extends State<MyHomePage>
                               onPressed: () {},
                               child: Text(
                                 'Clear cache',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                ),
+                                style: textTheme.labelMedium,
                               ),
                             ),
                           ),
@@ -118,6 +109,7 @@ class _MyHomePageState extends State<MyHomePage>
               QuickAction(
                 imageUri: 'assets/images/qqmusic.png',
                 onTap: () {
+                  appState.currentPlatform = 1;
                   print('qqmusic');
                 },
               ),

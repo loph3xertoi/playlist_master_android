@@ -4,12 +4,21 @@ import 'dart:math';
 import 'package:playlistmaster/entities/detail_playlist.dart';
 import 'package:playlistmaster/entities/detail_song.dart';
 import 'package:playlistmaster/entities/lyrics.dart';
+import 'package:playlistmaster/entities/user.dart';
+import 'package:playlistmaster/states/app_state.dart';
 
 import 'entities/playlist.dart';
 import 'entities/singer.dart';
 import 'entities/song.dart';
 
 class MockData {
+  static User user = User(
+    name: 'Daw Loph',
+    headPic: 'assets/images/avatar.png',
+    bgPic: MyAppState.defaultCoverImage,
+    numberOfPlatforms: 3,
+  );
+
   static List<Singer> singers = [
     Singer(
       id: '1',

@@ -17,4 +17,7 @@ class API {
 
   /// api: /songlink/{platformId}
   static const songlink = '/songlink';
+
+  /// api: /user/{uid}
+  static const user = '/user';
 }

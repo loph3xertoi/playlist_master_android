@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "errorMsg": null,
+  "data": {
+    "qqMusicUser": {
+      "name": "daw",
+      "headPic": "http://thirdqq.qlogo.cn/g?b=sdk&k=D86UImnAtLoOf1tpib7xeaQ&s=140&t=1556823363",
+      "lvPic": "https://y.qq.com/mediastyle/lv-icon/v10/vip/2x/d-vip1.png",
+      "listenPic": "http://y.gtimg.cn/music/icon/h5/listen/lv6.png",
+      "bgPic": "http://y.gtimg.cn/music/photo_new/T009R750x1334M000004JDRgV2XBQH9.jpg",
+      "visitorNum": 103,
+      "fansNum": 2,
+      "followNum": 11,
+      "friendsNum": 71
+    }
+  },
+  "total": null
+}

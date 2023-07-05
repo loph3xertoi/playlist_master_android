@@ -28,8 +28,8 @@ class MyAppState extends ChangeNotifier {
   // Using mock data.
   bool _isUsingMockData = false;
 
-  // The current platform, 0 for pm server, 1 for qq music, 2 for netease music, 3 for bilibili.
-  int _currentPlatform = 0;
+  /// The current platform, 0 for pm server, 1 for qq music, 2 for netease music, 3 for bilibili.
+  int _currentPlatform = 1;
 
   // The dirId fo playlist which current playing song belongs to.
   int? _ownerDirIdOfCurrentPlayingSong;
@@ -128,6 +128,9 @@ class MyAppState extends ChangeNotifier {
   // Set true if click song that is taken down in queue popup list.
   bool _isSkipTakenDownSong = false;
 
+  /// The current platform, 0 for pm server, 1 for qq music, 2 for netease music, 3 for bilibili.
+  int get currentPlatform => _currentPlatform;
+
   bool? get isDarkMode => _isDarkMode;
 
   int get prevCarouselIndex => _prevCarouselIndex;
@@ -189,6 +192,12 @@ class MyAppState extends ChangeNotifier {
   double? get speed => _speed;
 
   bool get isSkipTakenDownSong => _isSkipTakenDownSong;
+
+  /// The current platform, 0 for pm server, 1 for qq music, 2 for netease music, 3 for bilibili.
+  set currentPlatform(int value) {
+    _currentPlatform = value;
+    notifyListeners();
+  }
 
   set isDarkMode(bool? value) {
     _isDarkMode = value;

@@ -8,27 +8,50 @@ class ShowConfirmDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return AlertDialog(
       // title: Text('Are you sure?'),
-      content: Text('Do you want to empty the queue?'),
+      content: Text(
+        'Do you want to empty the queue?',
+        style: textTheme.labelMedium,
+      ),
       actions: [
         TextButton(
+          style: ButtonStyle(
+            shadowColor: MaterialStateProperty.all(
+              colorScheme.primary,
+            ),
+            overlayColor: MaterialStateProperty.all(
+              Colors.grey,
+            ),
+          ),
           onPressed: () {
             Navigator.pop(context);
           },
           child: Text(
             'Cancel',
-            style: TextStyle(color: Colors.black87),
+            style: textTheme.labelMedium,
           ),
         ),
         TextButton(
+          style: ButtonStyle(
+            shadowColor: MaterialStateProperty.all(
+              colorScheme.primary,
+            ),
+            overlayColor: MaterialStateProperty.all(
+              Colors.grey,
+            ),
+          ),
           onPressed: () {
             appState.queue = [];
             Navigator.of(context).pop();
           },
           child: Text(
             'Yes',
-            style: TextStyle(color: Color(0xFFFF0000)),
+            style: textTheme.labelMedium!.copyWith(
+              color: Color(0xFFFF0000),
+            ),
           ),
         )
       ],

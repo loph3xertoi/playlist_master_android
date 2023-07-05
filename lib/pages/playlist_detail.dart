@@ -203,11 +203,21 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                               ),
                                             ),
                                             TextButton.icon(
-                                              style: TextButton.styleFrom(
-                                                foregroundColor: Colors.white70,
+                                              style: ButtonStyle(
+                                                shadowColor:
+                                                    MaterialStateProperty.all(
+                                                  colorScheme.primary,
+                                                ),
+                                                overlayColor:
+                                                    MaterialStateProperty.all(
+                                                  Colors.grey,
+                                                ),
                                               ),
                                               icon: Icon(MdiIcons.webRefresh),
-                                              label: Text('Retry'),
+                                              label: Text(
+                                                'Retry',
+                                                style: textTheme.labelMedium,
+                                              ),
                                               onPressed: () {
                                                 setState(() {
                                                   _detailPlaylist =
@@ -298,10 +308,11 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                         children: [
                                                           SelectableText(
                                                             detailPlaylist.name,
-                                                            style: TextStyle(
-                                                              fontSize: 20.0,
-                                                              height: 1.0,
-                                                            ),
+                                                            style: textTheme
+                                                                .labelLarge!
+                                                                .copyWith(
+                                                                    fontSize:
+                                                                        20.0),
                                                             // overflow: TextOverflow
                                                             //     .ellipsis,
                                                           ),
@@ -326,7 +337,10 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                 detailPlaylist
                                                                     .description!,
                                                                 style: textTheme
-                                                                    .bodyLarge,
+                                                                    .labelLarge!
+                                                                    .copyWith(
+                                                                        fontSize:
+                                                                            10.0),
                                                                 maxLines: 3,
                                                                 overflow:
                                                                     TextOverflow
@@ -430,6 +444,11 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                             bool
                                                                                 hasValidSong =
                                                                                 false;
+                                                                            if (index ==
+                                                                                -1) {
+                                                                              index = 0;
+                                                                              MyToast.showToast('This song is taken down.');
+                                                                            }
                                                                             for (int i = index;
                                                                                 i < index + detailPlaylist.songsCount;
                                                                                 i++) {
@@ -522,6 +541,11 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                             bool
                                                                                 hasValidSong =
                                                                                 false;
+                                                                            if (index ==
+                                                                                -1) {
+                                                                              index = 0;
+                                                                              MyToast.showToast('This song is taken down.');
+                                                                            }
                                                                             for (int i = index;
                                                                                 i < index + detailPlaylist.songsCount;
                                                                                 i++) {
@@ -594,22 +618,22 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                           child: TextButton(
                                                             onPressed: () {},
                                                             style: ButtonStyle(
-                                                                overlayColor:
-                                                                    MaterialStateProperty
-                                                                        .all(
-                                                                  Colors.grey,
-                                                                ),
-                                                                backgroundColor:
-                                                                    MaterialStateProperty
-                                                                        .all(
-                                                                  Colors.white,
-                                                                )),
+                                                              shadowColor:
+                                                                  MaterialStateProperty
+                                                                      .all(
+                                                                colorScheme
+                                                                    .primary,
+                                                              ),
+                                                              overlayColor:
+                                                                  MaterialStateProperty
+                                                                      .all(
+                                                                Colors.grey,
+                                                              ),
+                                                            ),
                                                             child: Text(
                                                               'Add songs',
-                                                              style: TextStyle(
-                                                                color: Colors
-                                                                    .black,
-                                                              ),
+                                                              style: textTheme
+                                                                  .labelMedium,
                                                             ),
                                                           ),
                                                         ),
