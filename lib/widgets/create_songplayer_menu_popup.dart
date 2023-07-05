@@ -157,6 +157,9 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
               ),
               onTap: () {
                 print('song\'s detail');
+                appState.isPlayerPageOpened = false;
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/song_detail');
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -165,7 +168,11 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                     IconButton(
                       icon: Icon(Icons.description_rounded),
                       color: colorScheme.tertiary,
-                      onPressed: () {},
+                      onPressed: () {
+                        appState.isPlayerPageOpened = false;
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/song_detail');
+                      },
                     ),
                     Expanded(
                       child: Text(

@@ -386,7 +386,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                 return Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      padding: const EdgeInsets.only(top: 10.0),
                       child: Container(
                         height: 75.0,
                         alignment: Alignment.bottomCenter,
@@ -443,8 +443,6 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                               color: Color(0xE5FFFFFF),
                               icon: Icon(Icons.share_rounded),
                               onPressed: () {
-                                MyToast.showToast(
-                                    'Network error, try again later.');
                                 print(appState);
                                 print('lyrics: $_playProgress');
                                 print(
