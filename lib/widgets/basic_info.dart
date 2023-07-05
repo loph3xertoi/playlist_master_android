@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/retry.dart';
@@ -116,6 +117,7 @@ class _BasicInfoState extends State<BasicInfo> {
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
+    var isUsingMockData = appState.isUsingMockData;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Padding(
@@ -273,13 +275,100 @@ class _BasicInfoState extends State<BasicInfo> {
                                 child: Column(children: [
                                   CircleAvatar(
                                     radius: 36.0,
-                                    backgroundImage:
-                                        NetworkImage(qqmusicUser.headPic),
+                                    backgroundImage: isUsingMockData
+                                        ? Image.asset(
+                                                'assets/images/qqmusic.png')
+                                            .image
+                                        : CachedNetworkImageProvider(
+                                            qqmusicUser.headPic.isEmpty
+                                                ? MyAppState.defaultCoverImage
+                                                : qqmusicUser.headPic,
+                                          ),
+                                    // NetworkImage(qqmusicUser.headPic),
                                   ),
                                   Text(
                                     qqmusicUser.name,
                                     style: textTheme.labelMedium,
                                   ),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: 34.0,
+                                        height: 23.0,
+                                        child: isUsingMockData
+                                            ? Image.asset(
+                                                'assets/images/qqmusic_vip.png')
+                                            : CachedNetworkImage(
+                                                imageUrl:
+                                                    qqmusicUser.lvPic.isEmpty
+                                                        ? MyAppState
+                                                            .defaultCoverImage
+                                                        : qqmusicUser.lvPic,
+                                                progressIndicatorBuilder:
+                                                    (context, url,
+                                                            downloadProgress) =>
+                                                        CircularProgressIndicator(
+                                                            value:
+                                                                downloadProgress
+                                                                    .progress),
+                                                errorWidget:
+                                                    (context, url, error) =>
+                                                        Icon(MdiIcons.debian),
+                                              ),
+                                      ),
+                                      SizedBox(
+                                        width: 10.0,
+                                      ),
+                                      SizedBox(
+                                        width: 18.0,
+                                        height: 14.0,
+                                        child: isUsingMockData
+                                            ? Image.asset(
+                                                'assets/images/qqmusic_listenlv.png')
+                                            : CachedNetworkImage(
+                                                imageUrl: qqmusicUser
+                                                        .listenPic.isEmpty
+                                                    ? MyAppState
+                                                        .defaultCoverImage
+                                                    : qqmusicUser.listenPic,
+                                                progressIndicatorBuilder:
+                                                    (context, url,
+                                                            downloadProgress) =>
+                                                        CircularProgressIndicator(
+                                                            value:
+                                                                downloadProgress
+                                                                    .progress),
+                                                errorWidget:
+                                                    (context, url, error) =>
+                                                        Icon(MdiIcons.debian),
+                                              ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Text(
+                                          'Followers: ${qqmusicUser.fansNum}',
+                                          style: textTheme.labelSmall,
+                                        ),
+                                        Text(
+                                          'Following: ${qqmusicUser.followNum}',
+                                          style: textTheme.labelSmall,
+                                        ),
+                                        Text(
+                                          'friends: ${qqmusicUser.friendsNum}',
+                                          style: textTheme.labelSmall,
+                                        ),
+                                        Text(
+                                          'Visitors: ${qqmusicUser.visitorNum}',
+                                          style: textTheme.labelSmall,
+                                        ),
+                                      ]),
                                 ]),
                               ),
                             ),

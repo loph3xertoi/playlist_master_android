@@ -47,6 +47,8 @@ flutter:
     - assets/images/qqmusic.png
     - assets/images/netease.png
     - assets/images/bilibili.png
+    - assets/images/qqmusic_vip.png
+    - assets/images/qqmusic_listenlv.png
     - assets/images/songs_cover/parrot.jpeg
     - assets/images/songs_cover/tit.jpeg
     - assets/images/songs_cover/tit.png
