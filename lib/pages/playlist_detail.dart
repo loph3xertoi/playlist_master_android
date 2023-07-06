@@ -9,6 +9,7 @@ import 'package:http/retry.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/entities/detail_playlist.dart';
 import 'package:playlistmaster/entities/playlist.dart';
+import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/http/api.dart';
 import 'package:http/http.dart' as http;
 import 'package:playlistmaster/http/my_http.dart';
@@ -34,6 +35,80 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
 
   // late List<Song> _songs;
   // late String _tid;
+
+  Future<Map<String, String>> fetchSongsLink(
+      List<String> songMids, int platform) async {
+    DefaultCacheManager cacheManager = MyHttp.cacheManager;
+    // Uri url = Uri.http(
+    //   API.host,
+    //   '${API.songslink}/$platform',
+    // );
+    // String query = 'songMids=${songMids.join(',')}';
+    // url = url.replace(query: query);
+    Uri url = Uri.http(API.host, '${API.songslink}/$platform', {
+      'songMids': songMids.join(','),
+    });
+    String urlString = url.toString();
+    dynamic result = await cacheManager.getFileFromMemory(urlString);
+    if (result == null || !(result as FileInfo).file.existsSync()) {
+      result = await cacheManager.getFileFromCache(urlString);
+      if (result == null || !(result as FileInfo).file.existsSync()) {
+        MyLogger.logger.d('Loading songs link from network...');
+        final client = RetryClient(http.Client());
+        try {
+          var response = await client.get(url);
+          var decodedResponse =
+              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+          if (response.statusCode == 200 &&
+              decodedResponse['success'] == true) {
+            var songsLink = decodedResponse['data']!;
+            if (songsLink is Map<String, dynamic>) {
+              result = songsLink
+                  .map((key, value) => MapEntry(key, value.toString()));
+            }
+
+            await cacheManager.putFile(
+              urlString,
+              response.bodyBytes,
+              fileExtension: 'json',
+            );
+            // if (songsLink.isEmpty) {
+            //   // result = '1';
+            // } else {
+            //   result = songsLink;
+            // }
+          } else {
+            MyToast.showToast(
+                'Response error with code: ${response.statusCode}');
+            MyLogger.logger
+                .e('Response error with code: ${response.statusCode}');
+            result = null;
+          }
+        } catch (e) {
+          MyToast.showToast('Exception thrown: $e');
+          MyLogger.logger.e('Network error with exception: $e');
+          rethrow;
+        } finally {
+          client.close();
+        }
+      } else {
+        MyLogger.logger.d('Loading songs link from cache...');
+      }
+    } else {
+      MyLogger.logger.d('Loading songs link from memory...');
+    }
+    print(result.runtimeType);
+    if (result is Map<String, String>) {
+      result = Future.value(result);
+    } else if (result is FileInfo) {
+      var decodedResponse =
+          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
+      var songsLink = decodedResponse['data'] as Map<String, dynamic>;
+      result = songsLink.map((key, value) => MapEntry(key, value.toString()));
+      result = Future.value(result);
+    } else {}
+    return result;
+  }
 
   Future<DetailPlaylist?> fetchDetailPlaylist(Playlist playlist) async {
     DefaultCacheManager cacheManager = MyHttp.cacheManager;
@@ -105,11 +180,31 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
       MyLogger.logger.d('Loading detail playlist from memory...');
     }
     if (result is DetailPlaylist) {
+      List<String> songMids = result.songs.map((e) => e.songMid).toList();
+
+      Map<String, String> songsLink = await fetchSongsLink(songMids, 1);
+      // Set the song's link and determine whether the song is taken down.
+      for (Song song in result.songs) {
+        if (songsLink.containsKey(song.songMid)) {
+          song.isTakenDown = false;
+          song.songLink = songsLink[song.songMid]!;
+        }
+      }
       result = Future.value(result);
     } else if (result is FileInfo) {
       var decodedResponse =
           jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
       result = DetailPlaylist.fromJson(decodedResponse['data']);
+      List<String> songMids = result.songs.map((e) => e.songMid).toList();
+
+      Map<String, String> songsLink = await fetchSongsLink(songMids, 1);
+      // Set the song's link and determine whether the song is taken down.
+      for (Song song in result.songs) {
+        if (songsLink.containsKey(song.songMid)) {
+          song.isTakenDown = false;
+          song.songLink = songsLink[song.songMid]!;
+        }
+      }
       result = Future.value(result);
     } else {}
     return result;
@@ -122,13 +217,17 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     final state = Provider.of<MyAppState>(context, listen: false);
     var isUsingMockData = state.isUsingMockData;
     var openedPlaylist = state.openedPlaylist;
-    var rawQueue = state.rawQueue;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      state.rawQueue = null;
-    });
+    // var rawQueue = state.rawQueue;
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   state.rawQueue = null;
+    // });
     // _tid = ModalRoute.of(context)!.settings.arguments as String;
     if (isUsingMockData) {
       _detailPlaylist = Future.value(MockData.detailPlaylist);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        state.rawQueue = MockData.songs;
+        state.queue = MockData.songs;
+      });
     } else {
       _detailPlaylist = fetchDetailPlaylist(openedPlaylist!);
     }
@@ -136,6 +235,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    print('build playlist detail');
     MyAppState appState = context.watch<MyAppState>();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -232,6 +332,15 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                     } else {
                                       DetailPlaylist detailPlaylist =
                                           snapshot.data as DetailPlaylist;
+                                      rawQueue = detailPlaylist.songs;
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback((_) {
+                                        if (appState.rawQueue!.isEmpty) {
+                                          appState.rawQueue =
+                                              detailPlaylist.songs;
+                                        }
+                                      });
+
                                       return Container(
                                         decoration: BoxDecoration(
                                           color: colorScheme.primary,
@@ -431,13 +540,12 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
 
                                                                         if (appState.player ==
                                                                             null) {
-                                                                          appState.queue =
-                                                                              detailPlaylist.songs;
+                                                                          appState.queue = detailPlaylist
+                                                                              .songs
+                                                                              .where((song) => !song.isTakenDown && (song.payPlay == 0))
+                                                                              .toList();
 
-                                                                          appState.rawQueue =
-                                                                              detailPlaylist.songs;
-
-                                                                          await appState
+                                                                          appState
                                                                               .initAudioPlayer();
 
                                                                           if (true) {
@@ -452,11 +560,11 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                             for (int i = index;
                                                                                 i < index + detailPlaylist.songsCount;
                                                                                 i++) {
-                                                                              if (appState.rawQueue![i % detailPlaylist.songsCount].isTakenDown) {
+                                                                              if (rawQueue![i % detailPlaylist.songsCount].isTakenDown) {
                                                                                 continue;
                                                                               }
                                                                               hasValidSong = true;
-                                                                              index = appState.queue!.indexOf(appState.rawQueue![i % detailPlaylist.songsCount]);
+                                                                              index = appState.queue!.indexOf(rawQueue![i % detailPlaylist.songsCount]);
                                                                               break;
                                                                             }
 
@@ -499,7 +607,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                               .player!
                                                                               .play();
                                                                         } else if (ownerDirIdOfCurrentPlayingSong == openedPlaylist!.dirId &&
-                                                                            (index = appState.queue!.indexOf(appState.rawQueue![index])) ==
+                                                                            (index = appState.queue!.indexOf(rawQueue![index])) ==
                                                                                 currentPlayingSongInQueue) {
                                                                           if (!player!
                                                                               .playerState
@@ -510,8 +618,10 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                           appState.canSongPlayerPagePop =
                                                                               true;
 
-                                                                          appState.queue =
-                                                                              [];
+                                                                          appState.queue = detailPlaylist
+                                                                              .songs
+                                                                              .where((song) => !song.isTakenDown && (song.payPlay == 0))
+                                                                              .toList();
 
                                                                           appState
                                                                               .player!
@@ -528,12 +638,6 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                               .initQueue!
                                                                               .clear();
 
-                                                                          appState.queue =
-                                                                              detailPlaylist.songs;
-
-                                                                          appState.rawQueue =
-                                                                              detailPlaylist.songs;
-
                                                                           await appState
                                                                               .initAudioPlayer();
 
@@ -549,11 +653,11 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                             for (int i = index;
                                                                                 i < index + detailPlaylist.songsCount;
                                                                                 i++) {
-                                                                              if (appState.rawQueue![i % detailPlaylist.songsCount].isTakenDown) {
+                                                                              if (rawQueue![i % detailPlaylist.songsCount].isTakenDown) {
                                                                                 continue;
                                                                               }
                                                                               hasValidSong = true;
-                                                                              index = appState.queue!.indexOf(appState.rawQueue![i % detailPlaylist.songsCount]);
+                                                                              index = appState.queue!.indexOf(rawQueue![i % detailPlaylist.songsCount]);
                                                                               break;
                                                                             }
 
@@ -602,10 +706,8 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                           SongItem(
                                                                         index:
                                                                             index,
-                                                                        song: rawQueue ==
-                                                                                null
-                                                                            ? detailPlaylist.songs[index]
-                                                                            : appState.rawQueue![index],
+                                                                        song: rawQueue![
+                                                                            index],
                                                                       ),
                                                                     ),
                                                                   );

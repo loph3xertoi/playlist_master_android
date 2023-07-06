@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/third_lib_change/like_button/like_button.dart';
+import 'package:playlistmaster/widgets/create_song_item_menu_popup%20copy.dart';
 
 class SongItem extends StatefulWidget {
   final int index;
@@ -33,18 +34,16 @@ class _SongItemState extends State<SongItem> {
               child: Center(
                 child: Text(
                   (widget.index + 1).toString(),
-                  style: widget.song.isTakenDown || widget.song.payPlay == 1
+                  style: widget.song.payPlay == 1
                       ? textTheme.labelSmall!.copyWith(
                           color: colorScheme.onTertiary,
                         )
-                      : textTheme.labelSmall,
-                  // style: TextStyle(
-                  //   color: widget.song.isTakenDown || widget.song.payPlay == 1
-                  //       ? colorScheme.onTertiary
-                  //       : colorScheme.onSecondary,
-                  //   fontSize: 15.0,
-                  //   fontFamily: 'Roboto',
-                  // ),
+                      : widget.song.isTakenDown
+                          ? textTheme.labelSmall!.copyWith(
+                              color: colorScheme.onTertiary,
+                              fontStyle: FontStyle.italic,
+                            )
+                          : textTheme.labelSmall,
                 ),
               ),
             ),
@@ -56,37 +55,34 @@ class _SongItemState extends State<SongItem> {
               children: [
                 Text(
                   widget.song.name,
-                  style: widget.song.isTakenDown || widget.song.payPlay == 1
+                  style: widget.song.payPlay == 1
                       ? textTheme.labelMedium!.copyWith(
                           color: colorScheme.onTertiary,
                         )
-                      : textTheme.labelMedium,
-                  // style: TextStyle(
-                  //   fontSize: 14.0,
-                  //   fontFamily: 'Roboto',
-                  //   color: widget.song.isTakenDown || widget.song.payPlay == 1
-                  //       ? colorScheme.onTertiary
-                  //       : colorScheme.onSecondary,
-                  // ),
+                      : widget.song.isTakenDown
+                          ? textTheme.labelMedium!.copyWith(
+                              color: colorScheme.onTertiary,
+                              fontStyle: FontStyle.italic,
+                            )
+                          : textTheme.labelMedium,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   widget.song.singers[0].name,
-                  style: widget.song.isTakenDown || widget.song.payPlay == 1
+                  style: widget.song.payPlay == 1
                       ? textTheme.labelSmall!.copyWith(
-                          fontSize: 10.0,
                           color: colorScheme.onTertiary,
-                        )
-                      : textTheme.labelSmall!.copyWith(
                           fontSize: 10.0,
-                        ),
-                  // style: TextStyle(
-                  //   fontSize: 10.0,
-                  //   fontFamily: 'Roboto',
-                  //   color: widget.song.isTakenDown || widget.song.payPlay == 1
-                  //       ? colorScheme.onTertiary
-                  //       : colorScheme.onSecondary,
-                  // ),
+                        )
+                      : widget.song.isTakenDown
+                          ? textTheme.labelSmall!.copyWith(
+                              fontSize: 10.0,
+                              color: colorScheme.onTertiary,
+                              fontStyle: FontStyle.italic,
+                            )
+                          : textTheme.labelSmall!.copyWith(
+                              fontSize: 10.0,
+                            ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
@@ -111,10 +107,15 @@ class _SongItemState extends State<SongItem> {
                       ? colorScheme.onTertiary
                       : colorScheme.tertiary,
                   icon: Icon(
-                    Icons.playlist_add_rounded,
+                    Icons.queue_play_next_rounded,
                   )),
               IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => CreateSongItemMenuDialog(),
+                    );
+                  },
                   color: widget.song.isTakenDown || widget.song.payPlay == 1
                       ? colorScheme.onTertiary
                       : colorScheme.tertiary,

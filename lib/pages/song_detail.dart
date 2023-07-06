@@ -22,7 +22,6 @@ class _SongDetailPageState extends State<SongDetailPage> {
     var albumName = appState.currentDetailSong!.albumName;
     var description = appState.currentDetailSong!.description;
     var pubTime = appState.currentDetailSong!.pubTime;
-    var lyrics = appState.currentDetailSong!.lyrics;
     var size128 = appState.currentDetailSong!.size128;
     var size320 = appState.currentDetailSong!.size320;
     var sizeApe = appState.currentDetailSong!.sizeApe;

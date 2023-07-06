@@ -20,6 +20,7 @@ class PlaylistItem extends StatelessWidget {
       child: InkWell(
         onTap: () {
           appState.openedPlaylist = playlist;
+          appState.rawQueue = [];
           Navigator.pushNamed(
             context,
             '/playlist_detail',

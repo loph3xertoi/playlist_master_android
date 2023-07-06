@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:provider/provider.dart';
 
-class CreateSongplayerMenuDialog extends StatelessWidget {
+class CreateSongItemMenuDialog extends StatelessWidget {
   void _onCancelPressed(BuildContext context) {
     Navigator.pop(context);
   }
@@ -17,7 +17,6 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Dialog(
-      // backgroundColor: Colors.white,
       insetPadding: EdgeInsets.all(0.0),
       alignment: Alignment.bottomCenter,
       child: Material(
@@ -90,11 +89,40 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                   appState.isRemovingSongFromQueue = false;
                 });
 
-                appState.currentPlayingSongInQueue =
-                    appState.currentPlayingSongInQueue! %
-                        appState.queue!.length;
-                appState.currentSong =
-                    appState.queue![appState.currentPlayingSongInQueue!];
+                if (appState.currentPlayingSongInQueue ==
+                    appState.queue!.length) {
+                  if (appState.queue![0].isTakenDown &&
+                      appState.queue!.length == 1) {
+                    appState.queue = [];
+                    appState.currentPlayingSongInQueue = 0;
+                    appState.currentSong = null;
+                    appState.prevSong = null;
+                    appState.isPlaying = false;
+                    appState.player!.stop();
+                    appState.player!.dispose();
+                    appState.player = null;
+                    appState.initQueue!.clear();
+                    Navigator.pop(context);
+                    return;
+                  }
+                  if (appState.queue![0].isTakenDown &&
+                      appState.queue!.length > 1) {
+                    appState.currentPlayingSongInQueue = 1;
+                    appState.currentSong = appState.queue![1];
+                  } else {
+                    appState.currentPlayingSongInQueue = 0;
+                    appState.currentSong = appState.queue![0];
+                  }
+                } else {
+                  if (appState.queue![appState.currentPlayingSongInQueue!]
+                      .isTakenDown) {
+                    appState.currentPlayingSongInQueue =
+                        (appState.currentPlayingSongInQueue! + 1) %
+                            appState.queue!.length;
+                    appState.currentSong =
+                        appState.queue![appState.currentPlayingSongInQueue!];
+                  }
+                }
 
                 appState.player!.seek(Duration.zero,
                     index: appState.currentPlayingSongInQueue);

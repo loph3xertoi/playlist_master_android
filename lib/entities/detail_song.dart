@@ -13,6 +13,7 @@ class DetailSong {
   String songMid;
   String mediaMid;
   String vid;
+  String songLink;
   int duration;
   String description;
   String pubTime;
@@ -22,7 +23,7 @@ class DetailSong {
   int size320;
   int sizeApe;
   int sizeFlac;
-  bool? isTakenDown = false;
+  bool isTakenDown;
 
   DetailSong({
     required this.name,
@@ -35,6 +36,7 @@ class DetailSong {
     required this.songMid,
     required this.mediaMid,
     required this.vid,
+    this.songLink = '',
     required this.duration,
     required this.description,
     required this.pubTime,
@@ -44,6 +46,7 @@ class DetailSong {
     required this.size320,
     required this.sizeApe,
     required this.sizeFlac,
+    this.isTakenDown = true,
   });
 
   factory DetailSong.fromJson(Map<String, dynamic> json) {

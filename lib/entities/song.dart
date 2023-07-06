@@ -7,9 +7,10 @@ class Song {
   String songMid;
   String mediaMid;
   String vid;
+  String songLink;
   List<Singer> singers;
   String coverUri;
-  bool isTakenDown = false;
+  bool isTakenDown;
 
   /// 0 for free, 1 for pay.
   int payPlay;
@@ -20,8 +21,10 @@ class Song {
     required this.songMid,
     required this.mediaMid,
     required this.vid,
+    this.songLink = '',
     required this.singers,
     required this.coverUri,
+    this.isTakenDown = true,
     required this.payPlay,
   });
 

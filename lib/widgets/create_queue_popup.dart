@@ -105,14 +105,7 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                 //     player!.effectiveIndices!.indexOf(index));
                                 WidgetsBinding.instance
                                     .addPostFrameCallback((_) {
-                                  if (queue[index].isTakenDown) {
-                                    index = (index + 1) % queue.length;
-                                    appState.currentPlayingSongInQueue = index;
-                                    // if (!isPlayerPageOpened) {
-                                    appState.currentSong = queue[index];
-                                    // }
-                                    appState.isSkipTakenDownSong = true;
-                                  }
+                                  
                                   appState.player!
                                       .seek(Duration.zero, index: index);
                                   Future.delayed(Duration(seconds: 1), () {
@@ -183,16 +176,6 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                       WidgetsBinding.instance
                                           .addPostFrameCallback((_) {
                                         if (queue.isNotEmpty) {
-                                          if (queue[currentPlayingSongInQueue!]
-                                              .isTakenDown) {
-                                            if (queue.length == 1) {
-                                              appState.queue = [];
-                                            }
-                                            currentPlayingSongInQueue =
-                                                (currentPlayingSongInQueue! +
-                                                        1) %
-                                                    queue.length;
-                                          }
                                           appState.player!.seek(Duration.zero,
                                               index: currentPlayingSongInQueue);
                                           // if (!isPlayerPageOpened) {

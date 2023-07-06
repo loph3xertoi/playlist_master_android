@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:math';
 
 import 'package:playlistmaster/entities/detail_playlist.dart';
@@ -72,20 +71,20 @@ class MockData {
     ),
   ];
 
-  // TODO: fix this, test lyrics.
-  // link: 'assets/audios/parrot.mp3',
-  static List<String> links = [
-    'assets/audios/lyrics.mp3',
-    'assets/audios/tit.mp3',
-    'assets/audios/owl.mp3',
-    'assets/audios/budgerigar.mp3',
-    'assets/audios/bluejay.mp3',
-    'assets/audios/columbidae.mp3',
-    'assets/audios/hummingbirds.mp3',
-    'assets/audios/toucans.mp3',
-    'assets/audios/finches.mp3',
-    'assets/audios/bluebirds.mp3',
-  ];
+  // // TODO: fix this, test lyrics.
+  // // link: 'assets/audios/parrot.mp3',
+  // static List<String> links = [
+  //   'assets/audios/lyrics.mp3',
+  //   'assets/audios/tit.mp3',
+  //   'assets/audios/owl.mp3',
+  //   'assets/audios/budgerigar.mp3',
+  //   'assets/audios/bluejay.mp3',
+  //   'assets/audios/columbidae.mp3',
+  //   'assets/audios/hummingbirds.mp3',
+  //   'assets/audios/toucans.mp3',
+  //   'assets/audios/finches.mp3',
+  //   'assets/audios/bluebirds.mp3',
+  // ];
 
   static List<Song> songs = [
     Song(
@@ -94,8 +93,10 @@ class MockData {
       songMid: '0',
       mediaMid: '0',
       vid: '0',
+      songLink: 'assets/audios/lyrics.mp3',
       singers: [singers[0]],
       coverUri: 'assets/images/songs_cover/parrot.jpeg',
+      isTakenDown: false,
       payPlay: 0,
     ),
     Song(
@@ -104,8 +105,10 @@ class MockData {
       songMid: '1',
       mediaMid: '1',
       vid: '1',
+      songLink: 'assets/audios/tit.mp3',
       singers: [singers[1]],
       coverUri: 'assets/images/songs_cover/tit.jpeg',
+      isTakenDown: false,
       payPlay: 0,
     ),
     Song(
@@ -114,9 +117,11 @@ class MockData {
       songMid: '2',
       mediaMid: '2',
       vid: '',
+      songLink: 'assets/audios/owl.mp3',
       singers: [singers[2]],
       coverUri: 'assets/images/songs_cover/owl.jpeg',
-      payPlay: 1,
+      isTakenDown: false,
+      payPlay: 0,
     ),
     Song(
       name: 'Budgerigar',
@@ -124,8 +129,10 @@ class MockData {
       songMid: '3',
       mediaMid: '3',
       vid: '',
+      songLink: 'assets/audios/budgerigar.mp3',
       singers: [singers[3]],
       coverUri: 'assets/images/songs_cover/budgerigar.jpeg',
+      isTakenDown: false,
       payPlay: 0,
     ),
     Song(
@@ -134,8 +141,10 @@ class MockData {
       songMid: '4',
       mediaMid: '4',
       vid: '',
+      songLink: 'assets/audios/bluejay.mp3',
       singers: [singers[4]],
       coverUri: 'assets/images/songs_cover/bluejay.jpeg',
+      isTakenDown: false,
       payPlay: 0,
     ),
     Song(
@@ -144,8 +153,10 @@ class MockData {
       songMid: '5',
       mediaMid: '5',
       vid: '',
+      songLink: 'assets/audios/columbidae.mp3',
       singers: [singers[5]],
       coverUri: 'assets/images/songs_cover/columbidae.jpeg',
+      isTakenDown: false,
       payPlay: 0,
     ),
     Song(
@@ -154,8 +165,10 @@ class MockData {
       songMid: '6',
       mediaMid: '6',
       vid: '',
+      songLink: 'assets/audios/hummingbirds.mp3',
       singers: [singers[6]],
       coverUri: 'assets/images/songs_cover/hummingbirds.jpeg',
+      isTakenDown: false,
       payPlay: 0,
     ),
     Song(
@@ -164,8 +177,10 @@ class MockData {
       songMid: '7',
       mediaMid: '7',
       vid: '',
+      songLink: 'assets/audios/toucans.mp3',
       singers: [singers[7]],
       coverUri: 'assets/images/songs_cover/toucans.jpeg',
+      isTakenDown: false,
       payPlay: 0,
     ),
     Song(
@@ -174,9 +189,11 @@ class MockData {
       songMid: '8',
       mediaMid: '8',
       vid: '',
+      songLink: 'assets/audios/finches.mp3',
       singers: [singers[8]],
       coverUri: 'assets/images/songs_cover/finches.jpeg',
-      payPlay: 1,
+      isTakenDown: false,
+      payPlay: 0,
     ),
     Song(
       name: 'Bluebirds',
@@ -184,8 +201,10 @@ class MockData {
       songMid: '9',
       mediaMid: '9',
       vid: '',
+      songLink: 'assets/audios/bluebirds.mp3',
       singers: [singers[9]],
       coverUri: 'assets/images/songs_cover/bluebirds.jpeg',
+      isTakenDown: false,
       payPlay: 0,
     ),
   ];
@@ -356,6 +375,7 @@ class MockData {
     songMid: '0',
     mediaMid: '0',
     vid: '0',
+    songLink: 'assets/audios/lyrics.mp3',
     duration: 212,
     description: 'Giant Parrot!',
     pubTime: '2010-10-04',
@@ -365,6 +385,7 @@ class MockData {
     size320: pow(2, 20).toInt(),
     sizeApe: pow(2, 20).toInt(),
     sizeFlac: pow(2, 20).toInt(),
+    isTakenDown: false,
   );
 
   static const normalLyric = """[ti:If I Didn't Love You]

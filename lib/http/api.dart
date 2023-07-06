@@ -15,8 +15,11 @@ class API {
   /// api: /song/{songMid}/{platformId}
   static const detailSong = '/song';
 
-  /// api: /songlink/{platformId}
+  /// api: /songlink/{platformId}?songMid={songMid}&mediaMid={mediaMid}&type={type}
   static const songlink = '/songlink';
+
+  /// api: /songslink/{platformId}?songMids={songMids}
+  static const songslink = '/songslink';
 
   /// api: /user/{uid}
   static const user = '/user';

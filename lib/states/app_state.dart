@@ -15,7 +15,6 @@ import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/http/api.dart';
 import 'package:http/http.dart' as http;
 import 'package:playlistmaster/http/my_http.dart';
-import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:playlistmaster/utils/my_logger.dart';
 import 'package:playlistmaster/utils/my_toast.dart';
@@ -204,8 +203,8 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  set rawQueue(List<Song>? value) {
-    _rawQueue = value;
+  set rawQueue(value) {
+    _rawQueue = List.from(value);
     notifyListeners();
   }
 
@@ -392,28 +391,14 @@ class MyAppState extends ChangeNotifier {
             !_isRemovingSongFromQueue) {
           if (_userPlayingMode == 0) {
             currentPlayingSongInQueue = discontinuity.event.currentIndex;
-            if (_queue![currentPlayingSongInQueue!].isTakenDown) {
-              MyToast.showToast('Current song is taken down, skip to next.');
-              currentPlayingSongInQueue =
-                  (currentPlayingSongInQueue! + 1) % queue!.length;
-            }
             currentSong = _queue![currentPlayingSongInQueue!];
-            // currentDetailSong = null;
-            // prevSong = currentSong;
             prevCarouselIndex = currentPlayingSongInQueue!;
             // _carouselController.animateToPage(_player!.effectiveIndices!
             // .indexOf(_currentPlayingSongInQueue!));
           } else if (_userPlayingMode == 1) {
             currentPlayingSongInQueue =
                 discontinuity.event.currentIndex ?? _currentPlayingSongInQueue;
-            if (_queue![currentPlayingSongInQueue!].isTakenDown) {
-              MyToast.showToast('Current song is taken down, skip to next.');
-              currentPlayingSongInQueue =
-                  (currentPlayingSongInQueue! + 1) % queue!.length;
-            }
             currentSong = _queue![currentPlayingSongInQueue!];
-            // currentDetailSong = null;
-            // prevSong = currentSong;
             prevCarouselIndex = currentPlayingSongInQueue!;
             // _carouselController.animateToPage(_currentPlayingSongInQueue!);
           } else {
@@ -535,7 +520,7 @@ class MyAppState extends ChangeNotifier {
     if (isUsingMockData) {
       songs = _queue!
           .map((e) async => AudioSource.asset(
-                MockData.links[_queue!.indexOf(e)],
+                e.songLink,
                 tag: MediaItem(
                   // Specify a unique ID for each media item:
                   id: _queue!.indexOf(e).toString(),
@@ -545,33 +530,24 @@ class MyAppState extends ChangeNotifier {
                   title: e.name,
                   artUri: await getImageFileFromAssets(
                       e.coverUri, _queue!.indexOf(e)),
-                  // artUri: Uri.parse(
-                  //     'https://pub.dev/static/hash-upjs5ooo/img/pub-dev-logo-2x.png'),
-                  // -1
                 ),
               ))
           .toList();
     } else {
-      for (int i = 0; i < _queue!.length; i++) {
-        Song song = _queue![i];
-        String songlink = await fetchSongLink(song, '128', 1);
-        if (songlink == '1' || songlink.isEmpty) {
-          removeSongInQueue(i--);
-        } else if (songlink == '2') {
-        } else {
-          var audioSource = LockCachingAudioSource(
-            Uri.parse(songlink),
-            tag: MediaItem(
-              id: i.toString(),
-              album: 'Album name',
-              artist: song.singers.map((e) => e.name).join(','),
-              title: song.name,
-              artUri: Uri.parse(song.coverUri),
-            ),
-          );
-          songs.add(Future.value(audioSource));
-        }
-      }
+      songs = _queue!
+          .map((e) async => LockCachingAudioSource(
+                Uri.parse(e.songLink),
+                tag: MediaItem(
+                  // Specify a unique ID for each media item:
+                  id: _queue!.indexOf(e).toString(),
+                  // Metadata to display in the notification:
+                  album: 'Album name',
+                  artist: e.singers.map((e) => e.name).join(','),
+                  title: e.name,
+                  artUri: Uri.parse(e.coverUri),
+                ),
+              ))
+          .toList();
     }
 
     queueList = await Future.wait(songs);
