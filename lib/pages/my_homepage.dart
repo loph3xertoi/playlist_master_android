@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:playlistmaster/http/my_http.dart';
 import 'package:playlistmaster/states/app_state.dart';
+import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:playlistmaster/utils/theme_manager.dart';
 import 'package:playlistmaster/widgets/bottom_player.dart';
 import 'package:playlistmaster/widgets/floating_button/quick_action.dart';
@@ -64,10 +65,7 @@ class _MyHomePageState extends State<MyHomePage>
                         Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            onTap: () async {
-                              MyHttp.cacheManager.emptyCache();
-                              await AudioPlayer.clearAssetCache();
-                            },
+                            onTap: () {},
                             child: TextButton(
                               style: ButtonStyle(
                                 shadowColor: MaterialStateProperty.all(
@@ -77,7 +75,11 @@ class _MyHomePageState extends State<MyHomePage>
                                   Colors.grey,
                                 ),
                               ),
-                              onPressed: () {},
+                              onPressed: () async {
+                                MyHttp.cacheManager.emptyCache();
+                                await AudioPlayer.clearAssetCache();
+                                MyToast.showToast('Clear cache');
+                              },
                               child: Text(
                                 'Clear cache',
                                 style: textTheme.labelMedium,

@@ -10,7 +10,7 @@ class API {
   static const playlists = '/playlists';
 
   /// api: /songs/{playlistId}/{platformId}
-  static const detailPlaylist = '/songs';
+  static const detailPlaylist = '/detailplaylist';
 
   /// api: /song/{songMid}/{platformId}
   static const detailSong = '/song';

@@ -6,6 +6,7 @@ class Song {
   String songId;
   String songMid;
   String mediaMid;
+  String vid;
   List<Singer> singers;
   String coverUri;
   bool isTakenDown = false;
@@ -18,6 +19,7 @@ class Song {
     required this.songId,
     required this.songMid,
     required this.mediaMid,
+    required this.vid,
     required this.singers,
     required this.coverUri,
     required this.payPlay,
@@ -32,6 +34,7 @@ class Song {
       songId: json['songId'],
       songMid: json['songMid'],
       mediaMid: json['mediaMid'],
+      vid: json['vid'],
       singers: singers,
       coverUri: json['coverUri'],
       payPlay: json['payPlay'],
