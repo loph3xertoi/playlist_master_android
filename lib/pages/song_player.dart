@@ -1,24 +1,15 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_lyric/lyrics_reader.dart';
 import 'package:flutter_lyric/lyrics_reader_model.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/retry.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/entities/detail_song.dart';
-import 'package:playlistmaster/entities/song.dart';
-import 'package:playlistmaster/http/api.dart';
-import 'package:http/http.dart' as http;
-import 'package:playlistmaster/http/my_http.dart';
 import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
@@ -107,75 +98,10 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     super.dispose();
   }
 
-  Future<DetailSong?> fetchDetailSong(Song song) async {
-    DefaultCacheManager cacheManager = MyHttp.cacheManager;
-    Uri url = Uri.http(
-      API.host,
-      '${API.detailSong}/${song.songMid}/1',
-    );
-    String urlString = url.toString();
-    dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null || !(result as FileInfo).file.existsSync()) {
-      result = await cacheManager.getFileFromCache(urlString);
-      if (result == null || !(result as FileInfo).file.existsSync()) {
-        MyLogger.logger.d('Loading detail song from network...');
-        final client = RetryClient(http.Client());
-        try {
-          var response = await client.get(url);
-          var decodedResponse =
-              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-          if (response.statusCode == 200 &&
-              decodedResponse['success'] == true) {
-            result = DetailSong.fromJson(decodedResponse['data']);
-            await cacheManager.putFile(
-              urlString,
-              response.bodyBytes,
-              fileExtension: 'json',
-            );
-          } else {
-            MyToast.showToast(
-                'Response error with code: ${response.statusCode}');
-            MyLogger.logger
-                .e('Response error with code: ${response.statusCode}');
-            result = null;
-          }
-        } catch (e) {
-          MyToast.showToast('Exception thrown: $e');
-          MyLogger.logger.e('Network error with exception: $e');
-          rethrow;
-        } finally {
-          client.close();
-        }
-      } else {
-        MyLogger.logger.d('Loading detail song from cache...');
-      }
-    } else {
-      MyLogger.logger.d('Loading detail song from memory...');
-    }
-    if (result is DetailSong) {
-      if (song.songLink.isNotEmpty) {
-        result.songLink = song.songLink;
-        result.isTakenDown = false;
-      }
-      result = Future.value(result);
-    } else if (result is FileInfo) {
-      var decodedResponse =
-          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
-      result = DetailSong.fromJson(decodedResponse['data']);
-      if (song.songLink.isNotEmpty) {
-        result.songLink = song.songLink;
-        result.isTakenDown = false;
-      }
-      result = Future.value(result);
-    } else {}
-    return result;
-  }
-
   @override
   Widget build(BuildContext context) {
     print('build song player');
     MyAppState appState = context.watch<MyAppState>();
-
     var isUsingMockData = appState.isUsingMockData;
     var player = appState.player;
     var queue = appState.queue;
@@ -275,7 +201,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
           (currentDetailSong == null || prevSong != currentSong)) {
         _detailSong = isUsingMockData
             ? Future.value(MockData.detailSong)
-            : fetchDetailSong(currentSong);
+            : appState.fetchDetailSong(currentSong);
       }
     } on SocketException catch (e) {
       MyToast.showToast('Exception thrown: $e');
@@ -331,7 +257,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                         ),
                         onPressed: () {
                           setState(() {
-                            _detailSong = fetchDetailSong(currentSong!);
+                            _detailSong = appState.fetchDetailSong(currentSong!);
                           });
                         },
                       ),

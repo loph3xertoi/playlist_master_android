@@ -162,7 +162,9 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                 print('song\'s detail');
                 appState.isPlayerPageOpened = false;
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/song_detail');
+                // Navigator.pushNamed(context, '/song_detail');
+                Navigator.pushNamed(context, '/song_detail',
+                    arguments: appState.currentSong);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -174,7 +176,8 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                       onPressed: () {
                         appState.isPlayerPageOpened = false;
                         Navigator.pop(context);
-                        Navigator.pushNamed(context, '/song_detail');
+                        Navigator.pushNamed(context, '/song_detail',
+                            arguments: appState.currentSong);
                       },
                     ),
                     Expanded(

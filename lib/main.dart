@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/pages/my_homepage.dart';
 import 'package:playlistmaster/pages/playlist_detail.dart';
 import 'package:playlistmaster/pages/search_page.dart';
@@ -57,7 +58,16 @@ class MyApp extends StatelessWidget {
             '/search': (context) => SearchPage(),
             '/playlist_detail': (context) => PlaylistDetailPage(),
             '/song_player': (context) => SongPlayerPage(),
-            '/song_detail': (context) => SongDetailPage(),
+            // '/song_detail': (context) => SongDetailPage(),
+          },
+          onGenerateRoute: (settings) {
+            if (settings.name == '/song_detail') {
+              final args = settings.arguments as Song;
+              return MaterialPageRoute(
+                builder: (context) => SongDetailPage(song: args),
+              );
+            }
+            return null;
           },
         ),
       ),

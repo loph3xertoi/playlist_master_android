@@ -449,6 +449,70 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
+  Future<DetailSong?> fetchDetailSong(Song song) async {
+    DefaultCacheManager cacheManager = MyHttp.cacheManager;
+    Uri url = Uri.http(
+      API.host,
+      '${API.detailSong}/${song.songMid}/1',
+    );
+    String urlString = url.toString();
+    dynamic result = await cacheManager.getFileFromMemory(urlString);
+    if (result == null || !(result as FileInfo).file.existsSync()) {
+      result = await cacheManager.getFileFromCache(urlString);
+      if (result == null || !(result as FileInfo).file.existsSync()) {
+        MyLogger.logger.d('Loading detail song from network...');
+        final client = RetryClient(http.Client());
+        try {
+          var response = await client.get(url);
+          var decodedResponse =
+              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+          if (response.statusCode == 200 &&
+              decodedResponse['success'] == true) {
+            result = DetailSong.fromJson(decodedResponse['data']);
+            await cacheManager.putFile(
+              urlString,
+              response.bodyBytes,
+              fileExtension: 'json',
+            );
+          } else {
+            MyToast.showToast(
+                'Response error with code: ${response.statusCode}');
+            MyLogger.logger
+                .e('Response error with code: ${response.statusCode}');
+            result = null;
+          }
+        } catch (e) {
+          MyToast.showToast('Exception thrown: $e');
+          MyLogger.logger.e('Network error with exception: $e');
+          rethrow;
+        } finally {
+          client.close();
+        }
+      } else {
+        MyLogger.logger.d('Loading detail song from cache...');
+      }
+    } else {
+      MyLogger.logger.d('Loading detail song from memory...');
+    }
+    if (result is DetailSong) {
+      if (song.songLink.isNotEmpty) {
+        result.songLink = song.songLink;
+        result.isTakenDown = false;
+      }
+      result = Future.value(result);
+    } else if (result is FileInfo) {
+      var decodedResponse =
+          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
+      result = DetailSong.fromJson(decodedResponse['data']);
+      if (song.songLink.isNotEmpty) {
+        result.songLink = song.songLink;
+        result.isTakenDown = false;
+      }
+      result = Future.value(result);
+    } else {}
+    return result;
+  }
+
   Future<String> fetchSongLink(Song song, String quality, int platform) async {
     DefaultCacheManager cacheManager = MyHttp.cacheManager;
     Uri url = Uri.http(API.host, '${API.songlink}/$platform', {

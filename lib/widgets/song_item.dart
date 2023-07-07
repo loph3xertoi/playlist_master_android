@@ -5,7 +5,7 @@ import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/third_lib_change/like_button/like_button.dart';
 import 'package:playlistmaster/utils/my_toast.dart';
-import 'package:playlistmaster/widgets/create_song_item_menu_popup%20copy.dart';
+import 'package:playlistmaster/widgets/create_song_item_menu_popup.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -144,7 +144,8 @@ class _SongItemState extends State<SongItem> {
                   onPressed: () {
                     showDialog(
                       context: context,
-                      builder: (_) => CreateSongItemMenuDialog(),
+                      builder: (_) =>
+                          CreateSongItemMenuDialog(song: widget.song),
                     );
                   },
                   color: widget.song.isTakenDown || widget.song.payPlay == 1

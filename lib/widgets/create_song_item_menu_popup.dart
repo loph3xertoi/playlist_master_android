@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:provider/provider.dart';
 
 class CreateSongItemMenuDialog extends StatelessWidget {
-  void _onCancelPressed(BuildContext context) {
-    Navigator.pop(context);
-  }
-
-  void _onFinishPressed(BuildContext context) {
-    Navigator.pop(context);
-  }
+  final Song song;
+  CreateSongItemMenuDialog({required this.song});
 
   @override
   Widget build(BuildContext context) {
@@ -63,84 +59,52 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                 Radius.circular(10.0),
               ),
               onTap: () {
-                print('remove from queue');
-
-                if (appState.queue!.length == 1) {
-                  appState.queue = [];
-                  appState.currentPlayingSongInQueue = 0;
-                  appState.currentSong = null;
-                  appState.prevSong = null;
-                  appState.isPlaying = false;
-                  appState.player!.stop();
-                  appState.player!.dispose();
-                  appState.player = null;
-                  appState.initQueue!.clear();
-                  Navigator.pop(context);
-                  return;
-                }
-
-                appState.isRemovingSongFromQueue = true;
-                appState.removeSongInQueue(appState.currentPlayingSongInQueue!);
-                if (appState.initQueue?.length != 0) {
-                  appState.initQueue!
-                      .removeAt(appState.currentPlayingSongInQueue!);
-                }
-                Future.delayed(Duration(milliseconds: 200), () {
-                  appState.isRemovingSongFromQueue = false;
-                });
-
-                if (appState.currentPlayingSongInQueue ==
-                    appState.queue!.length) {
-                  if (appState.queue![0].isTakenDown &&
-                      appState.queue!.length == 1) {
-                    appState.queue = [];
-                    appState.currentPlayingSongInQueue = 0;
-                    appState.currentSong = null;
-                    appState.prevSong = null;
-                    appState.isPlaying = false;
-                    appState.player!.stop();
-                    appState.player!.dispose();
-                    appState.player = null;
-                    appState.initQueue!.clear();
-                    Navigator.pop(context);
-                    return;
-                  }
-                  if (appState.queue![0].isTakenDown &&
-                      appState.queue!.length > 1) {
-                    appState.currentPlayingSongInQueue = 1;
-                    appState.currentSong = appState.queue![1];
-                  } else {
-                    appState.currentPlayingSongInQueue = 0;
-                    appState.currentSong = appState.queue![0];
-                  }
-                } else {
-                  if (appState.queue![appState.currentPlayingSongInQueue!]
-                      .isTakenDown) {
-                    appState.currentPlayingSongInQueue =
-                        (appState.currentPlayingSongInQueue! + 1) %
-                            appState.queue!.length;
-                    appState.currentSong =
-                        appState.queue![appState.currentPlayingSongInQueue!];
-                  }
-                }
-
-                appState.player!.seek(Duration.zero,
-                    index: appState.currentPlayingSongInQueue);
-                appState.carouselController
-                    .jumpToPage(appState.currentPlayingSongInQueue!);
+                print('Remove from playlist.');
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Row(
                   children: [
                     IconButton(
-                      icon: Icon(Icons.remove_from_queue_rounded),
+                      icon: Icon(Icons.playlist_remove_rounded),
                       color: colorScheme.tertiary,
-                      onPressed: () {},
+                      onPressed: () {
+                        print('Remove from playlist.');
+                      },
                     ),
                     Expanded(
                       child: Text(
-                        'Remove from queue',
+                        'Remove from playlist',
+                        style: textTheme.labelMedium!.copyWith(
+                          color: colorScheme.onSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            InkWell(
+              borderRadius: BorderRadius.all(
+                Radius.circular(10.0),
+              ),
+              onTap: () {
+                print('Play video.');
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.ondemand_video_rounded),
+                      color: colorScheme.tertiary,
+                      onPressed: () {
+                        print('Play video.');
+                      },
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Play video',
                         style: textTheme.labelMedium!.copyWith(
                           color: colorScheme.onSecondary,
                         ),
@@ -158,7 +122,7 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                 print('song\'s detail');
                 appState.isPlayerPageOpened = false;
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/song_detail');
+                Navigator.pushNamed(context, '/song_detail', arguments: song);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -170,7 +134,8 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                       onPressed: () {
                         appState.isPlayerPageOpened = false;
                         Navigator.pop(context);
-                        Navigator.pushNamed(context, '/song_detail');
+                        Navigator.pushNamed(context, '/song_detail',
+                            arguments: song);
                       },
                     ),
                     Expanded(

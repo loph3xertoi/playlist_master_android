@@ -68,6 +68,10 @@ class ThemeNotifier with ChangeNotifier {
       background: Colors.white,
       primaryContainer: Colors.white,
     ),
+    textSelectionTheme: TextSelectionThemeData(
+      selectionHandleColor: Color(0xFF212121),
+      selectionColor: Colors.black26,
+    ),
     textTheme: TextTheme(
       titleMedium: TextStyle(
         fontSize: 12.0,
@@ -135,6 +139,10 @@ class ThemeNotifier with ChangeNotifier {
       onTertiary: Colors.white38,
       background: Color(0xFF212121),
       primaryContainer: Colors.black,
+    ),
+    textSelectionTheme: TextSelectionThemeData(
+      selectionHandleColor: Colors.amber,
+      selectionColor: Colors.amber.withOpacity(0.5),
     ),
     textTheme: TextTheme(
       titleMedium: TextStyle(
