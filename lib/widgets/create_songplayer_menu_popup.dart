@@ -3,14 +3,6 @@ import 'package:playlistmaster/states/app_state.dart';
 import 'package:provider/provider.dart';
 
 class CreateSongplayerMenuDialog extends StatelessWidget {
-  void _onCancelPressed(BuildContext context) {
-    Navigator.pop(context);
-  }
-
-  void _onFinishPressed(BuildContext context) {
-    Navigator.pop(context);
-  }
-
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
@@ -100,6 +92,7 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                     index: appState.currentPlayingSongInQueue);
                 appState.carouselController
                     .jumpToPage(appState.currentPlayingSongInQueue!);
+                Navigator.pop(context);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -108,7 +101,46 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                     IconButton(
                       icon: Icon(Icons.remove_from_queue_rounded),
                       color: colorScheme.tertiary,
-                      onPressed: () {},
+                      onPressed: () {
+                        print('remove from queue');
+
+                        if (appState.queue!.length == 1) {
+                          appState.queue = [];
+                          appState.currentPlayingSongInQueue = 0;
+                          appState.currentSong = null;
+                          appState.prevSong = null;
+                          appState.isPlaying = false;
+                          appState.player!.stop();
+                          appState.player!.dispose();
+                          appState.player = null;
+                          appState.initQueue!.clear();
+                          Navigator.pop(context);
+                          return;
+                        }
+
+                        appState.isRemovingSongFromQueue = true;
+                        appState.removeSongInQueue(
+                            appState.currentPlayingSongInQueue!);
+                        if (appState.initQueue?.length != 0) {
+                          appState.initQueue!
+                              .removeAt(appState.currentPlayingSongInQueue!);
+                        }
+                        Future.delayed(Duration(milliseconds: 200), () {
+                          appState.isRemovingSongFromQueue = false;
+                        });
+
+                        appState.currentPlayingSongInQueue =
+                            appState.currentPlayingSongInQueue! %
+                                appState.queue!.length;
+                        appState.currentSong = appState
+                            .queue![appState.currentPlayingSongInQueue!];
+
+                        appState.player!.seek(Duration.zero,
+                            index: appState.currentPlayingSongInQueue);
+                        appState.carouselController
+                            .jumpToPage(appState.currentPlayingSongInQueue!);
+                        Navigator.pop(context);
+                      },
                     ),
                     Expanded(
                       child: Text(
