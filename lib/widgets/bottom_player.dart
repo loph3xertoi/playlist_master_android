@@ -121,7 +121,7 @@ class _BottomPlayerState extends State<BottomPlayer>
                         Flexible(
                           flex: 3,
                           child: Text(
-                            currentSong?.name ?? '',
+                            '${currentSong?.name}',
                             style: textTheme.labelMedium!.copyWith(
                               fontSize: 15.0,
                               color: colorScheme.onSecondary,
@@ -136,9 +136,9 @@ class _BottomPlayerState extends State<BottomPlayer>
                             child: Padding(
                               padding: const EdgeInsets.only(top: 5.0),
                               child: Text(
-                                ' - ${currentSong?.singers[0].name}',
+                                ' · ${currentSong?.singers[0].name}',
                                 style: textTheme.labelMedium!.copyWith(
-                                  fontSize: 12.0,
+                                  fontSize: 11.0,
                                   color: colorScheme.onSecondary,
                                   textBaseline: TextBaseline.alphabetic,
                                 ),

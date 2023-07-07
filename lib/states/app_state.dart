@@ -19,6 +19,7 @@ import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
 import 'package:playlistmaster/utils/my_logger.dart';
 import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:uuid/uuid.dart';
 
 class MyAppState extends ChangeNotifier {
   // Dark mode.
@@ -539,7 +540,7 @@ class MyAppState extends ChangeNotifier {
                 Uri.parse(e.songLink),
                 tag: MediaItem(
                   // Specify a unique ID for each media item:
-                  id: _queue!.indexOf(e).toString(),
+                  id: Uuid().v1(),
                   // Metadata to display in the notification:
                   album: 'Album name',
                   artist: e.singers.map((e) => e.name).join(','),

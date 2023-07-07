@@ -73,7 +73,7 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 4.0),
+                      padding: const EdgeInsets.only(top: 5.0),
                       child: Text(
                         ' · ${widget.singers[0].name}',
                         style: textTheme.labelMedium!.copyWith(
