@@ -257,7 +257,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                         ),
                         onPressed: () {
                           setState(() {
-                            _detailSong = appState.fetchDetailSong(currentSong!);
+                            _detailSong =
+                                appState.fetchDetailSong(currentSong!);
                           });
                         },
                       ),
@@ -326,6 +327,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                     child: SelectableText(
                                       detailSong.name,
                                       style: textTheme.labelMedium!.copyWith(
+                                        color: Colors.white,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       // style: TextStyle(
@@ -341,6 +343,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                         .map((e) => e.name)
                                         .join(','),
                                     style: textTheme.labelSmall!.copyWith(
+                                      color: Colors.white,
                                       fontSize: 12.0,
                                       overflow: TextOverflow.ellipsis,
                                     ),
