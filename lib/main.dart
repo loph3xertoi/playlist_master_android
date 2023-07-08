@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:playlistmaster/entities/song.dart';
+import 'package:playlistmaster/entities/video.dart';
 import 'package:playlistmaster/pages/my_homepage.dart';
 import 'package:playlistmaster/pages/playlist_detail.dart';
 import 'package:playlistmaster/pages/search_page.dart';
 import 'package:playlistmaster/pages/song_detail.dart';
 import 'package:playlistmaster/pages/song_player.dart';
 import 'package:playlistmaster/pages/splash_screen.dart';
+import 'package:playlistmaster/pages/video_player.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/states/my_navigation_button_state.dart';
 import 'package:playlistmaster/states/my_search_state.dart';
@@ -65,6 +67,11 @@ class MyApp extends StatelessWidget {
               final args = settings.arguments as Song;
               return MaterialPageRoute(
                 builder: (context) => SongDetailPage(song: args),
+              );
+            }else if(settings.name == '/video_player'){
+              final args = settings.arguments as Song;
+              return MaterialPageRoute(
+                builder: (context) => VideoPlayerPage(song: args),
               );
             }
             return null;

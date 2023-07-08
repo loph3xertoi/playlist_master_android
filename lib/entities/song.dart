@@ -7,6 +7,7 @@ class Song {
   String songMid;
   String mediaMid;
   String vid;
+  List<String> videoLinks;
   String songLink;
   List<Singer> singers;
   String coverUri;
@@ -21,6 +22,7 @@ class Song {
     required this.songMid,
     required this.mediaMid,
     required this.vid,
+    this.videoLinks = const [''],
     this.songLink = '',
     required this.singers,
     required this.coverUri,

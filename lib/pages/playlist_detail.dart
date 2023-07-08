@@ -6,12 +6,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/retry.dart';
+import 'package:http/http.dart' as http;
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/entities/detail_playlist.dart';
 import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/http/api.dart';
-import 'package:http/http.dart' as http;
 import 'package:playlistmaster/http/my_http.dart';
 import 'package:playlistmaster/mock_data.dart';
 import 'package:playlistmaster/states/app_state.dart';
@@ -36,6 +36,72 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   // late List<Song> _songs;
   // late String _tid;
 
+  Future<Map<String, List<String>>> fetchMVsLink(
+      List<String> vids, int platform) async {
+    DefaultCacheManager cacheManager = MyHttp.cacheManager;
+    Uri url = Uri.http(API.host, '${API.mvsLink}/$platform', {
+      'vids': vids.join(','),
+    });
+    String urlString = url.toString();
+    dynamic result = await cacheManager.getFileFromMemory(urlString);
+    if (result == null || !(result as FileInfo).file.existsSync()) {
+      result = await cacheManager.getFileFromCache(urlString);
+      if (result == null || !(result as FileInfo).file.existsSync()) {
+        MyLogger.logger.d('Loading mv link from network...');
+        final client = RetryClient(http.Client());
+        try {
+          var response = await client.get(url);
+          var decodedResponse =
+              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+          if (response.statusCode == 200 &&
+              decodedResponse['success'] == true) {
+            var mvsLink = decodedResponse['data']!;
+            if (mvsLink is Map<String, dynamic>) {
+              result = mvsLink.map((key, value) =>
+                  MapEntry<String, List<String>>(
+                      key, List<String>.from(value)));
+            }
+            await cacheManager.putFile(
+              urlString,
+              response.bodyBytes,
+              fileExtension: 'json',
+            );
+          } else {
+            MyToast.showToast(
+                'Response error with code: ${response.statusCode}');
+            MyLogger.logger
+                .e('Response error with code: ${response.statusCode}');
+            result = null;
+          }
+        } catch (e) {
+          MyToast.showToast('Exception thrown: $e');
+          MyLogger.logger.e('Network error with exception: $e');
+          rethrow;
+        } finally {
+          client.close();
+        }
+      } else {
+        MyLogger.logger.d('Loading mv link from cache...');
+      }
+    } else {
+      MyLogger.logger.d('Loading mv link from memory...');
+    }
+    if (result is Map<String, List<String>>) {
+      result = Future.value(result);
+    } else if (result is FileInfo) {
+      var decodedResponse =
+          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
+      var mvsLink = decodedResponse['data']!;
+      if (mvsLink is Map<String, dynamic>) {
+        result = mvsLink.map((key, value) =>
+            MapEntry<String, List<String>>(key, List<String>.from(value)));
+      }
+      print(result.runtimeType);
+      result = Future<Map<String, List<String>>>.value(result);
+    } else {}
+    return result;
+  }
+
   Future<Map<String, String>> fetchSongsLink(
       List<String> songMids, int platform) async {
     DefaultCacheManager cacheManager = MyHttp.cacheManager;
@@ -45,7 +111,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     // );
     // String query = 'songMids=${songMids.join(',')}';
     // url = url.replace(query: query);
-    Uri url = Uri.http(API.host, '${API.songslink}/$platform', {
+    Uri url = Uri.http(API.host, '${API.songsLink}/$platform', {
       'songMids': songMids.join(','),
     });
     String urlString = url.toString();
@@ -181,7 +247,6 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     }
     if (result is DetailPlaylist) {
       List<String> songMids = result.songs.map((e) => e.songMid).toList();
-
       Map<String, String> songsLink = await fetchSongsLink(songMids, 1);
       // Set the song's link and determine whether the song is taken down.
       for (Song song in result.songs) {
@@ -190,6 +255,17 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
           song.songLink = songsLink[song.songMid]!;
         }
       }
+
+      List<String> vids = result.songs.map((e) => e.vid).toList()
+        ..removeWhere((vid) => vid.isEmpty);
+      Map<String, List<String>> mvsLink = await fetchMVsLink(vids, 1);
+      // Set the video's link.
+      for (Song song in result.songs) {
+        if (mvsLink.containsKey(song.vid)) {
+          song.videoLinks = mvsLink[song.vid]!;
+        }
+      }
+
       result = Future.value(result);
     } else if (result is FileInfo) {
       var decodedResponse =
@@ -205,6 +281,17 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
           song.songLink = songsLink[song.songMid]!;
         }
       }
+
+      List<String> vids = result.songs.map((e) => e.vid).toList()
+        ..removeWhere((vid) => vid.isEmpty);
+      Map<String, List<String>> mvsLink = await fetchMVsLink(vids, 1);
+      // Set the video's link.
+      for (Song song in result.songs) {
+        if (mvsLink.containsKey(song.vid)) {
+          song.videoLinks = mvsLink[song.vid]!;
+        }
+      }
+
       result = Future.value(result);
     } else {}
     return result;
@@ -617,6 +704,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                               player.play();
                                                                             }
                                                                           } else {
+                                                                            print(index);
                                                                             appState.canSongPlayerPagePop =
                                                                                 true;
 

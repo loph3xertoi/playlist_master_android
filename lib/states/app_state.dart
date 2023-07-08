@@ -12,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:playlistmaster/entities/detail_song.dart';
 import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/entities/song.dart';
+import 'package:playlistmaster/entities/video.dart';
 import 'package:playlistmaster/http/api.dart';
 import 'package:http/http.dart' as http;
 import 'package:playlistmaster/http/my_http.dart';
@@ -22,6 +23,12 @@ import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 
 class MyAppState extends ChangeNotifier {
+  // Last video's vid.
+  String _lastVideoVid = '';
+
+  // The time when quit video.
+  int _videoSeekTime = 0;
+
   // Dark mode.
   bool? _isDarkMode;
 
@@ -128,6 +135,10 @@ class MyAppState extends ChangeNotifier {
   // Set true if click song that is taken down in queue popup list.
   bool _isSkipTakenDownSong = false;
 
+  String get lastVideoVid => _lastVideoVid;
+
+  int get videoSeekTime => _videoSeekTime;
+
   /// The current platform, 0 for pm server, 1 for qq music, 2 for netease music, 3 for bilibili.
   int get currentPlatform => _currentPlatform;
 
@@ -192,6 +203,14 @@ class MyAppState extends ChangeNotifier {
   double? get speed => _speed;
 
   bool get isSkipTakenDownSong => _isSkipTakenDownSong;
+
+  set lastVideoVid(String value) {
+    _lastVideoVid = value;
+  }
+
+  set videoSeekTime(int value) {
+    _videoSeekTime = value;
+  }
 
   /// The current platform, 0 for pm server, 1 for qq music, 2 for netease music, 3 for bilibili.
   set currentPlatform(int value) {
@@ -513,9 +532,73 @@ class MyAppState extends ChangeNotifier {
     return result;
   }
 
+  Future<Video> fetchMVDetail(Song song, int platform) async {
+    DefaultCacheManager cacheManager = MyHttp.cacheManager;
+    Uri url = Uri.http(
+      API.host,
+      '${API.mvDetail}/${song.vid}/$platform',
+    );
+    String urlString = url.toString();
+    dynamic result = await cacheManager.getFileFromMemory(urlString);
+    if (result == null || !(result as FileInfo).file.existsSync()) {
+      result = await cacheManager.getFileFromCache(urlString);
+      if (result == null || !(result as FileInfo).file.existsSync()) {
+        MyLogger.logger.d('Loading detail mv information from network...');
+        final client = RetryClient(http.Client());
+        try {
+          var response = await client.get(url);
+          var decodedResponse =
+              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+          if (response.statusCode == 200 &&
+              decodedResponse['success'] == true) {
+            result = Video.fromJson(decodedResponse['data']);
+            (result as Video).videoLinks = List.from(song.videoLinks);
+            await cacheManager.putFile(
+              urlString,
+              response.bodyBytes,
+              fileExtension: 'json',
+            );
+            // if (detailMV.isEmpty) {
+            //   song.isTakenDown = true;
+            //   result = '1';
+            // } else {
+            //   result = songLink;
+            // }
+          } else {
+            MyToast.showToast(
+                'Response error with code: ${response.statusCode}');
+            MyLogger.logger
+                .e('Response error with code: ${response.statusCode}');
+            result = null;
+          }
+        } catch (e) {
+          MyToast.showToast('Exception thrown: $e');
+          MyLogger.logger.e('Network error with exception: $e');
+          rethrow;
+        } finally {
+          client.close();
+        }
+      } else {
+        MyLogger.logger.d('Loading detail mv information from cache...');
+      }
+    } else {
+      MyLogger.logger.d('Loading detail mv information from memory...');
+    }
+    if (result is Video) {
+      result = Future.value(result);
+    } else if (result is FileInfo) {
+      var decodedResponse =
+          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
+      result = Video.fromJson(decodedResponse['data']);
+      result.videoLinks = List.from(song.videoLinks);
+      result = Future.value(result);
+    } else {}
+    return result;
+  }
+
   Future<String> fetchSongLink(Song song, String quality, int platform) async {
     DefaultCacheManager cacheManager = MyHttp.cacheManager;
-    Uri url = Uri.http(API.host, '${API.songlink}/$platform', {
+    Uri url = Uri.http(API.host, '${API.songLink}/$platform', {
       'songMid': song.songMid,
       'mediaMid': song.mediaMid,
       'type': quality,
@@ -525,7 +608,7 @@ class MyAppState extends ChangeNotifier {
     if (result == null || !(result as FileInfo).file.existsSync()) {
       result = await cacheManager.getFileFromCache(urlString);
       if (result == null || !(result as FileInfo).file.existsSync()) {
-        MyLogger.logger.d('Loading songlink from network...');
+        MyLogger.logger.d('Loading song link from network...');
         final client = RetryClient(http.Client());
         try {
           var response = await client.get(url);
@@ -533,17 +616,17 @@ class MyAppState extends ChangeNotifier {
               jsonDecode(utf8.decode(response.bodyBytes)) as Map;
           if (response.statusCode == 200 &&
               decodedResponse['success'] == true) {
-            String songlink = decodedResponse['data'];
+            String songLink = decodedResponse['data'];
             await cacheManager.putFile(
               urlString,
               response.bodyBytes,
               fileExtension: 'json',
             );
-            if (songlink.isEmpty) {
+            if (songLink.isEmpty) {
               song.isTakenDown = true;
               result = '1';
             } else {
-              result = songlink;
+              result = songLink;
             }
           } else {
             MyToast.showToast(
@@ -560,10 +643,10 @@ class MyAppState extends ChangeNotifier {
           client.close();
         }
       } else {
-        MyLogger.logger.d('Loading songlink from cache...');
+        MyLogger.logger.d('Loading song link from cache...');
       }
     } else {
-      MyLogger.logger.d('Loading songlink from memory...');
+      MyLogger.logger.d('Loading song link from memory...');
     }
     if (result is String) {
       result = Future.value(result);

@@ -1,11 +1,7 @@
 import 'dart:ui';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lyric/lyrics_reader.dart';
-
-import '../lib/const.dart';
-
 void main() {
   runApp(MaterialApp(home: MyApp()));
 }

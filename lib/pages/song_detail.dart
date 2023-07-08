@@ -154,7 +154,7 @@ class _SongDetailPageState extends State<SongDetailPage> {
                                       ? Image.asset(
                                           MockData.detailSong.coverUri)
                                       : CachedNetworkImage(
-                                          imageUrl: currentDetailSong!
+                                          imageUrl: currentDetailSong
                                                   .coverUri.isNotEmpty
                                               ? currentDetailSong.coverUri
                                               : MyAppState.defaultCoverImage,

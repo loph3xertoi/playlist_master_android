@@ -13,6 +13,7 @@ class DetailSong {
   String songMid;
   String mediaMid;
   String vid;
+  List<String> videoLinks;
   String songLink;
   int duration;
   String description;
@@ -36,6 +37,7 @@ class DetailSong {
     required this.songMid,
     required this.mediaMid,
     required this.vid,
+    this.videoLinks = const [''],
     this.songLink = '',
     required this.duration,
     required this.description,

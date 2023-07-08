@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:playlistmaster/entities/song.dart';
+import 'package:playlistmaster/entities/video.dart';
 import 'package:playlistmaster/states/app_state.dart';
+import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:provider/provider.dart';
 
 class CreateSongItemMenuDialog extends StatelessWidget {
@@ -89,7 +91,14 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                 Radius.circular(10.0),
               ),
               onTap: () {
-                print('Play video.');
+                if (song.vid.isNotEmpty) {
+                  print('Play video.');
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/video_player',
+                      arguments: song);
+                } else {
+                  MyToast.showToast('This song has no video');
+                }
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -97,16 +106,27 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                   children: [
                     IconButton(
                       icon: Icon(Icons.ondemand_video_rounded),
-                      color: colorScheme.tertiary,
+                      color: song.vid.isEmpty
+                          ? colorScheme.onTertiary
+                          : colorScheme.tertiary,
                       onPressed: () {
-                        print('Play video.');
+                        if (song.vid.isNotEmpty) {
+                          print('Play video.');
+                          Navigator.pop(context);
+                          Navigator.pushNamed(context, '/video_player',
+                              arguments: song);
+                        } else {
+                          MyToast.showToast('This song has no video');
+                        }
                       },
                     ),
                     Expanded(
                       child: Text(
                         'Play video',
                         style: textTheme.labelMedium!.copyWith(
-                          color: colorScheme.onSecondary,
+                          color: song.vid.isEmpty
+                              ? colorScheme.onTertiary
+                              : colorScheme.onSecondary,
                         ),
                       ),
                     ),

@@ -4,6 +4,7 @@ import 'package:just_audio_background/just_audio_background.dart';
 import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/states/app_state.dart';
 import 'package:playlistmaster/third_lib_change/like_button/like_button.dart';
+import 'package:playlistmaster/utils/my_logger.dart';
 import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:playlistmaster/widgets/create_song_item_menu_popup.dart';
 import 'package:provider/provider.dart';
@@ -132,6 +133,14 @@ class _SongItemState extends State<SongItem> {
                           appState.currentPlayingSongInQueue! + 1,
                           newAudioSource);
                       MyToast.showToast('Added to queue');
+                    } else {
+                      if (widget.song.payPlay == 1) {
+                        MyToast.showToast('This song need vip to play');
+                        MyLogger.logger.e('This song need vip to play');
+                      } else if (widget.song.isTakenDown) {
+                        MyToast.showToast('This song is taken down');
+                        MyLogger.logger.e('This song is taken down');
+                      }
                     }
                   },
                   color: widget.song.isTakenDown || widget.song.payPlay == 1

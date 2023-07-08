@@ -16,10 +16,16 @@ class API {
   static const detailSong = '/song';
 
   /// api: /songlink/{platformId}?songMid={songMid}&mediaMid={mediaMid}&type={type}
-  static const songlink = '/songlink';
+  static const songLink = '/songlink';
 
   /// api: /songslink/{platformId}?songMids={songMids}
-  static const songslink = '/songslink';
+  static const songsLink = '/songslink';
+
+  /// api: /mv/{vid}/{platformId}
+  static const mvDetail = '/mv';
+
+  /// api: /mvlink/{platformId}?vids={vids}
+  static const mvsLink = '/mvlink';
 
   /// api: /user/{uid}
   static const user = '/user';
