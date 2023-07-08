@@ -252,6 +252,21 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
       for (Song song in result.songs) {
         if (songsLink.containsKey(song.songMid)) {
           song.isTakenDown = false;
+          // song.songLink = songsLink[song.songMid]!;
+        }
+      }
+
+      // Fetch songs link again as the link above may be wrong if there are some songs
+      // that are taken down.
+      songMids = result.songs
+          .where((song) => !song.isTakenDown)
+          .map((song) => song.songMid)
+          .toList();
+      songsLink = await fetchSongsLink(songMids, 1);
+      // Set the song's link and determine whether the song is taken down.
+      for (Song song in result.songs) {
+        if (songsLink.containsKey(song.songMid)) {
+          // This link is valid link.
           song.songLink = songsLink[song.songMid]!;
         }
       }
@@ -272,16 +287,30 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
           jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
       result = DetailPlaylist.fromJson(decodedResponse['data']);
       List<String> songMids = result.songs.map((e) => e.songMid).toList();
-
       Map<String, String> songsLink = await fetchSongsLink(songMids, 1);
       // Set the song's link and determine whether the song is taken down.
       for (Song song in result.songs) {
         if (songsLink.containsKey(song.songMid)) {
           song.isTakenDown = false;
-          song.songLink = songsLink[song.songMid]!;
+          // song.songLink = songsLink[song.songMid]!;
         }
       }
 
+      // Fetch songs link again as the link above may be wrong if there are some songs
+      // that are taken down.
+      songMids = result.songs
+          .where((song) => !song.isTakenDown)
+          .map((song) => song.songMid)
+          .toList();
+      songsLink = await fetchSongsLink(songMids, 1);
+      // Set the song's link and determine whether the song is taken down.
+      for (Song song in result.songs) {
+        if (songsLink.containsKey(song.songMid)) {
+          // This link is valid link.
+          song.songLink = songsLink[song.songMid]!;
+        }
+      }
+      
       List<String> vids = result.songs.map((e) => e.vid).toList()
         ..removeWhere((vid) => vid.isEmpty);
       Map<String, List<String>> mvsLink = await fetchMVsLink(vids, 1);
