@@ -522,15 +522,45 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                             // overflow: TextOverflow
                                                             //     .ellipsis,
                                                           ),
-                                                          Text(
-                                                            '${detailPlaylist.songsCount} songs',
-                                                            textAlign:
-                                                                TextAlign.start,
-                                                            style: textTheme
-                                                                .titleSmall,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
+                                                          Row(
+                                                            children: [
+                                                              Text(
+                                                                '${detailPlaylist.songsCount} songs',
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .start,
+                                                                style: textTheme
+                                                                    .titleSmall,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                              SizedBox(
+                                                                width: 10.0,
+                                                                child: Text(
+                                                                  '|',
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .center,
+                                                                  style:
+                                                                      TextStyle(
+                                                                    color: colorScheme
+                                                                        .onSecondary,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              Text(
+                                                                '${detailPlaylist.listenNum} listened',
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .start,
+                                                                style: textTheme
+                                                                    .titleSmall,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            ],
                                                           ),
                                                           Expanded(
                                                             child: Padding(
