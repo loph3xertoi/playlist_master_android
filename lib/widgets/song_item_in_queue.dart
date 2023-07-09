@@ -80,7 +80,7 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
                           fontSize: 10.0,
                           color: widget.isPlaying
                               ? Color(0xFFFF0000)
-                              : colorScheme.onPrimary,
+                              : colorScheme.tertiary,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),

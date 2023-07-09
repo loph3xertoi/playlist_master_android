@@ -260,7 +260,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
         for (Song song in result.songs) {
           if (songsLink.containsKey(song.songMid)) {
             song.isTakenDown = false;
-            // song.songLink = songsLink[song.songMid]!;
+            song.songLink = songsLink[song.songMid]!;
           }
         }
         // If all song isn't taken down, the links are all valid, just use it.
@@ -282,6 +282,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
           for (Song song in result.songs) {
             if (songsLink.containsKey(song.songMid)) {
               // This link is valid link.
+              song.isTakenDown = false;
               song.songLink = songsLink[song.songMid]!;
             }
           }
