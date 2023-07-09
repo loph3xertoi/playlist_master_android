@@ -62,38 +62,49 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   }
 
   void startPlay() async {
-    var video = await _video;
-    _resolutionList = {
-      '1080P': ResolutionItem(
-        value: 1080,
-        url: video.videoLinks[3],
-      ),
-      '720P': ResolutionItem(
-        value: 720,
-        url: video.videoLinks[2],
-      ),
-      '480P': ResolutionItem(
-        value: 480,
-        url: video.videoLinks[1],
-      ),
-      '320P': ResolutionItem(
-        value: 320,
-        url: video.videoLinks[0],
-      ),
-    };
-    await _player.setOption(FOption.hostCategory, "request-screen-on", 1);
-    await _player.setOption(FOption.hostCategory, "request-audio-focus", 1);
-    await _player.setOption(FOption.playerCategory, "reconnect", 20);
-    await _player.setOption(FOption.playerCategory, "framedrop", 20);
-    await _player.setOption(FOption.playerCategory, "enable-accurate-seek", 1);
-    await _player.setOption(FOption.playerCategory, "mediacodec", 1);
-    await _player.setOption(FOption.playerCategory, "packet-buffering", 0);
-    await _player.setOption(FOption.playerCategory, "soundtouch", 1);
+    Video video = await _video;
+    _resolutionList = getResolutionList(video.videoLinks);
+    await _player.setOption(FOption.hostCategory, 'request-screen-on', 1);
+    await _player.setOption(FOption.hostCategory, 'request-audio-focus', 1);
+    await _player.setOption(FOption.playerCategory, 'reconnect', 20);
+    await _player.setOption(FOption.playerCategory, 'framedrop', 20);
+    await _player.setOption(FOption.playerCategory, 'enable-accurate-seek', 1);
+    await _player.setOption(FOption.playerCategory, 'mediacodec', 1);
+    await _player.setOption(FOption.playerCategory, 'packet-buffering', 0);
+    await _player.setOption(FOption.playerCategory, 'soundtouch', 1);
 
     await _player.setLoop(0);
 
     // Play video of 480p by default.
     setVideoUrl(video.videoLinks[1]);
+  }
+
+  // Determine the resolution URLs based on the length of videoLinks
+  Map<String, ResolutionItem> getResolutionList(List<String> videoLinks) {
+    Map<String, ResolutionItem> resolutionList = {};
+
+    // Add resolutions based on the length of videoLinks
+    if (videoLinks.isNotEmpty) {
+      resolutionList['320p'] = ResolutionItem(value: 320, url: videoLinks[0]);
+    }
+    if (videoLinks.length >= 2) {
+      resolutionList['480p'] = ResolutionItem(value: 480, url: videoLinks[1]);
+    }
+    if (videoLinks.length >= 3) {
+      resolutionList['720p'] = ResolutionItem(value: 720, url: videoLinks[2]);
+    }
+    if (videoLinks.length >= 4) {
+      resolutionList['1080p'] = ResolutionItem(value: 1080, url: videoLinks[3]);
+    }
+    if (videoLinks.length >= 5) {
+      for (int i = 4; i < videoLinks.length; i++) {
+        String resolutionName = '1080p${i - 3}';
+        resolutionList[resolutionName] =
+            ResolutionItem(value: 1080, url: videoLinks[i]);
+      }
+    }
+
+    return resolutionList;
   }
 
   Future<void> setVideoUrl(String url) async {
