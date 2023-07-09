@@ -38,7 +38,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
 
   Future<Map<String, List<String>>> fetchMVsLink(
       List<String> vids, int platform) async {
-    DefaultCacheManager cacheManager = MyHttp.cacheManager;
+    CacheManager cacheManager = MyHttp.mvLinkCacheManager;
     Uri url = Uri.http(API.host, '${API.mvsLink}/$platform', {
       'vids': vids.join(','),
     });
@@ -104,13 +104,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
 
   Future<Map<String, String>> fetchSongsLink(
       List<String> songMids, int platform) async {
-    DefaultCacheManager cacheManager = MyHttp.cacheManager;
-    // Uri url = Uri.http(
-    //   API.host,
-    //   '${API.songslink}/$platform',
-    // );
-    // String query = 'songMids=${songMids.join(',')}';
-    // url = url.replace(query: query);
+    CacheManager cacheManager = MyHttp.songsLinkCacheManager;
     Uri url = Uri.http(API.host, '${API.songsLink}/$platform', {
       'songMids': songMids.join(','),
     });
@@ -178,7 +172,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
 
   Future<DetailPlaylist?> fetchDetailPlaylist(Playlist playlist) async {
     int platform = 1;
-    DefaultCacheManager cacheManager = MyHttp.cacheManager;
+    CacheManager cacheManager = MyHttp.detailPlaylistOtherCacheManager;
     Uri url = Uri.http(
       API.host,
       '${API.detailPlaylist}/${playlist.tid}/$platform',
@@ -261,30 +255,6 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
           if (songsLink.containsKey(song.songMid)) {
             song.isTakenDown = false;
             song.songLink = songsLink[song.songMid]!;
-          }
-        }
-        // If all song isn't taken down, the links are all valid, just use it.
-        if (songMids.length != songsLink.length) {
-          Uri url = Uri.http(API.host, '${API.songsLink}/$platform', {
-            'songMids': songMids.join(','),
-          });
-          var string = url.toString();
-          await cacheManager.removeFile(string);
-
-          // Fetch songs link again as the link above may be wrong if there are some songs
-          // that are taken down.
-          songMids = result.songs
-              .where((song) => !song.isTakenDown)
-              .map((song) => song.songMid)
-              .toList();
-          songsLink = await fetchSongsLink(songMids, platform);
-          // Set the song's link and determine whether the song is taken down.
-          for (Song song in result.songs) {
-            if (songsLink.containsKey(song.songMid)) {
-              // This link is valid link.
-              song.isTakenDown = false;
-              song.songLink = songsLink[song.songMid]!;
-            }
           }
         }
 
@@ -680,33 +650,25 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                             appState.queue =
                                                                                 detailPlaylist.songs.where((song) => !song.isTakenDown && (song.payPlay == 0)).toList();
 
-                                                                            appState.initAudioPlayer();
-
-                                                                            // if (true) {
-                                                                            //   bool
-                                                                            //       hasValidSong =
-                                                                            //       false;
-                                                                            //   if (index ==
-                                                                            //       -1) {
-                                                                            //     index = 0;
-                                                                            //     MyToast.showToast('This song is taken down.');
-                                                                            //   }
-                                                                            //   for (int i = index;
-                                                                            //       i < index + detailPlaylist.songsCount;
-                                                                            //       i++) {
-                                                                            //     if (rawQueue![i % detailPlaylist.songsCount].isTakenDown) {
-                                                                            //       continue;
-                                                                            //     }
-                                                                            //     hasValidSong = true;
-                                                                            //     index = appState.queue!.indexOf(rawQueue![i % detailPlaylist.songsCount]);
-                                                                            //     break;
-                                                                            //   }
-
-                                                                            //   if (!hasValidSong) {
-                                                                            //     MyToast.showToast('All songs in playlist is taken down.');
-                                                                            //     return;
-                                                                            //   }
-                                                                            // }
+                                                                            try {
+                                                                              await appState.initAudioPlayer();
+                                                                            } catch (e) {
+                                                                              MyToast.showToast('Exception: $e');
+                                                                              MyLogger.logger.e('Exception: $e');
+                                                                              appState.queue = [];
+                                                                              appState.currentDetailSong = null;
+                                                                              appState.currentPlayingSongInQueue = 0;
+                                                                              appState.currentSong = null;
+                                                                              appState.prevSong = null;
+                                                                              appState.isPlaying = false;
+                                                                              appState.player!.stop();
+                                                                              appState.player!.dispose();
+                                                                              appState.player = null;
+                                                                              appState.initQueue!.clear();
+                                                                              appState.isPlayerPageOpened = false;
+                                                                              appState.canSongPlayerPagePop = false;
+                                                                              return;
+                                                                            }
 
                                                                             appState.canSongPlayerPagePop =
                                                                                 true;
@@ -760,33 +722,25 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
 
                                                                             appState.initQueue!.clear();
 
-                                                                            await appState.initAudioPlayer();
-
-                                                                            // if (true) {
-                                                                            //   bool
-                                                                            //       hasValidSong =
-                                                                            //       false;
-                                                                            //   if (index ==
-                                                                            //       -1) {
-                                                                            //     index = 0;
-                                                                            //     MyToast.showToast('This song is taken down.');
-                                                                            //   }
-                                                                            //   for (int i = index;
-                                                                            //       i < index + detailPlaylist.songsCount;
-                                                                            //       i++) {
-                                                                            //     if (rawQueue![i % detailPlaylist.songsCount].isTakenDown) {
-                                                                            //       continue;
-                                                                            //     }
-                                                                            //     hasValidSong = true;
-                                                                            //     index = appState.queue!.indexOf(rawQueue![i % detailPlaylist.songsCount]);
-                                                                            //     break;
-                                                                            //   }
-
-                                                                            //   if (!hasValidSong) {
-                                                                            //     MyToast.showToast('All songs in playlist is taken down.');
-                                                                            //     return;
-                                                                            //   }
-                                                                            // }
+                                                                            try {
+                                                                              await appState.initAudioPlayer();
+                                                                            } catch (e) {
+                                                                              MyToast.showToast('Exception: $e');
+                                                                              MyLogger.logger.e('Exception: $e');
+                                                                              appState.queue = [];
+                                                                              appState.currentDetailSong = null;
+                                                                              appState.currentPlayingSongInQueue = 0;
+                                                                              appState.currentSong = null;
+                                                                              appState.prevSong = null;
+                                                                              appState.isPlaying = false;
+                                                                              appState.player!.stop();
+                                                                              appState.player!.dispose();
+                                                                              appState.player = null;
+                                                                              appState.initQueue!.clear();
+                                                                              appState.isPlayerPageOpened = false;
+                                                                              appState.canSongPlayerPagePop = false;
+                                                                              return;
+                                                                            }
 
                                                                             appState.ownerDirIdOfCurrentPlayingSong =
                                                                                 detailPlaylist.dirId;
@@ -807,19 +761,15 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                             appState.isFirstLoadSongPlayer =
                                                                                 true;
 
-                                                                            // appState.player!
-                                                                            //     .seek(
-                                                                            //         Duration
-                                                                            //             .zero,
-                                                                            //         index:
-                                                                            //             index);
                                                                             appState.player!.play();
                                                                           }
                                                                           appState.isPlayerPageOpened =
                                                                               true;
-                                                                          Navigator.pushNamed(
-                                                                              context,
-                                                                              '/song_player');
+                                                                          if (context
+                                                                              .mounted) {
+                                                                            Navigator.pushNamed(context,
+                                                                                '/song_player');
+                                                                          }
                                                                         }
                                                                       },
                                                                       child:
@@ -867,7 +817,9 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                   }),
                             ),
                           ),
-                          appState.isQueueEmpty ? Container() : BottomPlayer(),
+                          appState.currentSong == null
+                              ? Container()
+                              : BottomPlayer(),
                         ],
                       ),
                     ),

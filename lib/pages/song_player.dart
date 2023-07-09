@@ -51,9 +51,6 @@ class _SongPlayerPageState extends State<SongPlayerPage>
   Future<DetailSong?>? _detailSong;
   DetailSong? _simpleDetailSong;
   bool _hasLyrics = true;
-  // bool isPlaying = false;
-  // double max_value = 211658;
-// bool isTap = false;
   var _lyricUI = MyLyricsDisplayer(
     defaultSize: 20.0,
     defaultExtSize: 14.0,
@@ -61,28 +58,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     inlineGap: 0.0,
     highlight: true,
   );
-  // var myPlaying = false;
-
   @override
   void initState() {
-    final state = Provider.of<MyAppState>(context, listen: false);
-    var currentDetailSong = state.currentDetailSong;
-    // var isUsingMockData = state.isUsingMockData;
-    // var openedPlaylist = state.openedPlaylist;
-    // var currentSong = state.currentSong;
-    // _tid = ModalRoute.of(context)!.settings.arguments as String;
-    // if (isUsingMockData) {
-    //   _detailSong = Future.value(MockData.detailSong);
-    // } else {
-    //   _detailSong = fetchDetailSong(currentSong!.songMid);
-    // }
-    _detailSong = Future.value(currentDetailSong);
-
-    // _lyricModel = LyricsModelBuilder.create()
-    //     .bindLyricToMain(MockData.normalLyric)
-    //     .bindLyricToExt(MockData.transLyric)
-    //     .getModel();
-
     _controller = AnimationController(
       vsync: this,
       duration: Duration(seconds: 20),
@@ -115,18 +92,14 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     var positionDataStream = appState.positionDataStream;
     var carouselController = appState.carouselController;
     var prevCarouselIndex = appState.prevCarouselIndex;
-    var isSkipTakenDownSong = appState.isSkipTakenDownSong;
     String? mainLyrics;
 
     _isFirstLoadSongPlayer = appState.isFirstLoadSongPlayer;
     _isPlaying = appState.isPlaying;
 
-    if (_simpleDetailSong != currentDetailSong || isSkipTakenDownSong) {
+    if (_simpleDetailSong != currentDetailSong) {
       _simpleDetailSong = currentDetailSong;
       _detailSong = Future.value(currentDetailSong);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        appState.isSkipTakenDownSong = false;
-      });
     }
 
     if (_isFirstLoadSongPlayer) {
@@ -198,7 +171,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
 
     try {
       if (currentSong != null &&
-          (currentDetailSong == null || prevSong != currentSong)) {
+          (_detailSong == null || prevSong != currentSong)) {
         _detailSong = isUsingMockData
             ? Future.value(MockData.detailSong)
             : appState.fetchDetailSong(currentSong);

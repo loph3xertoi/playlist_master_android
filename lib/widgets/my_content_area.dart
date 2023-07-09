@@ -38,7 +38,7 @@ class _MyContentAreaState extends State<MyContentArea> {
   }
 
   Future<List<Playlist>?> fetchPlaylists() async {
-    DefaultCacheManager cacheManager = MyHttp.cacheManager;
+    CacheManager cacheManager = MyHttp.playlistsOtherCacheManager;
     Uri url = Uri.http(
       API.host,
       '${API.playlists}/${API.uid}/1',

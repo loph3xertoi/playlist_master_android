@@ -30,7 +30,7 @@ class _BasicInfoState extends State<BasicInfo> {
   late double imageSize;
 
   Future<T> fetchUser<T>() async {
-    DefaultCacheManager cacheManager = MyHttp.cacheManager;
+    CacheManager cacheManager = MyHttp.userOtherCacheManager;
     Uri url = Uri.http(
       API.host,
       '${API.user}/${API.uid}',

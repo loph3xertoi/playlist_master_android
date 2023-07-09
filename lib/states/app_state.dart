@@ -132,9 +132,6 @@ class MyAppState extends ChangeNotifier {
 
   Playlist? _openedPlaylist;
 
-  // Set true if click song that is taken down in queue popup list.
-  bool _isSkipTakenDownSong = false;
-
   String get lastVideoVid => _lastVideoVid;
 
   int get videoSeekTime => _videoSeekTime;
@@ -202,8 +199,6 @@ class MyAppState extends ChangeNotifier {
 
   double? get speed => _speed;
 
-  bool get isSkipTakenDownSong => _isSkipTakenDownSong;
-
   set lastVideoVid(String value) {
     _lastVideoVid = value;
   }
@@ -225,11 +220,6 @@ class MyAppState extends ChangeNotifier {
 
   set rawQueue(value) {
     _rawQueue = List.from(value);
-    notifyListeners();
-  }
-
-  set isSkipTakenDownSong(bool value) {
-    _isSkipTakenDownSong = value;
     notifyListeners();
   }
 
@@ -371,6 +361,15 @@ class MyAppState extends ChangeNotifier {
     // Try to load audio from a source and catch any errors.
     try {
       _initQueue = await initTheQueue();
+
+      // Listen to errors during playback.
+      _player!.playbackEventStream.listen(
+        (event) {},
+        onError: (Object e, StackTrace stackTrace) {
+          print('A stream error occurred: $e');
+        },
+      );
+
       await _player!.setAudioSource(_initQueue!,
           initialIndex: _currentPlayingSongInQueue,
           initialPosition: Duration.zero);
@@ -393,14 +392,6 @@ class MyAppState extends ChangeNotifier {
       await _player!.setVolume(_volume!);
       // Set the speed.
       await _player!.setSpeed(speed!);
-
-      // Listen to errors during playback.
-      _player!.playbackEventStream.listen(
-        (event) {},
-        onError: (Object e, StackTrace stackTrace) {
-          print('A stream error occurred: $e');
-        },
-      );
 
       // _player!.currentIndexStream.listen((event) {});
       // TODO: fix bug: when remove song in playlist, this function will also be called.
@@ -463,14 +454,14 @@ class MyAppState extends ChangeNotifier {
       //   await _player!.play();
       // }
     } catch (e) {
-      print("Error init audio player: $e");
-      rethrow;
+      print('Error init audio player: $e');
+      throw Exception('Error init audio player: $e');
     }
   }
 
   Future<DetailSong?> fetchDetailSong(Song song) async {
     print(song.songLink);
-    DefaultCacheManager cacheManager = MyHttp.cacheManager;
+    CacheManager cacheManager = MyHttp.detailSongOtherCacheManager;
     Uri url = Uri.http(
       API.host,
       '${API.detailSong}/${song.songMid}/1',
@@ -534,7 +525,7 @@ class MyAppState extends ChangeNotifier {
   }
 
   Future<Video> fetchMVDetail(Song song, int platform) async {
-    DefaultCacheManager cacheManager = MyHttp.cacheManager;
+    CacheManager cacheManager = MyHttp.detailMVOtherCacheManager;
     Uri url = Uri.http(
       API.host,
       '${API.mvDetail}/${song.vid}/$platform',
@@ -598,7 +589,7 @@ class MyAppState extends ChangeNotifier {
   }
 
   Future<String> fetchSongLink(Song song, String quality, int platform) async {
-    DefaultCacheManager cacheManager = MyHttp.cacheManager;
+    CacheManager cacheManager = MyHttp.songLinkCacheManager;
     Uri url = Uri.http(API.host, '${API.songLink}/$platform', {
       'songMid': song.songMid,
       'mediaMid': song.mediaMid,

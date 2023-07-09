@@ -76,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage>
                                 ),
                               ),
                               onPressed: () async {
-                                MyHttp.cacheManager.emptyCache();
+                                await MyHttp.clearCache();
                                 await AudioPlayer.clearAssetCache();
                                 MyToast.showToast('Clear cache');
                               },

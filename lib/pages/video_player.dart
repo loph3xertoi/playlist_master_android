@@ -1,11 +1,18 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:fplayer/fplayer.dart';
 import 'package:intl/intl.dart';
+import 'package:http/retry.dart';
+import 'package:http/http.dart' as http;
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/entities/video.dart';
+import 'package:playlistmaster/http/my_http.dart';
 import 'package:playlistmaster/states/app_state.dart';
+import 'package:playlistmaster/utils/my_logger.dart';
 import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:provider/provider.dart';
 import 'package:screen_brightness/screen_brightness.dart';
@@ -32,7 +39,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   };
 
   // Resolution list.
-  late Map<String, ResolutionItem> _resolutionList;
+  late Future<Map<String, ResolutionItem>> _resolutionList;
 
   @override
   void deactivate() {
@@ -46,6 +53,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
     _video = state.fetchMVDetail(widget.song, 1);
+    _resolutionList = _getResolutionList(_video);
     _startPlay();
   }
 
@@ -63,8 +71,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   }
 
   void _startPlay() async {
-    Video video = await _video;
-    _resolutionList = _getResolutionList(video.videoLinks);
+    var resolutionList = await _resolutionList;
     await _player.setOption(FOption.hostCategory, 'request-screen-on', 1);
     await _player.setOption(FOption.hostCategory, 'request-audio-focus', 1);
     await _player.setOption(FOption.playerCategory, 'reconnect', 20);
@@ -79,7 +86,59 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     // _player.addListener(_preparedListener);
 
     // Play video of 360p by default.
-    _setVideoUrl(video.videoLinks[0]);
+    _setVideoUrl(resolutionList.values.toList().first.url);
+  }
+
+  // Cache the video with the url.
+  Future<String?> _cachedVideoUrl(String rawUrl) async {
+    String? videoType = _getVideoType(rawUrl);
+    if (videoType == null) {
+      MyToast.showToast('Video url is corrupted');
+      throw Exception('Video url is corrupted.');
+    }
+    CacheManager cacheManager = MyHttp.videoCacheManager;
+    dynamic result = await cacheManager.getFileFromMemory(rawUrl);
+    if (result == null || !(result as FileInfo).file.existsSync()) {
+      result = await cacheManager.getFileFromCache(rawUrl);
+      if (result == null || !(result as FileInfo).file.existsSync()) {
+        MyLogger.logger.d('Loading video from network...');
+        final client = RetryClient(http.Client());
+        try {
+          var response = await client.get(Uri.parse(rawUrl));
+          if (response.statusCode == 200) {
+            await cacheManager.putFile(
+              rawUrl,
+              response.bodyBytes,
+              fileExtension: videoType,
+            );
+            result = await cacheManager.getFileFromCache(rawUrl);
+          } else {
+            MyToast.showToast(
+                'Response error with code: ${response.statusCode}');
+            MyLogger.logger
+                .e('Response error with code: ${response.statusCode}');
+            result = null;
+          }
+        } catch (e) {
+          MyToast.showToast('Exception thrown: $e');
+          MyLogger.logger.e('Network error with exception: $e');
+          rethrow;
+        } finally {
+          client.close();
+        }
+      } else {
+        MyLogger.logger.d('Loading video from cache...');
+      }
+    } else {
+      // The key is in memory and the value is in cache(sqlite).
+      MyLogger.logger.d('Loading video from memory...');
+    }
+
+    if (result is FileInfo) {
+      String filePath = result.file.uri.toString();
+      result = Future.value(filePath);
+    }
+    return result;
   }
 
   // void _preparedListener() {
@@ -90,28 +149,64 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   //   }
   // }
 
-  // Determine the resolution URLs based on the length of videoLinks
-  Map<String, ResolutionItem> _getResolutionList(List<String> videoLinks) {
-    Map<String, ResolutionItem> resolutionList = {};
+  String? _getVideoType(String url) {
+    int questionMarkIndex = url.indexOf('?');
+    int periodIndex = url.lastIndexOf('.', questionMarkIndex);
+    if (questionMarkIndex > periodIndex && periodIndex != -1) {
+      String videoType = url.substring(periodIndex + 1, questionMarkIndex);
+      return videoType;
+    }
+    return null;
+  }
 
+  // Determine the resolution URLs based on the length of videoLinks
+  Future<Map<String, ResolutionItem>> _getResolutionList(
+      Future<Video> video) async {
+    Map<String, ResolutionItem> resolutionList = {};
+    Video myVideo = await video;
+    List<String> videoLinks = myVideo.videoLinks;
+    // String? finalUrl = await _cachedVideoUrl(url);
+    // if (finalUrl == null) {
+    //   throw Exception('Http request error.');
+    // }
     // Add resolutions based on the length of videoLinks
     if (videoLinks.isNotEmpty) {
-      resolutionList['360p'] = ResolutionItem(value: 360, url: videoLinks[0]);
+      String? finalUrl = await _cachedVideoUrl(videoLinks[0]);
+      if (finalUrl == null) {
+        throw Exception('Http request error.');
+      }
+      resolutionList['360p'] = ResolutionItem(value: 360, url: finalUrl);
     }
     if (videoLinks.length >= 2) {
-      resolutionList['480p'] = ResolutionItem(value: 480, url: videoLinks[1]);
+      String? finalUrl = await _cachedVideoUrl(videoLinks[1]);
+      if (finalUrl == null) {
+        throw Exception('Http request error.');
+      }
+      resolutionList['480p'] = ResolutionItem(value: 480, url: finalUrl);
     }
     if (videoLinks.length >= 3) {
-      resolutionList['720p'] = ResolutionItem(value: 720, url: videoLinks[2]);
+      String? finalUrl = await _cachedVideoUrl(videoLinks[2]);
+      if (finalUrl == null) {
+        throw Exception('Http request error.');
+      }
+      resolutionList['720p'] = ResolutionItem(value: 720, url: finalUrl);
     }
     if (videoLinks.length >= 4) {
-      resolutionList['1080p'] = ResolutionItem(value: 1080, url: videoLinks[3]);
+      String? finalUrl = await _cachedVideoUrl(videoLinks[3]);
+      if (finalUrl == null) {
+        throw Exception('Http request error.');
+      }
+      resolutionList['1080p'] = ResolutionItem(value: 1080, url: finalUrl);
     }
     if (videoLinks.length >= 5) {
       for (int i = 4; i < videoLinks.length; i++) {
+        String? finalUrl = await _cachedVideoUrl(videoLinks[i]);
+        if (finalUrl == null) {
+          throw Exception('Http request error.');
+        }
         String resolutionName = '1080p${i - 3}';
         resolutionList[resolutionName] =
-            ResolutionItem(value: 1080, url: videoLinks[i]);
+            ResolutionItem(value: 1080, url: finalUrl);
       }
     }
 
@@ -122,8 +217,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     try {
       await _player.setDataSource(url, autoPlay: true, showCover: true);
     } catch (error) {
-      print('Exception: $error');
-      return;
+      throw Exception('Exception: $error');
     }
   }
 
@@ -137,7 +231,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     double videoHeight = size.width * 7 / 16;
 
     return FutureBuilder(
-      future: _video,
+      future: Future.wait([_video, _resolutionList]),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(
@@ -183,7 +277,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             ),
           );
         } else {
-          Video detailVideo = snapshot.data as Video;
+          Video detailVideo = snapshot.data![0] as Video;
+          Map<String, ResolutionItem> resolutionList =
+              snapshot.data![1] as Map<String, ResolutionItem>;
           return Scaffold(
             body: Material(
               color: Colors.black,
@@ -204,7 +300,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           title: detailVideo.name,
                           speedList: _speedList,
                           isResolution: true,
-                          resolutionList: _resolutionList,
+                          resolutionList: resolutionList,
+                          settingFun: () async {
+                            print(_player);
+                          },
                           onError: () async {
                             await _player.reset();
                             _setVideoUrl(detailVideo.videoLinks[0]);
