@@ -28,7 +28,9 @@ class _MySideDrawerState extends State<MySideDrawer> {
       title: Text(
         title,
         style: textTheme.labelMedium!.copyWith(
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          fontWeight: FontWeight.bold,
+          fontStyle: isSelected ? FontStyle.italic : FontStyle.normal,
+          // fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),
       leading: Icon(
@@ -52,81 +54,83 @@ class _MySideDrawerState extends State<MySideDrawer> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return SizedBox(
-      child: Drawer(
-        backgroundColor: Colors.transparent,
-        child: Stack(
-          children: [
-            Material(
-              color: Colors.transparent,
-              // color: Theme.of(context).scaffoldBackgroundColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(24),
-                  bottomRight: Radius.circular(24),
-                ),
-              ),
-              child: Column(
-                children: [
-                  SizedBox(height: 24),
-                  UserAccountsDrawerHeader(
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                    ),
-                    accountName: Text(
-                      'Daw Loph',
-                      style: textTheme.labelMedium,
-                    ),
-                    accountEmail: Text(
-                      'loph3xertoi@gmail.com',
-                      style: textTheme.labelMedium,
-                    ),
-                    currentAccountPicture: CircleAvatar(
-                      backgroundImage: AssetImage(
-                        'assets/images/qqmusic.png',
-                      ),
-                    ),
-                    otherAccountsPictures: [
-                      CircleAvatar(
-                        backgroundImage: AssetImage(
-                          'assets/images/bilibili.png',
-                        ),
-                      ),
-                      CircleAvatar(
-                        backgroundImage: AssetImage(
-                          'assets/images/netease.png',
-                        ),
-                      ),
-                    ],
+    return SafeArea(
+      child: SizedBox(
+        child: Drawer(
+          backgroundColor: Colors.transparent,
+          child: Stack(
+            children: [
+              Material(
+                color: Colors.transparent,
+                // color: Theme.of(context).scaffoldBackgroundColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(24),
+                    bottomRight: Radius.circular(24),
                   ),
-                  Expanded(
-                    child: ListView(
-                      children: [
-                        _buildMenuTile(
-                            'Home', Icons.home_filled, _selectedIndex == 0),
-                        _buildMenuTile(
-                            'Profile', Icons.person, _selectedIndex == 1),
-                        _buildMenuTile(
-                            'Settings', Icons.settings, _selectedIndex == 2),
+                ),
+                child: Column(
+                  children: [
+                    SizedBox(height: 24),
+                    UserAccountsDrawerHeader(
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                      ),
+                      accountName: Text(
+                        'Daw Loph',
+                        style: textTheme.labelMedium,
+                      ),
+                      accountEmail: Text(
+                        'loph3xertoi@gmail.com',
+                        style: textTheme.labelMedium,
+                      ),
+                      currentAccountPicture: CircleAvatar(
+                        backgroundImage: AssetImage(
+                          'assets/images/qqmusic.png',
+                        ),
+                      ),
+                      otherAccountsPictures: [
+                        CircleAvatar(
+                          backgroundImage: AssetImage(
+                            'assets/images/bilibili.png',
+                          ),
+                        ),
+                        CircleAvatar(
+                          backgroundImage: AssetImage(
+                            'assets/images/netease.png',
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                  Divider(),
-                  ListTile(
-                    title: Text(
-                      'Log out',
-                      style: textTheme.labelMedium,
+                    Expanded(
+                      child: ListView(
+                        children: [
+                          _buildMenuTile(
+                              'Home', Icons.home_filled, _selectedIndex == 0),
+                          _buildMenuTile(
+                              'Profile', Icons.person, _selectedIndex == 1),
+                          _buildMenuTile(
+                              'Settings', Icons.settings, _selectedIndex == 2),
+                        ],
+                      ),
                     ),
-                    leading: Icon(Icons.logout),
-                    onTap: () {
-                      // TODO: Implement log out functionality
-                    },
-                    textColor: Colors.black54,
-                  ),
-                ],
+                    Divider(),
+                    ListTile(
+                      title: Text(
+                        'Log out',
+                        style: textTheme.labelMedium,
+                      ),
+                      leading: Icon(Icons.logout),
+                      onTap: () {
+                        // TODO: Implement log out functionality
+                      },
+                      textColor: Colors.black54,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
