@@ -46,7 +46,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
     _video = state.fetchMVDetail(widget.song, 1);
-    startPlay();
+    _startPlay();
   }
 
   @override
@@ -58,12 +58,13 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       print(e);
       throw 'Failed to reset brightness';
     }
+    // _player.removeListener(_preparedListener);
     _player.release();
   }
 
-  void startPlay() async {
+  void _startPlay() async {
     Video video = await _video;
-    _resolutionList = getResolutionList(video.videoLinks);
+    _resolutionList = _getResolutionList(video.videoLinks);
     await _player.setOption(FOption.hostCategory, 'request-screen-on', 1);
     await _player.setOption(FOption.hostCategory, 'request-audio-focus', 1);
     await _player.setOption(FOption.playerCategory, 'reconnect', 20);
@@ -75,17 +76,27 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
     await _player.setLoop(0);
 
-    // Play video of 480p by default.
-    setVideoUrl(video.videoLinks[1]);
+    // _player.addListener(_preparedListener);
+
+    // Play video of 360p by default.
+    _setVideoUrl(video.videoLinks[0]);
   }
 
+  // void _preparedListener() {
+  //   FValue value = _player.value;
+  //   print('Resolution: ${value.size}');
+  //   if (value.prepared) {
+  //     print('prepared');
+  //   }
+  // }
+
   // Determine the resolution URLs based on the length of videoLinks
-  Map<String, ResolutionItem> getResolutionList(List<String> videoLinks) {
+  Map<String, ResolutionItem> _getResolutionList(List<String> videoLinks) {
     Map<String, ResolutionItem> resolutionList = {};
 
     // Add resolutions based on the length of videoLinks
     if (videoLinks.isNotEmpty) {
-      resolutionList['320p'] = ResolutionItem(value: 320, url: videoLinks[0]);
+      resolutionList['360p'] = ResolutionItem(value: 360, url: videoLinks[0]);
     }
     if (videoLinks.length >= 2) {
       resolutionList['480p'] = ResolutionItem(value: 480, url: videoLinks[1]);
@@ -107,7 +118,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     return resolutionList;
   }
 
-  Future<void> setVideoUrl(String url) async {
+  Future<void> _setVideoUrl(String url) async {
     try {
       await _player.setDataSource(url, autoPlay: true, showCover: true);
     } catch (error) {
@@ -124,7 +135,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     MediaQueryData mediaQueryData = MediaQuery.of(context);
     Size size = mediaQueryData.size;
     double videoHeight = size.width * 7 / 16;
-    int seekTime = appState.videoSeekTime;
 
     return FutureBuilder(
       future: _video,
@@ -197,18 +207,21 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           resolutionList: _resolutionList,
                           onError: () async {
                             await _player.reset();
-                            setVideoUrl(detailVideo.videoLinks[1]);
+                            _setVideoUrl(detailVideo.videoLinks[0]);
                           },
                           onVideoEnd: () async {
                             // await _player.reset();
-                            // setVideoUrl(detailVideo.videoLinks[1]);
+                            // _setVideoUrl(detailVideo.videoLinks[0]);
                           },
                           onVideoTimeChange: () {
                             // 视频时间变动则触发一次，可以保存视频播放历史
+                            appState.videoSeekTime =
+                                _player.currentPos.inMilliseconds;
                           },
                           onVideoPrepared: () async {
                             // 视频初始化完毕，如有历史记录时间段则可以触发快进
                             print('daw${detailVideo.vid}');
+                            int seekTime = appState.videoSeekTime;
                             try {
                               if (seekTime >= 1 &&
                                   detailVideo.vid == appState.lastVideoVid) {
