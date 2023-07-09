@@ -234,7 +234,9 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                     children: [
                       SelectableText(
                         'Exception: ${snapshot.error}',
-                        style: textTheme.labelLarge,
+                        style: textTheme.labelLarge!.copyWith(
+                          color: Colors.white,
+                        ),
                         // style: TextStyle(
                         //   color: Colors.white70,
                         //   fontFamily: 'Roboto',
@@ -244,7 +246,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                       TextButton.icon(
                         style: ButtonStyle(
                           shadowColor: MaterialStateProperty.all(
-                            colorScheme.primary,
+                            Colors.white54,
                           ),
                           overlayColor: MaterialStateProperty.all(
                             Colors.grey,
@@ -253,7 +255,9 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                         icon: Icon(MdiIcons.webRefresh),
                         label: Text(
                           'Retry',
-                          style: textTheme.labelMedium,
+                          style: textTheme.labelMedium!.copyWith(
+                            color: Colors.white,
+                          ),
                         ),
                         onPressed: () {
                           setState(() {

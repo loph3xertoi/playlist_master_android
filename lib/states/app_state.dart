@@ -469,6 +469,7 @@ class MyAppState extends ChangeNotifier {
   }
 
   Future<DetailSong?> fetchDetailSong(Song song) async {
+    print(song.songLink);
     DefaultCacheManager cacheManager = MyHttp.cacheManager;
     Uri url = Uri.http(
       API.host,

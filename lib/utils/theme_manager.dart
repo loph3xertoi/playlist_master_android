@@ -58,6 +58,8 @@ class ThemeNotifier with ChangeNotifier {
 
   final lightTheme = ThemeData(
     useMaterial3: true,
+    // primaryColorDark: Colors.amber,
+    // primaryColorLight: Colors.transparent,
     colorScheme: ColorScheme.fromSwatch().copyWith(
       primary: Colors.white,
       onPrimary: Color(0x42000000),
@@ -130,6 +132,13 @@ class ThemeNotifier with ChangeNotifier {
 
   final darkTheme = ThemeData(
     useMaterial3: true,
+    // primaryColorDark: Colors.white,
+    sliderTheme: SliderThemeData(
+      activeTrackColor: Colors.white,
+      inactiveTrackColor: Colors.white38,
+      
+    ),
+    primaryColorLight: Color(0xFFF0E6E9),
     colorScheme: ColorScheme.fromSwatch().copyWith(
       primary: Color(0xFF212121),
       onPrimary: Colors.white,

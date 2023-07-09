@@ -174,7 +174,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       padding: const EdgeInsets.only(bottom: 50.0),
                       child: FView(
                         player: _player,
-                        width: double.infinity,
+                        // width: double.infinity,
                         // height: videoHeight,
                         color: Colors.black,
                         fsFit: FFit.contain,

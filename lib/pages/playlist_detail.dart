@@ -177,10 +177,11 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   }
 
   Future<DetailPlaylist?> fetchDetailPlaylist(Playlist playlist) async {
+    int platform = 1;
     DefaultCacheManager cacheManager = MyHttp.cacheManager;
     Uri url = Uri.http(
       API.host,
-      '${API.detailPlaylist}/${playlist.tid}/1',
+      '${API.detailPlaylist}/${playlist.tid}/$platform',
     );
     String urlString = url.toString();
     dynamic result = await cacheManager.getFileFromMemory(urlString);
@@ -245,83 +246,59 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     } else {
       MyLogger.logger.d('Loading detail playlist from memory...');
     }
-    if (result is DetailPlaylist) {
-      List<String> songMids = result.songs.map((e) => e.songMid).toList();
-      Map<String, String> songsLink = await fetchSongsLink(songMids, 1);
-      // Set the song's link and determine whether the song is taken down.
-      for (Song song in result.songs) {
-        if (songsLink.containsKey(song.songMid)) {
-          song.isTakenDown = false;
-          // song.songLink = songsLink[song.songMid]!;
-        }
+    if (result is DetailPlaylist || result is FileInfo) {
+      if (result is FileInfo) {
+        var decodedResponse =
+            jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
+        result = DetailPlaylist.fromJson(decodedResponse['data']);
       }
+      if (result is DetailPlaylist) {
+        List<String> songMids = result.songs.map((e) => e.songMid).toList();
+        Map<String, String> songsLink =
+            await fetchSongsLink(songMids, platform);
+        // Set the song's link and determine whether the song is taken down.
+        for (Song song in result.songs) {
+          if (songsLink.containsKey(song.songMid)) {
+            song.isTakenDown = false;
+            // song.songLink = songsLink[song.songMid]!;
+          }
+        }
+        // If all song isn't taken down, the links are all valid, just use it.
+        if (songMids.length != songsLink.length) {
+          Uri url = Uri.http(API.host, '${API.songsLink}/$platform', {
+            'songMids': songMids.join(','),
+          });
+          var string = url.toString();
+          await cacheManager.removeFile(string);
 
-      // Fetch songs link again as the link above may be wrong if there are some songs
-      // that are taken down.
-      songMids = result.songs
-          .where((song) => !song.isTakenDown)
-          .map((song) => song.songMid)
-          .toList();
-      songsLink = await fetchSongsLink(songMids, 1);
-      // Set the song's link and determine whether the song is taken down.
-      for (Song song in result.songs) {
-        if (songsLink.containsKey(song.songMid)) {
-          // This link is valid link.
-          song.songLink = songsLink[song.songMid]!;
+          // Fetch songs link again as the link above may be wrong if there are some songs
+          // that are taken down.
+          songMids = result.songs
+              .where((song) => !song.isTakenDown)
+              .map((song) => song.songMid)
+              .toList();
+          songsLink = await fetchSongsLink(songMids, platform);
+          // Set the song's link and determine whether the song is taken down.
+          for (Song song in result.songs) {
+            if (songsLink.containsKey(song.songMid)) {
+              // This link is valid link.
+              song.songLink = songsLink[song.songMid]!;
+            }
+          }
         }
-      }
 
-      List<String> vids = result.songs.map((e) => e.vid).toList()
-        ..removeWhere((vid) => vid.isEmpty);
-      Map<String, List<String>> mvsLink = await fetchMVsLink(vids, 1);
-      // Set the video's link.
-      for (Song song in result.songs) {
-        if (mvsLink.containsKey(song.vid)) {
-          song.videoLinks = mvsLink[song.vid]!;
+        List<String> vids = result.songs.map((e) => e.vid).toList()
+          ..removeWhere((vid) => vid.isEmpty);
+        Map<String, List<String>> mvsLink = await fetchMVsLink(vids, platform);
+        // Set the video's link.
+        for (Song song in result.songs) {
+          if (mvsLink.containsKey(song.vid)) {
+            song.videoLinks = mvsLink[song.vid]!;
+          }
         }
-      }
 
-      result = Future.value(result);
-    } else if (result is FileInfo) {
-      var decodedResponse =
-          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
-      result = DetailPlaylist.fromJson(decodedResponse['data']);
-      List<String> songMids = result.songs.map((e) => e.songMid).toList();
-      Map<String, String> songsLink = await fetchSongsLink(songMids, 1);
-      // Set the song's link and determine whether the song is taken down.
-      for (Song song in result.songs) {
-        if (songsLink.containsKey(song.songMid)) {
-          song.isTakenDown = false;
-          // song.songLink = songsLink[song.songMid]!;
-        }
+        result = Future.value(result);
       }
-
-      // Fetch songs link again as the link above may be wrong if there are some songs
-      // that are taken down.
-      songMids = result.songs
-          .where((song) => !song.isTakenDown)
-          .map((song) => song.songMid)
-          .toList();
-      songsLink = await fetchSongsLink(songMids, 1);
-      // Set the song's link and determine whether the song is taken down.
-      for (Song song in result.songs) {
-        if (songsLink.containsKey(song.songMid)) {
-          // This link is valid link.
-          song.songLink = songsLink[song.songMid]!;
-        }
-      }
-      
-      List<String> vids = result.songs.map((e) => e.vid).toList()
-        ..removeWhere((vid) => vid.isEmpty);
-      Map<String, List<String>> mvsLink = await fetchMVsLink(vids, 1);
-      // Set the video's link.
-      for (Song song in result.songs) {
-        if (mvsLink.containsKey(song.vid)) {
-          song.videoLinks = mvsLink[song.vid]!;
-        }
-      }
-
-      result = Future.value(result);
     } else {}
     return result;
   }
@@ -432,7 +409,10 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                               icon: Icon(MdiIcons.webRefresh),
                                               label: Text(
                                                 'Retry',
-                                                style: textTheme.labelMedium,
+                                                style: textTheme.labelMedium!
+                                                    .copyWith(
+                                                  color: colorScheme.primary,
+                                                ),
                                               ),
                                               onPressed: () {
                                                 setState(() {
