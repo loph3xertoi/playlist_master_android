@@ -776,6 +776,8 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                           SongItem(
                                                                         index:
                                                                             index,
+                                                                        dirId: detailPlaylist
+                                                                            .dirId,
                                                                         song: rawQueue![
                                                                             index],
                                                                       ),

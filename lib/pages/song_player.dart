@@ -41,6 +41,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
   int _prevSongIndex = 0;
   // True for return original page as all songs are taken down.
   bool _return = false;
+  // bool _pressPlayButton = false;
 
   var _lyricPadding = 40.0;
   LyricsReaderModel? _lyricModel;
@@ -116,14 +117,17 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     if (queue?.isEmpty ?? false) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (appState.canSongPlayerPagePop) {
-          Navigator.of(context).pop();
           appState.isPlayerPageOpened = false;
           appState.canSongPlayerPagePop = false;
+          Navigator.of(context).pop();
         }
       });
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (appState.isPlayerPageOpened == false) {
+        appState.isPlayerPageOpened = true;
+      }
       if (_return) {
         appState.queue = [];
         appState.currentDetailSong = null;
@@ -291,8 +295,6 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                               color: Color(0xE5FFFFFF),
                               icon: Icon(Icons.arrow_back_rounded),
                               onPressed: () {
-                                // _appState.initSongPlayer = true;
-                                appState.isPlayerPageOpened = false;
                                 Navigator.pop(context);
                               },
                             ),
@@ -976,9 +978,10 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                         color: Color(0xE5FFFFFF),
                                         onPressed: () {
                                           player!.play();
-                                          setState(() {
-                                            _controller.repeat();
-                                          });
+                                          // setState(() {
+                                          //   _controller.repeat();
+                                          //   _pressPlayButton = true;
+                                          // });
                                         },
                                       );
                                     } else if (processingState !=
@@ -991,10 +994,11 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                         color: Color(0xE5FFFFFF),
                                         onPressed: () {
                                           player?.pause();
-                                          // appState.isPlaying = false;
-                                          setState(() {
-                                            _controller.stop();
-                                          });
+                                          appState.isPlaying = false;
+                                          // setState(() {
+                                          //   _controller.stop();
+                                          //   _pressPlayButton = true;
+                                          // });
                                         },
                                       );
                                     } else {

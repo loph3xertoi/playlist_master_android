@@ -12,11 +12,13 @@ import 'package:uuid/uuid.dart';
 
 class SongItem extends StatefulWidget {
   final int index;
+  final int dirId;
   final Song song;
 
   const SongItem({
     super.key,
     required this.index,
+    required this.dirId,
     required this.song,
   });
 
@@ -110,29 +112,68 @@ class _SongItemState extends State<SongItem> {
                 ),
               ),
               IconButton(
-                  onPressed: () {
-                    if (appState.currentSong != null &&
-                        !widget.song.isTakenDown &&
+                  onPressed: () async {
+                    if (!widget.song.isTakenDown &&
                         (widget.song.payPlay == 0)) {
-                      appState.queue!.insert(
-                          appState.currentPlayingSongInQueue! + 1, widget.song);
-                      var newAudioSource = LockCachingAudioSource(
-                        Uri.parse(widget.song.songLink),
-                        tag: MediaItem(
-                          // Specify a unique ID for each media item:
-                          id: Uuid().v1(),
-                          // Metadata to display in the notification:
-                          album: 'Album name',
-                          artist:
-                              widget.song.singers.map((e) => e.name).join(','),
-                          title: widget.song.name,
-                          artUri: Uri.parse(widget.song.coverUri),
-                        ),
-                      );
-                      appState.initQueue!.insert(
-                          appState.currentPlayingSongInQueue! + 1,
-                          newAudioSource);
-                      MyToast.showToast('Added to queue');
+                      if (appState.player == null) {
+                      appState.queue = [widget.song];
+                        try {
+                          await appState.initAudioPlayer();
+                        } catch (e) {
+                          MyToast.showToast('Exception: $e');
+                          MyLogger.logger.e('Exception: $e');
+                          appState.queue = [];
+                          appState.currentDetailSong = null;
+                          appState.currentPlayingSongInQueue = 0;
+                          appState.currentSong = null;
+                          appState.prevSong = null;
+                          appState.isPlaying = false;
+                          appState.player!.stop();
+                          appState.player!.dispose();
+                          appState.player = null;
+                          appState.initQueue!.clear();
+                          appState.isPlayerPageOpened = false;
+                          appState.canSongPlayerPagePop = false;
+                          return;
+                        }
+                        appState.currentPlayingSongInQueue = 0;
+
+                        appState.currentSong = widget.song;
+
+                        appState.prevSong = appState.currentSong;
+
+                        appState.currentDetailSong = null;
+
+                        appState.ownerDirIdOfCurrentPlayingSong = widget.dirId;
+
+                        // appState.isFirstLoadSongPlayer = true;
+
+                        appState.player!.play();
+
+                        MyToast.showToast('Added to queue');
+                      } else {
+                        appState.queue!.insert(
+                            appState.currentPlayingSongInQueue! + 1,
+                            widget.song);
+                        var newAudioSource = LockCachingAudioSource(
+                          Uri.parse(widget.song.songLink),
+                          tag: MediaItem(
+                            // Specify a unique ID for each media item:
+                            id: Uuid().v1(),
+                            // Metadata to display in the notification:
+                            album: 'Album name',
+                            artist: widget.song.singers
+                                .map((e) => e.name)
+                                .join(','),
+                            title: widget.song.name,
+                            artUri: Uri.parse(widget.song.coverUri),
+                          ),
+                        );
+                        appState.initQueue!.insert(
+                            appState.currentPlayingSongInQueue! + 1,
+                            newAudioSource);
+                        MyToast.showToast('Added to queue');
+                      }
                     } else {
                       if (widget.song.payPlay == 1) {
                         MyToast.showToast('This song need vip to play');

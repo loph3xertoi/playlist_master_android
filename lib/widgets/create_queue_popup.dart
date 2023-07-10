@@ -108,14 +108,14 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                   
                                   appState.player!
                                       .seek(Duration.zero, index: index);
-                                  Future.delayed(Duration(seconds: 1), () {
-                                    if (appState.isPlayerPageOpened) {
-                                      carouselController.animateToPage(
-                                        player!.effectiveIndices!
-                                            .indexOf(index),
-                                      );
-                                    }
-                                  });
+                                  // Future.delayed(Duration(seconds: 1), () {
+                                  //   if (appState.isPlayerPageOpened) {
+                                  //     carouselController.animateToPage(
+                                  //       player!.effectiveIndices!
+                                  //           .indexOf(index),
+                                  //     );
+                                  //   }
+                                  // });
                                 });
 
                                 if (!player!.playerState.playing) {

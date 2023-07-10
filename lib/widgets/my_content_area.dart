@@ -115,7 +115,7 @@ class _MyContentAreaState extends State<MyContentArea> {
                   SelectableText(
                     '${snapshot.error}',
                     style: TextStyle(
-                      color: Colors.black54,
+                      color: Colors.grey,
                       fontFamily: 'Roboto',
                       fontSize: 16.0,
                     ),

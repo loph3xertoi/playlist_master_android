@@ -100,7 +100,6 @@ class _SongDetailPageState extends State<SongDetailPage> {
                         color: colorScheme.tertiary,
                         icon: Icon(Icons.arrow_back_rounded),
                         onPressed: () {
-                          appState.isPlayerPageOpened = true;
                           Navigator.pop(context);
                         },
                       ),
