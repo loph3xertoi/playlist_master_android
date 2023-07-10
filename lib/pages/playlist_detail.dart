@@ -32,247 +32,7 @@ class PlaylistDetailPage extends StatefulWidget {
 class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late Future<DetailPlaylist?> _detailPlaylist;
-
-  // late List<Song> _songs;
-  // late String _tid;
-
-  Future<Map<String, List<String>>> fetchMVsLink(
-      List<String> vids, int platform) async {
-    CacheManager cacheManager = MyHttp.mvLinkCacheManager;
-    Uri url = Uri.http(API.host, '${API.mvsLink}/$platform', {
-      'vids': vids.join(','),
-    });
-    String urlString = url.toString();
-    dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null || !(result as FileInfo).file.existsSync()) {
-      result = await cacheManager.getFileFromCache(urlString);
-      if (result == null || !(result as FileInfo).file.existsSync()) {
-        MyLogger.logger.d('Loading mv link from network...');
-        final client = RetryClient(http.Client());
-        try {
-          var response = await client.get(url);
-          var decodedResponse =
-              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-          if (response.statusCode == 200 &&
-              decodedResponse['success'] == true) {
-            var mvsLink = decodedResponse['data']!;
-            if (mvsLink is Map<String, dynamic>) {
-              result = mvsLink.map((key, value) =>
-                  MapEntry<String, List<String>>(
-                      key, List<String>.from(value)));
-            }
-            await cacheManager.putFile(
-              urlString,
-              response.bodyBytes,
-              fileExtension: 'json',
-            );
-          } else {
-            MyToast.showToast(
-                'Response error with code: ${response.statusCode}');
-            MyLogger.logger
-                .e('Response error with code: ${response.statusCode}');
-            result = null;
-          }
-        } catch (e) {
-          MyToast.showToast('Exception thrown: $e');
-          MyLogger.logger.e('Network error with exception: $e');
-          rethrow;
-        } finally {
-          client.close();
-        }
-      } else {
-        MyLogger.logger.d('Loading mv link from cache...');
-      }
-    } else {
-      MyLogger.logger.d('Loading mv link from memory...');
-    }
-    if (result is Map<String, List<String>>) {
-      result = Future.value(result);
-    } else if (result is FileInfo) {
-      var decodedResponse =
-          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
-      var mvsLink = decodedResponse['data']!;
-      if (mvsLink is Map<String, dynamic>) {
-        result = mvsLink.map((key, value) =>
-            MapEntry<String, List<String>>(key, List<String>.from(value)));
-      }
-      print(result.runtimeType);
-      result = Future<Map<String, List<String>>>.value(result);
-    } else {}
-    return result;
-  }
-
-  Future<Map<String, String>> fetchSongsLink(
-      List<String> songMids, int platform) async {
-    CacheManager cacheManager = MyHttp.songsLinkCacheManager;
-    Uri url = Uri.http(API.host, '${API.songsLink}/$platform', {
-      'songMids': songMids.join(','),
-    });
-    String urlString = url.toString();
-    dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null || !(result as FileInfo).file.existsSync()) {
-      result = await cacheManager.getFileFromCache(urlString);
-      if (result == null || !(result as FileInfo).file.existsSync()) {
-        MyLogger.logger.d('Loading songs link from network...');
-        final client = RetryClient(http.Client());
-        try {
-          var response = await client.get(url);
-          var decodedResponse =
-              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-          if (response.statusCode == 200 &&
-              decodedResponse['success'] == true) {
-            var songsLink = decodedResponse['data']!;
-            if (songsLink is Map<String, dynamic>) {
-              result = songsLink
-                  .map((key, value) => MapEntry(key, value.toString()));
-            }
-
-            await cacheManager.putFile(
-              urlString,
-              response.bodyBytes,
-              fileExtension: 'json',
-            );
-            // if (songsLink.isEmpty) {
-            //   // result = '1';
-            // } else {
-            //   result = songsLink;
-            // }
-          } else {
-            MyToast.showToast(
-                'Response error with code: ${response.statusCode}');
-            MyLogger.logger
-                .e('Response error with code: ${response.statusCode}');
-            result = null;
-          }
-        } catch (e) {
-          MyToast.showToast('Exception thrown: $e');
-          MyLogger.logger.e('Network error with exception: $e');
-          rethrow;
-        } finally {
-          client.close();
-        }
-      } else {
-        MyLogger.logger.d('Loading songs link from cache...');
-      }
-    } else {
-      MyLogger.logger.d('Loading songs link from memory...');
-    }
-    print(result.runtimeType);
-    if (result is Map<String, String>) {
-      result = Future.value(result);
-    } else if (result is FileInfo) {
-      var decodedResponse =
-          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
-      var songsLink = decodedResponse['data'] as Map<String, dynamic>;
-      result = songsLink.map((key, value) => MapEntry(key, value.toString()));
-      result = Future.value(result);
-    } else {}
-    return result;
-  }
-
-  Future<DetailPlaylist?> fetchDetailPlaylist(Playlist playlist) async {
-    int platform = 1;
-    CacheManager cacheManager = MyHttp.detailPlaylistOtherCacheManager;
-    Uri url = Uri.http(
-      API.host,
-      '${API.detailPlaylist}/${playlist.tid}/$platform',
-    );
-    String urlString = url.toString();
-    dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null || !(result as FileInfo).file.existsSync()) {
-      result = await cacheManager.getFileFromCache(urlString);
-      if (result == null || !(result as FileInfo).file.existsSync()) {
-        MyLogger.logger.d('Loading detail playlist from network...');
-        final client = RetryClient(http.Client());
-        try {
-          var response = await client.get(url);
-          var decodedResponse =
-              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-          if (response.statusCode == 200 &&
-              decodedResponse['success'] == true) {
-            result = DetailPlaylist.fromJson(decodedResponse['data']);
-            await cacheManager.putFile(
-              urlString,
-              response.bodyBytes,
-              fileExtension: 'json',
-            );
-          } else if (response.statusCode == 200 &&
-              decodedResponse['success'] == false) {
-            MyToast.showToast('Request failure, tid is 0');
-            MyLogger.logger.e('Request failure, tid is 0');
-
-            DetailPlaylist detailPlaylist = DetailPlaylist(
-              name: playlist.name,
-              coverImage: playlist.coverImage,
-              songsCount: playlist.songsCount,
-              listenNum: 0,
-              dirId: playlist.dirId,
-              tid: playlist.tid,
-              songs: [],
-            );
-            result = detailPlaylist;
-            decodedResponse['data'] = detailPlaylist.toJson();
-            String jsonString = jsonEncode(decodedResponse);
-            List<int> bodyBytes = utf8.encode(jsonString);
-            Uint8List uint8List = Uint8List.fromList(bodyBytes);
-            await cacheManager.putFile(
-              urlString,
-              uint8List,
-              fileExtension: 'json',
-            );
-          } else {
-            MyToast.showToast(
-                'Response error with code: ${response.statusCode}');
-            MyLogger.logger
-                .e('Response error with code: ${response.statusCode}');
-            result = null;
-          }
-        } catch (e) {
-          MyToast.showToast('Exception thrown: $e');
-          MyLogger.logger.e('Network error with exception: $e');
-          rethrow;
-        } finally {
-          client.close();
-        }
-      } else {
-        MyLogger.logger.d('Loading detail playlist from cache...');
-      }
-    } else {
-      MyLogger.logger.d('Loading detail playlist from memory...');
-    }
-    if (result is DetailPlaylist || result is FileInfo) {
-      if (result is FileInfo) {
-        var decodedResponse =
-            jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
-        result = DetailPlaylist.fromJson(decodedResponse['data']);
-      }
-      if (result is DetailPlaylist) {
-        List<String> songMids = result.songs.map((e) => e.songMid).toList();
-        Map<String, String> songsLink =
-            await fetchSongsLink(songMids, platform);
-        // Set the song's link and determine whether the song is taken down.
-        for (Song song in result.songs) {
-          if (songsLink.containsKey(song.songMid)) {
-            song.isTakenDown = false;
-            song.songLink = songsLink[song.songMid]!;
-          }
-        }
-
-        List<String> vids = result.songs.map((e) => e.vid).toList()
-          ..removeWhere((vid) => vid.isEmpty);
-        Map<String, List<String>> mvsLink = await fetchMVsLink(vids, platform);
-        // Set the video's link.
-        for (Song song in result.songs) {
-          if (mvsLink.containsKey(song.vid)) {
-            song.videoLinks = mvsLink[song.vid]!;
-          }
-        }
-
-        result = Future.value(result);
-      }
-    } else {}
-    return result;
-  }
+  bool _changeRawQueue = true;
 
   @override
   void initState() {
@@ -280,7 +40,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     // _songs = _detailPlaylist.songs;
     final state = Provider.of<MyAppState>(context, listen: false);
     var isUsingMockData = state.isUsingMockData;
-    var openedPlaylist = state.openedPlaylist;
+    var openedPlaylist = state.rawOpenedPlaylist;
     // var rawQueue = state.rawQueue;
     // WidgetsBinding.instance.addPostFrameCallback((_) {
     //   state.rawQueue = null;
@@ -291,9 +51,10 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         state.rawQueue = MockData.songs;
         state.queue = MockData.songs;
+        state.openedPlaylist = state.rawOpenedPlaylist;
       });
     } else {
-      _detailPlaylist = fetchDetailPlaylist(openedPlaylist!);
+      _detailPlaylist = state.fetchDetailPlaylist(openedPlaylist!);
     }
   }
 
@@ -305,7 +66,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
     final textTheme = Theme.of(context).textTheme;
 
     var isUsingMockData = appState.isUsingMockData;
-    var openedPlaylist = appState.openedPlaylist;
+    var openedPlaylist = appState.rawOpenedPlaylist;
     var player = appState.player;
     var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
     var ownerDirIdOfCurrentPlayingSong =
@@ -387,8 +148,8 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                               ),
                                               onPressed: () {
                                                 setState(() {
-                                                  _detailPlaylist =
-                                                      fetchDetailPlaylist(
+                                                  _detailPlaylist = appState
+                                                      .fetchDetailPlaylist(
                                                           openedPlaylist!);
                                                 });
                                               },
@@ -402,9 +163,11 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                       rawQueue = detailPlaylist.songs;
                                       WidgetsBinding.instance
                                           .addPostFrameCallback((_) {
-                                        if (appState.rawQueue!.isEmpty) {
+                                        if (appState.rawQueue!.isEmpty ||
+                                            _changeRawQueue) {
                                           appState.rawQueue =
                                               detailPlaylist.songs;
+                                          _changeRawQueue = false;
                                         }
                                       });
 
@@ -650,6 +413,10 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                             appState.queue =
                                                                                 detailPlaylist.songs.where((song) => !song.isTakenDown && (song.payPlay == 0)).toList();
 
+                                                                            // Real index in queue, not in raw queue as some songs may be taken down.
+                                                                            int realIndex =
+                                                                                appState.queue!.indexOf(appState.rawQueue![index]);
+
                                                                             try {
                                                                               await appState.initAudioPlayer();
                                                                             } catch (e) {
@@ -674,10 +441,10 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                                 true;
 
                                                                             appState.currentPlayingSongInQueue =
-                                                                                index;
+                                                                                realIndex;
 
                                                                             appState.currentSong =
-                                                                                appState.queue![index];
+                                                                                appState.queue![realIndex];
 
                                                                             appState.prevSong =
                                                                                 appState.currentSong;
@@ -701,17 +468,22 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                             //             index);
                                                                             appState.player!.play();
                                                                           } else if (ownerDirIdOfCurrentPlayingSong == openedPlaylist!.dirId &&
-                                                                              (index = appState.queue!.indexOf(rawQueue![index])) == currentPlayingSongInQueue) {
+                                                                              appState.queue!.indexOf(appState.rawQueue![index]) == currentPlayingSongInQueue) {
                                                                             if (!player!.playerState.playing) {
                                                                               player.play();
                                                                             }
                                                                           } else {
-                                                                            print(index);
-                                                                            appState.canSongPlayerPagePop =
-                                                                                true;
-
                                                                             appState.queue =
                                                                                 detailPlaylist.songs.where((song) => !song.isTakenDown && (song.payPlay == 0)).toList();
+
+                                                                            // Real index in queue, not in raw queue as some songs may be taken down.
+                                                                            int realIndex =
+                                                                                appState.queue!.indexOf(appState.rawQueue![index]);
+
+                                                                            print(realIndex);
+
+                                                                            appState.canSongPlayerPagePop =
+                                                                                true;
 
                                                                             appState.player!.stop();
 
@@ -746,10 +518,10 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                                 detailPlaylist.dirId;
 
                                                                             appState.currentPlayingSongInQueue =
-                                                                                index;
+                                                                                realIndex;
 
                                                                             appState.currentSong =
-                                                                                appState.queue![index];
+                                                                                appState.queue![realIndex];
 
                                                                             appState.currentDetailSong =
                                                                                 null;

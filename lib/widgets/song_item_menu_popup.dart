@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/entities/song.dart';
 import 'package:playlistmaster/entities/video.dart';
 import 'package:playlistmaster/states/app_state.dart';
@@ -56,36 +57,38 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                 ),
               ),
             ),
-            InkWell(
-              borderRadius: BorderRadius.all(
-                Radius.circular(10.0),
-              ),
-              onTap: () {
-                print('Remove from playlist.');
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.playlist_remove_rounded),
-                      color: colorScheme.tertiary,
-                      onPressed: () {
-                        print('Remove from playlist.');
-                      },
+            (appState.openedPlaylist!.dirId > 0)
+                ? InkWell(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(10.0),
                     ),
-                    Expanded(
-                      child: Text(
-                        'Remove from playlist',
-                        style: textTheme.labelMedium!.copyWith(
-                          color: colorScheme.onSecondary,
-                        ),
+                    onTap: () {
+                      print('Remove from playlist.');
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.playlist_remove_rounded),
+                            color: colorScheme.tertiary,
+                            onPressed: () {
+                              print('Remove from playlist.');
+                            },
+                          ),
+                          Expanded(
+                            child: Text(
+                              'Remove from playlist',
+                              style: textTheme.labelMedium!.copyWith(
+                                color: colorScheme.onSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
+                  )
+                : Container(),
             InkWell(
               borderRadius: BorderRadius.all(
                 Radius.circular(10.0),
@@ -127,6 +130,53 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                           color: song.vid.isEmpty
                               ? colorScheme.onTertiary
                               : colorScheme.onSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            InkWell(
+              borderRadius: BorderRadius.all(
+                Radius.circular(10.0),
+              ),
+              onTap: () {
+                appState.isPlayerPageOpened = false;
+                appState.openedPlaylist = Playlist(
+                    name: 'similar song',
+                    coverImage: '',
+                    songsCount: 5,
+                    dirId: -1,
+                    tid: '');
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/similar_songs', arguments: song);
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.library_music_rounded),
+                      color: colorScheme.tertiary,
+                      onPressed: () {
+                        appState.isPlayerPageOpened = false;
+                        appState.openedPlaylist = Playlist(
+                            name: 'similar song',
+                            coverImage: '',
+                            songsCount: 5,
+                            dirId: -1,
+                            tid: '');
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/similar_songs',
+                            arguments: song);
+                      },
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Similar songs',
+                        style: textTheme.labelMedium!.copyWith(
+                          color: colorScheme.onSecondary,
                         ),
                       ),
                     ),

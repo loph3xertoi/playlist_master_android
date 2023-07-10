@@ -9,6 +9,7 @@ import 'package:http/retry.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:playlistmaster/entities/detail_playlist.dart';
 import 'package:playlistmaster/entities/detail_song.dart';
 import 'package:playlistmaster/entities/playlist.dart';
 import 'package:playlistmaster/entities/song.dart';
@@ -38,7 +39,8 @@ class MyAppState extends ChangeNotifier {
   /// The current platform, 0 for pm server, 1 for qq music, 2 for netease music, 3 for bilibili.
   int _currentPlatform = 1;
 
-  // The dirId fo playlist which current playing song belongs to.
+  // The dirId fo playlist which current playing song belongs to. -1 represents similar song page, -2 means
+  // search songs page.
   int? _ownerDirIdOfCurrentPlayingSong;
 
   // Default image for cover.
@@ -130,7 +132,11 @@ class MyAppState extends ChangeNotifier {
   // bool _initSongPlayer = true;
   // String _currentPage = '/';
 
+  // Current opened playlist, will change when navigate to similar song page.
   Playlist? _openedPlaylist;
+
+  // Raw opened playlist.
+  Playlist? _rawOpenedPlaylist;
 
   String get lastVideoVid => _lastVideoVid;
 
@@ -182,6 +188,8 @@ class MyAppState extends ChangeNotifier {
   int get userPlayingMode => _userPlayingMode;
 
   Playlist? get openedPlaylist => _openedPlaylist;
+
+  Playlist? get rawOpenedPlaylist => _rawOpenedPlaylist;
 
   bool get isQueueEmpty => _queue?.isEmpty ?? true;
 
@@ -325,6 +333,11 @@ class MyAppState extends ChangeNotifier {
 
   set openedPlaylist(Playlist? playlist) {
     _openedPlaylist = playlist;
+    notifyListeners();
+  }
+
+  set rawOpenedPlaylist(Playlist? playlist) {
+    _rawOpenedPlaylist = playlist;
     notifyListeners();
   }
 
@@ -520,6 +533,333 @@ class MyAppState extends ChangeNotifier {
         result.isTakenDown = false;
       }
       result = Future.value(result);
+    } else {}
+    return result;
+  }
+
+  Future<Map<String, List<String>>> fetchMVsLink(
+      List<String> vids, int platform) async {
+    CacheManager cacheManager = MyHttp.mvLinkCacheManager;
+    Uri url = Uri.http(API.host, '${API.mvsLink}/$platform', {
+      'vids': vids.join(','),
+    });
+    String urlString = url.toString();
+    dynamic result = await cacheManager.getFileFromMemory(urlString);
+    if (result == null || !(result as FileInfo).file.existsSync()) {
+      result = await cacheManager.getFileFromCache(urlString);
+      if (result == null || !(result as FileInfo).file.existsSync()) {
+        MyLogger.logger.d('Loading mv link from network...');
+        final client = RetryClient(http.Client());
+        try {
+          var response = await client.get(url);
+          var decodedResponse =
+              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+          if (response.statusCode == 200 &&
+              decodedResponse['success'] == true) {
+            var mvsLink = decodedResponse['data']!;
+            if (mvsLink is Map<String, dynamic>) {
+              result = mvsLink.map((key, value) =>
+                  MapEntry<String, List<String>>(
+                      key, List<String>.from(value)));
+            }
+            await cacheManager.putFile(
+              urlString,
+              response.bodyBytes,
+              fileExtension: 'json',
+            );
+          } else {
+            MyToast.showToast(
+                'Response error with code: ${response.statusCode}');
+            MyLogger.logger
+                .e('Response error with code: ${response.statusCode}');
+            result = null;
+          }
+        } catch (e) {
+          MyToast.showToast('Exception thrown: $e');
+          MyLogger.logger.e('Network error with exception: $e');
+          rethrow;
+        } finally {
+          client.close();
+        }
+      } else {
+        MyLogger.logger.d('Loading mv link from cache...');
+      }
+    } else {
+      MyLogger.logger.d('Loading mv link from memory...');
+    }
+    if (result is Map<String, List<String>>) {
+      result = Future.value(result);
+    } else if (result is FileInfo) {
+      var decodedResponse =
+          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
+      var mvsLink = decodedResponse['data']!;
+      if (mvsLink is Map<String, dynamic>) {
+        result = mvsLink.map((key, value) =>
+            MapEntry<String, List<String>>(key, List<String>.from(value)));
+      }
+      print(result.runtimeType);
+      result = Future<Map<String, List<String>>>.value(result);
+    } else {}
+    return result;
+  }
+
+  Future<Map<String, String>> fetchSongsLink(
+      List<String> songMids, int platform) async {
+    CacheManager cacheManager = MyHttp.songsLinkCacheManager;
+    Uri url = Uri.http(API.host, '${API.songsLink}/$platform', {
+      'songMids': songMids.join(','),
+    });
+    String urlString = url.toString();
+    dynamic result = await cacheManager.getFileFromMemory(urlString);
+    if (result == null || !(result as FileInfo).file.existsSync()) {
+      result = await cacheManager.getFileFromCache(urlString);
+      if (result == null || !(result as FileInfo).file.existsSync()) {
+        MyLogger.logger.d('Loading songs link from network...');
+        final client = RetryClient(http.Client());
+        try {
+          var response = await client.get(url);
+          var decodedResponse =
+              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+          if (response.statusCode == 200 &&
+              decodedResponse['success'] == true) {
+            var songsLink = decodedResponse['data']!;
+            if (songsLink is Map<String, dynamic>) {
+              result = songsLink
+                  .map((key, value) => MapEntry(key, value.toString()));
+            }
+
+            await cacheManager.putFile(
+              urlString,
+              response.bodyBytes,
+              fileExtension: 'json',
+            );
+            // if (songsLink.isEmpty) {
+            //   // result = '1';
+            // } else {
+            //   result = songsLink;
+            // }
+          } else {
+            MyToast.showToast(
+                'Response error with code: ${response.statusCode}');
+            MyLogger.logger
+                .e('Response error with code: ${response.statusCode}');
+            result = null;
+          }
+        } catch (e) {
+          MyToast.showToast('Exception thrown: $e');
+          MyLogger.logger.e('Network error with exception: $e');
+          rethrow;
+        } finally {
+          client.close();
+        }
+      } else {
+        MyLogger.logger.d('Loading songs link from cache...');
+      }
+    } else {
+      MyLogger.logger.d('Loading songs link from memory...');
+    }
+    print(result.runtimeType);
+    if (result is Map<String, String>) {
+      result = Future.value(result);
+    } else if (result is FileInfo) {
+      var decodedResponse =
+          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
+      var songsLink = decodedResponse['data'] as Map<String, dynamic>;
+      result = songsLink.map((key, value) => MapEntry(key, value.toString()));
+      result = Future.value(result);
+    } else {}
+    return result;
+  }
+
+  Future<DetailPlaylist?> fetchDetailPlaylist(Playlist playlist) async {
+    int platform = 1;
+    CacheManager cacheManager = MyHttp.detailPlaylistOtherCacheManager;
+    Uri url = Uri.http(
+      API.host,
+      '${API.detailPlaylist}/${playlist.tid}/$platform',
+    );
+    String urlString = url.toString();
+    dynamic result = await cacheManager.getFileFromMemory(urlString);
+    if (result == null || !(result as FileInfo).file.existsSync()) {
+      result = await cacheManager.getFileFromCache(urlString);
+      if (result == null || !(result as FileInfo).file.existsSync()) {
+        MyLogger.logger.d('Loading detail playlist from network...');
+        final client = RetryClient(http.Client());
+        try {
+          var response = await client.get(url);
+          var decodedResponse =
+              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+          if (response.statusCode == 200 &&
+              decodedResponse['success'] == true) {
+            result = DetailPlaylist.fromJson(decodedResponse['data']);
+            await cacheManager.putFile(
+              urlString,
+              response.bodyBytes,
+              fileExtension: 'json',
+            );
+          } else if (response.statusCode == 200 &&
+              decodedResponse['success'] == false) {
+            MyToast.showToast('Request failure, tid is 0');
+            MyLogger.logger.e('Request failure, tid is 0');
+
+            DetailPlaylist detailPlaylist = DetailPlaylist(
+              name: playlist.name,
+              coverImage: playlist.coverImage,
+              songsCount: playlist.songsCount,
+              listenNum: 0,
+              dirId: playlist.dirId,
+              tid: playlist.tid,
+              songs: [],
+            );
+            result = detailPlaylist;
+            decodedResponse['data'] = detailPlaylist.toJson();
+            String jsonString = jsonEncode(decodedResponse);
+            List<int> bodyBytes = utf8.encode(jsonString);
+            Uint8List uint8List = Uint8List.fromList(bodyBytes);
+            await cacheManager.putFile(
+              urlString,
+              uint8List,
+              fileExtension: 'json',
+            );
+          } else {
+            MyToast.showToast(
+                'Response error with code: ${response.statusCode}');
+            MyLogger.logger
+                .e('Response error with code: ${response.statusCode}');
+            result = null;
+          }
+        } catch (e) {
+          MyToast.showToast('Exception thrown: $e');
+          MyLogger.logger.e('Network error with exception: $e');
+          rethrow;
+        } finally {
+          client.close();
+        }
+      } else {
+        MyLogger.logger.d('Loading detail playlist from cache...');
+      }
+    } else {
+      MyLogger.logger.d('Loading detail playlist from memory...');
+    }
+    if (result is DetailPlaylist || result is FileInfo) {
+      if (result is FileInfo) {
+        var decodedResponse =
+            jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
+        result = DetailPlaylist.fromJson(decodedResponse['data']);
+      }
+      if (result is DetailPlaylist) {
+        List<String> songMids = result.songs.map((e) => e.songMid).toList();
+        Map<String, String> songsLink =
+            await fetchSongsLink(songMids, platform);
+        // Set the song's link and determine whether the song is taken down.
+        for (Song song in result.songs) {
+          if (songsLink.containsKey(song.songMid)) {
+            song.isTakenDown = false;
+            song.songLink = songsLink[song.songMid]!;
+          }
+        }
+
+        List<String> vids = result.songs.map((e) => e.vid).toList()
+          ..removeWhere((vid) => vid.isEmpty);
+        if (vids.isNotEmpty) {
+          Map<String, List<String>> mvsLink =
+              await fetchMVsLink(vids, platform);
+          // Set the video's link.
+          for (Song song in result.songs) {
+            if (mvsLink.containsKey(song.vid)) {
+              song.videoLinks = mvsLink[song.vid]!;
+            }
+          }
+        }
+
+        result = Future.value(result);
+      }
+    } else {}
+    return result;
+  }
+
+  Future<List<Song>> fetchSimilarSongs(Song song, int platform) async {
+    CacheManager cacheManager = MyHttp.similarSongsOtherCacheManager;
+    Uri url = Uri.http(
+      API.host,
+      '${API.similarSongs}/${song.songId}/$platform',
+    );
+    String urlString = url.toString();
+    dynamic result = await cacheManager.getFileFromMemory(urlString);
+    if (result == null || !(result as FileInfo).file.existsSync()) {
+      result = await cacheManager.getFileFromCache(urlString);
+      if (result == null || !(result as FileInfo).file.existsSync()) {
+        MyLogger.logger.d('Loading similar songs from network...');
+        final client = RetryClient(http.Client());
+        try {
+          var response = await client.get(url);
+          var decodedResponse =
+              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+          if (response.statusCode == 200 &&
+              decodedResponse['success'] == true) {
+            List<dynamic> jsonList = decodedResponse['data'];
+            List<Song> songs = jsonList.map((e) => Song.fromJson(e)).toList();
+            result = songs;
+            await cacheManager.putFile(
+              urlString,
+              response.bodyBytes,
+              fileExtension: 'json',
+            );
+          } else {
+            MyToast.showToast(
+                'Response error with code: ${response.statusCode}');
+            MyLogger.logger
+                .e('Response error with code: ${response.statusCode}');
+            result = null;
+          }
+        } catch (e) {
+          MyToast.showToast('Exception thrown: $e');
+          MyLogger.logger.e('Network error with exception: $e');
+          rethrow;
+        } finally {
+          client.close();
+        }
+      } else {
+        MyLogger.logger.d('Loading similar songs from cache...');
+      }
+    } else {
+      MyLogger.logger.d('Loading similar songs from memory...');
+    }
+    if (result is List<Song> || result is FileInfo) {
+      if (result is FileInfo) {
+        var decodedResponse =
+            jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
+        List<dynamic> jsonList = decodedResponse['data'];
+        List<Song> songs = jsonList.map((e) => Song.fromJson(e)).toList();
+        result = songs;
+      }
+      if (result is List<Song>) {
+        List<String> songMids = result.map((e) => e.songMid).toList();
+        Map<String, String> songsLink =
+            await fetchSongsLink(songMids, platform);
+        // Set the song's link and determine whether the song is taken down.
+        for (Song song in result) {
+          if (songsLink.containsKey(song.songMid)) {
+            song.isTakenDown = false;
+            song.songLink = songsLink[song.songMid]!;
+          }
+        }
+
+        List<String> vids = result.map((e) => e.vid).toList()
+          ..removeWhere((vid) => vid.isEmpty);
+        if (vids.isNotEmpty) {
+          Map<String, List<String>> mvsLink =
+              await fetchMVsLink(vids, platform);
+          // Set the video's link.
+          for (Song song in result) {
+            if (mvsLink.containsKey(song.vid)) {
+              song.videoLinks = mvsLink[song.vid]!;
+            }
+          }
+        }
+
+        result = Future.value(result);
+      }
     } else {}
     return result;
   }

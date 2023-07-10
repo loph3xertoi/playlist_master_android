@@ -1,0 +1,97 @@
+{
+  "success": true,
+  "errorMsg": null,
+  "data": [
+    {
+      "songName": "菲组曲",
+      "songId": "459946",
+      "songMid": "001STDYF3r8qYE",
+      "mediaMid": "000Zfmnh2MM0B4",
+      "vid": "",
+      "singers": [
+        {
+          "id": "14858",
+          "mid": "0017kD6A3XrqX5",
+          "name": "朱洁"
+        }
+      ],
+      "coverUri": "https://y.qq.com/music/photo_new/T001R300x300M0000017kD6A3XrqX5_3.jpg",
+      "payPlay": 0
+    },
+    {
+      "songName": "和你在一起",
+      "songId": "798404",
+      "songMid": "000OrvTb27snP0",
+      "mediaMid": "001klX5l2gEssD",
+      "vid": "",
+      "singers": [
+        {
+          "id": "14858",
+          "mid": "0017kD6A3XrqX5",
+          "name": "朱洁"
+        }
+      ],
+      "coverUri": "https://y.qq.com/music/photo_new/T001R300x300M0000017kD6A3XrqX5_3.jpg",
+      "payPlay": 0
+    },
+    {
+      "songName": "旧梦重弹",
+      "songId": "798414",
+      "songMid": "0001LLpE24eggy",
+      "mediaMid": "003gqP7I4P0mCO",
+      "vid": "",
+      "singers": [
+        {
+          "id": "14858",
+          "mid": "0017kD6A3XrqX5",
+          "name": "朱洁"
+        }
+      ],
+      "coverUri": "https://y.qq.com/music/photo_new/T001R300x300M0000017kD6A3XrqX5_3.jpg",
+      "payPlay": 0
+    },
+    {
+      "songName": "刀剑笑",
+      "songId": "830337",
+      "songMid": "000x1H1N2xZ80V",
+      "mediaMid": "002WoR7S3RVuiu",
+      "vid": "I0090uyGWLH",
+      "singers": [
+        {
+          "id": "20464",
+          "mid": "004WRjke3LMDk3",
+          "name": "杨青倩"
+        }
+      ],
+      "coverUri": "https://y.qq.com/music/photo_new/T001R300x300M000004WRjke3LMDk3_3.jpg",
+      "payPlay": 0
+    },
+    {
+      "songName": "梦想之光",
+      "songId": "102806934",
+      "songMid": "001LT9iL2cdZoo",
+      "mediaMid": "003o7EvD0urd4Y",
+      "vid": "",
+      "singers": [
+        {
+          "id": "19560",
+          "mid": "001XEnOQ2pLdzx",
+          "name": "孙晔"
+        },
+        {
+          "id": "61271",
+          "mid": "001qApr10Mnfoh",
+          "name": "徐慧"
+        },
+        {
+          "id": "1000400",
+          "mid": "001rDISu3Eu07c",
+          "name": "王愫稣"
+        }
+      ],
+      "coverUri": "https://y.qq.com/music/photo_new/T001R300x300M000001XEnOQ2pLdzx_3.jpg",
+      "payPlay": 0
+    }
+  ],
+  "total": 5
+}

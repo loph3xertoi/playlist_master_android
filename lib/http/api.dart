@@ -29,4 +29,7 @@ class API {
 
   /// api: /user/{uid}
   static const user = '/user';
+
+  /// api: /similarsongs/{songId}/{platformId}
+  static const similarSongs = '/similarsongs';
 }

@@ -5,6 +5,7 @@ import 'package:playlistmaster/entities/video.dart';
 import 'package:playlistmaster/pages/my_homepage.dart';
 import 'package:playlistmaster/pages/playlist_detail.dart';
 import 'package:playlistmaster/pages/search_page.dart';
+import 'package:playlistmaster/pages/similar_songs.dart';
 import 'package:playlistmaster/pages/song_detail.dart';
 import 'package:playlistmaster/pages/song_player.dart';
 import 'package:playlistmaster/pages/splash_screen.dart';
@@ -72,6 +73,11 @@ class MyApp extends StatelessWidget {
               final args = settings.arguments as Song;
               return MaterialPageRoute(
                 builder: (context) => VideoPlayerPage(song: args),
+              );
+            }else if(settings.name == '/similar_songs'){
+              final args = settings.arguments as Song;
+              return MaterialPageRoute(
+                builder: (context) => SimilarSongsPage(song: args),
               );
             }
             return null;

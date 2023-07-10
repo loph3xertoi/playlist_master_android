@@ -26,6 +26,9 @@ class MyHttp {
   static PlaylistsOtherCacheManager playlistsOtherCacheManager =
       PlaylistsOtherCacheManager();
 
+  static SimilarSongsOtherCacheManager similarSongsOtherCacheManager =
+      SimilarSongsOtherCacheManager();
+
   static clearCache() async {
     await defaultCacheManager.emptyCache();
     await mvLinkCacheManager.emptyCache();
@@ -183,6 +186,23 @@ class PlaylistsOtherCacheManager extends CacheManager with ImageCacheManager {
   }
 
   PlaylistsOtherCacheManager._()
+      : super(Config(
+          key,
+          stalePeriod: const Duration(days: 7),
+        ));
+}
+
+class SimilarSongsOtherCacheManager extends CacheManager with ImageCacheManager {
+  static const key = 'other_cache/similar_songs';
+
+  static final SimilarSongsOtherCacheManager _instance =
+      SimilarSongsOtherCacheManager._();
+
+  factory SimilarSongsOtherCacheManager() {
+    return _instance;
+  }
+
+  SimilarSongsOtherCacheManager._()
       : super(Config(
           key,
           stalePeriod: const Duration(days: 7),

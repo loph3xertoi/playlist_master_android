@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:playlistmaster/states/app_state.dart';
-import 'package:playlistmaster/widgets/create_confirm_popup.dart';
+import 'package:playlistmaster/widgets/confirm_popup.dart';
 import 'package:playlistmaster/widgets/song_item_in_queue.dart';
 import 'package:provider/provider.dart';
 

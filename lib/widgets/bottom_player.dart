@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:playlistmaster/states/app_state.dart';
-import 'package:playlistmaster/widgets/create_queue_popup.dart';
+import 'package:playlistmaster/widgets/queue_popup.dart';
 import 'package:provider/provider.dart';
 
 class BottomPlayer extends StatefulWidget {

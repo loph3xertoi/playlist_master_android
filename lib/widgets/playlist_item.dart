@@ -19,6 +19,7 @@ class PlaylistItem extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
+          appState.rawOpenedPlaylist = playlist;
           appState.openedPlaylist = playlist;
           appState.rawQueue = [];
           Navigator.pushNamed(
