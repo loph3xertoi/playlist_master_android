@@ -1,20 +1,19 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:playlistmaster/http/my_http.dart';
-import 'package:playlistmaster/states/app_state.dart';
-import 'package:playlistmaster/widgets/basic_info.dart';
 import 'package:provider/provider.dart';
+
+import '../states/app_state.dart';
+import 'basic_info.dart';
 
 class MySearchBar extends StatefulWidget {
   final GlobalKey<ScaffoldState> myScaffoldKey;
   final bool notInHomepage;
-  final bool inPlaylistDetailPage;
+  final bool inDetailLibraryPage;
 
   MySearchBar({
     required this.myScaffoldKey,
     required this.notInHomepage,
-    required this.inPlaylistDetailPage,
+    required this.inDetailLibraryPage,
   });
 
   @override
@@ -48,7 +47,7 @@ class _MySearchBarState extends State<MySearchBar>
     if (widget.notInHomepage) {
       print('searching...');
     } else {
-      Navigator.pushNamed(context, '/search');
+      Navigator.pushNamed(context, '/search_page');
     }
   }
 
@@ -88,7 +87,7 @@ class _MySearchBarState extends State<MySearchBar>
           alignLabelWithHint: true,
           floatingLabelAlignment: FloatingLabelAlignment.center,
           hintText:
-              widget.inPlaylistDetailPage ? 'Search Playlist' : 'Search Music',
+              widget.inDetailLibraryPage ? 'Search Playlist' : 'Search Music',
           hintStyle: textTheme.titleMedium,
           prefixIcon: GestureDetector(
             child: Ink(

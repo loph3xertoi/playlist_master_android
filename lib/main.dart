@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-import 'package:playlistmaster/entities/song.dart';
-import 'package:playlistmaster/entities/video.dart';
-import 'package:playlistmaster/pages/my_homepage.dart';
-import 'package:playlistmaster/pages/playlist_detail.dart';
-import 'package:playlistmaster/pages/search_page.dart';
-import 'package:playlistmaster/pages/similar_songs.dart';
-import 'package:playlistmaster/pages/song_detail.dart';
-import 'package:playlistmaster/pages/song_player.dart';
-import 'package:playlistmaster/pages/splash_screen.dart';
-import 'package:playlistmaster/pages/video_player.dart';
-import 'package:playlistmaster/states/app_state.dart';
-import 'package:playlistmaster/states/my_navigation_button_state.dart';
-import 'package:playlistmaster/states/my_search_state.dart';
-import 'package:playlistmaster/utils/theme_manager.dart';
 import 'package:provider/provider.dart';
+
+import 'entities/basic/basic_song.dart';
+import 'entities/basic/basic_video.dart';
+import 'pages/detail_library_page.dart';
+import 'pages/detail_song_page.dart';
+import 'pages/home_page.dart';
+import 'pages/related_videos_page.dart';
+import 'pages/search_page.dart';
+import 'pages/similar_songs_page.dart';
+import 'pages/song_player_page.dart';
+import 'pages/splash_screen.dart';
+import 'pages/video_player_page.dart';
+import 'states/app_state.dart';
+import 'states/my_navigation_button_state.dart';
+import 'states/my_search_state.dart';
+import 'utils/theme_manager.dart';
 
 Future<void> main() async {
   await JustAudioBackground.init(
@@ -30,7 +32,6 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -57,27 +58,31 @@ class MyApp extends StatelessWidget {
           initialRoute: '/splashscreen',
           routes: {
             '/splashscreen': (context) => SplashScreen(),
-            '/home': (context) => MyHomePage(),
-            '/search': (context) => SearchPage(),
-            '/playlist_detail': (context) => PlaylistDetailPage(),
-            '/song_player': (context) => SongPlayerPage(),
-            // '/song_detail': (context) => SongDetailPage(),
+            '/home_page': (context) => HomePage(),
+            '/search_page': (context) => SearchPage(),
+            '/detail_library_page': (context) => DetailLibraryPage(),
+            '/song_player_page': (context) => SongPlayerPage(),
           },
           onGenerateRoute: (settings) {
-            if (settings.name == '/song_detail') {
-              final args = settings.arguments as Song;
+            if (settings.name == '/detail_song_page') {
+              final args = settings.arguments as BasicSong;
               return MaterialPageRoute(
-                builder: (context) => SongDetailPage(song: args),
+                builder: (context) => DetailSongPage(song: args),
               );
-            }else if(settings.name == '/video_player'){
-              final args = settings.arguments as Song;
+            } else if (settings.name == '/video_player_page') {
+              final args = settings.arguments as BasicVideo;
               return MaterialPageRoute(
-                builder: (context) => VideoPlayerPage(song: args),
+                builder: (context) => VideoPlayerPage(video: args),
               );
-            }else if(settings.name == '/similar_songs'){
-              final args = settings.arguments as Song;
+            } else if (settings.name == '/similar_songs_page') {
+              final args = settings.arguments as BasicSong;
               return MaterialPageRoute(
                 builder: (context) => SimilarSongsPage(song: args),
+              );
+            } else if (settings.name == '/related_videos_page') {
+              final args = settings.arguments as BasicSong;
+              return MaterialPageRoute(
+                builder: (context) => RelatedVideosPage(song: args),
               );
             }
             return null;

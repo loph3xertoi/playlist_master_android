@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/states/app_state.dart';
 import 'package:provider/provider.dart';
+
+import '../states/app_state.dart';
 
 class CreateSongplayerMenuDialog extends StatelessWidget {
   @override
@@ -161,9 +162,7 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
               onTap: () {
                 print('song\'s detail');
                 appState.isPlayerPageOpened = false;
-                Navigator.pop(context);
-                // Navigator.pushNamed(context, '/song_detail');
-                Navigator.pushNamed(context, '/song_detail',
+                Navigator.popAndPushNamed(context, '/detail_song_page',
                     arguments: appState.currentSong);
               },
               child: Padding(
@@ -175,8 +174,7 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                       color: colorScheme.tertiary,
                       onPressed: () {
                         appState.isPlayerPageOpened = false;
-                        Navigator.pop(context);
-                        Navigator.pushNamed(context, '/song_detail',
+                        Navigator.popAndPushNamed(context, '/detail_song_page',
                             arguments: appState.currentSong);
                       },
                     ),

@@ -1,0 +1,50 @@
+{
+  "result": 100,
+  "data": [
+    {
+      "mvid": 11061,
+      "picurl": "http://y.gtimg.cn/music/photo_new/T015R640x360M102004ATS4F46slaL.jpg",
+      "playcnt": 18276086,
+      "singers": [
+        {
+          "id": 4558,
+          "mid": "0025NhlN2yWrP4",
+          "name": "周杰伦",
+          "picurl": "http://y.gtimg.cn/music/photo_new/T001R150x150M0000025NhlN2yWrP4_8.jpg"
+        }
+      ],
+      "title": "蒲公英的约定",
+      "vid": "f0018dcjvel"
+    },
+    {
+      "mvid": 55272,
+      "picurl": "http://y.gtimg.cn/music/photo_new/T015R640x360M101003O1ORH4XWmQL.jpg",
+      "playcnt": 1477191,
+      "singers": [
+        {
+          "id": 4558,
+          "mid": "0025NhlN2yWrP4",
+          "name": "周杰伦",
+          "picurl": "http://y.gtimg.cn/music/photo_new/T001R150x150M0000025NhlN2yWrP4_8.jpg"
+        }
+      ],
+      "title": "蒲公英的约定 (2007世界巡回演唱会)",
+      "vid": "y00133fa6sw"
+    },
+    {
+      "mvid": 1265014,
+      "picurl": "http://y.gtimg.cn/music/photo_new/T015R640x360M0000038Yrbr21rwE5.jpg",
+      "playcnt": 71622,
+      "singers": [
+        {
+          "id": 4558,
+          "mid": "0025NhlN2yWrP4",
+          "name": "周杰伦",
+          "picurl": "http://y.gtimg.cn/music/photo_new/T001R150x150M0000025NhlN2yWrP4_8.jpg"
+        }
+      ],
+      "title": "蒲公英的约定 ( 吉他版)",
+      "vid": "v0023f5jrs8"
+    }
+  ]
+}

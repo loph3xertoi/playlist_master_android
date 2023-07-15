@@ -1,0 +1,731 @@
+{
+  "result": 100,
+  "data": {
+    "list": [
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "我落泪情绪零碎",
+        "songid": 680284,
+        "songmid": "0022b7OX2STU86",
+        "songname": "我落泪情绪零碎",
+        "albumid": 56705,
+        "albummid": "000bviBl4FjTpO",
+        "albumname": "跨时代",
+        "interval": 257,
+        "strMediaMid": "001Zeo1P4a5j0v",
+        "size128": 4127549,
+        "size320": 10318569,
+        "sizeape": 0,
+        "sizeflac": 28837379,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "蒲公英的约定",
+        "songid": 102340965,
+        "songmid": "004Yi5BD3ksoAN",
+        "songname": "蒲公英的约定",
+        "albumid": 33021,
+        "albummid": "002eFUFm2XYZ7z",
+        "albumname": "我很忙",
+        "interval": 247,
+        "strMediaMid": "00140o6q3Jvfzr",
+        "size128": 3956601,
+        "size320": 9891204,
+        "sizeape": 0,
+        "sizeflac": 26775743,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "说好的幸福呢",
+        "songid": 449200,
+        "songmid": "0042QMDR1VzSsx",
+        "songname": "说好的幸福呢",
+        "albumid": 36062,
+        "albummid": "002Neh8l0uciQZ",
+        "albumname": "魔杰座",
+        "interval": 256,
+        "strMediaMid": "001a8tgu4DggDy",
+        "size128": 4108738,
+        "size320": 10271547,
+        "sizeape": 0,
+        "sizeflac": 27086130,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 260,
+            "mid": "003gNFzb0MYOnM",
+            "name": "CoCo李玟",
+            "pmid": "",
+            "title": "CoCo李玟",
+            "type": 1,
+            "uin": 0
+          },
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "刀马旦",
+        "songid": 13802,
+        "songmid": "004ZH3Qv2qjMhT",
+        "songname": "刀马旦",
+        "albumid": 1093,
+        "albummid": "000NdddH2RnGI5",
+        "albumname": "Promise",
+        "interval": 191,
+        "strMediaMid": "002Om7s53Ife6E",
+        "size128": 3059669,
+        "size320": 7648861,
+        "sizeape": 0,
+        "sizeflac": 40408651,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 0,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "晴天",
+        "songid": 97773,
+        "songmid": "0039MnYb0qxYhV",
+        "songname": "晴天",
+        "albumid": 8220,
+        "albummid": "000MkMni19ClKG",
+        "albumname": "叶惠美",
+        "interval": 269,
+        "strMediaMid": "002202B43Cq4V4",
+        "size128": 4317292,
+        "size320": 10792516,
+        "sizeape": 0,
+        "sizeflac": 31430142,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "爱在西元前",
+        "songid": 97740,
+        "songmid": "002usg9o4GTAKf",
+        "songname": "爱在西元前",
+        "albumid": 8217,
+        "albummid": "000I5jJB3blWeN",
+        "albumname": "范特西",
+        "interval": 234,
+        "strMediaMid": "004I6V6C3OjmqV",
+        "size128": 3749291,
+        "size320": 9372932,
+        "sizeape": 0,
+        "sizeflac": 29178676,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "明明就",
+        "songid": 3585884,
+        "songmid": "000oW8J53xPhZA",
+        "songname": "明明就",
+        "albumid": 194021,
+        "albummid": "003Ow85E3pnoqi",
+        "albumname": "十二新作",
+        "interval": 260,
+        "strMediaMid": "001mxHU44PEhTP",
+        "size128": 4167249,
+        "size320": 10417329,
+        "sizeape": 0,
+        "sizeflac": 27658991,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "七里香",
+        "songid": 102065756,
+        "songmid": "004Z8Ihr0JIu5s",
+        "songname": "七里香",
+        "albumid": 20612,
+        "albummid": "003DFRzD192KKD",
+        "albumname": "七里香",
+        "interval": 299,
+        "strMediaMid": "0012Ez0a1tFcOI",
+        "size128": 4788294,
+        "size320": 11970297,
+        "sizeape": 0,
+        "sizeflac": 35845646,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "兰亭序",
+        "songid": 449201,
+        "songmid": "00128N3r2SYKMF",
+        "songname": "兰亭序",
+        "albumid": 36062,
+        "albummid": "002Neh8l0uciQZ",
+        "albumname": "魔杰座",
+        "interval": 253,
+        "strMediaMid": "003VLsik0ztbIb",
+        "size128": 4064429,
+        "size320": 10160781,
+        "sizeape": 0,
+        "sizeflac": 28309022,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "稻香",
+        "songid": 449205,
+        "songmid": "003aAYrm3GE0Ac",
+        "songname": "稻香",
+        "albumid": 36062,
+        "albummid": "002Neh8l0uciQZ",
+        "albumname": "魔杰座",
+        "interval": 223,
+        "strMediaMid": "0020wJDo3cx0j3",
+        "size128": 3576668,
+        "size320": 8941053,
+        "sizeape": 0,
+        "sizeflac": 26012257,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "搁浅",
+        "songid": 102065750,
+        "songmid": "001Bbywq2gicae",
+        "songname": "搁浅",
+        "albumid": 20612,
+        "albummid": "003DFRzD192KKD",
+        "albumname": "七里香",
+        "interval": 240,
+        "strMediaMid": "004UlK9x0jeuow",
+        "size128": 3843167,
+        "size320": 9607864,
+        "sizeape": 0,
+        "sizeflac": 26174554,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "半岛铁盒",
+        "songid": 97761,
+        "songmid": "002OKIox28ad9a",
+        "songname": "半岛铁盒",
+        "albumid": 8219,
+        "albummid": "004MGitN0zEHpb",
+        "albumname": "八度空间",
+        "interval": 319,
+        "strMediaMid": "0019GXTz1OM6Wu",
+        "size128": 5111838,
+        "size320": 12779300,
+        "sizeape": 0,
+        "sizeflac": 36625330,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "一路向北",
+        "songid": 5105986,
+        "songmid": "001xd0HI0X9GNq",
+        "songname": "一路向北",
+        "albumid": 14311,
+        "albummid": "002MAeob3zLXwZ",
+        "albumname": "J III MP3 Player",
+        "interval": 295,
+        "strMediaMid": "004cZvLj1qDq4A",
+        "size128": 4732355,
+        "size320": 11830556,
+        "sizeape": 0,
+        "sizeflac": 35323866,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "花海",
+        "songid": 449198,
+        "songmid": "003cI52o4daJJL",
+        "songname": "花海",
+        "albumid": 36062,
+        "albummid": "002Neh8l0uciQZ",
+        "albumname": "魔杰座",
+        "interval": 264,
+        "strMediaMid": "001WYACn4XVhRT",
+        "size128": 4234954,
+        "size320": 10586525,
+        "sizeape": 0,
+        "sizeflac": 56056495,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 20424,
+            "mid": "001lH4Rz0rnWGE",
+            "name": "袁咏琳",
+            "pmid": "",
+            "title": "袁咏琳",
+            "type": 1,
+            "uin": 0
+          },
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "画沙",
+        "songid": 3223506,
+        "songmid": "001tCE0T2vR5p5",
+        "songname": "画沙",
+        "albumid": 266401,
+        "albummid": "001PWEzJ1gmAJn",
+        "albumname": "袁咏琳 Cindy",
+        "interval": 273,
+        "strMediaMid": "000eaMed3yYvDf",
+        "size128": 4379998,
+        "size320": 10949689,
+        "sizeape": 0,
+        "sizeflac": 29989249,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "借口",
+        "songid": 102065757,
+        "songmid": "002XWgfo0IKPOH",
+        "songname": "借口",
+        "albumid": 20612,
+        "albummid": "003DFRzD192KKD",
+        "albumname": "七里香",
+        "interval": 260,
+        "strMediaMid": "003GHu5O1neO0J",
+        "size128": 4165573,
+        "size320": 10413359,
+        "sizeape": 0,
+        "sizeflac": 28785985,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "等你下课 (with 杨瑞代)",
+        "songid": 361947425,
+        "songmid": "00176bPZ2wu39R",
+        "songname": "等你下课 (with 杨瑞代)",
+        "albumid": 28791467,
+        "albummid": "0042cH172YJ0mz",
+        "albumname": "最伟大的作品",
+        "interval": 270,
+        "strMediaMid": "002ylfWR2FWd6k",
+        "size128": 4321086,
+        "size320": 10802379,
+        "sizeape": 0,
+        "sizeflac": 57004838,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 3000,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "最长的电影",
+        "songid": 5177785,
+        "songmid": "003ZrdgZ0UnjDl",
+        "songname": "最长的电影",
+        "albumid": 33021,
+        "albummid": "002eFUFm2XYZ7z",
+        "albumname": "我很忙",
+        "interval": 235,
+        "strMediaMid": "001y7CaR29k6YP",
+        "size128": 3774787,
+        "size320": 9436302,
+        "sizeape": 0,
+        "sizeflac": 23970709,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "龙卷风",
+        "songid": 97758,
+        "songmid": "002l8JN71d2Dxy",
+        "songname": "龙卷风",
+        "albumid": 8218,
+        "albummid": "000f01724fd7TH",
+        "albumname": "Jay",
+        "interval": 250,
+        "strMediaMid": "0039Q1KR3RmT3I",
+        "size128": 4007168,
+        "size320": 10017189,
+        "sizeape": 0,
+        "sizeflac": 27758356,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      },
+      {
+        "singer": [
+          {
+            "id": 4558,
+            "mid": "0025NhlN2yWrP4",
+            "name": "周杰伦",
+            "pmid": "",
+            "title": "周杰伦",
+            "type": 0,
+            "uin": 0
+          }
+        ],
+        "name": "不能说的秘密",
+        "songid": 403778,
+        "songmid": "002MXZNu1GToOk",
+        "songname": "不能说的秘密",
+        "albumid": 32611,
+        "albummid": "001UP7mW458ipG",
+        "albumname": "不能说的秘密 电影原声带",
+        "interval": 296,
+        "strMediaMid": "000cZNr42YkLl1",
+        "size128": 4745726,
+        "size320": 11863989,
+        "sizeape": 0,
+        "sizeflac": 33367738,
+        "pay": {
+          "pay_down": 1,
+          "pay_month": 1,
+          "pay_play": 1,
+          "pay_status": 0,
+          "price_album": 0,
+          "price_track": 200,
+          "time_free": 0
+        }
+      }
+    ],
+    "pageNo": 1,
+    "pageSize": 20,
+    "total": 788,
+    "key": "周杰伦",
+    "t": 0,
+    "type": "song"
+  }
+}

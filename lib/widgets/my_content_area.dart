@@ -1,20 +1,20 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/entities/playlist.dart';
-import 'package:playlistmaster/http/api.dart';
-import 'package:http/http.dart' as http;
-import 'package:playlistmaster/http/my_http.dart';
-import 'package:playlistmaster/mock_data.dart';
-import 'package:playlistmaster/states/app_state.dart';
-import 'package:playlistmaster/utils/my_logger.dart';
-import 'package:playlistmaster/utils/my_toast.dart';
-import 'package:playlistmaster/widgets/create_playlist_popup.dart';
-import 'package:playlistmaster/widgets/playlist_item.dart';
 import 'package:provider/provider.dart';
+
+import '../entities/basic/basic_library.dart';
+import '../entities/qq_music/qqmusic_playlist.dart';
+import '../http/api.dart';
+import '../mock_data.dart';
+import '../states/app_state.dart';
+import '../utils/my_logger.dart';
+import '../utils/my_toast.dart';
+import 'create_playlist_popup.dart';
+import 'playlist_item.dart';
 
 class MyContentArea extends StatefulWidget {
   @override
@@ -22,8 +22,7 @@ class MyContentArea extends StatefulWidget {
 }
 
 class _MyContentAreaState extends State<MyContentArea> {
-  late Future<List<Playlist>?> _playlists;
-  // late List<Playlist> _playlists;
+  late Future<List<BasicLibrary>?> _libraries;
 
   @override
   void initState() {
@@ -31,77 +30,52 @@ class _MyContentAreaState extends State<MyContentArea> {
     final state = Provider.of<MyAppState>(context, listen: false);
     var isUsingMockData = state.isUsingMockData;
     if (isUsingMockData) {
-      _playlists = Future.value(MockData.playlists);
+      _libraries = Future.value(MockData.libraries);
     } else {
-      _playlists = fetchPlaylists();
+      _libraries = fetchLibraries(state.currentPlatform);
     }
   }
 
-  Future<List<Playlist>?> fetchPlaylists() async {
-    CacheManager cacheManager = MyHttp.playlistsOtherCacheManager;
-    Uri url = Uri.http(
-      API.host,
-      '${API.playlists}/${API.uid}/1',
-    );
-    String urlString = url.toString();
-    dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null || !(result as FileInfo).file.existsSync()) {
-      result = await cacheManager.getFileFromCache(urlString);
-      if (result == null || !(result as FileInfo).file.existsSync()) {
-        MyLogger.logger.d('Loading playlists from network...');
-        final client = RetryClient(http.Client());
-        try {
-          var response = await client.get(url);
-          var decodedResponse =
-              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-          if (response.statusCode == 200 &&
-              decodedResponse['success'] == true) {
-            List<dynamic> jsonList = decodedResponse['data'];
-            result = jsonList.map((e) => Playlist.fromJson(e)).toList();
-            await cacheManager.putFile(
-              urlString,
-              response.bodyBytes,
-              fileExtension: 'json',
-            );
-          } else {
-            MyToast.showToast(
-                'Response error with code: ${response.statusCode}');
-            MyLogger.logger
-                .e('Response error with code: ${response.statusCode}');
-            result = null;
-          }
-        } catch (e) {
-          MyToast.showToast('Exception thrown: $e');
-          MyLogger.logger.e('Network error with exception: $e');
-          rethrow;
-        } finally {
-          client.close();
+  Future<List<BasicLibrary>?> fetchLibraries(int platform) async {
+    Uri url = Uri.http(API.host, API.libraries, {
+      'id': API.uid,
+      'platform': platform.toString(),
+    });
+    MyLogger.logger.d('Loading libraries from network...');
+    final client = RetryClient(http.Client());
+    try {
+      var response = await client.get(url);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        var jsonList = decodedResponse['data'];
+        if (platform == 1) {
+          return Future.value(jsonList
+              .map<BasicLibrary>((e) => QQMusicPlaylist.fromJson(e))
+              .toList());
+        } else {
+          throw Exception('Only imeplement qq music platform');
         }
       } else {
-        MyLogger.logger.d('Loading playlists from cache...');
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+        return null;
       }
-    } else {
-      MyLogger.logger.d('Loading playlists from memory...');
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
     }
-    if (result is List<Playlist>) {
-      result = Future.value(result);
-    } else if (result is FileInfo) {
-      var decodedResponse =
-          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
-      List<dynamic> jsonList = decodedResponse['data'];
-      result = jsonList.map((e) => Playlist.fromJson(e)).toList();
-      result = Future.value(result);
-    } else {}
-    return result;
   }
 
   @override
   Widget build(BuildContext context) {
+    MyAppState appState = context.watch<MyAppState>();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    // final buttonTheme = Theme.of(context).buttonTheme;
     return FutureBuilder(
-        future: _playlists,
+        future: _libraries,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
@@ -136,7 +110,7 @@ class _MyContentAreaState extends State<MyContentArea> {
                     ),
                     onPressed: () {
                       setState(() {
-                        _playlists = fetchPlaylists();
+                        _libraries = fetchLibraries(appState.currentPlatform);
                       });
                     },
                   ),
@@ -144,6 +118,7 @@ class _MyContentAreaState extends State<MyContentArea> {
               ),
             );
           } else {
+            List<BasicLibrary> libraries = snapshot.data as List<BasicLibrary>;
             return Container(
               decoration: BoxDecoration(
                 color: colorScheme.primary,
@@ -159,7 +134,7 @@ class _MyContentAreaState extends State<MyContentArea> {
                         child: Padding(
                           padding: const EdgeInsets.only(left: 13.0),
                           child: Text(
-                            'Create Playlists (${(snapshot.data as List<Playlist>).length})',
+                            'Create Libraries (${libraries.length})',
                             style: textTheme.titleMedium,
                             textAlign: TextAlign.left,
                           ),
@@ -189,19 +164,18 @@ class _MyContentAreaState extends State<MyContentArea> {
                     ]),
                   ),
                   Expanded(
-                    child: (snapshot.data as List<Playlist>).isNotEmpty
+                    child: libraries.isNotEmpty
                         ? ListView.builder(
-                            itemCount: (snapshot.data as List<Playlist>).length,
+                            itemCount: libraries.length,
                             itemBuilder: (context, index) {
-                              return PlaylistItem(
-                                playlist:
-                                    (snapshot.data as List<Playlist>)[index],
+                              return LibraryItem(
+                                library: libraries[index],
                               );
                             },
                           )
                         : Center(
                             child: Text(
-                            'Empty Playlists',
+                            'Empty Libraries',
                             style: textTheme.labelMedium,
                           )),
                   ),

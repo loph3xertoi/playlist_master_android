@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fplayer/fplayer.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:playlistmaster/http/my_http.dart';
-import 'package:playlistmaster/states/app_state.dart';
-import 'package:playlistmaster/utils/my_toast.dart';
-import 'package:playlistmaster/utils/theme_manager.dart';
-import 'package:playlistmaster/widgets/bottom_player.dart';
-import 'package:playlistmaster/widgets/floating_button/quick_action.dart';
-import 'package:playlistmaster/widgets/floating_button/quick_action_menu.dart';
-import 'package:playlistmaster/widgets/my_content_area.dart';
-import 'package:playlistmaster/widgets/my_footer.dart';
-import 'package:playlistmaster/widgets/my_searchbar.dart';
-import 'package:playlistmaster/widgets/night_background.dart';
 import 'package:provider/provider.dart';
 
-class MyHomePage extends StatefulWidget {
+import '../http/my_http.dart';
+import '../states/app_state.dart';
+import '../utils/my_toast.dart';
+import '../utils/theme_manager.dart';
+import '../widgets/bottom_player.dart';
+import '../widgets/floating_button/quick_action.dart';
+import '../widgets/floating_button/quick_action_menu.dart';
+import '../widgets/my_content_area.dart';
+import '../widgets/my_footer.dart';
+import '../widgets/my_searchbar.dart';
+import '../widgets/night_background.dart';
+
+class HomePage extends StatefulWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage>
+class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   /// Current selected music app,
   /// 0 represents local music app, 1 represents QQ music,
@@ -29,6 +32,14 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void initState() {
     super.initState();
+    resetRotation();
+  }
+
+  void resetRotation() async {
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky,
+        overlays: []);
+    await FPlugin.setOrientationPortrait();
+    MyToast.showToast('Reset rotation');
   }
 
   @override
@@ -88,6 +99,33 @@ class _MyHomePageState extends State<MyHomePage>
                             ),
                           ),
                         ),
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {},
+                            child: TextButton(
+                              style: ButtonStyle(
+                                shadowColor: MaterialStateProperty.all(
+                                  colorScheme.primary,
+                                ),
+                                overlayColor: MaterialStateProperty.all(
+                                  Colors.grey,
+                                ),
+                              ),
+                              onPressed: () async {
+                                await SystemChrome.setEnabledSystemUIMode(
+                                    SystemUiMode.immersiveSticky,
+                                    overlays: []);
+                                await FPlugin.setOrientationPortrait();
+                                MyToast.showToast('Reset rotation');
+                              },
+                              child: Text(
+                                'Reset rotation',
+                                style: textTheme.labelMedium,
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   );
@@ -124,11 +162,10 @@ class _MyHomePageState extends State<MyHomePage>
                   child: MySearchBar(
                     myScaffoldKey: _scaffoldKey,
                     notInHomepage: false,
-                    inPlaylistDetailPage: false,
+                    inDetailLibraryPage: false,
                   ),
                 ),
                 // SizedBox.expand(),
-
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
@@ -147,7 +184,9 @@ class _MyHomePageState extends State<MyHomePage>
                             child: MyContentArea(),
                           ),
                         ),
-                        appState.isQueueEmpty ? Container() : BottomPlayer(),
+                        appState.currentSong == null
+                            ? Container()
+                            : BottomPlayer(),
                       ],
                     ),
                   ),

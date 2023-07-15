@@ -3,9 +3,10 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/states/app_state.dart';
-import 'package:playlistmaster/widgets/queue_popup.dart';
 import 'package:provider/provider.dart';
+
+import '../states/app_state.dart';
+import 'queue_popup.dart';
 
 class BottomPlayer extends StatefulWidget {
   @override
@@ -20,6 +21,7 @@ class _BottomPlayerState extends State<BottomPlayer>
 
   @override
   void initState() {
+    super.initState();
     _controller = AnimationController(
       vsync: this,
       duration: Duration(seconds: 20),
@@ -27,7 +29,6 @@ class _BottomPlayerState extends State<BottomPlayer>
     _songCoverRotateAnimation =
         Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
     _controller.repeat();
-    super.initState();
   }
 
   @override
@@ -38,6 +39,7 @@ class _BottomPlayerState extends State<BottomPlayer>
 
   @override
   Widget build(BuildContext context) {
+    print('build bottom player');
     MyAppState appState = context.watch<MyAppState>();
     var isUsingMockData = appState.isUsingMockData;
     var currentSong = appState.currentSong;
@@ -73,7 +75,7 @@ class _BottomPlayerState extends State<BottomPlayer>
           onTap: () {
             // appState.isPlayerPageOpened = true;
             appState.canSongPlayerPagePop = true;
-            Navigator.pushNamed(context, '/song_player');
+            Navigator.pushNamed(context, '/song_player_page');
           },
           child: Padding(
             padding: EdgeInsets.fromLTRB(10.0, 2.0, 8.0, 2.0),
@@ -94,14 +96,13 @@ class _BottomPlayerState extends State<BottomPlayer>
                       borderRadius: BorderRadius.all(Radius.circular(50.0)),
                       child: isUsingMockData
                           ? Image.asset(
-                              currentSong!.coverUri,
+                              currentSong!.cover,
                               fit: BoxFit.fill,
                             )
                           : CachedNetworkImage(
-                              imageUrl:
-                                  currentSong?.coverUri.isNotEmpty ?? false
-                                      ? currentSong!.coverUri
-                                      : MyAppState.defaultCoverImage,
+                              imageUrl: currentSong?.cover.isNotEmpty ?? false
+                                  ? currentSong!.cover
+                                  : MyAppState.defaultCoverImage,
                               progressIndicatorBuilder:
                                   (context, url, downloadProgress) =>
                                       CircularProgressIndicator(
@@ -137,7 +138,7 @@ class _BottomPlayerState extends State<BottomPlayer>
                             child: Padding(
                               padding: const EdgeInsets.only(top: 5.0),
                               child: Text(
-                                ' · ${currentSong?.singers[0].name}',
+                                ' · ${currentSong?.singers.map((e) => e.name).join(', ')}',
                                 style: textTheme.labelMedium!.copyWith(
                                   fontSize: 11.0,
                                   color: colorScheme.onSecondary,

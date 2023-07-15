@@ -5,23 +5,29 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:playlistmaster/entities/detail_playlist.dart';
-import 'package:playlistmaster/entities/detail_song.dart';
-import 'package:playlistmaster/entities/playlist.dart';
-import 'package:playlistmaster/entities/song.dart';
-import 'package:playlistmaster/entities/video.dart';
-import 'package:playlistmaster/http/api.dart';
-import 'package:http/http.dart' as http;
-import 'package:playlistmaster/http/my_http.dart';
-import 'package:playlistmaster/third_lib_change/just_audio/common.dart';
-import 'package:playlistmaster/utils/my_logger.dart';
-import 'package:playlistmaster/utils/my_toast.dart';
+import 'package:playlistmaster/entities/qq_music/qqmusic_detail_video.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
+
+import '../entities/basic/basic_library.dart';
+import '../entities/basic/basic_song.dart';
+import '../entities/basic/basic_video.dart';
+import '../entities/qq_music/qqmusic_detail_playlist.dart';
+import '../entities/qq_music/qqmusic_detail_song.dart';
+import '../entities/qq_music/qqmusic_playlist.dart';
+import '../entities/qq_music/qqmusic_song.dart';
+import '../entities/qq_music/qqmusic_video.dart';
+import '../http/api.dart';
+import '../http/my_http.dart';
+import '../third_lib_change/just_audio/common.dart';
+import '../utils/get_video_type.dart';
+import '../utils/my_logger.dart';
+import '../utils/my_toast.dart';
 
 class MyAppState extends ChangeNotifier {
   // Last video's vid.
@@ -39,30 +45,26 @@ class MyAppState extends ChangeNotifier {
   /// The current platform, 0 for pm server, 1 for qq music, 2 for netease music, 3 for bilibili.
   int _currentPlatform = 1;
 
-  // The dirId fo playlist which current playing song belongs to. -1 represents similar song page, -2 means
-  // search songs page.
-  int? _ownerDirIdOfCurrentPlayingSong;
-
   // Default image for cover.
   static const String defaultCoverImage =
       'https://img0.baidu.com/it/u=819122015,412168181&fm=253&fmt=auto&app=138&f=JPEG?w=320&h=320';
   // static const String defaultCoverImage =
   //     'https://www.worldwildlife.org/assets/structure/unique/logo-c562409bb6158bf64e5f8b1be066dbd5983d75f5ce7c9935a5afffbcc03f8e5d.png';
 
-  static const String defaultPlaylistCover =
+  static const String defaultLibraryCover =
       'http://y.gtimg.cn/mediastyle/global/img/cover_playlist.png?max_age=31536000';
 
   // Set true when init song player for cover animation forward.
   bool _isFirstLoadSongPlayer = false;
 
   // Current basic playing song.
-  Song? _currentSong;
+  BasicSong? _currentSong;
 
   // Previous basic playing song.
-  Song? _prevSong;
+  BasicSong? _prevSong;
 
   // Current detail playing song.
-  DetailSong? _currentDetailSong;
+  BasicSong? _currentDetailSong;
 
   // Is removing song from queue?
   bool _isRemovingSongFromQueue = false;
@@ -80,10 +82,10 @@ class MyAppState extends ChangeNotifier {
   AudioPlayer? _player;
 
   // Current queue.
-  List<Song>? _queue;
+  List<BasicSong>? _queue;
 
-  // Raw queue of the playlist.
-  List<Song>? _rawQueue;
+  // Raw queue of the library.
+  List<BasicSong>? _rawQueue;
 
   // Define the queue.
   ConcatenatingAudioSource? _initQueue;
@@ -132,11 +134,11 @@ class MyAppState extends ChangeNotifier {
   // bool _initSongPlayer = true;
   // String _currentPage = '/';
 
-  // Current opened playlist, will change when navigate to similar song page.
-  Playlist? _openedPlaylist;
+  // Current opened library, will change when navigate to similar song page.
+  BasicLibrary? _openedLibrary;
 
-  // Raw opened playlist.
-  Playlist? _rawOpenedPlaylist;
+  // Raw opened library.
+  BasicLibrary? _rawOpenedLibrary;
 
   String get lastVideoVid => _lastVideoVid;
 
@@ -149,11 +151,9 @@ class MyAppState extends ChangeNotifier {
 
   int get prevCarouselIndex => _prevCarouselIndex;
 
-  Song? get prevSong => _prevSong;
+  BasicSong? get prevSong => _prevSong;
 
-  DetailSong? get currentDetailSong => _currentDetailSong;
-
-  int? get ownerDirIdOfCurrentPlayingSong => _ownerDirIdOfCurrentPlayingSong;
+  BasicSong? get currentDetailSong => _currentDetailSong;
 
   bool get isUsingMockData => _isUsingMockData;
 
@@ -161,7 +161,7 @@ class MyAppState extends ChangeNotifier {
 
   bool get isFirstLoadSongPlayer => _isFirstLoadSongPlayer;
 
-  Song? get currentSong => _currentSong;
+  BasicSong? get currentSong => _currentSong;
 
   AnimationController? get coverRotatingController => _coverRotatingController;
 
@@ -187,19 +187,19 @@ class MyAppState extends ChangeNotifier {
 
   int get userPlayingMode => _userPlayingMode;
 
-  Playlist? get openedPlaylist => _openedPlaylist;
+  BasicLibrary? get openedLibrary => _openedLibrary;
 
-  Playlist? get rawOpenedPlaylist => _rawOpenedPlaylist;
+  BasicLibrary? get rawOpenedLibrary => _rawOpenedLibrary;
 
   bool get isQueueEmpty => _queue?.isEmpty ?? true;
 
-  List<Song>? get queue => _queue;
+  List<BasicSong>? get queue => _queue;
 
-  List<Song>? get rawQueue => _rawQueue;
+  List<BasicSong>? get rawQueue => _rawQueue;
 
-  // List<Song>? get prevQueue => _prevQueue;
+  // List<BasicSong>? get prevQueue => _prevQueue;
 
-  // List<Song>? get songsOfPlaylist => _songsOfPlaylist;
+  // List<BasicSong>? get songsOfPlaylist => _songsOfPlaylist;
 
   int? get currentPlayingSongInQueue => _currentPlayingSongInQueue;
 
@@ -236,18 +236,13 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  set prevSong(Song? value) {
+  set prevSong(BasicSong? value) {
     _prevSong = value;
     notifyListeners();
   }
 
-  set currentDetailSong(DetailSong? value) {
+  set currentDetailSong(BasicSong? value) {
     _currentDetailSong = value;
-    notifyListeners();
-  }
-
-  set ownerDirIdOfCurrentPlayingSong(int? value) {
-    _ownerDirIdOfCurrentPlayingSong = value;
     notifyListeners();
   }
 
@@ -266,7 +261,7 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  set currentSong(Song? value) {
+  set currentSong(BasicSong? value) {
     _currentSong = value;
     notifyListeners();
   }
@@ -331,13 +326,13 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  set openedPlaylist(Playlist? playlist) {
-    _openedPlaylist = playlist;
+  set openedLibrary(BasicLibrary? library) {
+    _openedLibrary = library;
     notifyListeners();
   }
 
-  set rawOpenedPlaylist(Playlist? playlist) {
-    _rawOpenedPlaylist = playlist;
+  set rawOpenedLibrary(BasicLibrary? library) {
+    _rawOpenedLibrary = library;
     notifyListeners();
   }
 
@@ -407,7 +402,7 @@ class MyAppState extends ChangeNotifier {
       await _player!.setSpeed(speed!);
 
       // _player!.currentIndexStream.listen((event) {});
-      // TODO: fix bug: when remove song in playlist, this function will also be called.
+      // TODO: fix bug: when remove song in library, this function will also be called.
       _player!.positionDiscontinuityStream.listen((discontinuity) {
         // _coverRotatingController!.value = 0;
         if (discontinuity.reason == PositionDiscontinuityReason.autoAdvance &&
@@ -472,526 +467,323 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  Future<DetailSong?> fetchDetailSong(Song song) async {
-    print(song.songLink);
-    CacheManager cacheManager = MyHttp.detailSongOtherCacheManager;
-    Uri url = Uri.http(
-      API.host,
-      '${API.detailSong}/${song.songMid}/1',
-    );
-    String urlString = url.toString();
-    dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null || !(result as FileInfo).file.existsSync()) {
-      result = await cacheManager.getFileFromCache(urlString);
-      if (result == null || !(result as FileInfo).file.existsSync()) {
-        MyLogger.logger.d('Loading detail song from network...');
-        final client = RetryClient(http.Client());
-        try {
-          var response = await client.get(url);
-          var decodedResponse =
-              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-          if (response.statusCode == 200 &&
-              decodedResponse['success'] == true) {
-            result = DetailSong.fromJson(decodedResponse['data']);
-            await cacheManager.putFile(
-              urlString,
-              response.bodyBytes,
-              fileExtension: 'json',
-            );
-          } else {
-            MyToast.showToast(
-                'Response error with code: ${response.statusCode}');
-            MyLogger.logger
-                .e('Response error with code: ${response.statusCode}');
-            result = null;
-          }
-        } catch (e) {
-          MyToast.showToast('Exception thrown: $e');
-          MyLogger.logger.e('Network error with exception: $e');
-          rethrow;
-        } finally {
-          client.close();
+  Future<BasicSong?> fetchDetailSong(BasicSong song, int platform) async {
+    Uri? url;
+    if (platform == 1) {
+      url = Uri.http(
+          API.host, '${API.detailSong}/${(song as QQMusicSong).songMid}', {
+        'platform': platform.toString(),
+      });
+    }
+    MyLogger.logger.d('Loading detail song from network...');
+    final client = RetryClient(http.Client());
+    try {
+      var response = await client.get(url!);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        if (platform == 1) {
+          return Future.value(
+              QQMusicDetailSong.fromJson(decodedResponse['data']));
+        } else {
+          throw Exception('Only imeplement qq music platform');
         }
       } else {
-        MyLogger.logger.d('Loading detail song from cache...');
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+        return null;
       }
-    } else {
-      MyLogger.logger.d('Loading detail song from memory...');
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
     }
-    if (result is DetailSong) {
-      if (song.songLink.isNotEmpty) {
-        result.songLink = song.songLink;
-        result.isTakenDown = false;
-      }
-      result = Future.value(result);
-    } else if (result is FileInfo) {
-      var decodedResponse =
-          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
-      result = DetailSong.fromJson(decodedResponse['data']);
-      if (song.songLink.isNotEmpty) {
-        result.songLink = song.songLink;
-        result.isTakenDown = false;
-      }
-      result = Future.value(result);
-    } else {}
-    return result;
   }
 
-  Future<Map<String, List<String>>> fetchMVsLink(
+  Future<Map<String, List<String>>?> fetchMVsLink(
       List<String> vids, int platform) async {
-    CacheManager cacheManager = MyHttp.mvLinkCacheManager;
-    Uri url = Uri.http(API.host, '${API.mvsLink}/$platform', {
-      'vids': vids.join(','),
+    Uri url = Uri.http(API.host, '${API.mvLink}/${vids.join(',')}', {
+      'platform': platform.toString(),
     });
-    String urlString = url.toString();
-    dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null || !(result as FileInfo).file.existsSync()) {
-      result = await cacheManager.getFileFromCache(urlString);
-      if (result == null || !(result as FileInfo).file.existsSync()) {
-        MyLogger.logger.d('Loading mv link from network...');
-        final client = RetryClient(http.Client());
-        try {
-          var response = await client.get(url);
-          var decodedResponse =
-              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-          if (response.statusCode == 200 &&
-              decodedResponse['success'] == true) {
-            var mvsLink = decodedResponse['data']!;
-            if (mvsLink is Map<String, dynamic>) {
-              result = mvsLink.map((key, value) =>
-                  MapEntry<String, List<String>>(
-                      key, List<String>.from(value)));
-            }
-            await cacheManager.putFile(
-              urlString,
-              response.bodyBytes,
-              fileExtension: 'json',
-            );
-          } else {
-            MyToast.showToast(
-                'Response error with code: ${response.statusCode}');
-            MyLogger.logger
-                .e('Response error with code: ${response.statusCode}');
-            result = null;
-          }
-        } catch (e) {
-          MyToast.showToast('Exception thrown: $e');
-          MyLogger.logger.e('Network error with exception: $e');
-          rethrow;
-        } finally {
-          client.close();
+    MyLogger.logger.d('Loading MVs link from network...');
+    final client = RetryClient(http.Client());
+    try {
+      var response = await client.get(url);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        var mvsLink = decodedResponse['data']!;
+        if (mvsLink is Map<String, dynamic>) {
+          return Future.value(mvsLink.map((key, value) =>
+              MapEntry<String, List<String>>(key, List<String>.from(value))));
+        } else {
+          throw Exception('Only imeplement qq music platform');
         }
       } else {
-        MyLogger.logger.d('Loading mv link from cache...');
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+        return null;
       }
-    } else {
-      MyLogger.logger.d('Loading mv link from memory...');
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
     }
-    if (result is Map<String, List<String>>) {
-      result = Future.value(result);
-    } else if (result is FileInfo) {
-      var decodedResponse =
-          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
-      var mvsLink = decodedResponse['data']!;
-      if (mvsLink is Map<String, dynamic>) {
-        result = mvsLink.map((key, value) =>
-            MapEntry<String, List<String>>(key, List<String>.from(value)));
-      }
-      print(result.runtimeType);
-      result = Future<Map<String, List<String>>>.value(result);
-    } else {}
-    return result;
   }
 
-  Future<Map<String, String>> fetchSongsLink(
+  Future<Map<String, String>?> fetchSongsLink(
       List<String> songMids, int platform) async {
-    CacheManager cacheManager = MyHttp.songsLinkCacheManager;
-    Uri url = Uri.http(API.host, '${API.songsLink}/$platform', {
-      'songMids': songMids.join(','),
+    Uri url = Uri.http(API.host, '${API.songsLink}/${songMids.join(',')}', {
+      'platform': platform.toString(),
     });
-    String urlString = url.toString();
-    dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null || !(result as FileInfo).file.existsSync()) {
-      result = await cacheManager.getFileFromCache(urlString);
-      if (result == null || !(result as FileInfo).file.existsSync()) {
-        MyLogger.logger.d('Loading songs link from network...');
-        final client = RetryClient(http.Client());
-        try {
-          var response = await client.get(url);
-          var decodedResponse =
-              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-          if (response.statusCode == 200 &&
-              decodedResponse['success'] == true) {
-            var songsLink = decodedResponse['data']!;
-            if (songsLink is Map<String, dynamic>) {
-              result = songsLink
-                  .map((key, value) => MapEntry(key, value.toString()));
-            }
-
-            await cacheManager.putFile(
-              urlString,
-              response.bodyBytes,
-              fileExtension: 'json',
-            );
-            // if (songsLink.isEmpty) {
-            //   // result = '1';
-            // } else {
-            //   result = songsLink;
-            // }
-          } else {
-            MyToast.showToast(
-                'Response error with code: ${response.statusCode}');
-            MyLogger.logger
-                .e('Response error with code: ${response.statusCode}');
-            result = null;
-          }
-        } catch (e) {
-          MyToast.showToast('Exception thrown: $e');
-          MyLogger.logger.e('Network error with exception: $e');
-          rethrow;
-        } finally {
-          client.close();
-        }
+    MyLogger.logger.d('Loading songs link from network...');
+    final client = RetryClient(http.Client());
+    try {
+      var response = await client.get(url);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        var songsLink = decodedResponse['data']!;
+        return Future.value(
+            songsLink.map((key, value) => MapEntry(key, value.toString())));
       } else {
-        MyLogger.logger.d('Loading songs link from cache...');
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+        return null;
       }
-    } else {
-      MyLogger.logger.d('Loading songs link from memory...');
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
     }
-    print(result.runtimeType);
-    if (result is Map<String, String>) {
-      result = Future.value(result);
-    } else if (result is FileInfo) {
-      var decodedResponse =
-          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
-      var songsLink = decodedResponse['data'] as Map<String, dynamic>;
-      result = songsLink.map((key, value) => MapEntry(key, value.toString()));
-      result = Future.value(result);
-    } else {}
-    return result;
   }
 
-  Future<DetailPlaylist?> fetchDetailPlaylist(Playlist playlist) async {
-    int platform = 1;
-    CacheManager cacheManager = MyHttp.detailPlaylistOtherCacheManager;
-    Uri url = Uri.http(
-      API.host,
-      '${API.detailPlaylist}/${playlist.tid}/$platform',
-    );
-    String urlString = url.toString();
-    dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null || !(result as FileInfo).file.existsSync()) {
-      result = await cacheManager.getFileFromCache(urlString);
-      if (result == null || !(result as FileInfo).file.existsSync()) {
-        MyLogger.logger.d('Loading detail playlist from network...');
-        final client = RetryClient(http.Client());
-        try {
-          var response = await client.get(url);
-          var decodedResponse =
-              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-          if (response.statusCode == 200 &&
-              decodedResponse['success'] == true) {
-            result = DetailPlaylist.fromJson(decodedResponse['data']);
-            await cacheManager.putFile(
-              urlString,
-              response.bodyBytes,
-              fileExtension: 'json',
-            );
-          } else if (response.statusCode == 200 &&
-              decodedResponse['success'] == false) {
-            MyToast.showToast('Request failure, tid is 0');
-            MyLogger.logger.e('Request failure, tid is 0');
-
-            DetailPlaylist detailPlaylist = DetailPlaylist(
-              name: playlist.name,
-              coverImage: playlist.coverImage,
-              songsCount: playlist.songsCount,
-              listenNum: 0,
-              dirId: playlist.dirId,
-              tid: playlist.tid,
-              songs: [],
-            );
-            result = detailPlaylist;
-            decodedResponse['data'] = detailPlaylist.toJson();
-            String jsonString = jsonEncode(decodedResponse);
-            List<int> bodyBytes = utf8.encode(jsonString);
-            Uint8List uint8List = Uint8List.fromList(bodyBytes);
-            await cacheManager.putFile(
-              urlString,
-              uint8List,
-              fileExtension: 'json',
-            );
-          } else {
-            MyToast.showToast(
-                'Response error with code: ${response.statusCode}');
-            MyLogger.logger
-                .e('Response error with code: ${response.statusCode}');
-            result = null;
-          }
-        } catch (e) {
-          MyToast.showToast('Exception thrown: $e');
-          MyLogger.logger.e('Network error with exception: $e');
-          rethrow;
-        } finally {
-          client.close();
-        }
-      } else {
-        MyLogger.logger.d('Loading detail playlist from cache...');
-      }
-    } else {
-      MyLogger.logger.d('Loading detail playlist from memory...');
+  Future<BasicLibrary?> fetchDetailLibrary(
+      BasicLibrary library, int platform) async {
+    Uri? url;
+    if (platform == 1) {
+      url = Uri.http(API.host,
+          '${API.detailLibrary}/${(library as QQMusicPlaylist).tid}', {
+        'platform': platform.toString(),
+      });
     }
-    if (result is DetailPlaylist || result is FileInfo) {
-      if (result is FileInfo) {
-        var decodedResponse =
-            jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
-        result = DetailPlaylist.fromJson(decodedResponse['data']);
-      }
-      if (result is DetailPlaylist) {
-        List<String> songMids = result.songs.map((e) => e.songMid).toList();
-        Map<String, String> songsLink =
-            await fetchSongsLink(songMids, platform);
-        // Set the song's link and determine whether the song is taken down.
-        for (Song song in result.songs) {
-          if (songsLink.containsKey(song.songMid)) {
-            song.isTakenDown = false;
-            song.songLink = songsLink[song.songMid]!;
-          }
+    MyLogger.logger.d('Loading detail library from network...');
+    final client = RetryClient(http.Client());
+    try {
+      var response = await client.get(url!);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        if (platform == 1) {
+          return Future.value(
+              QQMusicDetailPlaylist.fromJson(decodedResponse['data']));
+        } else {
+          throw Exception('Only imeplement qq music platform');
         }
-
-        List<String> vids = result.songs.map((e) => e.vid).toList()
-          ..removeWhere((vid) => vid.isEmpty);
-        if (vids.isNotEmpty) {
-          Map<String, List<String>> mvsLink =
-              await fetchMVsLink(vids, platform);
-          // Set the video's link.
-          for (Song song in result.songs) {
-            if (mvsLink.containsKey(song.vid)) {
-              song.videoLinks = mvsLink[song.vid]!;
-            }
-          }
-        }
-
-        result = Future.value(result);
+      } else if (response.statusCode == 200 &&
+          decodedResponse['success'] == false &&
+          platform == 1) {
+        MyToast.showToast('Request failure, tid is 0');
+        MyLogger.logger.e('Request failure, tid is 0');
+        return null;
+      } else {
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+        return null;
       }
-    } else {}
-    return result;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
   }
 
-  Future<List<Song>> fetchSimilarSongs(Song song, int platform) async {
-    CacheManager cacheManager = MyHttp.similarSongsOtherCacheManager;
-    Uri url = Uri.http(
-      API.host,
-      '${API.similarSongs}/${song.songId}/$platform',
-    );
-    String urlString = url.toString();
-    dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null || !(result as FileInfo).file.existsSync()) {
-      result = await cacheManager.getFileFromCache(urlString);
-      if (result == null || !(result as FileInfo).file.existsSync()) {
-        MyLogger.logger.d('Loading similar songs from network...');
-        final client = RetryClient(http.Client());
-        try {
-          var response = await client.get(url);
-          var decodedResponse =
-              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-          if (response.statusCode == 200 &&
-              decodedResponse['success'] == true) {
-            List<dynamic> jsonList = decodedResponse['data'];
-            List<Song> songs = jsonList.map((e) => Song.fromJson(e)).toList();
-            result = songs;
-            await cacheManager.putFile(
-              urlString,
-              response.bodyBytes,
-              fileExtension: 'json',
-            );
-          } else {
-            MyToast.showToast(
-                'Response error with code: ${response.statusCode}');
-            MyLogger.logger
-                .e('Response error with code: ${response.statusCode}');
-            result = null;
-          }
-        } catch (e) {
-          MyToast.showToast('Exception thrown: $e');
-          MyLogger.logger.e('Network error with exception: $e');
-          rethrow;
-        } finally {
-          client.close();
-        }
-      } else {
-        MyLogger.logger.d('Loading similar songs from cache...');
-      }
-    } else {
-      MyLogger.logger.d('Loading similar songs from memory...');
+  Future<List<BasicSong>?> fetchSimilarSongs(
+      BasicSong song, int platform) async {
+    Uri? url;
+    if (platform == 1) {
+      url = Uri.http(
+          API.host, '${API.similarSongs}/${(song as QQMusicSong).songId}', {
+        'platform': platform.toString(),
+      });
     }
-    if (result is List<Song> || result is FileInfo) {
-      if (result is FileInfo) {
-        var decodedResponse =
-            jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
+    MyLogger.logger.d('Loading similar songs from network...');
+    final client = RetryClient(http.Client());
+    try {
+      var response = await client.get(url!);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
         List<dynamic> jsonList = decodedResponse['data'];
-        List<Song> songs = jsonList.map((e) => Song.fromJson(e)).toList();
-        result = songs;
-      }
-      if (result is List<Song>) {
-        List<String> songMids = result.map((e) => e.songMid).toList();
-        Map<String, String> songsLink =
-            await fetchSongsLink(songMids, platform);
-        // Set the song's link and determine whether the song is taken down.
-        for (Song song in result) {
-          if (songsLink.containsKey(song.songMid)) {
-            song.isTakenDown = false;
-            song.songLink = songsLink[song.songMid]!;
-          }
+        List<BasicSong>? songs;
+        if (platform == 1) {
+          songs =
+              jsonList.map<BasicSong>((e) => QQMusicSong.fromJson(e)).toList();
         }
-
-        List<String> vids = result.map((e) => e.vid).toList()
-          ..removeWhere((vid) => vid.isEmpty);
-        if (vids.isNotEmpty) {
-          Map<String, List<String>> mvsLink =
-              await fetchMVsLink(vids, platform);
-          // Set the video's link.
-          for (Song song in result) {
-            if (mvsLink.containsKey(song.vid)) {
-              song.videoLinks = mvsLink[song.vid]!;
-            }
-          }
-        }
-
-        result = Future.value(result);
-      }
-    } else {}
-    return result;
-  }
-
-  Future<Video> fetchMVDetail(Song song, int platform) async {
-    CacheManager cacheManager = MyHttp.detailMVOtherCacheManager;
-    Uri url = Uri.http(
-      API.host,
-      '${API.mvDetail}/${song.vid}/$platform',
-    );
-    String urlString = url.toString();
-    dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null || !(result as FileInfo).file.existsSync()) {
-      result = await cacheManager.getFileFromCache(urlString);
-      if (result == null || !(result as FileInfo).file.existsSync()) {
-        MyLogger.logger.d('Loading detail mv information from network...');
-        final client = RetryClient(http.Client());
-        try {
-          var response = await client.get(url);
-          var decodedResponse =
-              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-          if (response.statusCode == 200 &&
-              decodedResponse['success'] == true) {
-            result = Video.fromJson(decodedResponse['data']);
-            (result as Video).videoLinks = List.from(song.videoLinks);
-            await cacheManager.putFile(
-              urlString,
-              response.bodyBytes,
-              fileExtension: 'json',
-            );
-            // if (detailMV.isEmpty) {
-            //   song.isTakenDown = true;
-            //   result = '1';
-            // } else {
-            //   result = songLink;
-            // }
-          } else {
-            MyToast.showToast(
-                'Response error with code: ${response.statusCode}');
-            MyLogger.logger
-                .e('Response error with code: ${response.statusCode}');
-            result = null;
-          }
-        } catch (e) {
-          MyToast.showToast('Exception thrown: $e');
-          MyLogger.logger.e('Network error with exception: $e');
-          rethrow;
-        } finally {
-          client.close();
-        }
+        return Future.value(songs);
       } else {
-        MyLogger.logger.d('Loading detail mv information from cache...');
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+        return null;
       }
-    } else {
-      MyLogger.logger.d('Loading detail mv information from memory...');
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
     }
-    if (result is Video) {
-      result = Future.value(result);
-    } else if (result is FileInfo) {
-      var decodedResponse =
-          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
-      result = Video.fromJson(decodedResponse['data']);
-      result.videoLinks = List.from(song.videoLinks);
-      result = Future.value(result);
-    } else {}
-    return result;
   }
 
-  Future<String> fetchSongLink(Song song, String quality, int platform) async {
-    CacheManager cacheManager = MyHttp.songLinkCacheManager;
-    Uri url = Uri.http(API.host, '${API.songLink}/$platform', {
-      'songMid': song.songMid,
-      'mediaMid': song.mediaMid,
-      'type': quality,
+  Future<BasicVideo?> fetchDetailMV(BasicVideo video, int platform) async {
+    String? vid;
+    if (platform == 1) {
+      vid = (video as QQMusicVideo).vid;
+    } else {
+      throw Exception('Only imeplement qq music platform');
+    }
+    Uri url = Uri.http(API.host, '${API.detailMV}/$vid', {
+      'platform': platform.toString(),
     });
-    String urlString = url.toString();
-    dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null || !(result as FileInfo).file.existsSync()) {
-      result = await cacheManager.getFileFromCache(urlString);
-      if (result == null || !(result as FileInfo).file.existsSync()) {
-        MyLogger.logger.d('Loading song link from network...');
-        final client = RetryClient(http.Client());
-        try {
-          var response = await client.get(url);
-          var decodedResponse =
-              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-          if (response.statusCode == 200 &&
-              decodedResponse['success'] == true) {
-            String songLink = decodedResponse['data'];
-            await cacheManager.putFile(
-              urlString,
-              response.bodyBytes,
-              fileExtension: 'json',
-            );
-            if (songLink.isEmpty) {
-              song.isTakenDown = true;
-              result = '1';
-            } else {
-              result = songLink;
-            }
-          } else {
-            MyToast.showToast(
-                'Response error with code: ${response.statusCode}');
-            MyLogger.logger
-                .e('Response error with code: ${response.statusCode}');
-            result = '2';
-          }
-        } catch (e) {
-          MyToast.showToast('Exception thrown: $e');
-          MyLogger.logger.e('Network error with exception: $e');
-          rethrow;
-        } finally {
-          client.close();
+
+    MyLogger.logger.d('Loading detail mv information from network...');
+    final client = RetryClient(http.Client());
+    try {
+      var response = await client.get(url);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        if (platform == 1) {
+          return Future.value(
+              QQMusicDetailVideo.fromJson(decodedResponse['data']));
+        } else {
+          throw Exception('Only imeplement qq music platform');
         }
       } else {
-        MyLogger.logger.d('Loading song link from cache...');
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  // Cache video.
+  Future<void> cacheVideo(String rawUrl) async {
+    final client = RetryClient(http.Client());
+    String? videoType = VideoUtil.getVideoType(rawUrl);
+    if (videoType == null) {
+      MyToast.showToast('Video url is corrupted');
+      throw Exception('Video url is corrupted');
+    }
+    CacheManager cacheManager = MyHttp.videoCacheManager;
+    dynamic result = await cacheManager.getFileFromCache(rawUrl);
+    if (result == null || !(result as FileInfo).file.existsSync()) {
+      try {
+        var response = await client.get(Uri.parse(rawUrl));
+        if (response.statusCode == 200) {
+          await cacheManager.putFile(
+            rawUrl,
+            response.bodyBytes,
+            fileExtension: videoType,
+          );
+          MyToast.showToast('Cache video successfully');
+          MyLogger.logger.i('Cache video successfully');
+        } else {
+          MyToast.showToast('Response error with code: ${response.statusCode}');
+          MyLogger.logger.e('Response error with code: ${response.statusCode}');
+        }
+      } catch (e) {
+        MyToast.showToast('Exception thrown: $e');
+        MyLogger.logger.e('Network error with exception: $e');
+        rethrow;
+      } finally {
+        client.close();
       }
     } else {
-      MyLogger.logger.d('Loading song link from memory...');
+      MyToast.showToast('Already cached');
+      MyLogger.logger.wtf('Already cached');
     }
-    if (result is String) {
-      result = Future.value(result);
-    } else if (result is FileInfo) {
-      var decodedResponse =
-          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
-      result = decodedResponse['data'].toString();
-      if (result.isEmpty) {
-        song.isTakenDown = true;
+  }
+
+  Future<List<BasicVideo>?> fetchRelatedMVs(
+      BasicSong song, int platform) async {
+    String? songId;
+    if (platform == 1) {
+      songId = (song as QQMusicSong).songId;
+    } else {
+      throw Exception('Only imeplement qq music platform');
+    }
+    Uri url = Uri.http(API.host, '${API.relatedMV}/$songId', {
+      'platform': platform.toString(),
+    });
+
+    MyLogger.logger.d('Loading related MVs from network...');
+    final client = RetryClient(http.Client());
+    try {
+      var response = await client.get(url);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        if (platform == 1) {
+          List<dynamic> jsonList = decodedResponse['data'];
+          return Future.value(jsonList
+              .map<QQMusicVideo>((video) => QQMusicVideo.fromJson(video))
+              .toList());
+        } else {
+          throw Exception('Only imeplement qq music platform');
+        }
+      } else {
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+        return null;
       }
-      result = Future.value(result);
-    } else {}
-    return result;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<String?> fetchSongLink(
+      BasicSong song, String quality, int platform) async {
+    Uri? url;
+    if (platform == 1) {
+      url = Uri.http(
+          API.host, '${API.songLink}/${(song as QQMusicSong).songMid}', {
+        'mediaMid': song.mediaMid,
+        'type': quality,
+        'platform': platform.toString(),
+      });
+    }
+    MyLogger.logger.d('Loading song link from network...');
+    final client = RetryClient(http.Client());
+    try {
+      var response = await client.get(url!);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        String songLink = decodedResponse['data'];
+        return Future.value(songLink);
+      } else {
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
   }
 
   Future<ConcatenatingAudioSource?> initTheQueue() async {
@@ -1003,13 +795,13 @@ class MyAppState extends ChangeNotifier {
                 e.songLink,
                 tag: MediaItem(
                   // Specify a unique ID for each media item:
-                  id: _queue!.indexOf(e).toString(),
+                  id: Uuid().v1(),
                   // Metadata to display in the notification:
                   album: 'Album name',
-                  artist: e.singers.map((e) => e.name).join(','),
+                  artist: e.singers.map((e) => e.name).join(', '),
                   title: e.name,
-                  artUri: await getImageFileFromAssets(
-                      e.coverUri, _queue!.indexOf(e)),
+                  artUri:
+                      await getImageFileFromAssets(e.cover, _queue!.indexOf(e)),
                 ),
               ))
           .toList();
@@ -1022,9 +814,9 @@ class MyAppState extends ChangeNotifier {
                   id: Uuid().v1(),
                   // Metadata to display in the notification:
                   album: 'Album name',
-                  artist: e.singers.map((e) => e.name).join(','),
+                  artist: e.singers.map((e) => e.name).join(', '),
                   title: e.name,
-                  artUri: Uri.parse(e.coverUri),
+                  artUri: Uri.parse(e.cover),
                 ),
               ))
           .toList();

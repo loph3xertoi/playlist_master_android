@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/states/my_search_state.dart';
-import 'package:playlistmaster/utils/theme_manager.dart';
-import 'package:playlistmaster/widgets/my_searchbar.dart';
 import 'package:provider/provider.dart';
+
+import '../states/my_search_state.dart';
+import '../utils/theme_manager.dart';
+import '../widgets/my_searchbar.dart';
 
 class SearchPage extends StatefulWidget {
   @override
@@ -33,14 +34,14 @@ class _SearchPageState extends State<SearchPage> {
                   child: MySearchBar(
                     myScaffoldKey: _scaffoldKey,
                     notInHomepage: true,
-                    inPlaylistDetailPage: false,
+                    inDetailLibraryPage: false,
                   ),
                 ),
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: theme.playlistDetailPageBg!,
+                        colors: theme.detailLibraryPageBg!,
                         stops: [0.0, 0.33, 0.67, 1.0],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,

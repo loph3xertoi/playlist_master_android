@@ -293,10 +293,10 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "8a7ec23272813ee89eab5ef45b8ddeb82353ddd9"
+      resolved-ref: "0bfb233656ce27a819ee36501228ea8a36df1784"
       url: "https://github.com/loph3xertoi/fplayer.git"
     source: git
-    version: "1.0.4"
+    version: "1.0.8"
   http:
     dependency: "direct overridden"
     description:

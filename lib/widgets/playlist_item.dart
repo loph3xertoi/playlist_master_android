@@ -1,13 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/entities/playlist.dart';
-import 'package:playlistmaster/states/app_state.dart';
 import 'package:provider/provider.dart';
 
-class PlaylistItem extends StatelessWidget {
-  final Playlist playlist;
-  const PlaylistItem({super.key, required this.playlist});
+import '../entities/basic/basic_library.dart';
+import '../states/app_state.dart';
+
+class LibraryItem extends StatelessWidget {
+  final BasicLibrary library;
+  const LibraryItem({super.key, required this.library});
 
   @override
   Widget build(BuildContext context) {
@@ -19,12 +20,12 @@ class PlaylistItem extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          appState.rawOpenedPlaylist = playlist;
-          appState.openedPlaylist = playlist;
+          appState.rawOpenedLibrary = library;
+          appState.openedLibrary = library;
           appState.rawQueue = [];
           Navigator.pushNamed(
             context,
-            '/playlist_detail',
+            '/detail_library_page',
           );
         },
         child: Ink(
@@ -40,11 +41,11 @@ class PlaylistItem extends StatelessWidget {
                     width: 46.0,
                     height: 46.0,
                     child: isUsingMockData
-                        ? Image.asset(playlist.coverImage)
+                        ? Image.asset(library.cover)
                         : CachedNetworkImage(
-                            imageUrl: playlist.coverImage.isNotEmpty
-                                ? playlist.coverImage
-                                : MyAppState.defaultPlaylistCover,
+                            imageUrl: library.cover.isNotEmpty
+                                ? library.cover
+                                : MyAppState.defaultLibraryCover,
                             progressIndicatorBuilder:
                                 (context, url, downloadProgress) =>
                                     CircularProgressIndicator(
@@ -64,14 +65,14 @@ class PlaylistItem extends StatelessWidget {
                       children: <Widget>[
                         Flexible(
                           child: Text(
-                            playlist.name,
+                            library.name,
                             style:
                                 textTheme.labelSmall!.copyWith(fontSize: 13.0),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Text(
-                          '${playlist.songsCount} songs',
+                          '${library.itemCount} songs',
                           style: textTheme.labelSmall!.copyWith(fontSize: 11.0),
                         ),
                       ],

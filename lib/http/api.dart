@@ -1,35 +1,48 @@
 class API {
-  /// Your uid, such as qq number.
-  static const uid = '2804161589';
+  /// Your uid in playlist master server.
+  static const uid = '0';
 
   /// Host of playlist server.
   static const host = '192.168.8.171:8080';
   // static const host = '192.168.0.114:8080';
 
-  /// api: /playlists/{uid}/{platformId}
-  static const playlists = '/playlists';
-
-  /// api: /songs/{playlistId}/{platformId}
-  static const detailPlaylist = '/detailplaylist';
-
-  /// api: /song/{songMid}/{platformId}
-  static const detailSong = '/song';
-
-  /// api: /songlink/{platformId}?songMid={songMid}&mediaMid={mediaMid}&type={type}
-  static const songLink = '/songlink';
-
-  /// api: /songslink/{platformId}?songMids={songMids}
-  static const songsLink = '/songslink';
-
-  /// api: /mv/{vid}/{platformId}
-  static const mvDetail = '/mv';
-
-  /// api: /mvlink/{platformId}?vids={vids}
-  static const mvsLink = '/mvlink';
-
-  /// api: /user/{uid}
+  /// Get user information according to [uid] in [platform].
+  /// api: /user/[uid]?platform=[platform]
   static const user = '/user';
 
-  /// api: /similarsongs/{songId}/{platformId}
+  /// Get detail song according to [songMid] in [platform].
+  /// api: /song/[songMid]?platform=[platform]
+  static const detailSong = '/song';
+
+  /// Get all similar songs according to [songId] in [platform].
+  /// api: /similarsongs/[songId]?platform=[platform]
   static const similarSongs = '/similarsongs';
+
+  /// Get song's link according to [songMid], [mediaMid] and [type] in [platform].
+  /// api: /songlink/[songMid]?mediaMid=[mediaMid]&type=[type]&platform=[platform]
+  static const songLink = '/songlink';
+
+  /// Get all songs' link according to [songMids] in [platform].
+  /// api: /songslink/[songMids]?platform=[platform]
+  static const songsLink = '/songslink';
+
+  /// Get detail MV according to [vid] in [platform].
+  /// api: /mv/[vid]?platform=[platform]
+  static const detailMV = '/mv';
+
+  /// Get all MVs' links according to [vids] in [platform].
+  /// api: /mvlink/[vids]?platform=[platform]
+  static const mvLink = '/mvlink';
+
+  /// Get all related MVs according to [songId] in [platform].
+  /// api: /relatedmv/[songId]?platform=[platform]
+  static const relatedMV = '/relatedmv';
+
+  /// Get all libraries according to [uid] in [platform].
+  /// api: /libraries?id=[uid]&platform=[platform]
+  static const libraries = '/libraries';
+
+  /// Get detail library according to [library] in [platform].
+  /// api: /detaillibrary/[library]?platform=[platform]
+  static const detailLibrary = '/detaillibrary';
 }

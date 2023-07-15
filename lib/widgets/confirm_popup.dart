@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/states/app_state.dart';
 import 'package:provider/provider.dart';
+
+import '../states/app_state.dart';
 
 class ShowConfirmDialog extends StatelessWidget {
   const ShowConfirmDialog({super.key});
@@ -11,7 +12,6 @@ class ShowConfirmDialog extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return AlertDialog(
-      // title: Text('Are you sure?'),
       content: Text(
         'Do you want to empty the queue?',
         style: textTheme.labelMedium,

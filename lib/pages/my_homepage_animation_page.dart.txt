@@ -9,12 +9,12 @@ import '../widgets/night_background.dart';
 import '../widgets/my_content_area.dart';
 import '../widgets/my_searchbar.dart';
 
-class MyHomePage extends StatefulWidget {
+class HomePage extends StatefulWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage>
+class _MyHomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   /// Current selected music app,
   /// 0 represents local music app, 1 represents QQ music,

@@ -2,27 +2,28 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/entities/song.dart';
-import 'package:playlistmaster/mock_data.dart';
-import 'package:playlistmaster/states/app_state.dart';
-import 'package:playlistmaster/utils/my_logger.dart';
-import 'package:playlistmaster/utils/my_toast.dart';
-import 'package:playlistmaster/utils/theme_manager.dart';
-import 'package:playlistmaster/widgets/bottom_player.dart';
-import 'package:playlistmaster/widgets/song_item.dart';
 import 'package:provider/provider.dart';
+
+import '../entities/basic/basic_song.dart';
+import '../mock_data.dart';
+import '../states/app_state.dart';
+import '../utils/my_logger.dart';
+import '../utils/my_toast.dart';
+import '../utils/theme_manager.dart';
+import '../widgets/bottom_player.dart';
+import '../widgets/song_item.dart';
 
 class SimilarSongsPage extends StatefulWidget {
   const SimilarSongsPage({super.key, required this.song});
 
-  final Song song;
+  final BasicSong song;
 
   @override
   State<SimilarSongsPage> createState() => _SimilarSongsPageState();
 }
 
 class _SimilarSongsPageState extends State<SimilarSongsPage> {
-  late Future<List<Song>> _similarSongs;
+  late Future<List<BasicSong>?> _similarSongs;
   bool _changeRawQueue = true;
 
   @override
@@ -30,7 +31,7 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
     var isUsingMockData = state.isUsingMockData;
-    var openedPlaylist = state.openedPlaylist;
+    var openedLibrary = state.openedLibrary;
     if (isUsingMockData) {
       _similarSongs = Future.value(MockData.similarSongs);
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -38,7 +39,8 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
         state.queue = MockData.songs;
       });
     } else {
-      _similarSongs = state.fetchSimilarSongs(widget.song, 1);
+      _similarSongs =
+          state.fetchSimilarSongs(widget.song, state.currentPlatform);
     }
   }
 
@@ -48,8 +50,6 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
     MyAppState appState = context.watch<MyAppState>();
     var isUsingMockData = appState.isUsingMockData;
     var rawQueue = appState.rawQueue;
-    var ownerDirIdOfCurrentPlayingSong =
-        appState.ownerDirIdOfCurrentPlayingSong;
     var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
     var player = appState.player;
 
@@ -63,7 +63,7 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: theme.playlistDetailPageBg!,
+                  colors: theme.detailLibraryPageBg!,
                   stops: [0.0, 0.33, 0.67, 1.0],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -115,7 +115,8 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                         setState(() {
                                           _similarSongs =
                                               appState.fetchSimilarSongs(
-                                                  widget.song, 1);
+                                                  widget.song,
+                                                  appState.currentPlatform);
                                         });
                                       },
                                     ),
@@ -123,8 +124,8 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                 ),
                               );
                             } else {
-                              List<Song> similarSongs =
-                                  snapshot.data as List<Song>;
+                              List<BasicSong> similarSongs =
+                                  snapshot.data as List<BasicSong>;
                               rawQueue = similarSongs;
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 if (appState.rawQueue!.isEmpty ||
@@ -133,7 +134,6 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                   _changeRawQueue = false;
                                 }
                               });
-
                               return Container(
                                 decoration: BoxDecoration(
                                   color: colorScheme.primary,
@@ -268,11 +268,6 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                           appState.currentDetailSong =
                                                               null;
 
-                                                          // appState.currentPage =
-                                                          //     '/song_player';
-                                                          appState.ownerDirIdOfCurrentPlayingSong =
-                                                              -1;
-
                                                           appState.isFirstLoadSongPlayer =
                                                               true;
 
@@ -284,14 +279,10 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                           //             index);
                                                           appState.player!
                                                               .play();
-                                                        } else if (ownerDirIdOfCurrentPlayingSong ==
-                                                                appState
-                                                                    .openedPlaylist!
-                                                                    .dirId &&
-                                                            appState.queue!.indexOf(
-                                                                    appState.rawQueue![
-                                                                        index]) ==
-                                                                currentPlayingSongInQueue) {
+                                                        } else if (appState
+                                                                .currentSong ==
+                                                            appState.rawQueue![
+                                                                index]) {
                                                           if (!player!
                                                               .playerState
                                                               .playing) {
@@ -364,9 +355,6 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                             return;
                                                           }
 
-                                                          appState.ownerDirIdOfCurrentPlayingSong =
-                                                              -1;
-
                                                           appState.currentPlayingSongInQueue =
                                                               realIndex;
 
@@ -381,7 +369,7 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                               appState
                                                                   .currentSong;
                                                           // appState.currentPage =
-                                                          //     '/song_player';
+                                                          //     '/song_player_page';
                                                           appState.isFirstLoadSongPlayer =
                                                               true;
 
@@ -393,15 +381,12 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                         if (context.mounted) {
                                                           Navigator.pushNamed(
                                                               context,
-                                                              '/song_player');
+                                                              '/song_player_page');
                                                         }
                                                       }
                                                     },
                                                     child: SongItem(
                                                       index: index,
-                                                      dirId: appState
-                                                          .openedPlaylist!
-                                                          .dirId,
                                                       song: rawQueue![index],
                                                     ),
                                                   ),

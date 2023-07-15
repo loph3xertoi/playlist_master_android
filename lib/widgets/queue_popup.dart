@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/states/app_state.dart';
-import 'package:playlistmaster/widgets/confirm_popup.dart';
-import 'package:playlistmaster/widgets/song_item_in_queue.dart';
 import 'package:provider/provider.dart';
+
+import '../states/app_state.dart';
+import 'confirm_popup.dart';
+import 'song_item_in_queue.dart';
 
 class ShowQueueDialog extends StatefulWidget {
   @override
@@ -87,9 +88,9 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                     : ListView.builder(
                         itemCount: queueLength,
                         itemBuilder: (context, index) {
-                          var songName = queue[index].name;
+                          var name = queue[index].name;
                           var singers = queue[index].singers;
-                          var coverUri = queue[index].coverUri;
+                          var cover = queue[index].cover;
                           return Material(
                             color: Colors.transparent,
                             child: InkWell(
@@ -105,7 +106,6 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                 //     player!.effectiveIndices!.indexOf(index));
                                 WidgetsBinding.instance
                                     .addPostFrameCallback((_) {
-                                  
                                   appState.player!
                                       .seek(Duration.zero, index: index);
                                   // Future.delayed(Duration(seconds: 1), () {
@@ -127,8 +127,8 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                 margin:
                                     EdgeInsets.fromLTRB(25.0, 0.0, 12.0, 0.0),
                                 child: SongItemInQueue(
-                                  name: songName,
-                                  coverUri: coverUri,
+                                  name: name,
+                                  cover: cover,
                                   singers: singers,
                                   isPlaying:
                                       (currentPlayingSongInQueue == index)

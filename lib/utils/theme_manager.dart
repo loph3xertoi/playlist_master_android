@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/utils/storage_manager.dart';
+
+import 'storage_manager.dart';
 
 class ThemeNotifier with ChangeNotifier {
   final List<Color> _homepageBgColors = [
@@ -47,12 +48,12 @@ class ThemeNotifier with ChangeNotifier {
   ];
 
   List<Color>? _homepageBg;
-  List<Color>? _playlistDetailPageBg;
+  List<Color>? _detailLibraryPageBg;
   List<Color>? _songPlayerPageBg;
 
   List<Color>? get homepageBg => _homepageBg;
 
-  List<Color>? get playlistDetailPageBg => _playlistDetailPageBg;
+  List<Color>? get detailLibraryPageBg => _detailLibraryPageBg;
 
   List<Color>? get songPlayerPageBg => _songPlayerPageBg;
 
@@ -136,7 +137,6 @@ class ThemeNotifier with ChangeNotifier {
     sliderTheme: SliderThemeData(
       activeTrackColor: Colors.white,
       inactiveTrackColor: Colors.white38,
-      
     ),
     primaryColorLight: Color(0xFFF0E6E9),
     colorScheme: ColorScheme.fromSwatch().copyWith(
@@ -219,13 +219,13 @@ class ThemeNotifier with ChangeNotifier {
       if (themeMode == 'light') {
         _themeData = lightTheme;
         _homepageBg = _homepageBgColors;
-        _playlistDetailPageBg = _playlistDetailPageBgColors;
+        _detailLibraryPageBg = _playlistDetailPageBgColors;
         _songPlayerPageBg = _songPlayerPageBgColors;
       } else {
         print('setting dark theme');
         _themeData = darkTheme;
         _homepageBg = _darkHomepageBgColors;
-        _playlistDetailPageBg = _darkPlaylistDetailPageBgColors;
+        _detailLibraryPageBg = _darkPlaylistDetailPageBgColors;
         _songPlayerPageBg = _darkSongPlayerPageBgColors;
       }
       notifyListeners();
@@ -235,7 +235,7 @@ class ThemeNotifier with ChangeNotifier {
   void setLightMode() async {
     _themeData = lightTheme;
     _homepageBg = _homepageBgColors;
-    _playlistDetailPageBg = _playlistDetailPageBgColors;
+    _detailLibraryPageBg = _playlistDetailPageBgColors;
     _songPlayerPageBg = _songPlayerPageBgColors;
     StorageManager.saveData('themeMode', 'light');
     notifyListeners();
@@ -244,7 +244,7 @@ class ThemeNotifier with ChangeNotifier {
   void setDarkMode() async {
     _themeData = darkTheme;
     _homepageBg = _darkHomepageBgColors;
-    _playlistDetailPageBg = _darkPlaylistDetailPageBgColors;
+    _detailLibraryPageBg = _darkPlaylistDetailPageBgColors;
     _songPlayerPageBg = _darkSongPlayerPageBgColors;
     StorageManager.saveData('themeMode', 'dark');
     notifyListeners();

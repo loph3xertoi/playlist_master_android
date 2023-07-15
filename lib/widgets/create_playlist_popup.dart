@@ -46,7 +46,7 @@ class CreatePlaylistDialog extends StatelessWidget {
                 ),
                 Expanded(
                   child: Text(
-                    'Add new playlist:',
+                    'Add new library:',
                     textAlign: TextAlign.center,
                     style: textTheme.labelMedium,
                   ),
@@ -87,7 +87,7 @@ class CreatePlaylistDialog extends StatelessWidget {
                   decoration: InputDecoration(
                     alignLabelWithHint: true,
                     floatingLabelAlignment: FloatingLabelAlignment.center,
-                    hintText: 'New Playlist',
+                    hintText: 'New Library',
                     hintStyle: textTheme.titleMedium,
                     contentPadding:
                         EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),

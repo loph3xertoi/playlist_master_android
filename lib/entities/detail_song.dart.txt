@@ -1,5 +1,5 @@
-import 'package:playlistmaster/entities/lyrics.dart';
-import 'package:playlistmaster/entities/singer.dart';
+import 'package:playlistmaster/entities/lyrics.dart.txt';
+imp'singer.dart.txt'art';
 
 /// Detail song for song player page.
 class DetailSong {

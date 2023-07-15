@@ -53,6 +53,7 @@ flutter:
 
   assets:
     - assets/images/welcome.png
+    - assets/images/default.jpg
     - assets/images/avatar.png
     - assets/images/home_button.png
     - assets/images/qqmusic.png

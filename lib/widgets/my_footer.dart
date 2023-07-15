@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/states/app_state.dart';
 import 'package:provider/provider.dart';
+
+import '../states/app_state.dart';
 
 class MyFooter extends StatefulWidget {
   @override

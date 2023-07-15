@@ -1,73 +1,99 @@
 import 'dart:math';
 
-import 'package:playlistmaster/entities/detail_playlist.dart';
-import 'package:playlistmaster/entities/detail_song.dart';
-import 'package:playlistmaster/entities/lyrics.dart';
-import 'package:playlistmaster/entities/user.dart';
-import 'package:playlistmaster/states/app_state.dart';
-
-import 'entities/playlist.dart';
-import 'entities/singer.dart';
-import 'entities/song.dart';
+import 'entities/basic/basic_library.dart';
+import 'entities/basic/basic_singer.dart';
+import 'entities/basic/basic_song.dart';
+import 'entities/pms/pms_user.dart';
+import 'entities/qq_music/qqmusic_detail_playlist.dart';
+import 'entities/qq_music/qqmusic_detail_song.dart';
+import 'entities/qq_music/qqmusic_lyrics.dart';
+import 'entities/qq_music/qqmusic_playlist.dart';
+import 'entities/qq_music/qqmusic_singer.dart';
+import 'entities/qq_music/qqmusic_song.dart';
+import 'entities/qq_music/qqmusic_user.dart';
+import 'states/app_state.dart';
 
 class MockData {
-  static User user = User(
+  static PMSUser pmsUser = PMSUser(
+    '0',
+    {
+      'qqmusic': QQMusicUser(
+        'assets/images/qqmusic_vip.png',
+        'assets/images/qqmusic_listenlv.png',
+        7,
+        4,
+        5,
+        6,
+        name: 'Mock qqmusic user',
+        headPic: 'assets/images/avatar.png',
+        bgPic: 'assets/images/default.jpg',
+      ),
+    },
     name: 'Daw Loph',
     headPic: 'assets/images/avatar.png',
     bgPic: MyAppState.defaultCoverImage,
-    numberOfPlatforms: 3,
   );
 
-  static List<Singer> singers = [
-    Singer(
-      id: '1',
-      mid: '1',
+  static List<BasicSinger> singers = [
+    QQMusicSinger(
+      1,
+      '1',
       name: 'Giant Parakeet',
+      headPic: 'assets/images/songs_cover/parrot.jpeg',
     ),
-    Singer(
-      id: '2',
-      mid: '2',
+    QQMusicSinger(
+      2,
+      '2',
       name: 'Little Chickadee',
+      headPic: 'assets/images/songs_cover/tit.jpeg',
     ),
-    Singer(
-      id: '3',
-      mid: '3',
+    QQMusicSinger(
+      3,
+      '3',
       name: 'Mysterious Owlet',
+      headPic: 'assets/images/songs_cover/owl.jpeg',
     ),
-    Singer(
-      id: '4',
-      mid: '4',
+    QQMusicSinger(
+      4,
+      '4',
       name: 'Lovely Budgerigar',
+      headPic: 'assets/images/songs_cover/budgerigar.jpeg',
     ),
-    Singer(
-      id: '5',
-      mid: '5',
+    QQMusicSinger(
+      5,
+      '5',
       name: 'Funny Blue Jay',
+      headPic: 'assets/images/songs_cover/bluejay.jpeg',
     ),
-    Singer(
-      id: '6',
-      mid: '6',
+    QQMusicSinger(
+      6,
+      '6',
       name: 'Smart Columbidae',
+      headPic: 'assets/images/songs_cover/columbidae.jpeg',
     ),
-    Singer(
-      id: '7',
-      mid: '7',
+    QQMusicSinger(
+      7,
+      '7',
       name: 'Beautiful Hummingbirds',
+      headPic: 'assets/images/songs_cover/hummingbirds.jpeg',
     ),
-    Singer(
-      id: '8',
-      mid: '8',
+    QQMusicSinger(
+      8,
+      '8',
       name: 'Intelligent Toucans',
+      headPic: 'assets/images/songs_cover/toucans.jpeg',
     ),
-    Singer(
-      id: '9',
-      mid: '9',
+    QQMusicSinger(
+      9,
+      '9',
       name: 'Adorable Finches',
+      headPic: 'assets/images/songs_cover/finches.jpeg',
     ),
-    Singer(
-      id: '10',
-      mid: '10',
+    QQMusicSinger(
+      10,
+      '10',
       name: 'Vibrant Bluebirds',
+      headPic: 'assets/images/songs_cover/bluebirds.jpeg',
     ),
   ];
 
@@ -86,369 +112,353 @@ class MockData {
   //   'assets/audios/bluebirds.mp3',
   // ];
 
-  static List<Song> songs = [
-    Song(
+  static List<QQMusicSong> songs = [
+    QQMusicSong(
+      '0',
+      '0',
+      '0',
       name: 'Parrot',
-      songId: '0',
-      songMid: '0',
-      mediaMid: '0',
-      vid: '0',
+      singers: [singers[0], singers[1]],
+      cover: 'assets/images/songs_cover/parrot.jpeg',
+      payPlay: 0,
+      isTakenDown: false,
       songLink: 'assets/audios/lyrics.mp3',
-      singers: [singers[0]],
-      coverUri: 'assets/images/songs_cover/parrot.jpeg',
-      isTakenDown: false,
-      payPlay: 0,
     ),
-    Song(
+    QQMusicSong(
+      '1',
+      '1',
+      '1',
       name: 'Tit',
-      songId: '1',
-      songMid: '1',
-      mediaMid: '1',
-      vid: '1',
-      songLink: 'assets/audios/tit.mp3',
       singers: [singers[1]],
-      coverUri: 'assets/images/songs_cover/tit.jpeg',
-      isTakenDown: false,
+      cover: 'assets/images/songs_cover/tit.jpeg',
       payPlay: 0,
+      isTakenDown: false,
+      songLink: 'assets/audios/tit.mp3',
     ),
-    Song(
+    QQMusicSong(
+      '2',
+      '2',
+      '2',
       name: 'Owl',
-      songId: '2',
-      songMid: '2',
-      mediaMid: '2',
-      vid: '',
-      songLink: 'assets/audios/owl.mp3',
       singers: [singers[2]],
-      coverUri: 'assets/images/songs_cover/owl.jpeg',
-      isTakenDown: false,
+      cover: 'assets/images/songs_cover/owl.jpeg',
       payPlay: 0,
+      isTakenDown: false,
+      songLink: 'assets/audios/owl.mp3',
     ),
-    Song(
+    QQMusicSong(
+      '3',
+      '3',
+      '3',
       name: 'Budgerigar',
-      songId: '3',
-      songMid: '3',
-      mediaMid: '3',
-      vid: '',
-      songLink: 'assets/audios/budgerigar.mp3',
       singers: [singers[3]],
-      coverUri: 'assets/images/songs_cover/budgerigar.jpeg',
-      isTakenDown: false,
+      cover: 'assets/images/songs_cover/budgerigar.jpeg',
       payPlay: 0,
+      isTakenDown: false,
+      songLink: 'assets/audios/budgerigar.mp3',
     ),
-    Song(
+    QQMusicSong(
+      '4',
+      '4',
+      '4',
       name: 'Blue Jay',
-      songId: '4',
-      songMid: '4',
-      mediaMid: '4',
-      vid: '',
-      songLink: 'assets/audios/bluejay.mp3',
       singers: [singers[4]],
-      coverUri: 'assets/images/songs_cover/bluejay.jpeg',
-      isTakenDown: false,
+      cover: 'assets/images/songs_cover/bluejay.jpeg',
       payPlay: 0,
+      isTakenDown: false,
+      songLink: 'assets/audios/bluejay.mp3',
     ),
-    Song(
+    QQMusicSong(
+      '5',
+      '5',
+      '5',
       name: 'Columbidae',
-      songId: '5',
-      songMid: '5',
-      mediaMid: '5',
-      vid: '',
-      songLink: 'assets/audios/columbidae.mp3',
       singers: [singers[5]],
-      coverUri: 'assets/images/songs_cover/columbidae.jpeg',
-      isTakenDown: false,
+      cover: 'assets/images/songs_cover/columbidae.jpeg',
       payPlay: 0,
+      isTakenDown: false,
+      songLink: 'assets/audios/columbidae.mp3',
     ),
-    Song(
+    QQMusicSong(
+      '6',
+      '6',
+      '6',
       name: 'Hummingbirds',
-      songId: '6',
-      songMid: '6',
-      mediaMid: '6',
-      vid: '',
-      songLink: 'assets/audios/hummingbirds.mp3',
       singers: [singers[6]],
-      coverUri: 'assets/images/songs_cover/hummingbirds.jpeg',
-      isTakenDown: false,
+      cover: 'assets/images/songs_cover/hummingbirds.jpeg',
       payPlay: 0,
+      isTakenDown: false,
+      songLink: 'assets/audios/hummingbirds.mp3',
     ),
-    Song(
+    QQMusicSong(
+      '7',
+      '7',
+      '7',
       name: 'Toucans',
-      songId: '7',
-      songMid: '7',
-      mediaMid: '7',
-      vid: '',
-      songLink: 'assets/audios/toucans.mp3',
       singers: [singers[7]],
-      coverUri: 'assets/images/songs_cover/toucans.jpeg',
-      isTakenDown: false,
+      cover: 'assets/images/songs_cover/toucans.jpeg',
       payPlay: 0,
+      isTakenDown: false,
+      songLink: 'assets/audios/toucans.mp3',
     ),
-    Song(
+    QQMusicSong(
+      '8',
+      '8',
+      '8',
       name: 'Finches',
-      songId: '8',
-      songMid: '8',
-      mediaMid: '8',
-      vid: '',
-      songLink: 'assets/audios/finches.mp3',
       singers: [singers[8]],
-      coverUri: 'assets/images/songs_cover/finches.jpeg',
-      isTakenDown: false,
+      cover: 'assets/images/songs_cover/finches.jpeg',
       payPlay: 0,
+      isTakenDown: false,
+      songLink: 'assets/audios/finches.mp3',
     ),
-    Song(
+    QQMusicSong(
+      '9',
+      '9',
+      '9',
       name: 'Bluebirds',
-      songId: '9',
-      songMid: '9',
-      mediaMid: '9',
-      vid: '',
-      songLink: 'assets/audios/bluebirds.mp3',
       singers: [singers[9]],
-      coverUri: 'assets/images/songs_cover/bluebirds.jpeg',
-      isTakenDown: false,
+      cover: 'assets/images/songs_cover/bluebirds.jpeg',
       payPlay: 0,
+      isTakenDown: false,
+      songLink: 'assets/audios/bluebirds.mp3',
     ),
   ];
 
-  static List<Song> similarSongs = [
-    Song(
+  static List<BasicSong> similarSongs = [
+    QQMusicSong(
+      '0',
+      '0',
+      '0',
       name: 'Parrot',
-      songId: '0',
-      songMid: '0',
-      mediaMid: '0',
-      vid: '0',
+      singers: [singers[0], singers[1]],
+      cover: 'assets/images/songs_cover/parrot.jpeg',
+      payPlay: 0,
+      isTakenDown: false,
       songLink: 'assets/audios/lyrics.mp3',
-      singers: [singers[0]],
-      coverUri: 'assets/images/songs_cover/parrot.jpeg',
-      isTakenDown: false,
-      payPlay: 0,
     ),
-    Song(
+    QQMusicSong(
+      '1',
+      '1',
+      '1',
       name: 'Tit',
-      songId: '1',
-      songMid: '1',
-      mediaMid: '1',
-      vid: '1',
-      songLink: 'assets/audios/tit.mp3',
       singers: [singers[1]],
-      coverUri: 'assets/images/songs_cover/tit.jpeg',
-      isTakenDown: false,
+      cover: 'assets/images/songs_cover/tit.jpeg',
       payPlay: 0,
+      isTakenDown: false,
+      songLink: 'assets/audios/tit.mp3',
     ),
-    Song(
+    QQMusicSong(
+      '2',
+      '2',
+      '2',
       name: 'Owl',
-      songId: '2',
-      songMid: '2',
-      mediaMid: '2',
-      vid: '',
-      songLink: 'assets/audios/owl.mp3',
       singers: [singers[2]],
-      coverUri: 'assets/images/songs_cover/owl.jpeg',
-      isTakenDown: false,
+      cover: 'assets/images/songs_cover/owl.jpeg',
       payPlay: 0,
+      isTakenDown: false,
+      songLink: 'assets/audios/owl.mp3',
     ),
-    Song(
+    QQMusicSong(
+      '3',
+      '3',
+      '3',
       name: 'Budgerigar',
-      songId: '3',
-      songMid: '3',
-      mediaMid: '3',
-      vid: '',
-      songLink: 'assets/audios/budgerigar.mp3',
       singers: [singers[3]],
-      coverUri: 'assets/images/songs_cover/budgerigar.jpeg',
-      isTakenDown: false,
+      cover: 'assets/images/songs_cover/budgerigar.jpeg',
       payPlay: 0,
+      isTakenDown: false,
+      songLink: 'assets/audios/budgerigar.mp3',
     ),
-    Song(
+    QQMusicSong(
+      '4',
+      '4',
+      '4',
       name: 'Blue Jay',
-      songId: '4',
-      songMid: '4',
-      mediaMid: '4',
-      vid: '',
-      songLink: 'assets/audios/bluejay.mp3',
       singers: [singers[4]],
-      coverUri: 'assets/images/songs_cover/bluejay.jpeg',
-      isTakenDown: false,
+      cover: 'assets/images/songs_cover/bluejay.jpeg',
       payPlay: 0,
+      isTakenDown: false,
+      songLink: 'assets/audios/bluejay.mp3',
     ),
   ];
 
-  static List<Playlist> playlists = [
-    Playlist(
+  static List<BasicLibrary> libraries = [
+    QQMusicPlaylist(
+      1,
+      '1',
       name: 'Bird',
-      coverImage: 'assets/images/playlist_cover/bird.png',
-      songsCount: 20,
-      dirId: 1,
-      tid: '1',
+      cover: 'assets/images/playlist_cover/bird.png',
+      itemCount: 20,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      2,
+      '2',
       name: 'Zebra',
-      coverImage: 'assets/images/playlist_cover/zebra.png',
-      songsCount: 24,
-      dirId: 2,
-      tid: '2',
+      cover: 'assets/images/playlist_cover/zebra.png',
+      itemCount: 24,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      3,
+      '3',
       name: 'Cat',
-      coverImage: 'assets/images/playlist_cover/cat.png',
-      songsCount: 3,
-      dirId: 3,
-      tid: '3',
+      cover: 'assets/images/playlist_cover/cat.png',
+      itemCount: 3,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      4,
+      '4',
       name: 'Owl',
-      coverImage: 'assets/images/playlist_cover/owl.png',
-      songsCount: 68,
-      dirId: 4,
-      tid: '4',
+      cover: 'assets/images/playlist_cover/owl.png',
+      itemCount: 68,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      5,
+      '5',
       name: 'Shark',
-      coverImage: 'assets/images/playlist_cover/shark.png',
-      songsCount: 23,
-      dirId: 5,
-      tid: '5',
+      cover: 'assets/images/playlist_cover/shark.png',
+      itemCount: 23,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      6,
+      '6',
       name: 'Panther',
-      coverImage: 'assets/images/playlist_cover/panther.png',
-      songsCount: 30,
-      dirId: 6,
-      tid: '6',
+      cover: 'assets/images/playlist_cover/panther.png',
+      itemCount: 30,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      7,
+      '7',
       name: 'Lion',
-      coverImage: 'assets/images/playlist_cover/lion.png',
-      songsCount: 89,
-      dirId: 7,
-      tid: '7',
+      cover: 'assets/images/playlist_cover/lion.png',
+      itemCount: 89,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      8,
+      '8',
       name: 'Fox',
-      coverImage: 'assets/images/playlist_cover/fox.png',
-      songsCount: 169,
-      dirId: 8,
-      tid: '8',
+      cover: 'assets/images/playlist_cover/fox.png',
+      itemCount: 169,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      9,
+      '9',
       name: 'Dog',
-      coverImage: 'assets/images/playlist_cover/dog.png',
-      songsCount: 72,
-      dirId: 9,
-      tid: '9',
+      cover: 'assets/images/playlist_cover/dog.png',
+      itemCount: 72,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      10,
+      '10',
       name: 'Dolphin',
-      coverImage: 'assets/images/playlist_cover/dolphin.png',
-      songsCount: 83,
-      dirId: 10,
-      tid: '10',
+      cover: 'assets/images/playlist_cover/dolphin.png',
+      itemCount: 83,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      11,
+      '11',
       name: 'Rabbit',
-      coverImage: 'assets/images/playlist_cover/rabbit.png',
-      songsCount: 24,
-      dirId: 11,
-      tid: '11',
+      cover: 'assets/images/playlist_cover/rabbit.png',
+      itemCount: 24,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      12,
+      '12',
       name: 'Elephant',
-      coverImage: 'assets/images/playlist_cover/elephant.png',
-      songsCount: 75,
-      dirId: 12,
-      tid: '12',
+      cover: 'assets/images/playlist_cover/elephant.png',
+      itemCount: 75,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      13,
+      '13',
       name: 'Wolf',
-      coverImage: 'assets/images/playlist_cover/wolf.png',
-      songsCount: 98,
-      dirId: 13,
-      tid: '13',
+      cover: 'assets/images/playlist_cover/wolf.png',
+      itemCount: 98,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      14,
+      '14',
       name: 'Dove',
-      coverImage: 'assets/images/playlist_cover/dove.png',
-      songsCount: 56,
-      dirId: 14,
-      tid: '14',
+      cover: 'assets/images/playlist_cover/dove.png',
+      itemCount: 56,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      15,
+      '15',
       name: 'Snake',
-      coverImage: 'assets/images/playlist_cover/snake.png',
-      songsCount: 65,
-      dirId: 15,
-      tid: '15',
+      cover: 'assets/images/playlist_cover/snake.png',
+      itemCount: 65,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      16,
+      '16',
       name: 'Bear',
-      coverImage: 'assets/images/playlist_cover/bear.png',
-      songsCount: 32,
-      dirId: 16,
-      tid: '16',
+      cover: 'assets/images/playlist_cover/bear.png',
+      itemCount: 32,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      17,
+      '17',
       name: 'Bee',
-      coverImage: 'assets/images/playlist_cover/bee.png',
-      songsCount: 58,
-      dirId: 17,
-      tid: '17',
+      cover: 'assets/images/playlist_cover/bee.png',
+      itemCount: 58,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      18,
+      '18',
       name: 'Panda',
-      coverImage: 'assets/images/playlist_cover/panda.png',
-      songsCount: 80,
-      dirId: 18,
-      tid: '18',
+      cover: 'assets/images/playlist_cover/panda.png',
+      itemCount: 80,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      19,
+      '19',
       name: 'Koala',
-      coverImage: 'assets/images/playlist_cover/koala.png',
-      songsCount: 7,
-      dirId: 19,
-      tid: '19',
+      cover: 'assets/images/playlist_cover/koala.png',
+      itemCount: 7,
     ),
-    Playlist(
+    QQMusicPlaylist(
+      20,
+      '20',
       name: 'Lizard',
-      coverImage: 'assets/images/playlist_cover/lizard.png',
-      songsCount: 73,
-      dirId: 20,
-      tid: '20',
+      cover: 'assets/images/playlist_cover/lizard.png',
+      itemCount: 73,
     ),
   ];
 
-  static DetailPlaylist detailPlaylist = DetailPlaylist(
+  static BasicLibrary detailLibrary = QQMusicDetailPlaylist(
+    23,
+    1,
+    '1',
+    songs,
     name: 'Bird',
-    description:
+    cover: 'assets/images/playlist_cover/bird.png',
+    itemCount: 10,
+    desc:
         'A bird does not sing because it has an answer, it sings because it has a song.',
-    coverImage: 'assets/images/playlist_cover/bird.png',
-    songsCount: 10,
-    listenNum: 23,
-    dirId: 1,
-    tid: '1',
-    songs: songs,
   );
 
-  static DetailSong detailSong = DetailSong(
+  static BasicSong detailSong = QQMusicDetailSong(
+    'Parrot',
+    'Bird',
+    '0',
+    '0',
+    '0',
+    212,
+    'Giant Parrot!',
+    '2010-10-04',
+    QQMusicLyrics(normalLyric, transLyric),
+    [0, 1, 2],
+    pow(2, 20).toInt(),
+    pow(2, 20).toInt(),
+    pow(2, 20).toInt(),
+    pow(2, 20).toInt(),
     name: 'Parrot',
-    title: 'Parrot',
-    albumName: 'Bird',
-    coverUri: 'assets/images/songs_cover/parrot.jpeg',
-    singers: [singers[0]],
+    singers: [singers[0], singers[1]],
+    cover: 'assets/images/songs_cover/parrot.jpeg',
     payPlay: 0,
-    songId: '0',
-    songMid: '0',
-    mediaMid: '0',
-    vid: '0',
-    songLink: 'assets/audios/lyrics.mp3',
-    duration: 212,
-    description: 'Giant Parrot!',
-    pubTime: '2010-10-04',
-    lyrics: Lyrics(lyric: normalLyric, trans: transLyric),
-    pmPlaylists: [],
-    size128: pow(2, 20).toInt(),
-    size320: pow(2, 20).toInt(),
-    sizeApe: pow(2, 20).toInt(),
-    sizeFlac: pow(2, 20).toInt(),
     isTakenDown: false,
+    songLink: 'assets/audios/lyrics.mp3',
   );
 
   static const normalLyric = """[ti:If I Didn't Love You]

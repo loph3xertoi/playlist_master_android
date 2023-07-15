@@ -1,21 +1,22 @@
-import 'package:playlistmaster/entities/song.dart';
+import 'package:playlistmaster/entities/song.dart.txt';
 
-/// Detail playlist.
-class DetailPlaylist {
+/// Detail library.
+class DetailLibrary {
   String name;
-  String? description;
-  String coverImage;
-  int songsCount;
+  String cover;
+  int itemCount;
+
+  String description;
   int listenNum;
   int dirId;
   String tid;
   List<Song> songs;
 
-  DetailPlaylist({
+  DetailLibrary({
     required this.name,
-    this.description = 'A description for your playlist.',
-    required this.coverImage,
-    required this.songsCount,
+    this.description = 'A description for your library.',
+    required this.cover,
+    required this.itemCount,
     required this.listenNum,
     required this.dirId,
     required this.tid,
@@ -26,8 +27,8 @@ class DetailPlaylist {
     return {
       'name': name,
       'desc': description,
-      'coverImage': coverImage,
-      'songCount': songsCount,
+      'coverImage': cover,
+      'songCount': itemCount,
       'listenNum': listenNum,
       'dirId': dirId,
       'tid': tid,
@@ -35,7 +36,7 @@ class DetailPlaylist {
     };
   }
 
-  factory DetailPlaylist.fromJson(Map<String, dynamic> json) {
+  factory DetailLibrary.fromJson(Map<String, dynamic> json) {
     int songsCount = json['songCount'];
     List<Song> songs;
     if (songsCount != 0) {
@@ -44,7 +45,7 @@ class DetailPlaylist {
     } else {
       songs = [];
     }
-    return DetailPlaylist(
+    return DetailLibrary(
       name: json['name'],
       description: json['desc'],
       coverImage: json['coverImage'],

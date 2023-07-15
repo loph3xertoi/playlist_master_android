@@ -1,28 +1,34 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/entities/detail_song.dart';
-import 'package:playlistmaster/entities/song.dart';
-import 'package:playlistmaster/mock_data.dart';
-import 'package:playlistmaster/states/app_state.dart';
 import 'package:provider/provider.dart';
 
-class SongDetailPage extends StatefulWidget {
-  final Song song;
-  const SongDetailPage({super.key, required this.song});
+import '../entities/basic/basic_song.dart';
+import '../entities/qq_music/qqmusic_detail_song.dart';
+import '../mock_data.dart';
+import '../states/app_state.dart';
+
+class DetailSongPage extends StatefulWidget {
+  final BasicSong song;
+  const DetailSongPage({super.key, required this.song});
 
   @override
-  State<SongDetailPage> createState() => _SongDetailPageState();
+  State<DetailSongPage> createState() => _DetailSongPageState();
 }
 
-class _SongDetailPageState extends State<SongDetailPage> {
-  Future<DetailSong?>? _detailSong;
+class _DetailSongPageState extends State<DetailSongPage> {
+  Future<BasicSong?>? _detailSong;
 
   @override
   void initState() {
-    final state = Provider.of<MyAppState>(context, listen: false);
     super.initState();
-    _detailSong = state.fetchDetailSong(widget.song);
+    final state = Provider.of<MyAppState>(context, listen: false);
+    var isUsingMockData = state.isUsingMockData;
+    if (isUsingMockData) {
+      _detailSong = Future.value(MockData.detailSong);
+    } else {
+      _detailSong = state.fetchDetailSong(widget.song, state.currentPlatform);
+    }
   }
 
   @override
@@ -66,7 +72,8 @@ class _SongDetailPageState extends State<SongDetailPage> {
                   ),
                   onPressed: () {
                     setState(() {
-                      _detailSong = appState.fetchDetailSong(widget.song);
+                      _detailSong = appState.fetchDetailSong(
+                          widget.song, appState.currentPlatform);
                     });
                   },
                 ),
@@ -74,12 +81,17 @@ class _SongDetailPageState extends State<SongDetailPage> {
             ),
           );
         } else {
-          DetailSong detailSong = snapshot.data as DetailSong;
-          var songName = detailSong.name;
+          dynamic detailSong;
+          if (appState.currentPlatform == 1 || appState.isUsingMockData) {
+            detailSong = snapshot.data as QQMusicDetailSong;
+          } else {
+            throw Exception('Only qq music platform implemented');
+          }
+          var name = detailSong.name;
           var singers = detailSong.singers;
-          var title = detailSong.title;
+          var title = detailSong.subTitle;
           var albumName = detailSong.albumName;
-          var description = detailSong.description;
+          var description = detailSong.songDesc;
           var pubTime = detailSong.pubTime;
           var size128 = detailSong.size128;
           var size320 = detailSong.size320;
@@ -108,13 +120,13 @@ class _SongDetailPageState extends State<SongDetailPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             SelectableText(
-                              songName,
+                              name,
                               style: textTheme.labelMedium!.copyWith(
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             SelectableText(
-                              singers.map((e) => e.name).join(','),
+                              singers.map((e) => e.name).join(', '),
                               style: textTheme.labelSmall!.copyWith(
                                 fontSize: 12.0,
                                 overflow: TextOverflow.ellipsis,
@@ -150,12 +162,11 @@ class _SongDetailPageState extends State<SongDetailPage> {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(4.0),
                                   child: isUsingMockData
-                                      ? Image.asset(
-                                          MockData.detailSong.coverUri)
+                                      ? Image.asset(MockData.detailSong.cover)
                                       : CachedNetworkImage(
                                           imageUrl: currentDetailSong
-                                                  .coverUri.isNotEmpty
-                                              ? currentDetailSong.coverUri
+                                                  .cover.isNotEmpty
+                                              ? currentDetailSong.cover
                                               : MyAppState.defaultCoverImage,
                                           progressIndicatorBuilder: (context,
                                                   url, downloadProgress) =>

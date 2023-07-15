@@ -1,13 +1,13 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/states/app_state.dart';
-import 'package:playlistmaster/third_lib_change/day_night_switch.dart';
-import 'package:playlistmaster/utils/storage_manager.dart';
-import 'package:playlistmaster/utils/theme_manager.dart';
-import 'package:playlistmaster/widgets/my_side_drawer.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../states/app_state.dart';
+import '../third_lib_change/day_night_switch.dart';
+import '../utils/theme_manager.dart';
+import 'my_side_drawer.dart';
 
 class NightBackground extends StatefulWidget {
   const NightBackground({super.key});

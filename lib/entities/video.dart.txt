@@ -1,4 +1,4 @@
-import 'package:playlistmaster/entities/singer.dart';
+import 'package:playlistmaster/entities/singer.dart.txt';
 
 /// Basic video entity.
 class Video {

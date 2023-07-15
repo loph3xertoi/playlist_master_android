@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-import 'package:playlistmaster/entities/song.dart';
-import 'package:playlistmaster/states/app_state.dart';
-import 'package:playlistmaster/third_lib_change/like_button/like_button.dart';
-import 'package:playlistmaster/utils/my_logger.dart';
-import 'package:playlistmaster/utils/my_toast.dart';
-import 'package:playlistmaster/widgets/song_item_menu_popup.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
+import '../entities/basic/basic_song.dart';
+import '../states/app_state.dart';
+import '../third_lib_change/like_button/like_button.dart';
+import '../utils/my_logger.dart';
+import '../utils/my_toast.dart';
+import 'song_item_menu_popup.dart';
+
 class SongItem extends StatefulWidget {
   final int index;
-  final int dirId;
-  final Song song;
+  final BasicSong song;
 
   const SongItem({
     super.key,
     required this.index,
-    required this.dirId,
     required this.song,
   });
 
@@ -78,7 +77,7 @@ class _SongItemState extends State<SongItem> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  widget.song.singers[0].name,
+                  widget.song.singers.map((e) => e.name).join(', '),
                   style: widget.song.payPlay == 1
                       ? textTheme.labelSmall!.copyWith(
                           color: colorScheme.onTertiary,
@@ -116,7 +115,7 @@ class _SongItemState extends State<SongItem> {
                     if (!widget.song.isTakenDown &&
                         (widget.song.payPlay == 0)) {
                       if (appState.player == null) {
-                      appState.queue = [widget.song];
+                        appState.queue = [widget.song];
                         try {
                           await appState.initAudioPlayer();
                         } catch (e) {
@@ -144,10 +143,6 @@ class _SongItemState extends State<SongItem> {
 
                         appState.currentDetailSong = null;
 
-                        appState.ownerDirIdOfCurrentPlayingSong = widget.dirId;
-
-                        // appState.isFirstLoadSongPlayer = true;
-
                         appState.player!.play();
 
                         MyToast.showToast('Added to queue');
@@ -155,20 +150,40 @@ class _SongItemState extends State<SongItem> {
                         appState.queue!.insert(
                             appState.currentPlayingSongInQueue! + 1,
                             widget.song);
-                        var newAudioSource = LockCachingAudioSource(
-                          Uri.parse(widget.song.songLink),
-                          tag: MediaItem(
-                            // Specify a unique ID for each media item:
-                            id: Uuid().v1(),
-                            // Metadata to display in the notification:
-                            album: 'Album name',
-                            artist: widget.song.singers
-                                .map((e) => e.name)
-                                .join(','),
-                            title: widget.song.name,
-                            artUri: Uri.parse(widget.song.coverUri),
-                          ),
-                        );
+                        AudioSource newAudioSource;
+                        if (appState.isUsingMockData) {
+                          newAudioSource = AudioSource.asset(
+                            widget.song.songLink,
+                            tag: MediaItem(
+                              // Specify a unique ID for each media item:
+                              id: Uuid().v1(),
+                              // Metadata to display in the notification:
+                              album: 'Album name',
+                              artist: widget.song.singers
+                                  .map((e) => e.name)
+                                  .join(', '),
+                              title: widget.song.name,
+                              artUri: await appState.getImageFileFromAssets(
+                                  widget.song.cover,
+                                  appState.queue!.indexOf(widget.song)),
+                            ),
+                          );
+                        } else {
+                          newAudioSource = LockCachingAudioSource(
+                            Uri.parse(widget.song.songLink),
+                            tag: MediaItem(
+                              // Specify a unique ID for each media item:
+                              id: Uuid().v1(),
+                              // Metadata to display in the notification:
+                              album: 'Album name',
+                              artist: widget.song.singers
+                                  .map((e) => e.name)
+                                  .join(', '),
+                              title: widget.song.name,
+                              artUri: Uri.parse(widget.song.cover),
+                            ),
+                          );
+                        }
                         appState.initQueue!.insert(
                             appState.currentPlayingSongInQueue! + 1,
                             newAudioSource);

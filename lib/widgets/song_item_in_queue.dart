@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/entities/singer.dart';
-import 'package:playlistmaster/third_lib_change/music_visualizer.dart';
+
+import '../entities/basic/basic_singer.dart';
+import '../third_lib_change/music_visualizer.dart';
 
 class SongItemInQueue extends StatefulWidget {
   final String name;
-  final List<Singer> singers;
-  final String coverUri;
+  final List<BasicSinger> singers;
+  final String cover;
   final bool isPlaying;
   final void Function()? onClose;
 
@@ -13,7 +14,7 @@ class SongItemInQueue extends StatefulWidget {
     super.key,
     required this.name,
     required this.singers,
-    required this.coverUri,
+    required this.cover,
     required this.isPlaying,
     required this.onClose,
   });
@@ -75,7 +76,7 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 5.0),
                       child: Text(
-                        ' · ${widget.singers[0].name}',
+                        ' · ${widget.singers.map((e) => e.name).join(', ')}',
                         style: textTheme.labelMedium!.copyWith(
                           fontSize: 10.0,
                           color: widget.isPlaying

@@ -65,6 +65,7 @@ class _FullScreenPlayerPageState extends State<FullScreenPlayerPage> {
 
   @override
   void initState() {
+    super.initState();
     _vlcController = VlcPlayerController.network(
       widget.controller.dataSource,
     );
@@ -76,8 +77,6 @@ class _FullScreenPlayerPageState extends State<FullScreenPlayerPage> {
     _vlcController.addOnRendererEventListener((type, id, name) {});
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
-
-    super.initState();
   }
 
   void listener() async {

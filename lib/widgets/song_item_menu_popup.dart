@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/entities/playlist.dart';
-import 'package:playlistmaster/entities/song.dart';
-import 'package:playlistmaster/entities/video.dart';
-import 'package:playlistmaster/states/app_state.dart';
-import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:provider/provider.dart';
 
+import '../entities/basic/basic_library.dart';
+import '../entities/basic/basic_song.dart';
+import '../entities/qq_music/qqmusic_playlist.dart';
+import '../states/app_state.dart';
+
 class CreateSongItemMenuDialog extends StatelessWidget {
-  final Song song;
+  final BasicSong song;
   CreateSongItemMenuDialog({required this.song});
 
   @override
@@ -33,7 +33,7 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                 Radius.circular(10.0),
               ),
               onTap: () {
-                print('add to playlist');
+                print('add to library');
                 print(appState);
               },
               child: Padding(
@@ -47,7 +47,7 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                     ),
                     Expanded(
                       child: Text(
-                        'Add to playlist',
+                        'Add to library',
                         style: textTheme.labelMedium!.copyWith(
                           color: colorScheme.onSecondary,
                         ),
@@ -57,13 +57,14 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                 ),
               ),
             ),
-            (appState.openedPlaylist!.dirId > 0)
+            (appState.currentPlatform == 1 &&
+                    appState.openedLibrary!.itemCount > 0)
                 ? InkWell(
                     borderRadius: BorderRadius.all(
                       Radius.circular(10.0),
                     ),
                     onTap: () {
-                      print('Remove from playlist.');
+                      print('Remove from library.');
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -73,12 +74,12 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                             icon: Icon(Icons.playlist_remove_rounded),
                             color: colorScheme.tertiary,
                             onPressed: () {
-                              print('Remove from playlist.');
+                              print('Remove from library.');
                             },
                           ),
                           Expanded(
                             child: Text(
-                              'Remove from playlist',
+                              'Remove from library',
                               style: textTheme.labelMedium!.copyWith(
                                 color: colorScheme.onSecondary,
                               ),
@@ -94,14 +95,8 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                 Radius.circular(10.0),
               ),
               onTap: () {
-                if (song.vid.isNotEmpty) {
-                  print('Play video.');
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/video_player',
-                      arguments: song);
-                } else {
-                  MyToast.showToast('This song has no video');
-                }
+                Navigator.popAndPushNamed(context, '/related_videos_page',
+                    arguments: song);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -109,27 +104,18 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                   children: [
                     IconButton(
                       icon: Icon(Icons.ondemand_video_rounded),
-                      color: song.vid.isEmpty
-                          ? colorScheme.onTertiary
-                          : colorScheme.tertiary,
+                      color: colorScheme.tertiary,
                       onPressed: () {
-                        if (song.vid.isNotEmpty) {
-                          print('Play video.');
-                          Navigator.pop(context);
-                          Navigator.pushNamed(context, '/video_player',
-                              arguments: song);
-                        } else {
-                          MyToast.showToast('This song has no video');
-                        }
+                        Navigator.popAndPushNamed(
+                            context, '/related_videos_page',
+                            arguments: song);
                       },
                     ),
                     Expanded(
                       child: Text(
                         'Play video',
                         style: textTheme.labelMedium!.copyWith(
-                          color: song.vid.isEmpty
-                              ? colorScheme.onTertiary
-                              : colorScheme.onSecondary,
+                          color: colorScheme.onSecondary,
                         ),
                       ),
                     ),
@@ -143,14 +129,13 @@ class CreateSongItemMenuDialog extends StatelessWidget {
               ),
               onTap: () {
                 appState.isPlayerPageOpened = false;
-                appState.openedPlaylist = Playlist(
-                    name: 'similar song',
-                    coverImage: '',
-                    songsCount: 5,
-                    dirId: -1,
-                    tid: '');
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/similar_songs', arguments: song);
+                appState.openedLibrary = BasicLibrary(
+                  name: 'similar song',
+                  cover: '',
+                  itemCount: -1,
+                );
+                Navigator.popAndPushNamed(context, '/similar_songs_page',
+                    arguments: song);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -161,14 +146,13 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                       color: colorScheme.tertiary,
                       onPressed: () {
                         appState.isPlayerPageOpened = false;
-                        appState.openedPlaylist = Playlist(
-                            name: 'similar song',
-                            coverImage: '',
-                            songsCount: 5,
-                            dirId: -1,
-                            tid: '');
-                        Navigator.pop(context);
-                        Navigator.pushNamed(context, '/similar_songs',
+                        appState.openedLibrary = BasicLibrary(
+                          name: 'similar song',
+                          cover: '',
+                          itemCount: -1,
+                        );
+                        Navigator.popAndPushNamed(
+                            context, '/similar_songs_page',
                             arguments: song);
                       },
                     ),
@@ -191,8 +175,8 @@ class CreateSongItemMenuDialog extends StatelessWidget {
               onTap: () {
                 print('song\'s detail');
                 appState.isPlayerPageOpened = false;
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/song_detail', arguments: song);
+                Navigator.popAndPushNamed(context, '/detail_song_page',
+                    arguments: song);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -203,8 +187,7 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                       color: colorScheme.tertiary,
                       onPressed: () {
                         appState.isPlayerPageOpened = false;
-                        Navigator.pop(context);
-                        Navigator.pushNamed(context, '/song_detail',
+                        Navigator.popAndPushNamed(context, '/detail_song_page',
                             arguments: song);
                       },
                     ),

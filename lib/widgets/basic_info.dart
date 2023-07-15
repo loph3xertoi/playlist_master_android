@@ -2,17 +2,19 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:http/retry.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/retry.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/entities/qqmusic_user.dart';
-import 'package:playlistmaster/http/api.dart';
-import 'package:playlistmaster/http/my_http.dart';
-import 'package:playlistmaster/states/app_state.dart';
-import 'package:playlistmaster/utils/my_logger.dart';
-import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:provider/provider.dart';
+
+import '../entities/basic/basic_user.dart';
+import '../entities/pms/pms_user.dart';
+import '../entities/qq_music/qqmusic_user.dart';
+import '../http/api.dart';
+import '../mock_data.dart';
+import '../states/app_state.dart';
+import '../utils/my_logger.dart';
+import '../utils/my_toast.dart';
 
 class BasicInfo extends StatefulWidget {
   @override
@@ -20,7 +22,7 @@ class BasicInfo extends StatefulWidget {
 }
 
 class _BasicInfoState extends State<BasicInfo> {
-  late Future<QQMusicUser> _qqmusicUser;
+  late Future<BasicUser?> _basicUser;
 
   double topMargin = 40.0;
   double bottomMargin = 200.0;
@@ -29,83 +31,52 @@ class _BasicInfoState extends State<BasicInfo> {
   double scale = 1.0;
   late double imageSize;
 
-  Future<T> fetchUser<T>() async {
-    CacheManager cacheManager = MyHttp.userOtherCacheManager;
-    Uri url = Uri.http(
-      API.host,
-      '${API.user}/${API.uid}',
-    );
-    String urlString = url.toString();
-    dynamic result = await cacheManager.getFileFromMemory(urlString);
-    if (result == null || !(result as FileInfo).file.existsSync()) {
-      result = await cacheManager.getFileFromCache(urlString);
-      if (result == null || !(result as FileInfo).file.existsSync()) {
-        MyLogger.logger.d('Loading user information from network...');
-        final client = RetryClient(http.Client());
-        try {
-          var response = await client.get(url);
-          var decodedResponse =
-              jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-          if (response.statusCode == 200 &&
-              decodedResponse['success'] == true) {
-            Map<String, dynamic> user = decodedResponse['data'];
-            // result = user.map((e) => QQMusicUser.fromJson(e)).toList();
-            if (T == QQMusicUser) {
-              result = QQMusicUser.fromJson(user['qqMusicUser']);
-            } else {
-              throw Exception('Only implement QQMusicUser');
-            }
-            await cacheManager.putFile(
-              urlString,
-              response.bodyBytes,
-              fileExtension: 'json',
-            );
-          } else {
-            MyToast.showToast(
-                'Response error with code: ${response.statusCode}');
-            MyLogger.logger
-                .e('Response error with code: ${response.statusCode}');
-            result = null;
-          }
-        } catch (e) {
-          MyToast.showToast('Exception thrown: $e');
-          MyLogger.logger.e('Network error with exception: $e');
-          rethrow;
-        } finally {
-          client.close();
+  Future<BasicUser?> fetchUser(int platform) async {
+    Uri url = Uri.http(API.host, '${API.user}/${API.uid}', {
+      'platform': platform.toString(),
+    });
+    MyLogger.logger.d('Loading user information from network...');
+    final client = RetryClient(http.Client());
+    try {
+      var response = await client.get(url);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        Map<String, dynamic> user = decodedResponse['data'];
+        // result = user.map((e) => BasicUser.fromJson(e)).toList();
+        if (platform == 0) {
+          return PMSUser.fromJson(user);
+        } else if (platform == 1) {
+          return QQMusicUser.fromJson(user);
+        } else if (platform == 2) {
+          throw Exception('Not implement netease music platform');
+        } else if (platform == 3) {
+          throw Exception('Not implement bilibili platform');
+        } else {
+          throw Exception('Invalid platform');
         }
       } else {
-        MyLogger.logger.d('Loading user information from cache...');
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+        return null;
       }
-    } else {
-      MyLogger.logger.d('Loading user information from memory...');
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
     }
-
-    if (result is T) {
-      result = Future.value(result);
-    } else if (result is FileInfo) {
-      var decodedResponse =
-          jsonDecode(utf8.decode(result.file.readAsBytesSync())) as Map;
-      Map<String, dynamic> user = decodedResponse['data'];
-      if (T == QQMusicUser) {
-        result = QQMusicUser.fromJson(user['qqMusicUser']);
-      } else {
-        throw Exception('Only implement QQMusicUser');
-      }
-      result = Future<T>.value(result);
-    } else {}
-    return result;
   }
 
   @override
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
-    if (state.currentPlatform == 1) {
-      _qqmusicUser = fetchUser<QQMusicUser>();
+    bool isUsingMockData = state.isUsingMockData;
+    if (isUsingMockData) {
+      _basicUser = Future.value(MockData.pmsUser.subUsers['qqmusic']);
     } else {
-      // _qqmusicUser = MockData.user;
-      throw Exception('Only implement QQMusicUser');
+      _basicUser = fetchUser(state.currentPlatform);
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       imageSize = MediaQuery.of(context).size.width - 24.0;
@@ -131,7 +102,7 @@ class _BasicInfoState extends State<BasicInfo> {
               borderRadius: BorderRadius.circular(10.0),
             ),
             child: FutureBuilder(
-                future: _qqmusicUser,
+                future: _basicUser,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(
@@ -166,11 +137,8 @@ class _BasicInfoState extends State<BasicInfo> {
                             ),
                             onPressed: () {
                               setState(() {
-                                if (appState.currentPlatform == 1) {
-                                  _qqmusicUser = fetchUser();
-                                } else {
-                                  throw Exception('Only implement QQMusicUser');
-                                }
+                                _basicUser =
+                                    fetchUser(appState.currentPlatform);
                               });
                             },
                           ),
@@ -178,7 +146,23 @@ class _BasicInfoState extends State<BasicInfo> {
                       ),
                     );
                   } else {
-                    QQMusicUser qqmusicUser = snapshot.data as QQMusicUser;
+                    dynamic user;
+                    if (isUsingMockData) {
+                      user = snapshot.data as QQMusicUser;
+                    } else {
+                      if (appState.currentPlatform == 0) {
+                        user = snapshot.data as PMSUser;
+                      } else if (appState.currentPlatform == 1) {
+                        user = snapshot.data as QQMusicUser;
+                      } else if (appState.currentPlatform == 2) {
+                        throw Exception('Not implement netease music platform');
+                      } else if (appState.currentPlatform == 3) {
+                        throw Exception('Not implement bilibili platform');
+                      } else {
+                        throw Exception('Invalid platform');
+                      }
+                    }
+
                     return Scaffold(
                       body: GestureDetector(
                         onVerticalDragUpdate: (details) {
@@ -224,12 +208,25 @@ class _BasicInfoState extends State<BasicInfo> {
                                 width: imageSize,
                                 height: imageSize,
                                 transform: Matrix4.identity()..scale(scale),
-                                child: Image.network(
-                                  qqmusicUser.bgPic,
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
+                                child: isUsingMockData
+                                    ? Image.asset(
+                                        user.bgPic,
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : CachedNetworkImage(
+                                        imageUrl: user.bgPic.isEmpty
+                                            ? MyAppState.defaultCoverImage
+                                            : user.bgPic,
+                                        progressIndicatorBuilder: (context, url,
+                                                downloadProgress) =>
+                                            CircularProgressIndicator(
+                                                value:
+                                                    downloadProgress.progress),
+                                        errorWidget: (context, url, error) =>
+                                            Icon(MdiIcons.debian),
+                                      ),
                               ),
                             ),
                             AnimatedPositioned(
@@ -280,14 +277,14 @@ class _BasicInfoState extends State<BasicInfo> {
                                                 'assets/images/qqmusic.png')
                                             .image
                                         : CachedNetworkImageProvider(
-                                            qqmusicUser.headPic.isEmpty
+                                            user.headPic.isEmpty
                                                 ? MyAppState.defaultCoverImage
-                                                : qqmusicUser.headPic,
+                                                : user.headPic,
                                           ),
-                                    // NetworkImage(qqmusicUser.headPic),
+                                    // NetworkImage(user.headPic),
                                   ),
                                   Text(
-                                    qqmusicUser.name,
+                                    user.name,
                                     style: textTheme.labelMedium,
                                   ),
                                   Row(
@@ -298,14 +295,12 @@ class _BasicInfoState extends State<BasicInfo> {
                                         width: 34.0,
                                         height: 23.0,
                                         child: isUsingMockData
-                                            ? Image.asset(
-                                                'assets/images/qqmusic_vip.png')
+                                            ? Image.asset(user.lvPic)
                                             : CachedNetworkImage(
-                                                imageUrl:
-                                                    qqmusicUser.lvPic.isEmpty
-                                                        ? MyAppState
-                                                            .defaultCoverImage
-                                                        : qqmusicUser.lvPic,
+                                                imageUrl: user.lvPic.isEmpty
+                                                    ? MyAppState
+                                                        .defaultCoverImage
+                                                    : user.lvPic,
                                                 progressIndicatorBuilder:
                                                     (context, url,
                                                             downloadProgress) =>
@@ -325,14 +320,12 @@ class _BasicInfoState extends State<BasicInfo> {
                                         width: 18.0,
                                         height: 14.0,
                                         child: isUsingMockData
-                                            ? Image.asset(
-                                                'assets/images/qqmusic_listenlv.png')
+                                            ? Image.asset(user.listenPic)
                                             : CachedNetworkImage(
-                                                imageUrl: qqmusicUser
-                                                        .listenPic.isEmpty
+                                                imageUrl: user.listenPic.isEmpty
                                                     ? MyAppState
                                                         .defaultCoverImage
-                                                    : qqmusicUser.listenPic,
+                                                    : user.listenPic,
                                                 progressIndicatorBuilder:
                                                     (context, url,
                                                             downloadProgress) =>
@@ -353,19 +346,19 @@ class _BasicInfoState extends State<BasicInfo> {
                                       mainAxisSize: MainAxisSize.max,
                                       children: [
                                         Text(
-                                          'Followers: ${qqmusicUser.fansNum}',
+                                          'Followers: ${user.fansNum}',
                                           style: textTheme.labelSmall,
                                         ),
                                         Text(
-                                          'Following: ${qqmusicUser.followNum}',
+                                          'Following: ${user.followNum}',
                                           style: textTheme.labelSmall,
                                         ),
                                         Text(
-                                          'friends: ${qqmusicUser.friendsNum}',
+                                          'friends: ${user.friendsNum}',
                                           style: textTheme.labelSmall,
                                         ),
                                         Text(
-                                          'Visitors: ${qqmusicUser.visitorNum}',
+                                          'Visitors: ${user.visitorNum}',
                                           style: textTheme.labelSmall,
                                         ),
                                       ]),
@@ -396,7 +389,7 @@ class _BasicInfoState extends State<BasicInfo> {
                     //           fit: StackFit.expand,
                     //           children: [
                     //             Image.network(
-                    //               qqmusicUser.bgPic,
+                    //               user.bgPic,
                     //               fit: BoxFit.cover,
                     //             ),
                     //           ],

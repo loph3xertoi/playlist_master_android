@@ -1,77 +1,70 @@
-import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:http/retry.dart';
-import 'package:http/http.dart' as http;
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/entities/detail_playlist.dart';
-import 'package:playlistmaster/entities/playlist.dart';
-import 'package:playlistmaster/entities/song.dart';
-import 'package:playlistmaster/http/api.dart';
-import 'package:playlistmaster/http/my_http.dart';
-import 'package:playlistmaster/mock_data.dart';
-import 'package:playlistmaster/states/app_state.dart';
-import 'package:playlistmaster/states/my_search_state.dart';
-import 'package:playlistmaster/utils/my_logger.dart';
-import 'package:playlistmaster/utils/my_toast.dart';
-import 'package:playlistmaster/utils/theme_manager.dart';
-import 'package:playlistmaster/widgets/bottom_player.dart';
-import 'package:playlistmaster/widgets/my_searchbar.dart';
-import 'package:playlistmaster/widgets/song_item.dart';
 import 'package:provider/provider.dart';
 
-class PlaylistDetailPage extends StatefulWidget {
+import '../entities/basic/basic_library.dart';
+import '../entities/qq_music/qqmusic_detail_playlist.dart';
+import '../mock_data.dart';
+import '../states/app_state.dart';
+import '../states/my_search_state.dart';
+import '../utils/my_logger.dart';
+import '../utils/my_toast.dart';
+import '../utils/theme_manager.dart';
+import '../widgets/bottom_player.dart';
+import '../widgets/my_searchbar.dart';
+import '../widgets/song_item.dart';
+
+class DetailLibraryPage extends StatefulWidget {
   @override
-  State<PlaylistDetailPage> createState() => _PlaylistDetailPageState();
+  State<DetailLibraryPage> createState() => _DetailLibraryPageState();
 }
 
-class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
+class _DetailLibraryPageState extends State<DetailLibraryPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  late Future<DetailPlaylist?> _detailPlaylist;
+  late Future<BasicLibrary?> _detailLibrary;
   bool _changeRawQueue = true;
 
   @override
   void initState() {
     super.initState();
-    // _songs = _detailPlaylist.songs;
+    // _songs = _detailLibrary.songs;
     final state = Provider.of<MyAppState>(context, listen: false);
     var isUsingMockData = state.isUsingMockData;
-    var openedPlaylist = state.rawOpenedPlaylist;
+    var openedLibrary = state.rawOpenedLibrary;
     // var rawQueue = state.rawQueue;
     // WidgetsBinding.instance.addPostFrameCallback((_) {
     //   state.rawQueue = null;
     // });
     // _tid = ModalRoute.of(context)!.settings.arguments as String;
     if (isUsingMockData) {
-      _detailPlaylist = Future.value(MockData.detailPlaylist);
+      _detailLibrary = Future.value(MockData.detailLibrary);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         state.rawQueue = MockData.songs;
         state.queue = MockData.songs;
-        state.openedPlaylist = state.rawOpenedPlaylist;
+        state.openedLibrary = state.rawOpenedLibrary;
       });
     } else {
-      _detailPlaylist = state.fetchDetailPlaylist(openedPlaylist!);
+      _detailLibrary =
+          state.fetchDetailLibrary(openedLibrary!, state.currentPlatform);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    print('build playlist detail');
+    print('build detail library page');
     MyAppState appState = context.watch<MyAppState>();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     var isUsingMockData = appState.isUsingMockData;
-    var openedPlaylist = appState.rawOpenedPlaylist;
+    var openedLibrary = appState.rawOpenedLibrary;
     var player = appState.player;
     var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
-    var ownerDirIdOfCurrentPlayingSong =
-        appState.ownerDirIdOfCurrentPlayingSong;
     var rawQueue = appState.rawQueue;
+    var currentPlatform = appState.currentPlatform;
 
     return Consumer<ThemeNotifier>(
       builder: (context, theme, _) => Material(
@@ -87,14 +80,14 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                     child: MySearchBar(
                       myScaffoldKey: _scaffoldKey,
                       notInHomepage: true,
-                      inPlaylistDetailPage: true,
+                      inDetailLibraryPage: true,
                     ),
                   ),
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: theme.playlistDetailPageBg!,
+                          colors: theme.detailLibraryPageBg!,
                           stops: [0.0, 0.33, 0.67, 1.0],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
@@ -107,7 +100,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                               margin:
                                   EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
                               child: FutureBuilder(
-                                  future: _detailPlaylist,
+                                  future: _detailLibrary,
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState ==
                                         ConnectionState.waiting) {
@@ -148,9 +141,11 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                               ),
                                               onPressed: () {
                                                 setState(() {
-                                                  _detailPlaylist = appState
-                                                      .fetchDetailPlaylist(
-                                                          openedPlaylist!);
+                                                  _detailLibrary = appState
+                                                      .fetchDetailLibrary(
+                                                          openedLibrary!,
+                                                          appState
+                                                              .currentPlatform);
                                                 });
                                               },
                                             ),
@@ -158,19 +153,29 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                         ),
                                       );
                                     } else {
-                                      DetailPlaylist detailPlaylist =
-                                          snapshot.data as DetailPlaylist;
-                                      rawQueue = detailPlaylist.songs;
-                                      WidgetsBinding.instance
-                                          .addPostFrameCallback((_) {
-                                        if (appState.rawQueue!.isEmpty ||
-                                            _changeRawQueue) {
-                                          appState.rawQueue =
-                                              detailPlaylist.songs;
-                                          _changeRawQueue = false;
-                                        }
-                                      });
-
+                                      dynamic detailLibrary;
+                                      if (currentPlatform == 1 ||
+                                          isUsingMockData) {
+                                        detailLibrary = snapshot.data == null
+                                            ? null
+                                            : snapshot.data
+                                                as QQMusicDetailPlaylist;
+                                      } else {
+                                        throw Exception(
+                                            'Only implement qq music platform');
+                                      }
+                                      if (detailLibrary != null) {
+                                        rawQueue = detailLibrary.songs;
+                                        WidgetsBinding.instance
+                                            .addPostFrameCallback((_) {
+                                          if (appState.rawQueue!.isEmpty ||
+                                              _changeRawQueue) {
+                                            appState.rawQueue =
+                                                detailLibrary.songs;
+                                            _changeRawQueue = false;
+                                          }
+                                        });
+                                      }
                                       return Container(
                                         decoration: BoxDecoration(
                                           color: colorScheme.primary,
@@ -220,11 +225,12 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                             child:
                                                                 isUsingMockData
                                                                     ? Image.asset(
-                                                                        detailPlaylist
-                                                                            .coverImage)
+                                                                        detailLibrary
+                                                                            .cover)
                                                                     : CachedNetworkImage(
-                                                                        imageUrl: detailPlaylist.coverImage.isNotEmpty
-                                                                            ? detailPlaylist.coverImage
+                                                                        imageUrl: detailLibrary != null &&
+                                                                                detailLibrary.cover.isNotEmpty
+                                                                            ? detailLibrary.cover
                                                                             : MyAppState.defaultCoverImage,
                                                                         progressIndicatorBuilder: (context,
                                                                                 url,
@@ -246,19 +252,24 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                 .start,
                                                         children: [
                                                           SelectableText(
-                                                            detailPlaylist.name,
+                                                            detailLibrary !=
+                                                                    null
+                                                                ? detailLibrary
+                                                                    .name
+                                                                : 'Hidden library',
                                                             style: textTheme
                                                                 .labelLarge!
                                                                 .copyWith(
-                                                                    fontSize:
-                                                                        20.0),
-                                                            // overflow: TextOverflow
-                                                            //     .ellipsis,
+                                                              fontSize: 20.0,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
                                                           ),
                                                           Row(
                                                             children: [
                                                               Text(
-                                                                '${detailPlaylist.songsCount} songs',
+                                                                '${detailLibrary != null ? detailLibrary.itemCount : 0} songs',
                                                                 textAlign:
                                                                     TextAlign
                                                                         .start,
@@ -283,7 +294,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                 ),
                                                               ),
                                                               Text(
-                                                                '${detailPlaylist.listenNum} listened',
+                                                                '${detailLibrary != null ? detailLibrary.listenNum : 0} listened',
                                                                 textAlign:
                                                                     TextAlign
                                                                         .start,
@@ -303,8 +314,11 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                       top:
                                                                           12.0),
                                                               child: Text(
-                                                                detailPlaylist
-                                                                    .description!,
+                                                                detailLibrary !=
+                                                                        null
+                                                                    ? detailLibrary
+                                                                        .desc
+                                                                    : 'This library is a hidden library.',
                                                                 style: textTheme
                                                                     .labelLarge!
                                                                     .copyWith(
@@ -326,7 +340,10 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                             ),
                                             Expanded(
                                               child:
-                                                  detailPlaylist.songsCount != 0
+                                                  detailLibrary != null &&
+                                                          detailLibrary
+                                                                  .itemCount !=
+                                                              0
                                                       ? Column(
                                                           children: [
                                                             SizedBox(
@@ -373,14 +390,14 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                               child: ListView
                                                                   .builder(
                                                                 // TODO: fix this. Mock.songs have 10 songs only.
-                                                                // itemCount: _detailPlaylist.songsCount,
+                                                                // itemCount: _detailLibrary.songsCount,
                                                                 itemCount: isUsingMockData
                                                                     ? min(
-                                                                        detailPlaylist
-                                                                            .songsCount,
+                                                                        detailLibrary
+                                                                            .itemCount,
                                                                         10)
-                                                                    : detailPlaylist
-                                                                        .songsCount,
+                                                                    : detailLibrary
+                                                                        .itemCount,
                                                                 itemBuilder:
                                                                     (context,
                                                                         index) {
@@ -411,7 +428,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                           if (appState.player ==
                                                                               null) {
                                                                             appState.queue =
-                                                                                detailPlaylist.songs.where((song) => !song.isTakenDown && (song.payPlay == 0)).toList();
+                                                                                detailLibrary.songs.where((song) => !song.isTakenDown && (song.payPlay == 0)).toList();
 
                                                                             // Real index in queue, not in raw queue as some songs may be taken down.
                                                                             int realIndex =
@@ -452,11 +469,6 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                             appState.currentDetailSong =
                                                                                 null;
 
-                                                                            // appState.currentPage =
-                                                                            //     '/song_player';
-                                                                            appState.ownerDirIdOfCurrentPlayingSong =
-                                                                                detailPlaylist.dirId;
-
                                                                             appState.isFirstLoadSongPlayer =
                                                                                 true;
 
@@ -467,20 +479,18 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                             //         index:
                                                                             //             index);
                                                                             appState.player!.play();
-                                                                          } else if (ownerDirIdOfCurrentPlayingSong == openedPlaylist!.dirId &&
-                                                                              appState.queue!.indexOf(appState.rawQueue![index]) == currentPlayingSongInQueue) {
+                                                                          } else if (appState.currentSong ==
+                                                                              appState.rawQueue![index]) {
                                                                             if (!player!.playerState.playing) {
                                                                               player.play();
                                                                             }
                                                                           } else {
                                                                             appState.queue =
-                                                                                detailPlaylist.songs.where((song) => !song.isTakenDown && (song.payPlay == 0)).toList();
+                                                                                detailLibrary.songs.where((song) => !song.isTakenDown && (song.payPlay == 0)).toList();
 
                                                                             // Real index in queue, not in raw queue as some songs may be taken down.
                                                                             int realIndex =
                                                                                 appState.queue!.indexOf(appState.rawQueue![index]);
-
-                                                                            print(realIndex);
 
                                                                             appState.canSongPlayerPagePop =
                                                                                 true;
@@ -514,9 +524,6 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                               return;
                                                                             }
 
-                                                                            appState.ownerDirIdOfCurrentPlayingSong =
-                                                                                detailPlaylist.dirId;
-
                                                                             appState.currentPlayingSongInQueue =
                                                                                 realIndex;
 
@@ -529,7 +536,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                             appState.prevSong =
                                                                                 appState.currentSong;
                                                                             // appState.currentPage =
-                                                                            //     '/song_player';
+                                                                            //     '/song_player_page';
                                                                             appState.isFirstLoadSongPlayer =
                                                                                 true;
 
@@ -540,7 +547,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                           if (context
                                                                               .mounted) {
                                                                             Navigator.pushNamed(context,
-                                                                                '/song_player');
+                                                                                '/song_player_page');
                                                                           }
                                                                         }
                                                                       },
@@ -548,8 +555,6 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
                                                                           SongItem(
                                                                         index:
                                                                             index,
-                                                                        dirId: detailPlaylist
-                                                                            .dirId,
                                                                         song: rawQueue![
                                                                             index],
                                                                       ),
