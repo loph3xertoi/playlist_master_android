@@ -96,7 +96,10 @@ class _RelatedVideosPageState extends State<RelatedVideosPage> {
               }
               return relatedVideos.length == 0
                   ? Center(
-                      child: Text('This song has no videos.'),
+                      child: Text(
+                        'This song has no videos.',
+                        style: textTheme.labelLarge,
+                      ),
                     )
                   : Padding(
                       padding: const EdgeInsets.only(top: 4.0),
