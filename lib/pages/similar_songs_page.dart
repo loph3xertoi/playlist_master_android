@@ -128,7 +128,8 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                   snapshot.data as List<BasicSong>;
                               rawQueue = similarSongs;
                               WidgetsBinding.instance.addPostFrameCallback((_) {
-                                if (appState.rawQueue!.isEmpty ||
+                                if (appState.rawQueue == null ||
+                                    appState.rawQueue!.isEmpty ||
                                     _changeRawQueue) {
                                   appState.rawQueue = similarSongs;
                                   _changeRawQueue = false;

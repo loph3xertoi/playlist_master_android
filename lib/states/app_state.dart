@@ -10,15 +10,17 @@ import 'package:http/retry.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:playlistmaster/entities/qq_music/qqmusic_detail_video.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 
 import '../entities/basic/basic_library.dart';
+import '../entities/basic/basic_paged_songs.dart';
 import '../entities/basic/basic_song.dart';
 import '../entities/basic/basic_video.dart';
 import '../entities/qq_music/qqmusic_detail_playlist.dart';
 import '../entities/qq_music/qqmusic_detail_song.dart';
+import '../entities/qq_music/qqmusic_detail_video.dart';
+import '../entities/qq_music/qqmusic_paged_songs.dart';
 import '../entities/qq_music/qqmusic_playlist.dart';
 import '../entities/qq_music/qqmusic_song.dart';
 import '../entities/qq_music/qqmusic_video.dart';
@@ -30,6 +32,24 @@ import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 
 class MyAppState extends ChangeNotifier {
+  // Current page.
+  int _currentPage = 2;
+
+  // First page number.
+  int _firstPageNo = 1;
+
+  // Searching page size.
+  int _pageSize = 20;
+
+  // Total searched songs count.
+  int _totalSearchedSongs = 0;
+
+  // Searched songs.
+  List<BasicSong?> _searchedSongs = [];
+
+  // Searching keyword.
+  String? _searchingString;
+
   // Last video's vid.
   String _lastVideoVid = '';
 
@@ -140,6 +160,18 @@ class MyAppState extends ChangeNotifier {
   // Raw opened library.
   BasicLibrary? _rawOpenedLibrary;
 
+  int get currentPage => _currentPage;
+
+  int get firstPageNo => _firstPageNo;
+
+  int get pageSize => _pageSize;
+
+  int get totalSearchedSongs => _totalSearchedSongs;
+
+  List<BasicSong?> get searchedSongs => _searchedSongs;
+
+  String? get searchingString => _searchingString;
+
   String get lastVideoVid => _lastVideoVid;
 
   int get videoSeekTime => _videoSeekTime;
@@ -206,6 +238,26 @@ class MyAppState extends ChangeNotifier {
   double? get volume => _volume;
 
   double? get speed => _speed;
+
+  set currentPage(int value) {
+    _currentPage = value;
+    notifyListeners();
+  }
+
+  set totalSearchedSongs(int value) {
+    _totalSearchedSongs = value;
+    notifyListeners();
+  }
+
+  set searchedSongs(List<BasicSong?> value) {
+    _searchedSongs = value;
+    notifyListeners();
+  }
+
+  set searchingString(String? value) {
+    _searchingString = value;
+    notifyListeners();
+  }
 
   set lastVideoVid(String value) {
     _lastVideoVid = value;
@@ -736,6 +788,42 @@ class MyAppState extends ChangeNotifier {
           return Future.value(jsonList
               .map<QQMusicVideo>((video) => QQMusicVideo.fromJson(video))
               .toList());
+        } else {
+          throw Exception('Only imeplement qq music platform');
+        }
+      } else {
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<BasicPagedSongs?> fetchSearchedSongs(
+      String name, int pageNo, int pageSize, int platform) async {
+    Uri url = Uri.http(API.host, '${API.searchSong}/$name', {
+      'pageNo': pageNo.toString(),
+      'pageSize': pageSize.toString(),
+      'platform': platform.toString(),
+    });
+
+    MyLogger.logger.d('Searching songs from network...');
+    final client = RetryClient(http.Client());
+    try {
+      var response = await client.get(url);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        if (platform == 1) {
+          Map<String, dynamic> pagedSongsJson = decodedResponse['data'];
+          QQMusicPagedSongs pagedSongs =
+              QQMusicPagedSongs.fromJson(pagedSongsJson);
+          return Future.value(pagedSongs);
         } else {
           throw Exception('Only imeplement qq music platform');
         }

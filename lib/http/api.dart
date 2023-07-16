@@ -45,4 +45,8 @@ class API {
   /// Get detail library according to [library] in [platform].
   /// api: /detaillibrary/[library]?platform=[platform]
   static const detailLibrary = '/detaillibrary';
+
+  /// Search songs according to [name] in [platform] with [pageNo] and [pageSize].
+  /// api: /search/song/[name]?pageNo=[pageNo]&pageSize=[pageSize]&platform=[platform]
+  static const searchSong = '/search/song';
 }

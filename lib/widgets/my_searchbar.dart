@@ -2,6 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../entities/basic/basic_paged_songs.dart';
+import '../entities/basic/basic_song.dart';
+import '../entities/qq_music/qqmusic_paged_songs.dart';
 import '../states/app_state.dart';
 import 'basic_info.dart';
 
@@ -23,31 +26,64 @@ class MySearchBar extends StatefulWidget {
 class _MySearchBarState extends State<MySearchBar>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
+  late TextEditingController _textEditingController;
+  late FocusNode _focusNode;
+  late int _platform;
+  late List<BasicSong?> _searchedSongs;
 
   @override
   void initState() {
     super.initState();
+    final state = Provider.of<MyAppState>(context, listen: false);
+    _platform = state.currentPlatform;
+    _searchedSongs = state.searchedSongs;
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
+    _textEditingController = TextEditingController();
+    _focusNode = FocusNode();
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _textEditingController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
-  void _onSearchIconPressed() {
-    _onSearchAreaPressed();
+  void _onSearchIconPressed(MyAppState appState) async {
+    if (widget.notInHomepage) {
+      _onSubmitted(_textEditingController.text, appState);
+      _focusNode.unfocus();
+    } else {
+      Navigator.pushNamed(context, '/search_page');
+    }
   }
 
   void _onSearchAreaPressed() {
     if (widget.notInHomepage) {
-      print('searching...');
     } else {
       Navigator.pushNamed(context, '/search_page');
+    }
+  }
+
+  void _onSubmitted(String searchString, MyAppState appState) async {
+    print(searchString);
+    appState.currentPage = 2;
+    if (searchString != '') {
+      appState.searchingString = searchString;
+      BasicPagedSongs? pagedSongs = await appState.fetchSearchedSongs(
+          searchString, appState.firstPageNo, appState.pageSize, _platform);
+      if (pagedSongs != null) {
+        appState.totalSearchedSongs = pagedSongs.total;
+        if (_platform == 1) {
+          appState.searchedSongs = (pagedSongs as QQMusicPagedSongs).songs;
+        } else {
+          throw Exception('Only imeplement qq music platform');
+        }
+      }
     }
   }
 
@@ -56,6 +92,7 @@ class _MySearchBarState extends State<MySearchBar>
   }
 
   void _onBackIconPressed() {
+    _searchedSongs.clear();
     Navigator.pop(context);
   }
 
@@ -79,6 +116,8 @@ class _MySearchBarState extends State<MySearchBar>
         color: colorScheme.secondary,
       ),
       child: TextField(
+        controller: _textEditingController,
+        focusNode: _focusNode,
         textAlignVertical: TextAlignVertical.top,
         enabled: true,
         cursorColor: colorScheme.onPrimary,
@@ -105,7 +144,12 @@ class _MySearchBarState extends State<MySearchBar>
                 //   progress: _animationController,
                 // ),
                 onPressed: widget.notInHomepage
-                    ? _onBackIconPressed
+                    ? () {
+                        appState.searchedSongs.clear();
+                        appState.totalSearchedSongs = 0;
+                        appState.currentPage = 2;
+                        _onBackIconPressed();
+                      }
                     : _onMenuIconPressed,
               ),
             ),
@@ -123,7 +167,9 @@ class _MySearchBarState extends State<MySearchBar>
                   child: IconButton(
                     color: colorScheme.tertiary,
                     icon: Icon(Icons.search_rounded),
-                    onPressed: _onSearchIconPressed,
+                    onPressed: () {
+                      _onSearchIconPressed(appState);
+                    },
                   ),
                 ),
                 !widget.notInHomepage
@@ -157,6 +203,9 @@ class _MySearchBarState extends State<MySearchBar>
           contentPadding: EdgeInsets.symmetric(vertical: 12.0),
         ),
         onTap: _onSearchAreaPressed,
+        onSubmitted: (value) {
+          _onSubmitted(value, appState);
+        },
       ),
     );
   }

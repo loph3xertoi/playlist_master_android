@@ -39,7 +39,7 @@ class _HomePageState extends State<HomePage>
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky,
         overlays: []);
     await FPlugin.setOrientationPortrait();
-    MyToast.showToast('Reset rotation');
+    // MyToast.showToast('Reset rotation');
   }
 
   @override
@@ -62,7 +62,7 @@ class _HomePageState extends State<HomePage>
             backgroundColor: Colors.transparent,
             imageUri: 'assets/images/home_button.png',
             onTap: () async {
-              appState.currentPlatform = 0;
+              // appState.currentPlatform = 0;
               showDialog(
                 builder: (BuildContext context) {
                   return AlertDialog(
@@ -121,6 +121,32 @@ class _HomePageState extends State<HomePage>
                               },
                               child: Text(
                                 'Reset rotation',
+                                style: textTheme.labelMedium,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {},
+                            child: TextButton(
+                              style: ButtonStyle(
+                                shadowColor: MaterialStateProperty.all(
+                                  colorScheme.primary,
+                                ),
+                                overlayColor: MaterialStateProperty.all(
+                                  Colors.grey,
+                                ),
+                              ),
+                              onPressed: () async {
+                                var res = await appState.fetchSearchedSongs(
+                                    '洛天依', appState.firstPageNo, appState.pageSize, appState.currentPlatform);
+                                print(res);
+                                MyToast.showToast('Search songs');
+                              },
+                              child: Text(
+                                'Search songs',
                                 style: textTheme.labelMedium,
                               ),
                             ),
