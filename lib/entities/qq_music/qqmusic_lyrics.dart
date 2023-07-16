@@ -4,15 +4,15 @@ import 'package:flutter/foundation.dart';
 @immutable
 class QQMusicLyrics {
   const QQMusicLyrics(
-    this.lyric,
-    this.trans,
+    this._lyric,
+    this._trans,
   );
 
   /// Lyrics of song.
-  final String lyric;
+  final String _lyric;
 
   /// Translate of lyrics.
-  final String trans;
+  final String _trans;
 
   factory QQMusicLyrics.fromJson(Map<String, dynamic> json) {
     return QQMusicLyrics(
@@ -22,6 +22,15 @@ class QQMusicLyrics {
   }
 
   Map<String, dynamic> toJson() {
-    return {'lyric': lyric, 'trans': trans};
+    return {'lyric': _lyric, 'trans': _trans};
   }
+
+  @override
+  String toString() {
+    return 'Lyrics{lyric: $lyric, trans: $trans}';
+  }
+
+  String get lyric => _lyric;
+
+  String get trans => _trans;
 }

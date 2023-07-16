@@ -250,7 +250,7 @@ class MyAppState extends ChangeNotifier {
   }
 
   set searchedSongs(List<BasicSong> value) {
-    _searchedSongs = value;
+    _searchedSongs = List.from(value);
     notifyListeners();
   }
 

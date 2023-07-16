@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_lyric/lyrics_reader.dart';
+import 'package:flutter_lyric/lyrics_reader_model.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -7,6 +9,8 @@ import '../entities/basic/basic_song.dart';
 import '../entities/qq_music/qqmusic_detail_song.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
+import '../widgets/my_lyrics_displayer.dart';
+import '../widgets/my_lyrics_reader.dart';
 
 class DetailSongPage extends StatefulWidget {
   final BasicSong song;
@@ -18,11 +22,27 @@ class DetailSongPage extends StatefulWidget {
 
 class _DetailSongPageState extends State<DetailSongPage> {
   Future<BasicSong?>? _detailSong;
+  LyricsReaderModel? _lyricModel;
+  late MyLyricsDisplayer _lyricUI;
 
   @override
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final textTheme = Theme.of(context).textTheme;
+      _lyricUI = MyLyricsDisplayer(
+        bias: 0.1,
+        // defaultSize: 14.0,
+        // defaultExtSize: 12.0,
+        // otherMainSize: 16.0,
+        inlineGap: 0.0,
+        lineGap: 20.0,
+        highlight: false,
+        textTheme: textTheme,
+      );
+    });
+
     var isUsingMockData = state.isUsingMockData;
     if (isUsingMockData) {
       _detailSong = Future.value(MockData.detailSong);
@@ -99,6 +119,11 @@ class _DetailSongPageState extends State<DetailSongPage> {
           var sizeFlac = detailSong.sizeFlac;
           var isUsingMockData = appState.isUsingMockData;
           var currentDetailSong = detailSong;
+          var lyrics = detailSong.lyrics;
+          _lyricModel ??= LyricsModelBuilder.create()
+              .bindLyricToMain(lyrics.lyric)
+              .bindLyricToExt(lyrics.trans)
+              .getModel();
           return Center(
             child: Container(
               color: colorScheme.primary,
@@ -207,25 +232,46 @@ class _DetailSongPageState extends State<DetailSongPage> {
                           'pubTime: $pubTime',
                           style: textTheme.labelMedium,
                         ),
-                        SelectableText(
-                          'size128: $size128',
-                          style: textTheme.labelMedium,
-                        ),
-                        SelectableText(
-                          'size320: $size320',
-                          style: textTheme.labelMedium,
-                        ),
-                        SelectableText(
-                          'sizeApe: $sizeApe',
-                          style: textTheme.labelMedium,
-                        ),
-                        SelectableText(
-                          'sizeFlac: $sizeFlac',
-                          style: textTheme.labelMedium,
+                        // SelectableText(
+                        //   'size128: $size128',
+                        //   style: textTheme.labelMedium,
+                        // ),
+                        // SelectableText(
+                        //   'size320: $size320',
+                        //   style: textTheme.labelMedium,
+                        // ),
+                        // SelectableText(
+                        //   'sizeApe: $sizeApe',
+                        //   style: textTheme.labelMedium,
+                        // ),
+                        // SelectableText(
+                        //   'sizeFlac: $sizeFlac',
+                        //   style: textTheme.labelMedium,
+                        // ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: LyricsReader(
+                            padding: EdgeInsets.symmetric(horizontal: 40.0),
+                            model: _lyricModel,
+                            lyricUi: _lyricUI,
+                            playing: false,
+                            size: Size(double.infinity, 400.0),
+                            onTap: () {
+                              // setState(() {
+                              //   _toggleLyrics = !_toggleLyrics;
+                              // });
+                            },
+                            emptyBuilder: () => Center(
+                              child: SelectableText(
+                                'No lyrics',
+                                style: textTheme.labelMedium,
+                              ),
+                            ),
+                          ),
                         ),
                         SingleChildScrollView(
                           child: Container(
-                            height: 400.0,
+                            height: 100.0,
                             width: double.infinity,
                             color: colorScheme.secondary.withOpacity(0.3),
                             child: SelectableText(

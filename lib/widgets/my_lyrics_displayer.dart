@@ -12,18 +12,21 @@ class MyLyricsDisplayer extends LyricUI {
   LyricBaseLine lyricBaseLine;
   bool highlight;
   HighlightDirection highlightDirection;
+  TextTheme? textTheme;
 
-  MyLyricsDisplayer(
-      {this.defaultSize = 18,
-      this.defaultExtSize = 14,
-      this.otherMainSize = 16,
-      this.bias = 0.5,
-      this.lineGap = 25,
-      this.inlineGap = 25,
-      this.lyricAlign = LyricAlign.CENTER,
-      this.lyricBaseLine = LyricBaseLine.CENTER,
-      this.highlight = true,
-      this.highlightDirection = HighlightDirection.LTR});
+  MyLyricsDisplayer({
+    this.defaultSize = 18,
+    this.defaultExtSize = 14,
+    this.otherMainSize = 16,
+    this.bias = 0.5,
+    this.lineGap = 25,
+    this.inlineGap = 25,
+    this.lyricAlign = LyricAlign.CENTER,
+    this.lyricBaseLine = LyricBaseLine.CENTER,
+    this.highlight = true,
+    this.highlightDirection = HighlightDirection.LTR,
+    this.textTheme,
+  });
 
   MyLyricsDisplayer.clone(MyLyricsDisplayer myLyricsDisplayer)
       : this(
@@ -40,32 +43,48 @@ class MyLyricsDisplayer extends LyricUI {
         );
 
   @override
-  TextStyle getPlayingExtTextStyle() => TextStyle(
-        color: Colors.grey[300],
-        fontSize: defaultExtSize,
-        fontFamily: 'Roboto',
-      );
+  TextStyle getPlayingExtTextStyle() => textTheme == null
+      ? TextStyle(
+          color: Colors.grey[300],
+          fontSize: defaultExtSize,
+          fontFamily: 'Roboto',
+        )
+      : textTheme!.labelSmall!.copyWith(
+          fontSize: defaultExtSize,
+        );
 
   @override
-  TextStyle getOtherExtTextStyle() => TextStyle(
-        color: Colors.grey[300],
-        fontSize: defaultExtSize,
-        fontFamily: 'Roboto',
-      );
+  TextStyle getOtherExtTextStyle() => textTheme == null
+      ? TextStyle(
+          color: Colors.grey[300],
+          fontSize: defaultExtSize,
+          fontFamily: 'Roboto',
+        )
+      : textTheme!.labelSmall!.copyWith(
+          fontSize: defaultExtSize,
+        );
 
   @override
-  TextStyle getOtherMainTextStyle() => TextStyle(
-        color: Colors.grey[200],
-        fontSize: otherMainSize,
-        fontFamily: 'Roboto',
-      );
+  TextStyle getOtherMainTextStyle() => textTheme == null
+      ? TextStyle(
+          color: Colors.grey[200],
+          fontSize: otherMainSize,
+          fontFamily: 'Roboto',
+        )
+      : textTheme!.labelMedium!.copyWith(
+          fontSize: defaultSize,
+        );
 
   @override
-  TextStyle getPlayingMainTextStyle() => TextStyle(
-        color: Colors.white,
-        fontSize: defaultSize,
-        fontFamily: 'Roboto',
-      );
+  TextStyle getPlayingMainTextStyle() => textTheme == null
+      ? TextStyle(
+          color: Colors.white,
+          fontSize: defaultSize,
+          fontFamily: 'Roboto',
+        )
+      : textTheme!.labelMedium!.copyWith(
+          fontSize: defaultSize,
+        );
 
   @override
   double getInlineSpace() => inlineGap;

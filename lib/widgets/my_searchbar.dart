@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/entities/qq_music/qqmusic_song.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_paged_songs.dart';
@@ -70,19 +71,37 @@ class _MySearchBarState extends State<MySearchBar>
   }
 
   void _onSubmitted(String searchString, MyAppState appState) async {
+    searchString = searchString.trim();
     print(searchString);
-    appState.currentPage = 2;
-    if (searchString != '') {
-      appState.searchingString = searchString;
-      BasicPagedSongs? pagedSongs = await appState.fetchSearchedSongs(
-          searchString, appState.firstPageNo, appState.pageSize, _platform);
-      if (pagedSongs != null) {
-        appState.totalSearchedSongs = pagedSongs.total;
+    if (widget.notInHomepage && !widget.inDetailLibraryPage) {
+      appState.currentPage = 2;
+      if (searchString != '') {
+        appState.searchingString = searchString;
+        BasicPagedSongs? pagedSongs = await appState.fetchSearchedSongs(
+            searchString, appState.firstPageNo, appState.pageSize, _platform);
+        if (pagedSongs != null) {
+          appState.totalSearchedSongs = pagedSongs.total;
+          if (_platform == 1) {
+            appState.searchedSongs = (pagedSongs as QQMusicPagedSongs).songs;
+          } else {
+            throw Exception('Only imeplement qq music platform');
+          }
+        }
+      }
+    } else if (widget.inDetailLibraryPage) {
+      if (searchString != '') {
+        appState.searchingString = searchString;
         if (_platform == 1) {
-          appState.searchedSongs = (pagedSongs as QQMusicPagedSongs).songs;
+          appState.searchedSongs = appState.rawQueue!
+              .where((e) =>
+                  (e as QQMusicSong).name.contains(searchString) ||
+                  e.singers.any((singer) => singer.name.contains(searchString)))
+              .toList();
         } else {
           throw Exception('Only imeplement qq music platform');
         }
+      } else {
+        appState.searchedSongs = appState.rawQueue!;
       }
     }
   }

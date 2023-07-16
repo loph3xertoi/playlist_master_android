@@ -1101,21 +1101,21 @@ class _SongPlayerPageState extends State<SongPlayerPage>
           },
           emptyBuilder: () => Center(
             child: SelectableText(
-              "No lyrics",
+              'No lyrics',
               style: _lyricUI.getOtherMainTextStyle(),
             ),
           ),
           selectLineBuilder: (progress, confirm) {
             return GestureDetector(
               onTap: () {
-                LyricsLog.logD("Click event");
+                LyricsLog.logD('Click event');
                 confirm.call();
                 setState(() {
                   player?.seek(Duration(milliseconds: progress));
                 });
               },
               onLongPress: () {
-                LyricsLog.logD("Longpress event");
+                LyricsLog.logD('Longpress event');
                 confirm.call();
                 String copied = '';
                 int index = _lyricModel!.getCurrentLine(progress);
@@ -1137,7 +1137,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                   children: [
                     IconButton(
                         onPressed: () {
-                          LyricsLog.logD("Click event");
+                          LyricsLog.logD('Click event');
                           confirm.call();
                           setState(() {
                             player?.seek(Duration(milliseconds: progress));
