@@ -45,7 +45,7 @@ class MyAppState extends ChangeNotifier {
   int _totalSearchedSongs = 0;
 
   // Searched songs.
-  List<BasicSong?> _searchedSongs = [];
+  List<BasicSong> _searchedSongs = [];
 
   // Searching keyword.
   String? _searchingString;
@@ -168,7 +168,7 @@ class MyAppState extends ChangeNotifier {
 
   int get totalSearchedSongs => _totalSearchedSongs;
 
-  List<BasicSong?> get searchedSongs => _searchedSongs;
+  List<BasicSong> get searchedSongs => _searchedSongs;
 
   String? get searchingString => _searchingString;
 
@@ -249,7 +249,7 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  set searchedSongs(List<BasicSong?> value) {
+  set searchedSongs(List<BasicSong> value) {
     _searchedSongs = value;
     notifyListeners();
   }

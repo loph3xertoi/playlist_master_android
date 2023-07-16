@@ -272,12 +272,6 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                           appState.isFirstLoadSongPlayer =
                                                               true;
 
-                                                          // appState.player!
-                                                          //     .seek(
-                                                          //         Duration
-                                                          //             .zero,
-                                                          //         index:
-                                                          //             index);
                                                           appState.player!
                                                               .play();
                                                         } else if (appState
@@ -304,8 +298,6 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                               .indexOf(appState
                                                                       .rawQueue![
                                                                   index]);
-
-                                                          print(realIndex);
 
                                                           appState.canSongPlayerPagePop =
                                                               true;
