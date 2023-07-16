@@ -15,36 +15,36 @@ class API {
   static const detailSong = '/song';
 
   /// Get all similar songs according to [songId] in [platform].
-  /// api: /similarsongs/[songId]?platform=[platform]
-  static const similarSongs = '/similarsongs';
+  /// api: /similarSongs/[songId]?platform=[platform]
+  static const similarSongs = '/similarSongs';
 
   /// Get song's link according to [songMid], [mediaMid] and [type] in [platform].
-  /// api: /songlink/[songMid]?mediaMid=[mediaMid]&type=[type]&platform=[platform]
-  static const songLink = '/songlink';
+  /// api: /songLink/[songMid]?mediaMid=[mediaMid]&type=[type]&platform=[platform]
+  static const songLink = '/songLink';
 
   /// Get all songs' link according to [songMids] in [platform].
-  /// api: /songslink/[songMids]?platform=[platform]
-  static const songsLink = '/songslink';
+  /// api: /songsLink/[songMids]?platform=[platform]
+  static const songsLink = '/songsLink';
+
+  /// Get all MVs' links according to [vids] in [platform].
+  /// api: /mvLink/[vids]?platform=[platform]
+  static const mvLink = '/mvLink';
 
   /// Get detail MV according to [vid] in [platform].
   /// api: /mv/[vid]?platform=[platform]
   static const detailMV = '/mv';
 
-  /// Get all MVs' links according to [vids] in [platform].
-  /// api: /mvlink/[vids]?platform=[platform]
-  static const mvLink = '/mvlink';
-
   /// Get all related MVs according to [songId] in [platform].
-  /// api: /relatedmv/[songId]?platform=[platform]
-  static const relatedMV = '/relatedmv';
+  /// api: /relatedMV/[songId]?platform=[platform]
+  static const relatedMV = '/relatedMV';
 
   /// Get all libraries according to [uid] in [platform].
   /// api: /libraries?id=[uid]&platform=[platform]
   static const libraries = '/libraries';
 
   /// Get detail library according to [library] in [platform].
-  /// api: /detaillibrary/[library]?platform=[platform]
-  static const detailLibrary = '/detaillibrary';
+  /// api: /detailLibrary/[library]?platform=[platform]
+  static const detailLibrary = '/detailLibrary';
 
   /// Search songs according to [name] in [platform] with [pageNo] and [pageSize].
   /// api: /search/song/[name]?pageNo=[pageNo]&pageSize=[pageSize]&platform=[platform]
