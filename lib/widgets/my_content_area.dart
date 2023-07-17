@@ -1,20 +1,12 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/retry.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
-import '../entities/qq_music/qqmusic_playlist.dart';
-import '../http/api.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
-import '../utils/my_logger.dart';
-import '../utils/my_toast.dart';
-import 'create_playlist_popup.dart';
-import 'playlist_item.dart';
+import 'create_library_popup.dart';
+import 'library_item.dart';
 
 class MyContentArea extends StatefulWidget {
   @override
@@ -23,6 +15,20 @@ class MyContentArea extends StatefulWidget {
 
 class _MyContentAreaState extends State<MyContentArea> {
   late Future<List<BasicLibrary>?> _libraries;
+
+  void _refreshLibraries(MyAppState appState) async {
+    setState(() {
+      _libraries = appState.fetchLibraries(appState.currentPlatform);
+    });
+  }
+
+  void _removeLibraryFromLibraries(BasicLibrary library) async {
+    List<BasicLibrary>? libraries = await _libraries;
+    libraries!.remove(library);
+    setState(() {
+      _libraries = Future.value(libraries);
+    });
+  }
 
   @override
   void initState() {
@@ -34,6 +40,10 @@ class _MyContentAreaState extends State<MyContentArea> {
     } else {
       _libraries = state.fetchLibraries(state.currentPlatform);
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      state.refreshLibraries = _refreshLibraries;
+      state.removeLibraryFromLibraries = _removeLibraryFromLibraries;
+    });
   }
 
   @override
@@ -77,7 +87,8 @@ class _MyContentAreaState extends State<MyContentArea> {
                     ),
                     onPressed: () {
                       setState(() {
-                        _libraries = appState.fetchLibraries(appState.currentPlatform);
+                        _libraries =
+                            appState.fetchLibraries(appState.currentPlatform);
                       });
                     },
                   ),
@@ -116,7 +127,7 @@ class _MyContentAreaState extends State<MyContentArea> {
                             onPressed: () {
                               showDialog(
                                   context: context,
-                                  builder: (_) => CreatePlaylistDialog());
+                                  builder: (_) => CreateLibraryDialog());
                             },
                           ),
                           IconButton(

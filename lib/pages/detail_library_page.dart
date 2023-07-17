@@ -14,6 +14,7 @@ import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 import '../utils/theme_manager.dart';
 import '../widgets/bottom_player.dart';
+import '../widgets/library_item_menu_popup.dart';
 import '../widgets/my_searchbar.dart';
 import '../widgets/song_item.dart';
 
@@ -388,7 +389,17 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                       ),
                                                                       IconButton(
                                                                         onPressed:
-                                                                            () {},
+                                                                            () {
+                                                                          showDialog(
+                                                                            context:
+                                                                                context,
+                                                                            builder: (_) =>
+                                                                                LibraryItemMenuPopup(
+                                                                              library: detailLibrary,
+                                                                              isInDetailLibraryPage: true,
+                                                                            ),
+                                                                          );
+                                                                        },
                                                                         icon:
                                                                             Icon(
                                                                           Icons

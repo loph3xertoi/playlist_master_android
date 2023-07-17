@@ -1,16 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class CreatePlaylistDialog extends StatelessWidget {
+import '../states/app_state.dart';
+import '../utils/my_toast.dart';
+
+class CreateLibraryDialog extends StatefulWidget {
+  @override
+  State<CreateLibraryDialog> createState() => _CreateLibraryDialogState();
+}
+
+class _CreateLibraryDialogState extends State<CreateLibraryDialog> {
+  late TextEditingController _textEditingController;
+  bool _showSuffixIcon = false;
+
   void _onCancelPressed(BuildContext context) {
     Navigator.pop(context);
   }
 
-  void _onFinishPressed(BuildContext context) {
-    Navigator.pop(context);
+  void _onFinishPressed(BuildContext context, MyAppState appState) {
+    _onSubmitted(context, _textEditingController.text, appState);
+  }
+
+  void _onSubmitted(
+      BuildContext context, String value, MyAppState appState) async {
+    if (value == '') {
+      MyToast.showToast('Please enter library name!');
+    } else {
+      var result =
+          await appState.createLibrary(value, appState.currentPlatform);
+      if (result!['result'] == 100) {
+        MyToast.showToast('Create new library successfully!');
+      } else if (result['result'] == 200) {
+        MyToast.showToast(result['errMsg'].toString());
+      } else {
+        MyToast.showToast('Create library failed!');
+      }
+      appState.refreshLibraries!(appState);
+    }
+    if (mounted) {
+      Navigator.pop(context);
+    }
+  }
+
+  void _updateSuffixIconVisibility() {
+    setState(() {
+      _showSuffixIcon = _textEditingController.text.isNotEmpty;
+    });
+  }
+
+  @override
+  void dispose() {
+    _textEditingController.removeListener(_updateSuffixIconVisibility);
+    _textEditingController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _textEditingController = TextEditingController();
+    _textEditingController.addListener(_updateSuffixIconVisibility);
   }
 
   @override
   Widget build(BuildContext context) {
+    MyAppState appState = context.watch<MyAppState>();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Dialog(
@@ -61,7 +115,7 @@ class CreatePlaylistDialog extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    _onFinishPressed(context);
+                    _onFinishPressed(context, appState);
                   },
                   child: Text(
                     'Finish',
@@ -81,9 +135,13 @@ class CreatePlaylistDialog extends StatelessWidget {
                   color: colorScheme.secondary,
                 ),
                 child: TextField(
+                  controller: _textEditingController,
                   autofocus: true,
                   textAlignVertical: TextAlignVertical.center,
                   cursorColor: colorScheme.onPrimary,
+                  style: textTheme.titleMedium!.copyWith(
+                    color: colorScheme.onSecondary,
+                  ),
                   decoration: InputDecoration(
                     alignLabelWithHint: true,
                     floatingLabelAlignment: FloatingLabelAlignment.center,
@@ -91,11 +149,17 @@ class CreatePlaylistDialog extends StatelessWidget {
                     hintStyle: textTheme.titleMedium,
                     contentPadding:
                         EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
-                    suffixIcon: Icon(Icons.cancel_rounded),
+                    suffixIcon: _textEditingController.text.isNotEmpty
+                        ? GestureDetector(
+                            onTap: () => _textEditingController.clear(),
+                            child: Icon(Icons.cancel_rounded))
+                        : null,
                     suffixIconColor: colorScheme.tertiary,
                     border: InputBorder.none,
                   ),
-                  onTap: null,
+                  onSubmitted: (value) {
+                    _onSubmitted(context, value, appState);
+                  },
                 ),
               ),
             ),

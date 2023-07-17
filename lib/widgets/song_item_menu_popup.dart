@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../entities/basic/basic_song.dart';
-import '../entities/qq_music/qqmusic_playlist.dart';
 import '../states/app_state.dart';
 
 class CreateSongItemMenuDialog extends StatelessWidget {

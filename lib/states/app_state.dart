@@ -35,6 +35,12 @@ import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 
 class MyAppState extends ChangeNotifier {
+  // Remove library from libraries in home page.
+  void Function(BasicLibrary)? removeLibraryFromLibraries;
+
+  // Refresh home page's libraries.
+  void Function(MyAppState)? refreshLibraries;
+
   // Current page.
   int _currentPage = 2;
 
@@ -872,9 +878,9 @@ class MyAppState extends ChangeNotifier {
           } else if (resultCode == 200) {
             // Create fail.
             result.putIfAbsent('result', () => resultCode);
-            result.putIfAbsent('dirId', () => resultJson['errMsg']);
+            result.putIfAbsent('errMsg', () => 'Name already exists');
           } else {
-            throw Exception('Create library failed');
+            throw Exception('Create library failed: $resultJson');
           }
           return Future.value(result);
         } else {
@@ -895,7 +901,17 @@ class MyAppState extends ChangeNotifier {
   }
 
   Future<Map<String, Object>?> deleteLibrary(
-      int libraryId, int platform) async {
+      BasicLibrary library, int platform) async {
+    int libraryId;
+    if (platform == 1) {
+      if (library is QQMusicPlaylist) {
+        libraryId = library.dirId;
+      } else {
+        libraryId = (library as QQMusicDetailPlaylist).dirId;
+      }
+    } else {
+      throw Exception('Only imeplement qq music platform');
+    }
     final Uri url = Uri.http(API.host, '${API.deleteLibrary}/$libraryId', {
       'platform': platform.toString(),
     });
@@ -913,7 +929,8 @@ class MyAppState extends ChangeNotifier {
           if (resultCode == 100) {
             result.putIfAbsent('result', () => resultCode);
           } else {
-            throw Exception('Delete library failed');
+            result.putIfAbsent('result', () => resultCode);
+            MyToast.showToast('Delete library failed: $resultJson');
           }
           return Future.value(result);
         } else {

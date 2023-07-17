@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:playlistmaster/entities/qq_music/qqmusic_playlist.dart';
 import 'package:playlistmaster/states/app_state.dart';
 
 void main() {
@@ -13,7 +14,10 @@ void main() {
   });
 
   test('Delete library', () async {
-    var map = await appState.deleteLibrary(22, 1);
+    var map = await appState.deleteLibrary(
+      QQMusicPlaylist(22, '22', name: 'name', cover: 'cover', itemCount: 1),
+      1,
+    );
     expect(map!['result'], equals(100));
   });
 }

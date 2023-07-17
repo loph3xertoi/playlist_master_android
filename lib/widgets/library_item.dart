@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../states/app_state.dart';
+import 'library_item_menu_popup.dart';
 
 class LibraryItem extends StatelessWidget {
   final BasicLibrary library;
@@ -79,40 +80,20 @@ class LibraryItem extends StatelessWidget {
                     ),
                   ),
                 ),
-                PopupMenuButton(
-                  color: colorScheme.tertiary,
-                  shadowColor: Colors.transparent,
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 1,
-                      child: Text(
-                        'Option 1',
-                        style: textTheme.labelSmall,
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 2,
-                      child: Text(
-                        'Option 2',
-                        style: textTheme.labelSmall,
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 3,
-                      child: Text(
-                        'Option 3',
-                        style: textTheme.labelSmall,
-                      ),
-                    ),
-                  ],
-                  onSelected: (value) {
-                    // Handle selection in the popup menu
-                  },
-                  padding: EdgeInsets.zero,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                ),
+                IconButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => LibraryItemMenuPopup(
+                          library: library,
+                          isInDetailLibraryPage: false,
+                        ),
+                      );
+                    },
+                    color: colorScheme.tertiary,
+                    icon: Icon(
+                      Icons.more_vert_rounded,
+                    )),
               ],
             ),
           ),
