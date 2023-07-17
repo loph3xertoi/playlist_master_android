@@ -47,9 +47,15 @@ class QQMusicDetailPlaylist extends BasicLibrary {
   }
 
   factory QQMusicDetailPlaylist.fromJson(Map<String, dynamic> json) {
-    List<dynamic> songsJson = json['songs'];
-    List<QQMusicSong> songs =
-        songsJson.map<QQMusicSong>((e) => QQMusicSong.fromJson(e)).toList();
+    int itemCount = json['itemCount'];
+    List<QQMusicSong> songs = [];
+
+    if (itemCount > 0) {
+      List<dynamic> songsJson = json['songs'];
+      songs =
+          songsJson.map<QQMusicSong>((e) => QQMusicSong.fromJson(e)).toList();
+    }
+
     return QQMusicDetailPlaylist(
       json['listenNum'],
       json['dirId'],
@@ -57,7 +63,7 @@ class QQMusicDetailPlaylist extends BasicLibrary {
       songs,
       name: json['name'],
       cover: json['cover'],
-      itemCount: json['itemCount'],
+      itemCount: itemCount,
       desc: json['desc'],
     );
   }

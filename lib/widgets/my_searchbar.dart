@@ -141,6 +141,9 @@ class _MySearchBarState extends State<MySearchBar>
         enabled: true,
         cursorColor: colorScheme.onPrimary,
         readOnly: widget.notInHomepage ? false : true,
+        style: textTheme.titleMedium!.copyWith(
+          color: colorScheme.onSecondary,
+        ),
         decoration: InputDecoration(
           alignLabelWithHint: true,
           floatingLabelAlignment: FloatingLabelAlignment.center,

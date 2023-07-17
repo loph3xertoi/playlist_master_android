@@ -173,8 +173,9 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                         // }
                                         WidgetsBinding.instance
                                             .addPostFrameCallback((_) {
-                                          if (appState.rawQueue!.isEmpty ||
-                                              _changeRawQueue) {
+                                          // if (appState.rawQueue!.isEmpty ||
+                                          // _changeRawQueue) {
+                                          if (_changeRawQueue) {
                                             appState.rawQueue =
                                                 detailLibrary.songs;
                                             appState.searchedSongs =

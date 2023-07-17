@@ -63,6 +63,7 @@ class _HomePageState extends State<HomePage>
             imageUri: 'assets/images/home_button.png',
             onTap: () async {
               // appState.currentPlatform = 0;
+              print(appState);
               showDialog(
                 builder: (BuildContext context) {
                   return AlertDialog(
