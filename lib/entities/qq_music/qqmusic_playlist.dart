@@ -28,4 +28,9 @@ class QQMusicPlaylist extends BasicLibrary {
       itemCount: json['itemCount'],
     );
   }
+
+  @override
+  String toString() {
+    return 'QQMusicPlaylist{dirId: $dirId, tid: $tid, name: $name, cover: $cover, itemCount: $itemCount}';
+  }
 }

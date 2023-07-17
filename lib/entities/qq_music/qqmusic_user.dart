@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/foundation.dart';
 
 import '../basic/basic_user.dart';
@@ -48,4 +49,41 @@ class QQMusicUser extends BasicUser {
       bgPic: json['bgPic'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'headPic': headPic,
+      'bgPic': bgPic,
+      'lvPic': lvPic,
+      'listenPic': listenPic,
+      'visitorNum': visitorNum,
+      'fansNum': fansNum,
+      'followNum': followNum,
+      'friendsNum': friendsNum
+    };
+  }
+
+  @override
+  String toString() {
+    return 'QQMusicUser{lvPic: $lvPic, listenPic: $listenPic, visitorNum: $visitorNum, fansNum: $fansNum, followNum: $followNum, friendsNum: $friendsNum}';
+  }
+
+//   @override
+//   String toString() {
+//     String str = '''
+// QQMusicUser{
+//   name: $name,
+//   headPic: $headPic,
+//   bgPic: $bgPic,
+//   lvPic: $lvPic,
+//   listenPic: $listenPic,
+//   visitorNum: $visitorNum,
+//   fansNum: $fansNum,
+//   followNum: $followNum,
+//   friendsNum: $friendsNum
+// }
+//     ''';
+//     return str;
+//   }
 }

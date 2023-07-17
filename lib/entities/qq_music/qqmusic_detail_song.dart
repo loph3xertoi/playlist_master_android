@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
-import 'package:playlistmaster/entities/qq_music/qqmusic_singer.dart';
 
 import '../basic/basic_song.dart';
 import 'qqmusic_lyrics.dart';
+import 'qqmusic_singer.dart';
 
 /// Detail song of qq music.
 @immutable
@@ -103,7 +103,6 @@ class QQMusicDetailSong extends BasicSong {
     List<QQMusicSinger> singers =
         singersJson.map((e) => QQMusicSinger.fromJson(e)).toList();
 
-    
     return QQMusicDetailSong(
       json['subTitle'],
       json['albumName'],
@@ -126,5 +125,10 @@ class QQMusicDetailSong extends BasicSong {
       isTakenDown: json['isTakenDown'],
       songLink: json['songLink'],
     );
+  }
+
+  @override
+  String toString() {
+    return 'QQMusicDetailSong(name: $name, singers: $singers, cover: $cover, payPlay: $payPlay, isTakenDown: $isTakenDown, songLink: $songLink, subTitle: $subTitle, albumName: $albumName, songId: $songId, songMid: $songMid, mediaMid: $mediaMid, duration: $duration, songDesc: $songDesc, pubTime: $pubTime, lyrics: $lyrics, pmPlaylists: $pmPlaylists, size128: $size128, size320: $size320, sizeApe: $sizeApe, sizeFlac: $sizeFlac)';
   }
 }

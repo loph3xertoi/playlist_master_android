@@ -38,4 +38,9 @@ class PMSUser extends BasicUser {
       bgPic: json['bgPic'],
     );
   }
+
+  @override
+  String toString() {
+    return 'PMSUser{id: $id, subUsers: $subUsers, name: $name, headPic: $headPic, bgPic: $bgPic}';
+  }
 }

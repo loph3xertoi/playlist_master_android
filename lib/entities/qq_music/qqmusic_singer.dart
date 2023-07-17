@@ -26,4 +26,9 @@ class QQMusicSinger extends BasicSinger {
       headPic: json['headPic'],
     );
   }
+
+  @override
+  String toString() {
+    return 'QQMusicSinger{mid: $mid, name: $name, headPic: $headPic}';
+  }
 }

@@ -58,4 +58,9 @@ class QQMusicSong extends BasicSong {
       songLink: json['songLink'],
     );
   }
+
+  @override
+  String toString() {
+    return 'QQMusicSong{songId: $songId, songMid: $songMid, mediaMid: $mediaMid, name: $name, singers: $singers, cover: $cover, payPlay: $payPlay, isTakenDown: $isTakenDown, songLink: $songLink}';
+  }
 }

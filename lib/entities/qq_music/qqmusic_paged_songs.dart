@@ -23,4 +23,9 @@ class QQMusicPagedSongs extends BasicPagedSongs {
       total: json['total'],
     );
   }
+
+  @override
+  String toString() {
+    return 'QQMusicPagedSongs{songs: $songs, pageNo: $pageNo, pageSize: $pageSize, total: $total}';
+  }
 }

@@ -16,13 +16,16 @@ import 'package:uuid/uuid.dart';
 import '../entities/basic/basic_library.dart';
 import '../entities/basic/basic_paged_songs.dart';
 import '../entities/basic/basic_song.dart';
+import '../entities/basic/basic_user.dart';
 import '../entities/basic/basic_video.dart';
+import '../entities/pms/pms_user.dart';
 import '../entities/qq_music/qqmusic_detail_playlist.dart';
 import '../entities/qq_music/qqmusic_detail_song.dart';
 import '../entities/qq_music/qqmusic_detail_video.dart';
 import '../entities/qq_music/qqmusic_paged_songs.dart';
 import '../entities/qq_music/qqmusic_playlist.dart';
 import '../entities/qq_music/qqmusic_song.dart';
+import '../entities/qq_music/qqmusic_user.dart';
 import '../entities/qq_music/qqmusic_video.dart';
 import '../http/api.dart';
 import '../http/my_http.dart';
@@ -516,6 +519,43 @@ class MyAppState extends ChangeNotifier {
     } catch (e) {
       print('Error init audio player: $e');
       throw Exception('Error init audio player: $e');
+    }
+  }
+
+  Future<BasicUser?> fetchUser(int platform) async {
+    Uri url = Uri.http(API.host, '${API.user}/${API.uid}', {
+      'platform': platform.toString(),
+    });
+    MyLogger.logger.d('Loading user information from network...');
+    final client = RetryClient(http.Client());
+    try {
+      var response = await client.get(url);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        Map<String, dynamic> user = decodedResponse['data'];
+        // result = user.map((e) => BasicUser.fromJson(e)).toList();
+        if (platform == 0) {
+          return PMSUser.fromJson(user);
+        } else if (platform == 1) {
+          return QQMusicUser.fromJson(user);
+        } else if (platform == 2) {
+          throw Exception('Not implement netease music platform');
+        } else if (platform == 3) {
+          throw Exception('Not implement bilibili platform');
+        } else {
+          throw Exception('Invalid platform');
+        }
+      } else {
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
     }
   }
 

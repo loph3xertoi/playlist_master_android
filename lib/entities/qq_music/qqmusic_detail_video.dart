@@ -56,4 +56,9 @@ class QQMusicDetailVideo extends BasicVideo {
       singers: singers,
     );
   }
+
+  @override
+  String toString() {
+    return 'QQMusicDetailVideo{pubDate: $pubDate, vid: $vid, duration: $duration, playCnt: $playCnt, desc: $desc, links: $links, name: $name, cover: $cover, singers: $singers}';
+  }
 }

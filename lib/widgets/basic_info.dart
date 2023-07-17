@@ -1,20 +1,13 @@
-import 'dart:convert';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/retry.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_user.dart';
 import '../entities/pms/pms_user.dart';
 import '../entities/qq_music/qqmusic_user.dart';
-import '../http/api.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
-import '../utils/my_logger.dart';
-import '../utils/my_toast.dart';
 
 class BasicInfo extends StatefulWidget {
   @override
@@ -31,43 +24,6 @@ class _BasicInfoState extends State<BasicInfo> {
   double scale = 1.0;
   late double imageSize;
 
-  Future<BasicUser?> fetchUser(int platform) async {
-    Uri url = Uri.http(API.host, '${API.user}/${API.uid}', {
-      'platform': platform.toString(),
-    });
-    MyLogger.logger.d('Loading user information from network...');
-    final client = RetryClient(http.Client());
-    try {
-      var response = await client.get(url);
-      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        Map<String, dynamic> user = decodedResponse['data'];
-        // result = user.map((e) => BasicUser.fromJson(e)).toList();
-        if (platform == 0) {
-          return PMSUser.fromJson(user);
-        } else if (platform == 1) {
-          return QQMusicUser.fromJson(user);
-        } else if (platform == 2) {
-          throw Exception('Not implement netease music platform');
-        } else if (platform == 3) {
-          throw Exception('Not implement bilibili platform');
-        } else {
-          throw Exception('Invalid platform');
-        }
-      } else {
-        MyToast.showToast('Response error with code: ${response.statusCode}');
-        MyLogger.logger.e('Response error with code: ${response.statusCode}');
-        return null;
-      }
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      MyLogger.logger.e('Network error with exception: $e');
-      rethrow;
-    } finally {
-      client.close();
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -76,7 +32,7 @@ class _BasicInfoState extends State<BasicInfo> {
     if (isUsingMockData) {
       _basicUser = Future.value(MockData.pmsUser.subUsers['qqmusic']);
     } else {
-      _basicUser = fetchUser(state.currentPlatform);
+      _basicUser = state.fetchUser(state.currentPlatform);
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       imageSize = MediaQuery.of(context).size.width - 24.0;
@@ -137,8 +93,8 @@ class _BasicInfoState extends State<BasicInfo> {
                             ),
                             onPressed: () {
                               setState(() {
-                                _basicUser =
-                                    fetchUser(appState.currentPlatform);
+                                _basicUser = appState
+                                    .fetchUser(appState.currentPlatform);
                               });
                             },
                           ),

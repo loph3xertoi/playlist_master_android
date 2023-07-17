@@ -33,4 +33,9 @@ class QQMusicVideo extends BasicVideo {
       singers: singers,
     );
   }
+
+  @override
+  String toString() {
+    return 'QQMusicVideo{vid: $vid, playCnt: $playCnt, name: $name, cover: $cover, singers: $singers}';
+  }
 }
