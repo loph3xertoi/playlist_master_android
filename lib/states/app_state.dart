@@ -845,6 +845,94 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
+  Future<Map<String, Object>?> createLibrary(
+      String libraryName, int platform) async {
+    final Uri url = Uri.http(API.host, API.createLibrary, {
+      'platform': platform.toString(),
+    });
+    final requestBody = {'name': libraryName};
+    MyLogger.logger.d('Creating library...');
+    final client = RetryClient(http.Client());
+    try {
+      final response = await client.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        if (platform == 1) {
+          Map<String, Object> result = {};
+          Map<String, dynamic> resultJson = decodedResponse['data'];
+          int resultCode = resultJson['result'];
+          // Create success.
+          if (resultCode == 100) {
+            result.putIfAbsent('result', () => resultCode);
+            result.putIfAbsent('dirId', () => resultJson['data']['dirid']);
+          } else if (resultCode == 200) {
+            // Create fail.
+            result.putIfAbsent('result', () => resultCode);
+            result.putIfAbsent('dirId', () => resultJson['errMsg']);
+          } else {
+            throw Exception('Create library failed');
+          }
+          return Future.value(result);
+        } else {
+          throw Exception('Only imeplement qq music platform');
+        }
+      } else {
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+    return null;
+  }
+
+  Future<Map<String, Object>?> deleteLibrary(
+      int libraryId, int platform) async {
+    final Uri url = Uri.http(API.host, '${API.deleteLibrary}/$libraryId', {
+      'platform': platform.toString(),
+    });
+    MyLogger.logger.d('Deleting library...');
+    final client = RetryClient(http.Client());
+    try {
+      final response = await client.delete(url);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        if (platform == 1) {
+          Map<String, Object> result = {};
+          Map<String, dynamic> resultJson = decodedResponse['data'];
+          int resultCode = resultJson['result'];
+          // Create success.
+          if (resultCode == 100) {
+            result.putIfAbsent('result', () => resultCode);
+          } else {
+            throw Exception('Delete library failed');
+          }
+          return Future.value(result);
+        } else {
+          throw Exception('Only imeplement qq music platform');
+        }
+      } else {
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+    return null;
+  }
+
   Future<BasicPagedSongs?> fetchSearchedSongs(
       String name, int pageNo, int pageSize, int platform) async {
     Uri url = Uri.http(API.host, '${API.searchSong}/$name', {
