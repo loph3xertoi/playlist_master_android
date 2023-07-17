@@ -969,6 +969,39 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
+  Future<List<BasicLibrary>?> fetchLibraries(int platform) async {
+    Uri url = Uri.http(API.host, API.libraries, {
+      'id': API.uid,
+      'platform': platform.toString(),
+    });
+    MyLogger.logger.d('Loading libraries from network...');
+    final client = RetryClient(http.Client());
+    try {
+      var response = await client.get(url);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        var jsonList = decodedResponse['data'];
+        if (platform == 1) {
+          return Future.value(jsonList
+              .map<BasicLibrary>((e) => QQMusicPlaylist.fromJson(e))
+              .toList());
+        } else {
+          throw Exception('Only imeplement qq music platform');
+        }
+      } else {
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
   Future<String?> fetchSongLink(
       BasicSong song, String quality, int platform) async {
     Uri? url;
