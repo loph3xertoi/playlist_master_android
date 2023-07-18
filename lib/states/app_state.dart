@@ -1061,9 +1061,11 @@ class MyAppState extends ChangeNotifier {
     if (platform == 1) {
       int dirId = (library as QQMusicPlaylist).dirId;
       String songsMid = songs.map((e) => (e as QQMusicSong).songMid).join(',');
+      String tid = library.tid;
       requestBody = {
         'dirid': dirId.toString(),
         'mid': songsMid,
+        'tid': tid,
       };
     } else {
       throw Exception('Only implement qq music platform');
@@ -1117,9 +1119,11 @@ class MyAppState extends ChangeNotifier {
     Uri url;
     if (platform == 1) {
       int dirId = (library as QQMusicPlaylist).dirId;
+      String tid = library.tid;
       String songsId = songs.map((e) => (e as QQMusicSong).songId).join(',');
       url = Uri.http(API.host, API.removeSongsFromLibrary, {
         'dirId': dirId.toString(),
+        'tid': tid,
         'songsId': songsId,
         'platform': platform.toString(),
       });
@@ -1175,6 +1179,8 @@ class MyAppState extends ChangeNotifier {
       String songsId = songs.map((e) => (e as QQMusicSong).songId).join(',');
       int srcDirId = (srcLibrary as QQMusicPlaylist).dirId;
       int dstDirId = (dstLibrary as QQMusicPlaylist).dirId;
+      String srcTid = srcLibrary.tid;
+      String dstTid = dstLibrary.tid;
       url = Uri.http(API.host, API.moveSongsToOtherLibrary, {
         'platform': platform.toString(),
       });
@@ -1182,6 +1188,8 @@ class MyAppState extends ChangeNotifier {
         'songsId': songsId,
         'fromDirId': srcDirId.toString(),
         'toDirId': dstDirId.toString(),
+        'fromTid': srcTid,
+        'toTid': dstTid,
       };
     } else {
       throw Exception('Only implement qq music platform');

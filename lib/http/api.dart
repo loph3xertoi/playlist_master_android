@@ -58,16 +58,19 @@ class API {
   /// api: DELETE /library/[library]?platform=[platform]
   static const deleteLibrary = '/library';
 
-  /// Add songs to library in [platform] with [library].
-  /// api: POST /addSongsToLibrary?platform=[platform] {'dirid':[dirId],'mid':[songsMid]}
+  /// Add songs to library in [platform] with [library],
+  /// [tid] is used to evict cache.
+  /// api: POST /addSongsToLibrary?platform=[platform] {'dirid':[dirId],'mid':[songsMid],'tid':[tid]}
   static const addSongsToLibrary = '/addSongsToLibrary';
 
-  /// Move songs from one library to another library in [platform].
+  /// Move songs from one library to another library in [platform],
+  /// [fromTid] and [toTid] is used to evict cache.
   /// api: PUT /moveSongsToOtherLibrary?platform=[platform] {'songsId':[songsId],'fromDirId':[fromDirId],
-  /// 'toDirId':[toDirId]}
+  /// 'toDirId':[toDirId], 'fromTid':[fromTid], 'toTid':[toTid]}
   static const moveSongsToOtherLibrary = '/moveSongsToOtherLibrary';
 
-  /// Remove songs from library in [platform] with [library].
-  /// api: DELETE /removeSongsFromLibrary?dirId=[dirId]&songsId=[songsId]&platform=[platform]
+  /// Remove songs from library in [platform] with [library],
+  /// [tid] is used to evict cache.
+  /// api: DELETE /removeSongsFromLibrary?dirId=[dirId]&tid=[tid]&songsId=[songsId]&platform=[platform]
   static const removeSongsFromLibrary = '/removeSongsFromLibrary';
 }
