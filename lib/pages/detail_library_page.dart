@@ -367,7 +367,101 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                     children: [
                                                                       IconButton(
                                                                         onPressed:
-                                                                            () {},
+                                                                            () async {
+                                                                          if (appState.player ==
+                                                                              null) {
+                                                                            appState.queue =
+                                                                                searchedSongs.where((song) => !song.isTakenDown && (song.payPlay == 0)).toList();
+
+                                                                            // Real index in queue, not in raw queue as some songs may be taken down.
+                                                                            int realIndex =
+                                                                                appState.queue!.indexOf(searchedSongs[0]);
+
+                                                                            try {
+                                                                              await appState.initAudioPlayer();
+                                                                            } catch (e) {
+                                                                              MyToast.showToast('Exception: $e');
+                                                                              MyLogger.logger.e('Exception: $e');
+                                                                              appState.queue = [];
+                                                                              appState.currentDetailSong = null;
+                                                                              appState.currentPlayingSongInQueue = 0;
+                                                                              appState.currentSong = null;
+                                                                              appState.prevSong = null;
+                                                                              appState.isPlaying = false;
+                                                                              appState.player!.stop();
+                                                                              appState.player!.dispose();
+                                                                              appState.player = null;
+                                                                              appState.initQueue!.clear();
+                                                                              appState.isPlayerPageOpened = false;
+                                                                              appState.canSongPlayerPagePop = false;
+                                                                              return;
+                                                                            }
+
+                                                                            appState.currentPlayingSongInQueue =
+                                                                                realIndex;
+
+                                                                            appState.currentSong =
+                                                                                appState.queue![realIndex];
+
+                                                                            appState.prevSong =
+                                                                                appState.currentSong;
+
+                                                                            appState.currentDetailSong =
+                                                                                null;
+
+                                                                            appState.player!.play();
+                                                                          } else {
+                                                                            appState.queue =
+                                                                                searchedSongs.where((song) => !song.isTakenDown && (song.payPlay == 0)).toList();
+
+                                                                            // Real index in queue, not in raw queue as some songs may be taken down.
+                                                                            int realIndex =
+                                                                                appState.queue!.indexOf(searchedSongs[0]);
+
+                                                                            appState.player!.stop();
+
+                                                                            appState.player!.dispose();
+
+                                                                            appState.player =
+                                                                                null;
+
+                                                                            appState.initQueue!.clear();
+
+                                                                            try {
+                                                                              await appState.initAudioPlayer();
+                                                                            } catch (e) {
+                                                                              MyToast.showToast('Exception: $e');
+                                                                              MyLogger.logger.e('Exception: $e');
+                                                                              appState.queue = [];
+                                                                              appState.currentDetailSong = null;
+                                                                              appState.currentPlayingSongInQueue = 0;
+                                                                              appState.currentSong = null;
+                                                                              appState.prevSong = null;
+                                                                              appState.isPlaying = false;
+                                                                              appState.player!.stop();
+                                                                              appState.player!.dispose();
+                                                                              appState.player = null;
+                                                                              appState.initQueue!.clear();
+                                                                              appState.isPlayerPageOpened = false;
+                                                                              appState.canSongPlayerPagePop = false;
+                                                                              return;
+                                                                            }
+
+                                                                            appState.currentPlayingSongInQueue =
+                                                                                realIndex;
+
+                                                                            appState.currentSong =
+                                                                                appState.queue![realIndex];
+
+                                                                            appState.currentDetailSong =
+                                                                                null;
+
+                                                                            appState.prevSong =
+                                                                                appState.currentSong;
+
+                                                                            appState.player!.play();
+                                                                          }
+                                                                        },
                                                                         icon:
                                                                             Icon(
                                                                           Icons
