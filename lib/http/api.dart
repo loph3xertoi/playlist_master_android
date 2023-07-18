@@ -18,6 +18,10 @@ class API {
   /// api: GET /similarSongs/[songId]?platform=[platform]
   static const similarSongs = '/similarSongs';
 
+  /// Search songs according to [name] in [platform] with [pageNo] and [pageSize].
+  /// api: GET /search/song/[name]?pageNo=[pageNo]&pageSize=[pageSize]&platform=[platform]
+  static const searchSong = '/search/song';
+
   /// Get song's link according to [songMid], [mediaMid] and [type] in [platform].
   /// api: GET /songLink/[songMid]?mediaMid=[mediaMid]&type=[type]&platform=[platform]
   static const songLink = '/songLink';
@@ -54,7 +58,16 @@ class API {
   /// api: DELETE /library/[library]?platform=[platform]
   static const deleteLibrary = '/library';
 
-  /// Search songs according to [name] in [platform] with [pageNo] and [pageSize].
-  /// api: GET /search/song/[name]?pageNo=[pageNo]&pageSize=[pageSize]&platform=[platform]
-  static const searchSong = '/search/song';
+  /// Add songs to library in [platform] with [library].
+  /// api: POST /addSongsToLibrary?platform=[platform] {'dirid':[dirId],'mid':[songsMid]}
+  static const addSongsToLibrary = '/addSongsToLibrary';
+
+  /// Move songs from one library to another library in [platform].
+  /// api: PUT /moveSongsToOtherLibrary?platform=[platform] {'songsId':[songsId],'fromDirId':[fromDirId],
+  /// 'toDirId':[toDirId]}
+  static const moveSongsToOtherLibrary = '/moveSongsToOtherLibrary';
+
+  /// Remove songs from library in [platform] with [library].
+  /// api: DELETE /removeSongsFromLibrary?dirId=[dirId]&songsId=[songsId]&platform=[platform]
+  static const removeSongsFromLibrary = '/removeSongsFromLibrary';
 }

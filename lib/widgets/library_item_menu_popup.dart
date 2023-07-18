@@ -24,6 +24,16 @@ class LibraryItemMenuPopup extends StatelessWidget {
     // appState.removeLibraryFromLibraries!(library);
   }
 
+  void _editLibrary(MyAppState appState) async {
+    int platform = appState.currentPlatform;
+    if (platform == 1) {
+      MyToast.showToast('API missing in qq music platform.');
+      return;
+    } else {
+      throw Exception('Not implement');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
@@ -105,6 +115,8 @@ class LibraryItemMenuPopup extends StatelessWidget {
               onTap: () {
                 print('Edit library.');
                 print(appState);
+                _editLibrary(appState);
+                Navigator.pop(context);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -113,7 +125,12 @@ class LibraryItemMenuPopup extends StatelessWidget {
                     IconButton(
                       icon: Icon(Icons.edit_rounded),
                       color: colorScheme.tertiary,
-                      onPressed: () {},
+                      onPressed: () {
+                        print('Edit library.');
+                        print(appState);
+                        _editLibrary(appState);
+                        Navigator.pop(context);
+                      },
                     ),
                     Expanded(
                       child: Text(

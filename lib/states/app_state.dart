@@ -583,7 +583,7 @@ class MyAppState extends ChangeNotifier {
           return Future.value(
               QQMusicDetailSong.fromJson(decodedResponse['data']));
         } else {
-          throw Exception('Only imeplement qq music platform');
+          throw Exception('Only implement qq music platform');
         }
       } else {
         MyToast.showToast('Response error with code: ${response.statusCode}');
@@ -615,7 +615,7 @@ class MyAppState extends ChangeNotifier {
           return Future.value(mvsLink.map((key, value) =>
               MapEntry<String, List<String>>(key, List<String>.from(value))));
         } else {
-          throw Exception('Only imeplement qq music platform');
+          throw Exception('Only implement qq music platform');
         }
       } else {
         MyToast.showToast('Response error with code: ${response.statusCode}');
@@ -678,7 +678,7 @@ class MyAppState extends ChangeNotifier {
           return Future.value(
               QQMusicDetailPlaylist.fromJson(decodedResponse['data']));
         } else {
-          throw Exception('Only imeplement qq music platform');
+          throw Exception('Only implement qq music platform');
         }
       } else if (response.statusCode == 200 &&
           decodedResponse['success'] == false &&
@@ -741,7 +741,7 @@ class MyAppState extends ChangeNotifier {
     if (platform == 1) {
       vid = (video as QQMusicVideo).vid;
     } else {
-      throw Exception('Only imeplement qq music platform');
+      throw Exception('Only implement qq music platform');
     }
     Uri url = Uri.http(API.host, '${API.detailMV}/$vid', {
       'platform': platform.toString(),
@@ -757,7 +757,7 @@ class MyAppState extends ChangeNotifier {
           return Future.value(
               QQMusicDetailVideo.fromJson(decodedResponse['data']));
         } else {
-          throw Exception('Only imeplement qq music platform');
+          throw Exception('Only implement qq music platform');
         }
       } else {
         MyToast.showToast('Response error with code: ${response.statusCode}');
@@ -817,7 +817,7 @@ class MyAppState extends ChangeNotifier {
     if (platform == 1) {
       songId = (song as QQMusicSong).songId;
     } else {
-      throw Exception('Only imeplement qq music platform');
+      throw Exception('Only implement qq music platform');
     }
     Uri url = Uri.http(API.host, '${API.relatedMV}/$songId', {
       'platform': platform.toString(),
@@ -835,7 +835,7 @@ class MyAppState extends ChangeNotifier {
               .map<QQMusicVideo>((video) => QQMusicVideo.fromJson(video))
               .toList());
         } else {
-          throw Exception('Only imeplement qq music platform');
+          throw Exception('Only implement qq music platform');
         }
       } else {
         MyToast.showToast('Response error with code: ${response.statusCode}');
@@ -884,7 +884,7 @@ class MyAppState extends ChangeNotifier {
           }
           return Future.value(result);
         } else {
-          throw Exception('Only imeplement qq music platform');
+          throw Exception('Only implement qq music platform');
         }
       } else {
         MyToast.showToast('Response error with code: ${response.statusCode}');
@@ -910,7 +910,7 @@ class MyAppState extends ChangeNotifier {
         libraryId = (library as QQMusicDetailPlaylist).dirId;
       }
     } else {
-      throw Exception('Only imeplement qq music platform');
+      throw Exception('Only implement qq music platform');
     }
     final Uri url = Uri.http(API.host, '${API.deleteLibrary}/$libraryId', {
       'platform': platform.toString(),
@@ -934,7 +934,7 @@ class MyAppState extends ChangeNotifier {
           }
           return Future.value(result);
         } else {
-          throw Exception('Only imeplement qq music platform');
+          throw Exception('Only implement qq music platform');
         }
       } else {
         MyToast.showToast('Response error with code: ${response.statusCode}');
@@ -970,7 +970,7 @@ class MyAppState extends ChangeNotifier {
               QQMusicPagedSongs.fromJson(pagedSongsJson);
           return Future.value(pagedSongs);
         } else {
-          throw Exception('Only imeplement qq music platform');
+          throw Exception('Only implement qq music platform');
         }
       } else {
         MyToast.showToast('Response error with code: ${response.statusCode}');
@@ -1003,7 +1003,7 @@ class MyAppState extends ChangeNotifier {
               .map<BasicLibrary>((e) => QQMusicPlaylist.fromJson(e))
               .toList());
         } else {
-          throw Exception('Only imeplement qq music platform');
+          throw Exception('Only implement qq music platform');
         }
       } else {
         MyToast.showToast('Response error with code: ${response.statusCode}');
@@ -1050,6 +1050,181 @@ class MyAppState extends ChangeNotifier {
     } finally {
       client.close();
     }
+  }
+
+  Future<Map<String, Object>?> addSongsToLibrary(
+      List<BasicSong> songs, BasicLibrary library, int platform) async {
+    final Uri url = Uri.http(API.host, API.addSongsToLibrary, {
+      'platform': platform.toString(),
+    });
+    Map<String, Object> requestBody;
+    if (platform == 1) {
+      int dirId = (library as QQMusicPlaylist).dirId;
+      String songsMid = songs.map((e) => (e as QQMusicSong).songMid).join(',');
+      requestBody = {
+        'dirid': dirId.toString(),
+        'mid': songsMid,
+      };
+    } else {
+      throw Exception('Only implement qq music platform');
+    }
+    MyLogger.logger.d('Adding songs to library...');
+    final client = RetryClient(http.Client());
+    try {
+      final response = await client.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        if (platform == 1) {
+          Map<String, Object> result = {};
+          Map<String, dynamic> resultJson = decodedResponse['data'];
+          int resultCode = resultJson['result'];
+          // Create success.
+          if (resultCode == 100) {
+            result.putIfAbsent('result', () => resultCode);
+            // result.putIfAbsent('dirId', () => resultJson['data']['dirid']);
+          } else if (resultCode == 200) {
+            // Create fail.
+            result.putIfAbsent('result', () => resultCode);
+            result.putIfAbsent('errMsg', () => 'Name already exists');
+          } else {
+            throw Exception('Add songs to library failed: $resultJson');
+          }
+          return Future.value(result);
+        } else {
+          throw Exception('Only implement qq music platform');
+        }
+      } else {
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+    return null;
+  }
+
+  Future<Map<String, Object>?> removeSongsFromLibrary(
+      List<BasicSong> songs, BasicLibrary library, int platform) async {
+    Map<String, Object> requestBody;
+    Uri url;
+    if (platform == 1) {
+      int dirId = (library as QQMusicPlaylist).dirId;
+      String songsId = songs.map((e) => (e as QQMusicSong).songId).join(',');
+      url = Uri.http(API.host, API.removeSongsFromLibrary, {
+        'dirId': dirId.toString(),
+        'songsId': songsId,
+        'platform': platform.toString(),
+      });
+    } else {
+      throw Exception('Only implement qq music platform');
+    }
+
+    MyLogger.logger.d('Removing songs from library...');
+    final client = RetryClient(http.Client());
+    try {
+      final response = await client.delete(url);
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        if (platform == 1) {
+          Map<String, Object> result = {};
+          Map<String, dynamic> resultJson = decodedResponse['data'];
+          int resultCode = resultJson['result'];
+          if (resultCode == 100) {
+            result.putIfAbsent('result', () => resultCode);
+          } else if (resultCode == 200) {
+            result.putIfAbsent('result', () => resultCode);
+            result.putIfAbsent('errMsg', () => resultJson['errMsg']);
+          } else {
+            throw Exception('Remove songs from library failed: $resultJson');
+          }
+          return Future.value(result);
+        } else {
+          throw Exception('Only implement qq music platform');
+        }
+      } else {
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+    return null;
+  }
+
+  Future<Map<String, Object>?> moveSongsToOtherLibrary(
+    List<BasicSong> songs,
+    BasicLibrary srcLibrary,
+    BasicLibrary dstLibrary,
+    int platform,
+  ) async {
+    Map<String, Object> requestBody;
+    Uri url;
+    if (platform == 1) {
+      String songsId = songs.map((e) => (e as QQMusicSong).songId).join(',');
+      int srcDirId = (srcLibrary as QQMusicPlaylist).dirId;
+      int dstDirId = (dstLibrary as QQMusicPlaylist).dirId;
+      url = Uri.http(API.host, API.moveSongsToOtherLibrary, {
+        'platform': platform.toString(),
+      });
+      requestBody = {
+        'songsId': songsId,
+        'fromDirId': srcDirId.toString(),
+        'toDirId': dstDirId.toString(),
+      };
+    } else {
+      throw Exception('Only implement qq music platform');
+    }
+
+    MyLogger.logger.d('Moving songs to other library...');
+    final client = RetryClient(http.Client());
+    try {
+      final response = await client.put(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+        if (platform == 1) {
+          Map<String, Object> result = {};
+          Map<String, dynamic> resultJson = decodedResponse['data'];
+          int resultCode = resultJson['result'];
+          if (resultCode == 100) {
+            result.putIfAbsent('result', () => resultCode);
+          } else if (resultCode == 200) {
+            result.putIfAbsent('result', () => resultCode);
+            result.putIfAbsent('errMsg', () => resultJson['errMsg']);
+          } else {
+            throw Exception('Moving songs failed: $resultJson');
+          }
+          return Future.value(result);
+        } else {
+          throw Exception('Only implement qq music platform');
+        }
+      } else {
+        MyToast.showToast('Response error with code: ${response.statusCode}');
+        MyLogger.logger.e('Response error with code: ${response.statusCode}');
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+    return null;
   }
 
   Future<ConcatenatingAudioSource?> initTheQueue() async {

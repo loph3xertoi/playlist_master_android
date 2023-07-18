@@ -84,7 +84,7 @@ class _MySearchBarState extends State<MySearchBar>
           if (_platform == 1) {
             appState.searchedSongs = (pagedSongs as QQMusicPagedSongs).songs;
           } else {
-            throw Exception('Only imeplement qq music platform');
+            throw Exception('Only implement qq music platform');
           }
         }
       }
@@ -98,7 +98,7 @@ class _MySearchBarState extends State<MySearchBar>
                   e.singers.any((singer) => singer.name.contains(searchString)))
               .toList();
         } else {
-          throw Exception('Only imeplement qq music platform');
+          throw Exception('Only implement qq music platform');
         }
       } else {
         appState.searchedSongs = appState.rawQueue!;

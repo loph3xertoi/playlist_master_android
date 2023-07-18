@@ -137,7 +137,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           (await video) as QQMusicDetailVideo;
       videoLinks = qqMusicDetailVideo.links;
     } else {
-      throw Exception('Only imeplement qq music platform');
+      throw Exception('Only implement qq music platform');
     }
     // String? finalUrl = await _cachedVideoUrl(url);
     // if (finalUrl == null) {
