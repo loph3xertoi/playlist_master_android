@@ -1,14 +1,17 @@
+import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
+import '../entities/basic/basic_library.dart';
 import '../entities/basic/basic_song.dart';
 import '../states/app_state.dart';
 import '../third_lib_change/like_button/like_button.dart';
 import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
+import 'select_library_popup.dart';
 import 'song_item_menu_popup.dart';
 
 class SongItem extends StatefulWidget {
@@ -26,6 +29,41 @@ class SongItem extends StatefulWidget {
 }
 
 class _SongItemState extends State<SongItem> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _addSongToLibrary(BuildContext context, MyAppState appState) async {
+    if (mounted) {
+      showFlexibleBottomSheet(
+        minHeight: 0,
+        initHeight: 0.45,
+        maxHeight: 0.9,
+        context: context,
+        bottomSheetColor: Colors.transparent,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30.0),
+            topRight: Radius.circular(30.0),
+          ),
+        ),
+        builder: (
+          BuildContext context,
+          ScrollController scrollController,
+          double bottomSheetOffset,
+        ) {
+          return SelectLibraryPopup(
+            scrollController: scrollController,
+            song: widget.song,
+          );
+        },
+        anchors: [0, 0.45, 0.9],
+        isSafeArea: true,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
@@ -206,12 +244,15 @@ class _SongItemState extends State<SongItem> {
                     Icons.queue_play_next_rounded,
                   )),
               IconButton(
-                  onPressed: () {
-                    showDialog(
+                  onPressed: () async {
+                    var data = await showDialog(
                       context: context,
-                      builder: (_) =>
+                      builder: (context) =>
                           CreateSongItemMenuDialog(song: widget.song),
                     );
+                    if (data == 'Add to library' && mounted) {
+                      _addSongToLibrary(context, appState);
+                    }
                   },
                   color: widget.song.isTakenDown || widget.song.payPlay == 1
                       ? colorScheme.onTertiary

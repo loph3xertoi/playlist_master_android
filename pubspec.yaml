@@ -38,7 +38,11 @@ dependencies:
       ref: master
   screen_brightness: ^0.2.2
   intl: ^0.18.1
-
+  bottom_sheet: ^3.1.0
+  # bottom_sheet:
+  #   git:
+  #     url: git@github.com:loph3xertoi/flutter-bottom-sheet.git
+  #     ref: SNP-304_bottom_sheet_offset
 dependency_overrides:
   http: ^1.1.0
 

@@ -1,13 +1,9 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-
 import '../basic/basic_library.dart';
 import 'qqmusic_song.dart';
 
 /// Detail playlist of qq music.
-@immutable
 class QQMusicDetailPlaylist extends BasicLibrary {
-  const QQMusicDetailPlaylist(
+  QQMusicDetailPlaylist(
     this.listenNum,
     this.dirId,
     this.tid,

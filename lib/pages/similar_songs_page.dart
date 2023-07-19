@@ -361,8 +361,7 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                           appState.prevSong =
                                                               appState
                                                                   .currentSong;
-                                                          // appState.currentPage =
-                                                          //     '/song_player_page';
+
                                                           appState.isFirstLoadSongPlayer =
                                                               true;
 
@@ -391,7 +390,10 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                       )
                                     : Center(
                                         child: TextButton(
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            MyToast.showToast(
+                                                'To be implement');
+                                          },
                                           style: ButtonStyle(
                                             shadowColor:
                                                 MaterialStateProperty.all(

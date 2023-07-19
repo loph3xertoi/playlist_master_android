@@ -15,6 +15,7 @@ import '../utils/my_toast.dart';
 import '../utils/theme_manager.dart';
 import '../widgets/bottom_player.dart';
 import '../widgets/library_item_menu_popup.dart';
+import '../widgets/multi_songs_select_popup.dart';
 import '../widgets/my_searchbar.dart';
 import '../widgets/song_item.dart';
 
@@ -26,7 +27,15 @@ class DetailLibraryPage extends StatefulWidget {
 class _DetailLibraryPageState extends State<DetailLibraryPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late Future<BasicLibrary?> _detailLibrary;
+  late MyAppState _appState;
   bool _changeRawQueue = true;
+
+  void _refreshDetailLibraryPage(MyAppState appState) {
+    setState(() {
+      _detailLibrary = appState.fetchDetailLibrary(
+          appState.openedLibrary!, appState.currentPlatform);
+    });
+  }
 
   @override
   void initState() {
@@ -35,6 +44,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
     final state = Provider.of<MyAppState>(context, listen: false);
     var isUsingMockData = state.isUsingMockData;
     var openedLibrary = state.rawOpenedLibrary;
+    _appState = state;
     // var rawQueue = state.rawQueue;
     // WidgetsBinding.instance.addPostFrameCallback((_) {
     //   state.rawQueue = null;
@@ -48,6 +58,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
         state.openedLibrary = state.rawOpenedLibrary;
       });
     } else {
+      state.refreshDetailLibraryPage = _refreshDetailLibraryPage;
       _detailLibrary =
           state.fetchDetailLibrary(openedLibrary!, state.currentPlatform);
     }
@@ -63,10 +74,9 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
     var isUsingMockData = appState.isUsingMockData;
     var openedLibrary = appState.rawOpenedLibrary;
     var player = appState.player;
-    var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
-    var rawQueue = appState.rawQueue;
     var searchedSongs = appState.searchedSongs;
     var currentPlatform = appState.currentPlatform;
+    var rawQueue = appState.rawQueue;
 
     return Consumer<ThemeNotifier>(
       builder: (context, theme, _) => Material(
@@ -224,6 +234,8 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                         child: GestureDetector(
                                                           onTap: () {
                                                             print(appState);
+                                                            print(
+                                                                detailLibrary);
                                                             print(
                                                                 searchedSongs);
                                                             setState(() {});
@@ -472,11 +484,17 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                       ),
                                                                       IconButton(
                                                                         onPressed:
-                                                                            () {},
+                                                                            () {
+                                                                          showDialog(
+                                                                              context: context,
+                                                                              builder: (_) => MultiSongsSelectPopup());
+                                                                        },
                                                                         icon:
                                                                             Icon(
                                                                           Icons
-                                                                              .playlist_add_check_rounded,
+                                                                              .checklist_rounded,
+                                                                          // Icons
+                                                                          //     .playlist_add_check_rounded,
                                                                         ),
                                                                         color: colorScheme
                                                                             .tertiary,
@@ -629,8 +647,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                                 appState.currentDetailSong = null;
 
                                                                                 appState.prevSong = appState.currentSong;
-                                                                                // appState.currentPage =
-                                                                                //     '/song_player_page';
+
                                                                                 appState.isFirstLoadSongPlayer = true;
 
                                                                                 appState.player!.play();
@@ -664,7 +681,10 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                             )
                                                       : Center(
                                                           child: TextButton(
-                                                            onPressed: () {},
+                                                            onPressed: () {
+                                                              MyToast.showToast(
+                                                                  'To be implement');
+                                                            },
                                                             style: ButtonStyle(
                                                               shadowColor:
                                                                   MaterialStateProperty

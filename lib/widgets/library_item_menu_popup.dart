@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../states/app_state.dart';
+import 'confirm_popup.dart';
 
 class LibraryItemMenuPopup extends StatelessWidget {
   final BasicLibrary library;
@@ -20,7 +21,7 @@ class LibraryItemMenuPopup extends StatelessWidget {
     } else {
       MyToast.showToast('Delete library failed!');
     }
-    appState.refreshLibraries!(appState);
+    appState.refreshLibraries!(appState, false);
     // appState.removeLibraryFromLibraries!(library);
   }
 
@@ -67,15 +68,23 @@ class LibraryItemMenuPopup extends StatelessWidget {
                 Radius.circular(10.0),
               ),
               onTap: () {
-                print('Delete library.');
-                print(appState);
-                _deleteLibrary(appState);
-                Navigator.pop(context);
-                if (isInDetailLibraryPage) {
-                  appState.openedLibrary = null;
-                  appState.rawOpenedLibrary = null;
-                  Navigator.pop(context);
-                }
+                showDialog(
+                  context: context,
+                  builder: (_) => ShowConfirmDialog(
+                    title: 'Do you want to delete this library?',
+                    onConfirm: () {
+                      print('Delete library.');
+                      print(appState);
+                      _deleteLibrary(appState);
+                      Navigator.pop(context);
+                      if (isInDetailLibraryPage) {
+                        appState.openedLibrary = null;
+                        appState.rawOpenedLibrary = null;
+                        Navigator.pop(context);
+                      }
+                    },
+                  ),
+                );
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -85,15 +94,23 @@ class LibraryItemMenuPopup extends StatelessWidget {
                       icon: Icon(Icons.delete_rounded),
                       color: colorScheme.tertiary,
                       onPressed: () {
-                        print('Delete library.');
-                        print(appState);
-                        _deleteLibrary(appState);
-                        Navigator.pop(context);
-                        if (isInDetailLibraryPage) {
-                          appState.openedLibrary = null;
-                          appState.rawOpenedLibrary = null;
-                          Navigator.pop(context);
-                        }
+                        showDialog(
+                          context: context,
+                          builder: (_) => ShowConfirmDialog(
+                            title: 'Do you want to delete this library?',
+                            onConfirm: () {
+                              print('Delete library.');
+                              print(appState);
+                              _deleteLibrary(appState);
+                              Navigator.pop(context);
+                              if (isInDetailLibraryPage) {
+                                appState.openedLibrary = null;
+                                appState.rawOpenedLibrary = null;
+                                Navigator.pop(context);
+                              }
+                            },
+                          ),
+                        );
                       },
                     ),
                     Expanded(

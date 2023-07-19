@@ -1,8 +1,5 @@
-import 'package:flutter/foundation.dart';
-
-@immutable
 class BasicLibrary {
-  const BasicLibrary({
+  BasicLibrary({
     required this.name,
     required this.cover,
     required this.itemCount,
@@ -10,5 +7,5 @@ class BasicLibrary {
 
   final String name;
   final String cover;
-  final int itemCount;
+  int itemCount;
 }

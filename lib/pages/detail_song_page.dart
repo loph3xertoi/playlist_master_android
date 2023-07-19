@@ -10,7 +10,6 @@ import '../entities/qq_music/qqmusic_detail_song.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
 import '../widgets/my_lyrics_displayer.dart';
-import '../widgets/my_lyrics_reader.dart';
 
 class DetailSongPage extends StatefulWidget {
   final BasicSong song;

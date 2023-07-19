@@ -1,11 +1,8 @@
-import 'package:flutter/foundation.dart';
-
 import '../basic/basic_library.dart';
 
 /// Playlist for qq music.
-@immutable
 class QQMusicPlaylist extends BasicLibrary {
-  const QQMusicPlaylist(
+  QQMusicPlaylist(
     this.dirId,
     this.tid, {
     required super.name,

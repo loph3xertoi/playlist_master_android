@@ -16,10 +16,18 @@ class MyContentArea extends StatefulWidget {
 class _MyContentAreaState extends State<MyContentArea> {
   late Future<List<BasicLibrary>?> _libraries;
 
-  void _refreshLibraries(MyAppState appState) async {
-    setState(() {
-      _libraries = appState.fetchLibraries(appState.currentPlatform);
-    });
+  Future<List<BasicLibrary>?> _refreshLibraries(
+      MyAppState appState, bool delayRebuild) async {
+    _libraries = appState.fetchLibraries(appState.currentPlatform);
+    if (delayRebuild) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {});
+      });
+    } else {
+      setState(() {});
+    }
+
+    return _libraries;
   }
 
   void _removeLibraryFromLibraries(BasicLibrary library) async {
@@ -126,8 +134,9 @@ class _MyContentAreaState extends State<MyContentArea> {
                             color: colorScheme.tertiary,
                             onPressed: () {
                               showDialog(
-                                  context: context,
-                                  builder: (_) => CreateLibraryDialog());
+                                context: context,
+                                builder: (_) => CreateLibraryDialog(),
+                              );
                             },
                           ),
                           IconButton(

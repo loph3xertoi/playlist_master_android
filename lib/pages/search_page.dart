@@ -401,8 +401,7 @@ class _SearchPageState extends State<SearchPage> {
                                                             appState.prevSong =
                                                                 appState
                                                                     .currentSong;
-                                                            // appState.currentPage =
-                                                            //     '/song_player_page';
+                                                            
                                                             appState.isFirstLoadSongPlayer =
                                                                 true;
 

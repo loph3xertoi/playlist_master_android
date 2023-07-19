@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../states/app_state.dart';
 
 class ShowConfirmDialog extends StatelessWidget {
-  const ShowConfirmDialog({super.key});
+  const ShowConfirmDialog(
+      {super.key, required this.title, required this.onConfirm});
+  final String title;
+  final Function onConfirm;
 
   @override
   Widget build(BuildContext context) {
-    MyAppState appState = context.watch<MyAppState>();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return AlertDialog(
       content: Text(
-        'Do you want to empty the queue?',
+        title,
         style: textTheme.labelMedium,
       ),
       actions: [
@@ -31,7 +30,7 @@ class ShowConfirmDialog extends StatelessWidget {
           },
           child: Text(
             'Cancel',
-            style: textTheme.labelMedium,
+            style: textTheme.labelSmall,
           ),
         ),
         TextButton(
@@ -44,12 +43,12 @@ class ShowConfirmDialog extends StatelessWidget {
             ),
           ),
           onPressed: () {
-            appState.queue = [];
+            onConfirm();
             Navigator.of(context).pop();
           },
           child: Text(
             'Yes',
-            style: textTheme.labelMedium!.copyWith(
+            style: textTheme.labelSmall!.copyWith(
               color: Color(0xFFFF0000),
             ),
           ),

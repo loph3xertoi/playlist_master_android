@@ -75,82 +75,86 @@ class _HomePageState extends State<HomePage>
                     // content: Image.network(MyAppState.defaultCoverImage),
                     content: Column(
                       children: [
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () {},
-                            child: TextButton(
-                              style: ButtonStyle(
-                                shadowColor: MaterialStateProperty.all(
-                                  colorScheme.primary,
-                                ),
-                                overlayColor: MaterialStateProperty.all(
-                                  Colors.grey,
-                                ),
-                              ),
-                              onPressed: () async {
-                                await MyHttp.clearCache();
-                                await AudioPlayer.clearAssetCache();
-                                MyToast.showToast('Clear cache');
-                              },
-                              child: Text(
-                                'Clear cache',
-                                style: textTheme.labelMedium,
-                              ),
+                        TextButton(
+                          style: ButtonStyle(
+                            shadowColor: MaterialStateProperty.all(
+                              colorScheme.primary,
+                            ),
+                            overlayColor: MaterialStateProperty.all(
+                              Colors.grey,
                             ),
                           ),
-                        ),
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () {},
-                            child: TextButton(
-                              style: ButtonStyle(
-                                shadowColor: MaterialStateProperty.all(
-                                  colorScheme.primary,
-                                ),
-                                overlayColor: MaterialStateProperty.all(
-                                  Colors.grey,
-                                ),
-                              ),
-                              onPressed: () async {
-                                await SystemChrome.setEnabledSystemUIMode(
-                                    SystemUiMode.immersiveSticky,
-                                    overlays: []);
-                                await FPlugin.setOrientationPortrait();
-                                MyToast.showToast('Reset rotation');
-                              },
-                              child: Text(
-                                'Reset rotation',
-                                style: textTheme.labelMedium,
-                              ),
-                            ),
+                          onPressed: () async {
+                            await MyHttp.clearCache();
+                            await AudioPlayer.clearAssetCache();
+                            MyToast.showToast('Clear local cache');
+                          },
+                          child: Text(
+                            'Clear local cache',
+                            style: textTheme.labelMedium,
                           ),
                         ),
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () {},
-                            child: TextButton(
-                              style: ButtonStyle(
-                                shadowColor: MaterialStateProperty.all(
-                                  colorScheme.primary,
-                                ),
-                                overlayColor: MaterialStateProperty.all(
-                                  Colors.grey,
-                                ),
-                              ),
-                              onPressed: () async {
-                                var res = await appState.fetchSearchedSongs(
-                                    '洛天依', appState.firstPageNo, appState.pageSize, appState.currentPlatform);
-                                print(res);
-                                MyToast.showToast('Search songs');
-                              },
-                              child: Text(
-                                'Search songs',
-                                style: textTheme.labelMedium,
-                              ),
+                        TextButton(
+                          style: ButtonStyle(
+                            shadowColor: MaterialStateProperty.all(
+                              colorScheme.primary,
                             ),
+                            overlayColor: MaterialStateProperty.all(
+                              Colors.grey,
+                            ),
+                          ),
+                          onPressed: () async {
+                            await SystemChrome.setEnabledSystemUIMode(
+                                SystemUiMode.immersiveSticky,
+                                overlays: []);
+                            await FPlugin.setOrientationPortrait();
+                            MyToast.showToast('Reset rotation');
+                          },
+                          child: Text(
+                            'Reset rotation',
+                            style: textTheme.labelMedium,
+                          ),
+                        ),
+                        TextButton(
+                          style: ButtonStyle(
+                            shadowColor: MaterialStateProperty.all(
+                              colorScheme.primary,
+                            ),
+                            overlayColor: MaterialStateProperty.all(
+                              Colors.grey,
+                            ),
+                          ),
+                          onPressed: () async {
+                            var res = await appState.fetchSearchedSongs(
+                                '洛天依',
+                                appState.firstPageNo,
+                                appState.pageSize,
+                                appState.currentPlatform);
+                            print(res);
+                            MyToast.showToast('Search songs');
+                          },
+                          child: Text(
+                            'Search songs',
+                            style: textTheme.labelMedium,
+                          ),
+                        ),
+                        TextButton(
+                          style: ButtonStyle(
+                            shadowColor: MaterialStateProperty.all(
+                              colorScheme.primary,
+                            ),
+                            overlayColor: MaterialStateProperty.all(
+                              Colors.grey,
+                            ),
+                          ),
+                          onPressed: () {
+                            appState.refreshLibraries!(appState, false);
+                            MyToast.showToast('Refresh libraries');
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            'Refresh libraries',
+                            style: textTheme.labelMedium,
                           ),
                         ),
                       ],

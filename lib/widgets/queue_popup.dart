@@ -72,7 +72,12 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                     onPressed: () {
                       showDialog(
                         context: context,
-                        builder: (_) => ShowConfirmDialog(),
+                        builder: (_) => ShowConfirmDialog(
+                          title: 'Do you want to empty the queue?',
+                          onConfirm: () {
+                            appState.queue = [];
+                          },
+                        ),
                       );
                     },
                   )

@@ -4,10 +4,31 @@ import 'package:provider/provider.dart';
 import '../entities/basic/basic_library.dart';
 import '../entities/basic/basic_song.dart';
 import '../states/app_state.dart';
+import 'confirm_popup.dart';
 
-class CreateSongItemMenuDialog extends StatelessWidget {
-  final BasicSong song;
+class CreateSongItemMenuDialog extends StatefulWidget {
   CreateSongItemMenuDialog({required this.song});
+
+  final BasicSong song;
+
+  @override
+  State<CreateSongItemMenuDialog> createState() =>
+      _CreateSongItemMenuDialogState();
+}
+
+class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
+  void _removeSongFromLibrary(BuildContext context, MyAppState appState) async {
+    appState.rawOpenedLibrary!.itemCount -= 1;
+    appState.rawQueue!.remove(widget.song);
+    appState.searchedSongs.remove(widget.song);
+    await appState.removeSongsFromLibrary(
+        [widget.song], appState.openedLibrary!, appState.currentPlatform);
+    appState.refreshLibraries!(appState, true);
+    appState.refreshDetailLibraryPage!(appState);
+    if (context.mounted) {
+      Navigator.pop(context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +53,7 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                 Radius.circular(10.0),
               ),
               onTap: () {
-                print('add to library');
-                print(appState);
+                Navigator.pop(context, "Add to library");
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -42,7 +62,9 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                     IconButton(
                       icon: Icon(Icons.playlist_add_rounded),
                       color: colorScheme.tertiary,
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pop(context, 'Add to library');
+                      },
                     ),
                     Expanded(
                       child: Text(
@@ -63,7 +85,17 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                       Radius.circular(10.0),
                     ),
                     onTap: () {
-                      print('Remove from library.');
+                      showDialog(
+                        context: context,
+                        builder: (_) => ShowConfirmDialog(
+                          title:
+                              'Do you want to remove this song from library?',
+                          onConfirm: () {
+                            print('Remove from library.');
+                            _removeSongFromLibrary(context, appState);
+                          },
+                        ),
+                      );
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -73,7 +105,17 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                             icon: Icon(Icons.playlist_remove_rounded),
                             color: colorScheme.tertiary,
                             onPressed: () {
-                              print('Remove from library.');
+                              showDialog(
+                                context: context,
+                                builder: (_) => ShowConfirmDialog(
+                                  title:
+                                      'Do you want to remove this song from library?',
+                                  onConfirm: () {
+                                    print('Remove from library.');
+                                    _removeSongFromLibrary(context, appState);
+                                  },
+                                ),
+                              );
                             },
                           ),
                           Expanded(
@@ -95,7 +137,7 @@ class CreateSongItemMenuDialog extends StatelessWidget {
               ),
               onTap: () {
                 Navigator.popAndPushNamed(context, '/related_videos_page',
-                    arguments: song);
+                    arguments: widget.song);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -107,7 +149,7 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                       onPressed: () {
                         Navigator.popAndPushNamed(
                             context, '/related_videos_page',
-                            arguments: song);
+                            arguments: widget.song);
                       },
                     ),
                     Expanded(
@@ -134,7 +176,7 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                   itemCount: -1,
                 );
                 Navigator.popAndPushNamed(context, '/similar_songs_page',
-                    arguments: song);
+                    arguments: widget.song);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -152,7 +194,7 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                         );
                         Navigator.popAndPushNamed(
                             context, '/similar_songs_page',
-                            arguments: song);
+                            arguments: widget.song);
                       },
                     ),
                     Expanded(
@@ -175,7 +217,7 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                 print('song\'s detail');
                 appState.isPlayerPageOpened = false;
                 Navigator.popAndPushNamed(context, '/detail_song_page',
-                    arguments: song);
+                    arguments: widget.song);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -187,7 +229,7 @@ class CreateSongItemMenuDialog extends StatelessWidget {
                       onPressed: () {
                         appState.isPlayerPageOpened = false;
                         Navigator.popAndPushNamed(context, '/detail_song_page',
-                            arguments: song);
+                            arguments: widget.song);
                       },
                     ),
                     Expanded(

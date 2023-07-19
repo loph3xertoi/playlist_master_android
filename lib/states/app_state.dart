@@ -35,11 +35,14 @@ import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 
 class MyAppState extends ChangeNotifier {
+  // Refresh detail library page.
+  void Function(MyAppState)? refreshDetailLibraryPage;
+
   // Remove library from libraries in home page.
   void Function(BasicLibrary)? removeLibraryFromLibraries;
 
   // Refresh home page's libraries.
-  void Function(MyAppState)? refreshLibraries;
+  Future<List<BasicLibrary>?> Function(MyAppState, bool)? refreshLibraries;
 
   // Current page.
   int _currentPage = 2;
@@ -1087,6 +1090,7 @@ class MyAppState extends ChangeNotifier {
           // Create success.
           if (resultCode == 100) {
             result.putIfAbsent('result', () => resultCode);
+            MyToast.showToast('Songs added');
             // result.putIfAbsent('dirId', () => resultJson['data']['dirid']);
           } else if (resultCode == 200) {
             // Create fail.
@@ -1143,6 +1147,7 @@ class MyAppState extends ChangeNotifier {
           int resultCode = resultJson['result'];
           if (resultCode == 100) {
             result.putIfAbsent('result', () => resultCode);
+            MyToast.showToast('Songs removed from ${library.name}');
           } else if (resultCode == 200) {
             result.putIfAbsent('result', () => resultCode);
             result.putIfAbsent('errMsg', () => resultJson['errMsg']);
@@ -1211,6 +1216,7 @@ class MyAppState extends ChangeNotifier {
           int resultCode = resultJson['result'];
           if (resultCode == 100) {
             result.putIfAbsent('result', () => resultCode);
+            MyToast.showToast('Songs moved');
           } else if (resultCode == 200) {
             result.putIfAbsent('result', () => resultCode);
             result.putIfAbsent('errMsg', () => resultJson['errMsg']);

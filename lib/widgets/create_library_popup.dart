@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -5,6 +6,13 @@ import '../states/app_state.dart';
 import '../utils/my_toast.dart';
 
 class CreateLibraryDialog extends StatefulWidget {
+  CreateLibraryDialog({
+    Key? key,
+    this.initText,
+  }) : super(key: key);
+
+  String? initText;
+
   @override
   State<CreateLibraryDialog> createState() => _CreateLibraryDialogState();
 }
@@ -23,6 +31,7 @@ class _CreateLibraryDialogState extends State<CreateLibraryDialog> {
 
   void _onSubmitted(
       BuildContext context, String value, MyAppState appState) async {
+    int libraryId = -1;
     if (value == '') {
       MyToast.showToast('Please enter library name!');
     } else {
@@ -30,15 +39,20 @@ class _CreateLibraryDialogState extends State<CreateLibraryDialog> {
           await appState.createLibrary(value, appState.currentPlatform);
       if (result!['result'] == 100) {
         MyToast.showToast('Create new library successfully!');
+        if (appState.currentPlatform == 1) {
+          libraryId = result['dirId'] as int;
+          appState.refreshLibraries!(appState, true);
+        } else {
+          throw Exception('Only implement qq music platform');
+        }
       } else if (result['result'] == 200) {
         MyToast.showToast(result['errMsg'].toString());
       } else {
         MyToast.showToast('Create library failed!');
       }
-      appState.refreshLibraries!(appState);
     }
     if (mounted) {
-      Navigator.pop(context);
+      Navigator.pop(context, libraryId);
     }
   }
 
@@ -59,6 +73,9 @@ class _CreateLibraryDialogState extends State<CreateLibraryDialog> {
   void initState() {
     super.initState();
     _textEditingController = TextEditingController();
+    if (widget.initText != null) {
+      _textEditingController.text = widget.initText!;
+    }
     _textEditingController.addListener(_updateSuffixIconVisibility);
   }
 
@@ -127,9 +144,9 @@ class _CreateLibraryDialogState extends State<CreateLibraryDialog> {
               ],
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(12.0, 0.0, 12.0, 15.0),
+              padding: EdgeInsets.fromLTRB(12.0, 0.0, 12.0, 40.0),
               child: Container(
-                height: 32.0,
+                height: 40.0,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8.0),
                   color: colorScheme.secondary,
