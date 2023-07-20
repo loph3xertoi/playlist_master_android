@@ -824,9 +824,6 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                               onPressed: () {
                                                 showDialog(
                                                   context: context,
-                                                  // builder: (context) => Dialog(
-                                                  //   child: Text('hello'),
-                                                  // ),
                                                   builder: (_) =>
                                                       CreateSongplayerMenuDialog(),
                                                 );

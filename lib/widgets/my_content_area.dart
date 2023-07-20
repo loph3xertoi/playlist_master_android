@@ -6,6 +6,7 @@ import '../entities/basic/basic_library.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
 import 'create_library_popup.dart';
+import 'libraries_settings_menu_popup.dart';
 import 'library_item.dart';
 
 class MyContentArea extends StatefulWidget {
@@ -144,7 +145,14 @@ class _MyContentAreaState extends State<MyContentArea> {
                             color: colorScheme.tertiary,
                             icon: Icon(Icons.more_vert_rounded),
                             tooltip: 'Library settings',
-                            onPressed: () {},
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (_) => LibrariesSettingsPopup(
+                                  libraries: libraries,
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),

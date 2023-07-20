@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/entities/qq_music/qqmusic_playlist.dart';
-import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../states/app_state.dart';
+import '../utils/my_toast.dart';
 import 'confirm_popup.dart';
 
 class LibraryItemMenuPopup extends StatelessWidget {

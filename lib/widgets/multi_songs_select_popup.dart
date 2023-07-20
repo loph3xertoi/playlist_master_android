@@ -131,18 +131,20 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
             ButtonBar(
               children: <Widget>[
                 TextButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (_) => ShowConfirmDialog(
-                        title:
-                            'Do you want to remove these songs from library?',
-                        onConfirm: () {
-                          _removeSelectedSongsFromLibrary(appState);
-                        },
-                      ),
-                    );
-                  },
+                  onPressed: _selectedIndex.isNotEmpty
+                      ? () {
+                          showDialog(
+                            context: context,
+                            builder: (_) => ShowConfirmDialog(
+                              title:
+                                  'Do you want to remove these songs from library?',
+                              onConfirm: () {
+                                _removeSelectedSongsFromLibrary(appState);
+                              },
+                            ),
+                          );
+                        }
+                      : null,
                   style: _selectedIndex.isNotEmpty
                       ? ButtonStyle(
                           shadowColor: MaterialStateProperty.all(
@@ -163,9 +165,11 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () {
-                    _addSongsToLibraries(context, appState);
-                  },
+                  onPressed: _selectedIndex.isNotEmpty
+                      ? () {
+                          _addSongsToLibraries(context, appState);
+                        }
+                      : null,
                   style: _selectedIndex.isNotEmpty
                       ? ButtonStyle(
                           shadowColor: MaterialStateProperty.all(
@@ -186,9 +190,11 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () {
-                    _moveSongsToLibraries(context, appState);
-                  },
+                  onPressed: _selectedIndex.isNotEmpty
+                      ? () {
+                          _moveSongsToLibraries(context, appState);
+                        }
+                      : null,
                   style: _selectedIndex.isNotEmpty
                       ? ButtonStyle(
                           shadowColor: MaterialStateProperty.all(
@@ -240,7 +246,7 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
           return SelectLibraryPopup(
             scrollController: scrollController,
             songs: selectedSongs,
-            action:'add',
+            action: 'add',
           );
         },
         anchors: [0, 0.45, 0.9],
@@ -295,8 +301,7 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
           return SelectLibraryPopup(
             scrollController: scrollController,
             songs: selectedSongs,
-            action:'move',
-
+            action: 'move',
           );
         },
         anchors: [0, 0.45, 0.9],
