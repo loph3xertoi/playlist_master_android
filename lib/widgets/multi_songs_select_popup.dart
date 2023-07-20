@@ -164,7 +164,7 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
                 ),
                 TextButton(
                   onPressed: () {
-                    _addSongsToLibrary(context, appState);
+                    _addSongsToLibraries(context, appState);
                   },
                   style: _selectedIndex.isNotEmpty
                       ? ButtonStyle(
@@ -186,7 +186,9 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    _moveSongsToLibraries(context, appState);
+                  },
                   style: _selectedIndex.isNotEmpty
                       ? ButtonStyle(
                           shadowColor: MaterialStateProperty.all(
@@ -214,9 +216,8 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
     );
   }
 
-  void _addSongsToLibrary(BuildContext context, MyAppState appState) async {
-    appState.rawOpenedLibrary!.itemCount -= _selectedIndex.length;
-    List<BasicSong> removedSongs =
+  void _addSongsToLibraries(BuildContext context, MyAppState appState) async {
+    List<BasicSong> selectedSongs =
         _selectedIndex.map((index) => appState.rawQueue![index]).toList();
     if (mounted) {
       showFlexibleBottomSheet(
@@ -238,7 +239,8 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
         ) {
           return SelectLibraryPopup(
             scrollController: scrollController,
-            songs: removedSongs,
+            songs: selectedSongs,
+            action:'add',
           );
         },
         anchors: [0, 0.45, 0.9],
@@ -266,6 +268,60 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
     appState.refreshDetailLibraryPage!(appState);
     if (appState.rawOpenedLibrary!.itemCount == 0 && mounted) {
       Navigator.pop(context);
+    }
+  }
+
+  void _moveSongsToLibraries(BuildContext context, MyAppState appState) async {
+    List<BasicSong> selectedSongs =
+        _selectedIndex.map((index) => appState.rawQueue![index]).toList();
+    if (mounted) {
+      int? result = await showFlexibleBottomSheet(
+        minHeight: 0,
+        initHeight: 0.45,
+        maxHeight: 0.9,
+        context: context,
+        bottomSheetColor: Colors.transparent,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30.0),
+            topRight: Radius.circular(30.0),
+          ),
+        ),
+        builder: (
+          BuildContext context,
+          ScrollController scrollController,
+          double bottomSheetOffset,
+        ) {
+          return SelectLibraryPopup(
+            scrollController: scrollController,
+            songs: selectedSongs,
+            action:'move',
+
+          );
+        },
+        anchors: [0, 0.45, 0.9],
+        isSafeArea: true,
+      );
+
+      if (result != null && result == 0) {
+        appState.rawOpenedLibrary!.itemCount -= _selectedIndex.length;
+        Map<int, Object> map = appState.rawQueue!.asMap();
+        Map<int, Object> modifiableMap = Map.from(map);
+        modifiableMap
+            .removeWhere((index, object) => _selectedIndex.contains(index));
+        appState.rawQueue = modifiableMap.values.toList();
+        setState(() {
+          _selectedIndex.clear();
+        });
+        appState.searchedSongs = appState.rawQueue!;
+        await appState.removeSongsFromLibrary(
+            selectedSongs, appState.openedLibrary!, appState.currentPlatform);
+        appState.refreshLibraries!(appState, true);
+        appState.refreshDetailLibraryPage!(appState);
+        if (appState.rawOpenedLibrary!.itemCount == 0 && mounted) {
+          Navigator.pop(context);
+        }
+      }
     }
   }
 }

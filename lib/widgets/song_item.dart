@@ -56,6 +56,7 @@ class _SongItemState extends State<SongItem> {
           return SelectLibraryPopup(
             scrollController: scrollController,
             songs: [widget.song],
+            action: 'add',
           );
         },
         anchors: [0, 0.45, 0.9],

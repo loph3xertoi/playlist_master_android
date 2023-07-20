@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/entities/basic/basic_song.dart';
-import 'package:playlistmaster/entities/qq_music/qqmusic_playlist.dart';
-import 'package:playlistmaster/widgets/selectable_library_item.dart';
+import '../entities/basic/basic_song.dart';
+import '../entities/qq_music/qqmusic_playlist.dart';
+import 'selectable_library_item.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
@@ -14,10 +14,12 @@ class SelectLibraryPopup extends StatefulWidget {
     super.key,
     required this.scrollController,
     required this.songs,
+    required this.action,
   });
 
   final ScrollController scrollController;
   final List<BasicSong> songs;
+  final String action;
 
   @override
   State<SelectLibraryPopup> createState() => _SelectLibraryPopupState();
@@ -107,7 +109,9 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                       Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: Text(
-                          'Save to library',
+                          widget.action == 'add'
+                              ? 'Save to libraries'
+                              : 'Move to libraries',
                           style: textTheme.labelSmall,
                         ),
                       ),
@@ -121,7 +125,6 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                             });
                             if (_selectedIndex.isNotEmpty) {
                               _addSongsToLibraries(appState, libraries);
-                              Navigator.pop(context);
                             }
                           },
                           style: ButtonStyle(
@@ -137,7 +140,9 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                                 ? 'Multi-select'
                                 : _selectedIndex.isEmpty
                                     ? 'Cancel'
-                                    : 'Save(${_selectedIndex.length})',
+                                    : widget.action == 'add'
+                                        ? 'Save(${_selectedIndex.length})'
+                                        : 'Move(${_selectedIndex.length})',
                             style: textTheme.labelSmall,
                           ),
                         ),
@@ -170,9 +175,6 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                                     itemCount: 1,
                                   );
                                   _addSongsToLibrary(appState, library);
-                                  if (mounted) {
-                                    Navigator.pop(context);
-                                  }
                                 } else {
                                   throw Exception(
                                       'Only implement qq music platform');
@@ -202,7 +204,6 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                                   });
                                 } else {
                                   _addSongsToLibrary(appState, libraries[i]);
-                                  Navigator.pop(context);
                                 }
                               },
                               child: SelectableLibraryItem(
@@ -226,24 +227,39 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
   }
 
   void _addSongsToLibrary(MyAppState appState, BasicLibrary library) async {
-    await appState.addSongsToLibrary(
+    int? result;
+    Map<String, Object>? resultMap = await appState.addSongsToLibrary(
       widget.songs,
       library,
       appState.currentPlatform,
     );
-    appState.refreshLibraries!(appState, true);
+    if (resultMap != null && resultMap['result'] == 100) {
+      appState.refreshLibraries!(appState, true);
+      result = 0;
+    }
+    if (mounted) {
+      Navigator.pop(context, result);
+    }
   }
 
-  Future<void> _addSongsToLibraries(
+  void _addSongsToLibraries(
       MyAppState appState, List<BasicLibrary> libraries) async {
+    int? result;
     int platform = appState.currentPlatform;
+    Map<String, Object>? _result;
     for (int i = 0; i < _selectedIndex.length; i++) {
-      await appState.addSongsToLibrary(
+      _result = await appState.addSongsToLibrary(
         widget.songs,
         libraries[_selectedIndex[i]],
         platform,
       );
+      if (_result != null && _result['result'] == 100) {
+        result = 0;
+      }
     }
     appState.refreshLibraries!(appState, true);
+    if (mounted) {
+      Navigator.pop(context, result);
+    }
   }
 }
