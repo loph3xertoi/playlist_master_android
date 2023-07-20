@@ -125,17 +125,12 @@ class _MultiLibrariesSelectPopupState extends State<MultiLibrariesSelectPopup> {
       _selectedIndex.clear();
     });
 
-    var result;
-    for (var library in removedLibraries) {
-      var resultMap =
-          await appState.deleteLibrary(library, appState.currentPlatform);
-      if (resultMap != null && resultMap['result'] == 100) {
-        result = 0;
-      }
-    }
-    if (result == 0) {
+    var resultMap = await appState.deleteLibraries(
+        removedLibraries, appState.currentPlatform);
+    if (resultMap != null && resultMap['result'] == 100) {
       MyToast.showToast('Delete successfully');
     }
+
     appState.refreshLibraries!(appState, true);
     if (mounted) {
       Navigator.pop(context);

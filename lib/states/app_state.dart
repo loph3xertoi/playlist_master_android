@@ -903,22 +903,26 @@ class MyAppState extends ChangeNotifier {
     return null;
   }
 
-  Future<Map<String, Object>?> deleteLibrary(
-      BasicLibrary library, int platform) async {
-    int libraryId;
+  Future<Map<String, Object>?> deleteLibraries(
+      List<BasicLibrary> libraries, int platform) async {
+    String librariesIds;
     if (platform == 1) {
-      if (library is QQMusicPlaylist) {
-        libraryId = library.dirId;
+      if (libraries[0] is QQMusicPlaylist) {
+        librariesIds = libraries
+            .map((library) => (library as QQMusicPlaylist).dirId)
+            .join(",");
       } else {
-        libraryId = (library as QQMusicDetailPlaylist).dirId;
+        librariesIds = libraries
+            .map((library) => (library as QQMusicDetailPlaylist).dirId)
+            .join(",");
       }
     } else {
       throw Exception('Only implement qq music platform');
     }
-    final Uri url = Uri.http(API.host, '${API.deleteLibrary}/$libraryId', {
+    final Uri url = Uri.http(API.host, '${API.deleteLibrary}/$librariesIds', {
       'platform': platform.toString(),
     });
-    MyLogger.logger.d('Deleting library...');
+    MyLogger.logger.d('Deleting libraries...');
     final client = RetryClient(http.Client());
     try {
       final response = await client.delete(url);
@@ -933,7 +937,7 @@ class MyAppState extends ChangeNotifier {
             result.putIfAbsent('result', () => resultCode);
           } else {
             result.putIfAbsent('result', () => resultCode);
-            MyToast.showToast('Delete library failed: $resultJson');
+            MyToast.showToast('Delete libraries failed: $resultJson');
           }
           return Future.value(result);
         } else {

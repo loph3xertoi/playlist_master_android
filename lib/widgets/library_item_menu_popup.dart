@@ -14,7 +14,7 @@ class LibraryItemMenuPopup extends StatelessWidget {
 
   void _deleteLibrary(MyAppState appState) async {
     int platform = appState.currentPlatform;
-    var result = await appState.deleteLibrary(library, platform);
+    var result = await appState.deleteLibraries([library], platform);
     if (result!['result'] == 100) {
       MyToast.showToast('Delete library successfully!');
     } else {

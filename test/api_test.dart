@@ -14,9 +14,12 @@ void main() {
     expect(map!['result'], equals(100));
   });
 
-  test('Delete library', () async {
-    var map = await appState.deleteLibrary(
-      QQMusicPlaylist(22, '22', name: 'name', cover: 'cover', itemCount: 1),
+  test('Delete libraries', () async {
+    var map = await appState.deleteLibraries(
+      [
+        QQMusicPlaylist(22, '22', name: 'name1', cover: 'cover1', itemCount: 1),
+        QQMusicPlaylist(23, '23', name: 'name2', cover: 'cover2', itemCount: 1),
+      ],
       1,
     );
     expect(map!['result'], equals(100));

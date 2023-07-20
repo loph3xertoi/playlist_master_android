@@ -55,7 +55,7 @@ class API {
   static const createLibrary = '/library';
 
   /// Delete library in [platform] with id [library].
-  /// api: DELETE /library/[library]?platform=[platform]
+  /// api: DELETE /library/[libraries]?platform=[platform]
   static const deleteLibrary = '/library';
 
   /// Add songs to library in [platform] with [library],
