@@ -13,11 +13,11 @@ class SelectLibraryPopup extends StatefulWidget {
   const SelectLibraryPopup({
     super.key,
     required this.scrollController,
-    required this.song,
+    required this.songs,
   });
 
   final ScrollController scrollController;
-  final BasicSong song;
+  final List<BasicSong> songs;
 
   @override
   State<SelectLibraryPopup> createState() => _SelectLibraryPopupState();
@@ -152,14 +152,14 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                           color: Colors.transparent,
                           child: InkWell(
                             onTap: () async {
-                              int result = await showDialog(
+                              int? result = await showDialog(
                                 context: context,
                                 builder: (_) => CreateLibraryDialog(
-                                  initText: widget.song.name,
+                                  initText: widget.songs[0].name,
                                 ),
                               );
                               // Create library successfully.
-                              if (result > 0) {
+                              if (result != null && result > 0) {
                                 if (appState.currentPlatform == 1) {
                                   // Temporarily library for holding dirId.
                                   BasicLibrary library = QQMusicPlaylist(
@@ -227,7 +227,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
 
   void _addSongsToLibrary(MyAppState appState, BasicLibrary library) async {
     await appState.addSongsToLibrary(
-      [widget.song],
+      widget.songs,
       library,
       appState.currentPlatform,
     );
@@ -239,7 +239,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
     int platform = appState.currentPlatform;
     for (int i = 0; i < _selectedIndex.length; i++) {
       await appState.addSongsToLibrary(
-        [widget.song],
+        widget.songs,
         libraries[_selectedIndex[i]],
         platform,
       );

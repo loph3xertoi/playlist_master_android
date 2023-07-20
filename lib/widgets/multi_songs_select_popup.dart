@@ -1,6 +1,8 @@
 import 'dart:math';
 
+import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:flutter/material.dart';
+import 'select_library_popup.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_song.dart';
@@ -161,7 +163,9 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    _addSongsToLibrary(context, appState);
+                  },
                   style: _selectedIndex.isNotEmpty
                       ? ButtonStyle(
                           shadowColor: MaterialStateProperty.all(
@@ -208,6 +212,39 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
         ),
       ),
     );
+  }
+
+  void _addSongsToLibrary(BuildContext context, MyAppState appState) async {
+    appState.rawOpenedLibrary!.itemCount -= _selectedIndex.length;
+    List<BasicSong> removedSongs =
+        _selectedIndex.map((index) => appState.rawQueue![index]).toList();
+    if (mounted) {
+      showFlexibleBottomSheet(
+        minHeight: 0,
+        initHeight: 0.45,
+        maxHeight: 0.9,
+        context: context,
+        bottomSheetColor: Colors.transparent,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30.0),
+            topRight: Radius.circular(30.0),
+          ),
+        ),
+        builder: (
+          BuildContext context,
+          ScrollController scrollController,
+          double bottomSheetOffset,
+        ) {
+          return SelectLibraryPopup(
+            scrollController: scrollController,
+            songs: removedSongs,
+          );
+        },
+        anchors: [0, 0.45, 0.9],
+        isSafeArea: true,
+      );
+    }
   }
 
   void _removeSelectedSongsFromLibrary(MyAppState appState) async {
