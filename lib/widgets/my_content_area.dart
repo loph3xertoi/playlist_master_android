@@ -132,6 +132,7 @@ class _MyContentAreaState extends State<MyContentArea> {
                           IconButton(
                             icon: Icon(Icons.library_add_rounded),
                             color: colorScheme.tertiary,
+                            tooltip: 'Create library',
                             onPressed: () {
                               showDialog(
                                 context: context,
@@ -142,9 +143,8 @@ class _MyContentAreaState extends State<MyContentArea> {
                           IconButton(
                             color: colorScheme.tertiary,
                             icon: Icon(Icons.more_vert_rounded),
-                            onPressed: () {
-                              // Add your search icon onPressed logic here
-                            },
+                            tooltip: 'Library settings',
+                            onPressed: () {},
                           ),
                         ],
                       ),

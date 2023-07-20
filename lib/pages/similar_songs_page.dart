@@ -155,6 +155,7 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                     Icons.playlist_play_rounded,
                                                   ),
                                                   color: colorScheme.tertiary,
+                                                  tooltip: 'Play all',
                                                 ),
                                                 IconButton(
                                                   onPressed: () {},

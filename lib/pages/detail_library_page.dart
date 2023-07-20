@@ -481,6 +481,8 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                         ),
                                                                         color: colorScheme
                                                                             .tertiary,
+                                                                        tooltip:
+                                                                            'Play all',
                                                                       ),
                                                                       IconButton(
                                                                         onPressed:
@@ -498,6 +500,8 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                         ),
                                                                         color: colorScheme
                                                                             .tertiary,
+                                                                        tooltip:
+                                                                            'Multi select',
                                                                       ),
                                                                       IconButton(
                                                                         onPressed:
@@ -519,6 +523,8 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                         ),
                                                                         color: colorScheme
                                                                             .tertiary,
+                                                                        tooltip:
+                                                                            'Edit library',
                                                                       ),
                                                                     ],
                                                                   ),

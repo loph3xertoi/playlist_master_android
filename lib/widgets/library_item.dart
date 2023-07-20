@@ -91,6 +91,7 @@ class LibraryItem extends StatelessWidget {
                       );
                     },
                     color: colorScheme.tertiary,
+                    tooltip: 'Edit library',
                     icon: Icon(
                       Icons.more_vert_rounded,
                     )),

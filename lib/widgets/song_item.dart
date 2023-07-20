@@ -241,6 +241,7 @@ class _SongItemState extends State<SongItem> {
                   color: widget.song.isTakenDown || widget.song.payPlay == 1
                       ? colorScheme.onTertiary
                       : colorScheme.tertiary,
+                  tooltip: 'Add to queue',
                   icon: Icon(
                     Icons.queue_play_next_rounded,
                   )),
@@ -258,6 +259,7 @@ class _SongItemState extends State<SongItem> {
                   color: widget.song.isTakenDown || widget.song.payPlay == 1
                       ? colorScheme.onTertiary
                       : colorScheme.tertiary,
+                  tooltip: 'Edit song',
                   icon: Icon(
                     Icons.more_vert_rounded,
                   )),
