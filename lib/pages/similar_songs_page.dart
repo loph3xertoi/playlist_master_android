@@ -11,6 +11,7 @@ import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 import '../utils/theme_manager.dart';
 import '../widgets/bottom_player.dart';
+import '../widgets/multi_songs_select_popup.dart';
 import '../widgets/song_item.dart';
 
 class SimilarSongsPage extends StatefulWidget {
@@ -143,6 +144,41 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                 child: similarSongs.isNotEmpty
                                     ? Column(
                                         children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Row(
+                                              children: [
+                                                IconButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.arrow_back_rounded,
+                                                  ),
+                                                  color: colorScheme.tertiary,
+                                                ),
+                                                Expanded(
+                                                  child: RichText(
+                                                    textAlign: TextAlign.center,
+                                                    text: TextSpan(
+                                                      text:
+                                                          'Similar songs for: ',
+                                                      style:
+                                                          textTheme.labelSmall,
+                                                      children: <TextSpan>[
+                                                        TextSpan(
+                                                          text:
+                                                              widget.song.name,
+                                                          style: textTheme
+                                                              .labelMedium,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                           SizedBox(
                                             height: 40.0,
                                             child: Row(
@@ -150,7 +186,142 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                   MainAxisAlignment.end,
                                               children: [
                                                 IconButton(
-                                                  onPressed: () {},
+                                                  onPressed: () async {
+                                                    if (appState.player ==
+                                                        null) {
+                                                      appState.queue = similarSongs
+                                                          .where((song) =>
+                                                              !song
+                                                                  .isTakenDown &&
+                                                              (song.payPlay ==
+                                                                  0))
+                                                          .toList();
+
+                                                      // Real index in queue, not in raw queue as some songs may be taken down.
+                                                      int realIndex = appState
+                                                          .queue!
+                                                          .indexOf(
+                                                              similarSongs[0]);
+
+                                                      try {
+                                                        await appState
+                                                            .initAudioPlayer();
+                                                      } catch (e) {
+                                                        MyToast.showToast(
+                                                            'Exception: $e');
+                                                        MyLogger.logger
+                                                            .e('Exception: $e');
+                                                        appState.queue = [];
+                                                        appState.currentDetailSong =
+                                                            null;
+                                                        appState
+                                                            .currentPlayingSongInQueue = 0;
+                                                        appState.currentSong =
+                                                            null;
+                                                        appState.prevSong =
+                                                            null;
+                                                        appState.isPlaying =
+                                                            false;
+                                                        appState.player!.stop();
+                                                        appState.player!
+                                                            .dispose();
+                                                        appState.player = null;
+                                                        appState.initQueue!
+                                                            .clear();
+                                                        appState.isPlayerPageOpened =
+                                                            false;
+                                                        appState.canSongPlayerPagePop =
+                                                            false;
+                                                        return;
+                                                      }
+
+                                                      appState.currentPlayingSongInQueue =
+                                                          realIndex;
+
+                                                      appState.currentSong =
+                                                          appState.queue![
+                                                              realIndex];
+
+                                                      appState.prevSong =
+                                                          appState.currentSong;
+
+                                                      appState.currentDetailSong =
+                                                          null;
+
+                                                      appState.player!.play();
+                                                    } else {
+                                                      appState.queue = similarSongs
+                                                          .where((song) =>
+                                                              !song
+                                                                  .isTakenDown &&
+                                                              (song.payPlay ==
+                                                                  0))
+                                                          .toList();
+
+                                                      // Real index in queue, not in raw queue as some songs may be taken down.
+                                                      int realIndex = appState
+                                                          .queue!
+                                                          .indexOf(
+                                                              similarSongs[0]);
+
+                                                      appState.player!.stop();
+
+                                                      appState.player!
+                                                          .dispose();
+
+                                                      appState.player = null;
+
+                                                      appState.initQueue!
+                                                          .clear();
+
+                                                      try {
+                                                        await appState
+                                                            .initAudioPlayer();
+                                                      } catch (e) {
+                                                        MyToast.showToast(
+                                                            'Exception: $e');
+                                                        MyLogger.logger
+                                                            .e('Exception: $e');
+                                                        appState.queue = [];
+                                                        appState.currentDetailSong =
+                                                            null;
+                                                        appState
+                                                            .currentPlayingSongInQueue = 0;
+                                                        appState.currentSong =
+                                                            null;
+                                                        appState.prevSong =
+                                                            null;
+                                                        appState.isPlaying =
+                                                            false;
+                                                        appState.player!.stop();
+                                                        appState.player!
+                                                            .dispose();
+                                                        appState.player = null;
+                                                        appState.initQueue!
+                                                            .clear();
+                                                        appState.isPlayerPageOpened =
+                                                            false;
+                                                        appState.canSongPlayerPagePop =
+                                                            false;
+                                                        return;
+                                                      }
+
+                                                      appState.currentPlayingSongInQueue =
+                                                          realIndex;
+
+                                                      appState.currentSong =
+                                                          appState.queue![
+                                                              realIndex];
+
+                                                      appState.currentDetailSong =
+                                                          null;
+
+                                                      appState.prevSong =
+                                                          appState.currentSong;
+
+                                                      appState.player!.play();
+                                                    }
+                                                  },
                                                   icon: Icon(
                                                     Icons.playlist_play_rounded,
                                                   ),
@@ -158,12 +329,17 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                   tooltip: 'Play all',
                                                 ),
                                                 IconButton(
-                                                  onPressed: () {},
+                                                  onPressed: () {
+                                                    showDialog(
+                                                        context: context,
+                                                        builder: (_) =>
+                                                            MultiSongsSelectPopup());
+                                                  },
                                                   icon: Icon(
-                                                    Icons
-                                                        .playlist_add_check_rounded,
+                                                    Icons.checklist_rounded,
                                                   ),
                                                   color: colorScheme.tertiary,
+                                                  tooltip: 'Multi select',
                                                 ),
                                                 IconButton(
                                                   onPressed: () {},

@@ -170,13 +170,15 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
               ),
               onTap: () {
                 appState.isPlayerPageOpened = false;
+                BasicLibrary originLibrary = appState.openedLibrary!;
                 appState.openedLibrary = BasicLibrary(
                   name: 'similar song',
                   cover: '',
                   itemCount: -1,
                 );
                 Navigator.popAndPushNamed(context, '/similar_songs_page',
-                    arguments: widget.song);
+                        arguments: widget.song)
+                    .then((_) => appState.openedLibrary = originLibrary);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -187,14 +189,17 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
                       color: colorScheme.tertiary,
                       onPressed: () {
                         appState.isPlayerPageOpened = false;
+                        BasicLibrary originLibrary = appState.openedLibrary!;
                         appState.openedLibrary = BasicLibrary(
                           name: 'similar song',
                           cover: '',
                           itemCount: -1,
                         );
                         Navigator.popAndPushNamed(
-                            context, '/similar_songs_page',
-                            arguments: widget.song);
+                                context, '/similar_songs_page',
+                                arguments: widget.song)
+                            .then(
+                                (_) => appState.openedLibrary = originLibrary);
                       },
                     ),
                     Expanded(
