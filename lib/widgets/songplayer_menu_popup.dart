@@ -1,7 +1,9 @@
+import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../states/app_state.dart';
+import 'select_library_popup.dart';
 
 class CreateSongplayerMenuDialog extends StatelessWidget {
   @override
@@ -28,8 +30,8 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                 Radius.circular(10.0),
               ),
               onTap: () {
-                print('add to playlist');
-                print(appState);
+                Navigator.pop(context);
+                _addSongToLibrary(context, appState);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -38,11 +40,14 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                     IconButton(
                       icon: Icon(Icons.playlist_add_rounded),
                       color: colorScheme.tertiary,
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _addSongToLibrary(context, appState);
+                      },
                     ),
                     Expanded(
                       child: Text(
-                        'Add to playlist',
+                        'Add to library',
                         style: textTheme.labelMedium!.copyWith(
                           color: colorScheme.onSecondary,
                         ),
@@ -194,5 +199,36 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _addSongToLibrary(BuildContext context, MyAppState appState) async {
+    if (context.mounted) {
+      showFlexibleBottomSheet(
+        minHeight: 0,
+        initHeight: 0.45,
+        maxHeight: 0.9,
+        context: context,
+        bottomSheetColor: Colors.transparent,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30.0),
+            topRight: Radius.circular(30.0),
+          ),
+        ),
+        builder: (
+          BuildContext context,
+          ScrollController scrollController,
+          double bottomSheetOffset,
+        ) {
+          return SelectLibraryPopup(
+            scrollController: scrollController,
+            songs: [appState.currentSong!],
+            action: 'add',
+          );
+        },
+        anchors: [0, 0.45, 0.9],
+        isSafeArea: true,
+      );
+    }
   }
 }
