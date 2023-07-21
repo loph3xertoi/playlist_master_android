@@ -89,29 +89,37 @@ class _MySideDrawerState extends State<MySideDrawer> {
                       ),
                       currentAccountPicture: CircleAvatar(
                         backgroundImage: AssetImage(
-                          currentPlatform == 1
-                              ? 'assets/images/qqmusic.png'
-                              : currentPlatform == 2
-                                  ? 'assets/images/netease.png'
-                                  : 'assets/images/bilibili.png',
+                          currentPlatform == 0
+                              ? 'assets/images/pm_round.png'
+                              : currentPlatform == 1
+                                  ? 'assets/images/qqmusic.png'
+                                  : currentPlatform == 2
+                                      ? 'assets/images/netease.png'
+                                      : 'assets/images/bilibili.png',
                         ),
                       ),
                       otherAccountsPictures: [
                         CircleAvatar(
                           backgroundImage: AssetImage(
-                            currentPlatform == 1
-                                ? 'assets/images/netease.png'
-                                : currentPlatform == 2
-                                    ? 'assets/images/bilibili.png'
-                                    : 'assets/images/qqmusic.png',
+                            currentPlatform == 0
+                                ? 'assets/images/qqmusic.png'
+                                : currentPlatform == 1
+                                    ? 'assets/images/netease.png'
+                                    : currentPlatform == 2
+                                        ? 'assets/images/bilibili.png'
+                                        : 'assets/images/qqmusic.png',
                           ),
                         ),
                         CircleAvatar(
-                          backgroundImage: AssetImage(currentPlatform == 1
-                              ? 'assets/images/bilibili.png'
-                              : currentPlatform == 2
-                                  ? 'assets/images/qqmusic.png'
-                                  : 'assets/images/netease.png'),
+                          backgroundImage: AssetImage(
+                            currentPlatform == 0
+                                ? 'assets/images/netease.png'
+                                : currentPlatform == 1
+                                    ? 'assets/images/bilibili.png'
+                                    : currentPlatform == 2
+                                        ? 'assets/images/qqmusic.png'
+                                        : 'assets/images/netease.png',
+                          ),
                         ),
                       ],
                     ),

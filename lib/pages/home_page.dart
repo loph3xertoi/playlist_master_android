@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fplayer/fplayer.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:playlistmaster/utils/my_logger.dart';
 import 'package:provider/provider.dart';
 
 import '../http/my_http.dart';
@@ -62,8 +63,9 @@ class _HomePageState extends State<HomePage>
             backgroundColor: Colors.transparent,
             imageUri: 'assets/images/home_button.png',
             onTap: () async {
-              // appState.currentPlatform = 0;
-              print(appState);
+              MyToast.showToast('Switched to pms.');
+              MyLogger.logger.i('Switched to pms.');
+              appState.currentPlatform = 0;
               showDialog(
                 builder: (BuildContext context) {
                   return AlertDialog(
@@ -169,21 +171,24 @@ class _HomePageState extends State<HomePage>
               QuickAction(
                 imageUri: 'assets/images/bilibili.png',
                 onTap: () {
-                  print('Switched to bilibili.');
+                  MyToast.showToast('Switched to bilibili.');
+                  MyLogger.logger.i('Switched to bilibili.');
                   appState.currentPlatform = 3;
                 },
               ),
               QuickAction(
                 imageUri: 'assets/images/netease.png',
                 onTap: () {
-                  print('Switched to netease music.');
+                  MyToast.showToast('Switched to netease music.');
+                  MyLogger.logger.i('Switched to netease music.');
                   appState.currentPlatform = 2;
                 },
               ),
               QuickAction(
                 imageUri: 'assets/images/qqmusic.png',
                 onTap: () {
-                  print('Switched to qq music.');
+                  MyToast.showToast('Switched to qq music.');
+                  MyLogger.logger.i('Switched to qq music.');
                   appState.currentPlatform = 1;
                 },
               ),

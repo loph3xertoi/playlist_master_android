@@ -60,6 +60,8 @@ flutter:
     - assets/images/default.jpg
     - assets/images/avatar.png
     - assets/images/home_button.png
+    - assets/images/pm_round.png
+    - assets/images/pm_square.png
     - assets/images/qqmusic.png
     - assets/images/netease.png
     - assets/images/bilibili.png
