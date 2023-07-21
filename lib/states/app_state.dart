@@ -532,10 +532,16 @@ class MyAppState extends ChangeNotifier {
   }
 
   Future<BasicUser?> fetchUser(int platform) async {
+    if (platform == 0) {
+      MyLogger.logger.d('Loading user information from pms...');
+    } else if (platform == 1) {
+      MyLogger.logger.d('Loading user information from qq music server...');
+    } else {
+      throw Exception('Not yet implement.');
+    }
     Uri url = Uri.http(API.host, '${API.user}/${API.uid}', {
       'platform': platform.toString(),
     });
-    MyLogger.logger.d('Loading user information from network...');
     final client = RetryClient(http.Client());
     try {
       var response = await client.get(url);

@@ -143,12 +143,15 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                   Colors.grey,
                                                 ),
                                               ),
-                                              icon: Icon(MdiIcons.webRefresh),
+                                              icon: Icon(
+                                                MdiIcons.webRefresh,
+                                                color: colorScheme.onPrimary,
+                                              ),
                                               label: Text(
                                                 'Retry',
                                                 style: textTheme.labelMedium!
                                                     .copyWith(
-                                                  color: colorScheme.primary,
+                                                  color: colorScheme.onPrimary,
                                                 ),
                                               ),
                                               onPressed: () {

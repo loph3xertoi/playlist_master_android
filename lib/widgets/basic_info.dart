@@ -86,10 +86,15 @@ class _BasicInfoState extends State<BasicInfo> {
                                 Colors.grey,
                               ),
                             ),
-                            icon: Icon(MdiIcons.webRefresh),
+                            icon: Icon(
+                              MdiIcons.webRefresh,
+                              color: colorScheme.onPrimary,
+                            ),
                             label: Text(
                               'Retry',
-                              style: textTheme.labelMedium,
+                              style: textTheme.labelMedium!.copyWith(
+                                color: colorScheme.onPrimary,
+                              ),
                             ),
                             onPressed: () {
                               setState(() {

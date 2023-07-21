@@ -229,11 +229,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       Colors.grey,
                     ),
                   ),
-                  icon: Icon(MdiIcons.webRefresh),
+                  icon: Icon(
+                    MdiIcons.webRefresh,
+                    color: colorScheme.onPrimary,
+                  ),
                   label: Text(
                     'Retry',
                     style: textTheme.labelMedium!.copyWith(
-                      color: Colors.white,
+                      color: colorScheme.onPrimary,
                     ),
                   ),
                   onPressed: () {

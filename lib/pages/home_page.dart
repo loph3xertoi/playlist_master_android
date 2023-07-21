@@ -169,20 +169,22 @@ class _HomePageState extends State<HomePage>
               QuickAction(
                 imageUri: 'assets/images/bilibili.png',
                 onTap: () {
-                  print('bilibili');
+                  print('Switched to bilibili.');
+                  appState.currentPlatform = 3;
                 },
               ),
               QuickAction(
                 imageUri: 'assets/images/netease.png',
                 onTap: () {
-                  print('netease');
+                  print('Switched to netease music.');
+                  appState.currentPlatform = 2;
                 },
               ),
               QuickAction(
                 imageUri: 'assets/images/qqmusic.png',
                 onTap: () {
+                  print('Switched to qq music.');
                   appState.currentPlatform = 1;
-                  print('qqmusic');
                 },
               ),
             ],

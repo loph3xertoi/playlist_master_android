@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../states/app_state.dart';
 
 class MySideDrawer extends StatefulWidget {
   @override
@@ -51,6 +54,8 @@ class _MySideDrawerState extends State<MySideDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    MyAppState appState = context.watch<MyAppState>();
+    var currentPlatform = appState.currentPlatform;
     final textTheme = Theme.of(context).textTheme;
     return SafeArea(
       child: SizedBox(
@@ -84,19 +89,29 @@ class _MySideDrawerState extends State<MySideDrawer> {
                       ),
                       currentAccountPicture: CircleAvatar(
                         backgroundImage: AssetImage(
-                          'assets/images/qqmusic.png',
+                          currentPlatform == 1
+                              ? 'assets/images/qqmusic.png'
+                              : currentPlatform == 2
+                                  ? 'assets/images/netease.png'
+                                  : 'assets/images/bilibili.png',
                         ),
                       ),
                       otherAccountsPictures: [
                         CircleAvatar(
                           backgroundImage: AssetImage(
-                            'assets/images/bilibili.png',
+                            currentPlatform == 1
+                                ? 'assets/images/netease.png'
+                                : currentPlatform == 2
+                                    ? 'assets/images/bilibili.png'
+                                    : 'assets/images/qqmusic.png',
                           ),
                         ),
                         CircleAvatar(
-                          backgroundImage: AssetImage(
-                            'assets/images/netease.png',
-                          ),
+                          backgroundImage: AssetImage(currentPlatform == 1
+                              ? 'assets/images/bilibili.png'
+                              : currentPlatform == 2
+                                  ? 'assets/images/qqmusic.png'
+                                  : 'assets/images/netease.png'),
                         ),
                       ],
                     ),
@@ -120,6 +135,7 @@ class _MySideDrawerState extends State<MySideDrawer> {
                       ),
                       leading: Icon(Icons.logout),
                       onTap: () {
+                        print(appState);
                         // TODO: Implement log out functionality
                       },
                       textColor: Colors.black54,
