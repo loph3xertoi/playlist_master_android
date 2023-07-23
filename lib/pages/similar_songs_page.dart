@@ -87,9 +87,11 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                               return Center(
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     SelectableText(
-                                      'Exception: ${snapshot.error}',
+                                      '${snapshot.error}',
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: Colors.white70,
                                         fontFamily: 'Roboto',

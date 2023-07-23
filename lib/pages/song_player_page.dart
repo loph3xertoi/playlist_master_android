@@ -217,9 +217,11 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                   return Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         SelectableText(
-                          'Exception: ${snapshot.error}',
+                          '${snapshot.error}',
+                          textAlign: TextAlign.center,
                           style: textTheme.labelLarge!.copyWith(
                             color: Colors.white,
                           ),

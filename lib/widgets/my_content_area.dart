@@ -71,9 +71,11 @@ class _MyContentAreaState extends State<MyContentArea> {
             return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SelectableText(
                     '${snapshot.error}',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.grey,
                       fontFamily: 'Roboto',
