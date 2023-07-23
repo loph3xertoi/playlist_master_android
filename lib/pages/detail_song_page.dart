@@ -224,67 +224,71 @@ class _DetailSongPageState extends State<DetailSongPage> {
                         ],
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      // mainAxisSize: MainAxisSize.max,
-                      children: [
-                        SelectableText(
-                          'albumName: $albumName',
-                          style: textTheme.labelMedium,
-                        ),
-                        SelectableText(
-                          'pubTime: $pubTime',
-                          style: textTheme.labelMedium,
-                        ),
-                        // SelectableText(
-                        //   'size128: $size128',
-                        //   style: textTheme.labelMedium,
-                        // ),
-                        // SelectableText(
-                        //   'size320: $size320',
-                        //   style: textTheme.labelMedium,
-                        // ),
-                        // SelectableText(
-                        //   'sizeApe: $sizeApe',
-                        //   style: textTheme.labelMedium,
-                        // ),
-                        // SelectableText(
-                        //   'sizeFlac: $sizeFlac',
-                        //   style: textTheme.labelMedium,
-                        // ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10.0),
-                          child: LyricsReader(
-                            padding: EdgeInsets.symmetric(horizontal: 40.0),
-                            model: _lyricModel,
-                            lyricUi: _lyricUI,
-                            playing: false,
-                            size: Size(double.infinity, 400.0),
-                            onTap: () {
-                              // setState(() {
-                              //   _toggleLyrics = !_toggleLyrics;
-                              // });
-                            },
-                            emptyBuilder: () => Center(
-                              child: SelectableText(
-                                'No lyrics',
-                                style: textTheme.labelMedium,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        // mainAxisSize: MainAxisSize.max,
+                        children: [
+                          SelectableText(
+                            'albumName: $albumName',
+                            style: textTheme.labelMedium,
+                          ),
+                          SelectableText(
+                            'pubTime: $pubTime',
+                            style: textTheme.labelMedium,
+                          ),
+                          // SelectableText(
+                          //   'size128: $size128',
+                          //   style: textTheme.labelMedium,
+                          // ),
+                          // SelectableText(
+                          //   'size320: $size320',
+                          //   style: textTheme.labelMedium,
+                          // ),
+                          // SelectableText(
+                          //   'sizeApe: $sizeApe',
+                          //   style: textTheme.labelMedium,
+                          // ),
+                          // SelectableText(
+                          //   'sizeFlac: $sizeFlac',
+                          //   style: textTheme.labelMedium,
+                          // ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10.0),
+                            child: LyricsReader(
+                              padding: EdgeInsets.symmetric(horizontal: 40.0),
+                              model: _lyricModel,
+                              lyricUi: _lyricUI,
+                              playing: false,
+                              size: Size(double.infinity, 400.0),
+                              onTap: () {
+                                // setState(() {
+                                //   _toggleLyrics = !_toggleLyrics;
+                                // });
+                              },
+                              emptyBuilder: () => Center(
+                                child: SelectableText(
+                                  'No lyrics',
+                                  style: textTheme.labelMedium,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        SingleChildScrollView(
-                          child: Container(
-                            height: 100.0,
-                            width: double.infinity,
-                            color: colorScheme.secondary.withOpacity(0.3),
-                            child: SelectableText(
-                              'description: $description',
-                              style: textTheme.labelMedium,
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: Container(
+                                height: 100.0,
+                                width: double.infinity,
+                                color: colorScheme.secondary.withOpacity(0.3),
+                                child: SelectableText(
+                                  'description: $description',
+                                  style: textTheme.labelMedium,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
