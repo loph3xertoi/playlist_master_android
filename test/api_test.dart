@@ -10,8 +10,8 @@ void main() {
   });
 
   test('Create library', () async {
-    var map = await appState.createLibrary('daw\'s library', 1);
-    expect(map!['result'], equals(100));
+    int? libraryId = await appState.createLibrary('daw\'s library', 1);
+    expect(libraryId, isNotNull);
   });
 
   test('Delete libraries', () async {

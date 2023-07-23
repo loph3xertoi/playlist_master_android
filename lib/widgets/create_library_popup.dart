@@ -35,18 +35,12 @@ class _CreateLibraryDialogState extends State<CreateLibraryDialog> {
     if (value == '') {
       MyToast.showToast('Please enter library name!');
     } else {
-      var result =
+      int? result =
           await appState.createLibrary(value, appState.currentPlatform);
-      if (result!['result'] == 100) {
+      if (result != null) {
         MyToast.showToast('Create new library successfully!');
-        if (appState.currentPlatform == 1) {
-          libraryId = result['dirId'] as int;
-          appState.refreshLibraries!(appState, true);
-        } else {
-          throw Exception('Only implement qq music platform');
-        }
-      } else if (result['result'] == 200) {
-        MyToast.showToast(result['errMsg'].toString());
+        libraryId = result;
+        appState.refreshLibraries!(appState, true);
       } else {
         MyToast.showToast('Create library failed!');
       }
