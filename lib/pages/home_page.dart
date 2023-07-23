@@ -66,6 +66,7 @@ class _HomePageState extends State<HomePage>
               MyToast.showToast('Switched to pms.');
               MyLogger.logger.i('Switched to pms.');
               appState.currentPlatform = 0;
+              appState.refreshLibraries!(appState, false);
               showDialog(
                 builder: (BuildContext context) {
                   return AlertDialog(
@@ -174,6 +175,7 @@ class _HomePageState extends State<HomePage>
                   MyToast.showToast('Switched to bilibili.');
                   MyLogger.logger.i('Switched to bilibili.');
                   appState.currentPlatform = 3;
+                  appState.refreshLibraries!(appState, false);
                 },
               ),
               QuickAction(
@@ -182,6 +184,7 @@ class _HomePageState extends State<HomePage>
                   MyToast.showToast('Switched to netease music.');
                   MyLogger.logger.i('Switched to netease music.');
                   appState.currentPlatform = 2;
+                  appState.refreshLibraries!(appState, false);
                 },
               ),
               QuickAction(
@@ -190,6 +193,7 @@ class _HomePageState extends State<HomePage>
                   MyToast.showToast('Switched to qq music.');
                   MyLogger.logger.i('Switched to qq music.');
                   appState.currentPlatform = 1;
+                  appState.refreshLibraries!(appState, false);
                 },
               ),
             ],
