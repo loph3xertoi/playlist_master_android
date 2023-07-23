@@ -10,24 +10,24 @@ class API {
   /// api: GET /user/[uid]?platform=[platform]
   static const user = '/user';
 
-  /// Get detail song according to [songMid] in [platform].
-  /// api: GET /song/[songMid]?platform=[platform]
+  /// Get detail song according to [songId] in [platform].
+  /// api: GET /song/[songId]?platform=[platform]
   static const detailSong = '/song';
 
   /// Get all similar songs according to [songId] in [platform].
   /// api: GET /similarSongs/[songId]?platform=[platform]
   static const similarSongs = '/similarSongs';
 
-  /// Search songs according to [name] in [platform] with [pageNo] and [pageSize].
-  /// api: GET /search/song/[name]?pageNo=[pageNo]&pageSize=[pageSize]&platform=[platform]
+  /// Search songs according to [keywords] in [platform] with [offset] and [limit].
+  /// api: GET /search/song/[keywords]?offset=[offset]&limit=[limit]&platform=[platform]
   static const searchSong = '/search/song';
 
-  /// Get song's link according to [songMid], [mediaMid] and [type] in [platform].
-  /// api: GET /songLink/[songMid]?mediaMid=[mediaMid]&type=[type]&platform=[platform]
-  static const songLink = '/songLink';
+  // /// Get song's link according to [songMid], [mediaMid] and [type] in [platform].
+  // /// api: GET /songLink/[songMid]?mediaMid=[mediaMid]&type=[type]&platform=[platform]
+  // static const songLink = '/songLink';
 
-  /// Get all songs' link according to [songMids] in [platform].
-  /// api: GET /songsLink/[songMids]?platform=[platform]
+  /// Get all songs' link according to [SongIds] in [platform].
+  /// api: GET /songsLink/[SongIds]?platform=[platform]
   static const songsLink = '/songsLink';
 
   /// Get all MVs' links according to [vids] in [platform].
@@ -54,23 +54,23 @@ class API {
   /// api: POST /library?platform=[platform] {'name': [name]}
   static const createLibrary = '/library';
 
-  /// Delete library in [platform] with id [library].
+  /// Delete library in [platform] with id [libraries].
   /// api: DELETE /library/[libraries]?platform=[platform]
   static const deleteLibrary = '/library';
 
-  /// Add songs to library in [platform] with [library],
+  /// Add songs to library with [libraryId] in [platform],
   /// [tid] is used to evict cache.
-  /// api: POST /addSongsToLibrary?platform=[platform] {'dirid':[dirId],'mid':[songsMid],'tid':[tid]}
+  /// api: POST /addSongsToLibrary?platform=[platform] {'libraryId':[libraryId],'songsId':[songsId],'tid':[tid]}
   static const addSongsToLibrary = '/addSongsToLibrary';
 
   /// Move songs from one library to another library in [platform],
   /// [fromTid] and [toTid] is used to evict cache.
-  /// api: PUT /moveSongsToOtherLibrary?platform=[platform] {'songsId':[songsId],'fromDirId':[fromDirId],
-  /// 'toDirId':[toDirId], 'fromTid':[fromTid], 'toTid':[toTid]}
+  /// api: PUT /moveSongsToOtherLibrary?platform=[platform] {'songsId':[songsId],'fromLibrary':[fromLibrary],
+  /// 'toLibrary':[toLibrary], 'fromTid':[fromTid], 'toTid':[toTid]}
   static const moveSongsToOtherLibrary = '/moveSongsToOtherLibrary';
 
-  /// Remove songs from library in [platform] with [library],
+  /// Remove songs from library with [libraryId] in [platform],
   /// [tid] is used to evict cache.
-  /// api: DELETE /removeSongsFromLibrary?dirId=[dirId]&tid=[tid]&songsId=[songsId]&platform=[platform]
+  /// api: DELETE /removeSongsFromLibrary?libraryId=[libraryId]&songsId=[songsId]&platform=[platform]&tid=[tid]
   static const removeSongsFromLibrary = '/removeSongsFromLibrary';
 }
