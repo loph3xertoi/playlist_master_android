@@ -29,6 +29,6 @@ class QQMusicSinger extends BasicSinger {
 
   @override
   String toString() {
-    return 'QQMusicSinger{mid: $mid, name: $name, headPic: $headPic}';
+    return 'QQMusicSinger{id: $id, mid: $mid, name: $name, headPic: $headPic}';
   }
 }

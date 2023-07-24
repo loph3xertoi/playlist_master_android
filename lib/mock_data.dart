@@ -20,6 +20,7 @@ class MockData {
       'qqmusic': QQMusicUser(
         'assets/images/qqmusic_vip.png',
         'assets/images/qqmusic_listenlv.png',
+        '10001',
         7,
         4,
         5,
@@ -447,7 +448,7 @@ class MockData {
     212,
     'Giant Parrot!',
     '2010-10-04',
-    QQMusicLyrics(normalLyric, transLyric),
+    QQMusicLyrics(lyric: normalLyric, transLyric),
     [0, 1, 2],
     pow(2, 20).toInt(),
     pow(2, 20).toInt(),

@@ -7,6 +7,7 @@ import '../basic/basic_user.dart';
 @immutable
 class QQMusicUser extends BasicUser {
   const QQMusicUser(
+    this.qqNumber,
     this.lvPic,
     this.listenPic,
     this.visitorNum,
@@ -17,6 +18,9 @@ class QQMusicUser extends BasicUser {
     required super.headPic,
     required super.bgPic,
   });
+
+  /// The qq number of user.
+  final String qqNumber;
 
   /// The icon for your qq music vip.
   final String lvPic;
@@ -38,6 +42,7 @@ class QQMusicUser extends BasicUser {
 
   factory QQMusicUser.fromJson(Map<String, dynamic> json) {
     return QQMusicUser(
+      json['qqNumber'],
       json['lvPic'],
       json['listenPic'],
       json['visitorNum'],
@@ -53,6 +58,7 @@ class QQMusicUser extends BasicUser {
   Map<String, dynamic> toJson() {
     return {
       'name': name,
+      'qqNumber': qqNumber,
       'headPic': headPic,
       'bgPic': bgPic,
       'lvPic': lvPic,
@@ -66,7 +72,7 @@ class QQMusicUser extends BasicUser {
 
   @override
   String toString() {
-    return 'QQMusicUser{lvPic: $lvPic, listenPic: $listenPic, visitorNum: $visitorNum, fansNum: $fansNum, followNum: $followNum, friendsNum: $friendsNum}';
+    return 'QQMusicUser{name: $name, qqNumber: $qqNumber, headPic: $headPic, bgPic: $bgPic, lvPic: $lvPic, listenPic: $listenPic, visitorNum: $visitorNum, fansNum: $fansNum, followNum: $followNum, friendsNum: $friendsNum}';
   }
 
 //   @override
