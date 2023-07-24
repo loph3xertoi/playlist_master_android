@@ -56,7 +56,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     var currentPlatform = state.currentPlatform;
     platform = currentPlatform;
     if (isUsingMockData) {
-      throw Exception('No mock data for video');
+      throw UnimplementedError('No mock data for video');
     } else {
       _detailVideo = state.fetchDetailMV(widget.video, currentPlatform);
     }

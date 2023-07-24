@@ -94,7 +94,7 @@ class _SearchPageState extends State<SearchPage> {
         setState(() {
           _isLoading = false;
         });
-        throw Exception('Failed to search songs');
+        throw Exception('Fetch songs failed');
       }
     }
   }

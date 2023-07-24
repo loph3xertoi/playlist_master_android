@@ -27,7 +27,7 @@ class _RelatedVideosPageState extends State<RelatedVideosPage> {
     var isUsingMockData = state.isUsingMockData;
     var currentPlatform = state.currentPlatform;
     if (isUsingMockData) {
-      throw Exception('No mock data for video');
+      throw UnimplementedError('No mock data for video');
     } else {
       _relatedVideos = state.fetchRelatedMVs(widget.song, currentPlatform);
     }

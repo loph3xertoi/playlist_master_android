@@ -963,7 +963,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                         },
                                       );
                                     } else {
-                                      throw Exception('Invalid playing mode.');
+                                      throw UnsupportedError(
+                                          'Invalid playing mode.');
                                     }
                                   },
                                 ),

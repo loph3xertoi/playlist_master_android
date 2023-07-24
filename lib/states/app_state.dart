@@ -456,7 +456,7 @@ class MyAppState extends ChangeNotifier {
         await _player!.setShuffleModeEnabled(false);
         await _player!.setLoopMode(LoopMode.one);
       } else {
-        throw Exception('Invalid playing mode');
+        throw UnsupportedError('Invalid playing mode');
       }
 
       // Set the volume.
@@ -618,12 +618,9 @@ class MyAppState extends ChangeNotifier {
           jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       if (response.statusCode == 200 && decodedResponse['success'] == true) {
         var mvsLink = decodedResponse['data']!;
-        if (mvsLink is Map<String, dynamic>) {
-          return Future.value(mvsLink.map((key, value) =>
-              MapEntry<String, List<String>>(key, List<String>.from(value))));
-        } else {
-          throw Exception('Only implement qq music platform');
-        }
+        // if (mvsLink is Map<String, dynamic>) {
+        return Future.value(mvsLink.map((key, value) =>
+            MapEntry<String, List<String>>(key, List<String>.from(value))));
       } else {
         MyToast.showToast('Response error: $decodedResponse');
         MyLogger.logger.e('Response error: $decodedResponse');

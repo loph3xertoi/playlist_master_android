@@ -22,10 +22,16 @@ class _VideoItemState extends State<VideoItem> {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
     var currentPlatform = state.currentPlatform;
-    if (currentPlatform == 1) {
+    if (currentPlatform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (currentPlatform == 1) {
       _video = widget.video as QQMusicVideo;
+    } else if (currentPlatform == 2) {
+      throw UnimplementedError('Not yet implement ncm platform');
+    } else if (currentPlatform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
     } else {
-      throw Exception('Only implement qq music platform');
+      throw UnsupportedError('Invalid platform');
     }
   }
 
