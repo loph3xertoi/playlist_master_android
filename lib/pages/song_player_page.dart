@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lyric/lyrics_reader.dart';
@@ -222,6 +223,35 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                       children: [
                         SelectableText(
                           '${snapshot.error}',
+                          contextMenuBuilder: (context, editableTextState) {
+                            final List<ContextMenuButtonItem> buttonItems =
+                                editableTextState.contextMenuButtonItems;
+                            return AdaptiveTextSelectionToolbar(
+                              anchors: editableTextState.contextMenuAnchors,
+                              children: [
+                                ...buttonItems.map<Widget>((buttonItem) {
+                                  return Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: buttonItem.onPressed,
+                                      child: Ink(
+                                        padding: EdgeInsets.all(8.0),
+                                        color: colorScheme.primary,
+                                        child: Text(
+                                          CupertinoTextSelectionToolbarButton
+                                              .getButtonLabel(
+                                                  context, buttonItem),
+                                          style: textTheme.labelSmall!.copyWith(
+                                            color: colorScheme.onSecondary,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList()
+                              ],
+                            );
+                          },
                           textAlign: TextAlign.center,
                           style: textTheme.labelLarge!.copyWith(
                             color: Colors.white,
@@ -341,6 +371,45 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                     Expanded(
                                       child: SelectableText(
                                         currentSong?.name ?? '',
+                                        contextMenuBuilder:
+                                            (context, editableTextState) {
+                                          final List<ContextMenuButtonItem>
+                                              buttonItems = editableTextState
+                                                  .contextMenuButtonItems;
+                                          return AdaptiveTextSelectionToolbar(
+                                            anchors: editableTextState
+                                                .contextMenuAnchors,
+                                            children: [
+                                              ...buttonItems
+                                                  .map<Widget>((buttonItem) {
+                                                return Material(
+                                                  color: Colors.transparent,
+                                                  child: InkWell(
+                                                    onTap: buttonItem.onPressed,
+                                                    child: Ink(
+                                                      padding:
+                                                          EdgeInsets.all(8.0),
+                                                      color:
+                                                          colorScheme.primary,
+                                                      child: Text(
+                                                        CupertinoTextSelectionToolbarButton
+                                                            .getButtonLabel(
+                                                                context,
+                                                                buttonItem),
+                                                        style: textTheme
+                                                            .labelSmall!
+                                                            .copyWith(
+                                                          color: colorScheme
+                                                              .onSecondary,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              }).toList()
+                                            ],
+                                          );
+                                        },
                                         style: textTheme.labelMedium!.copyWith(
                                           color: Colors.white,
                                           overflow: TextOverflow.ellipsis,
@@ -359,6 +428,44 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                           : currentSong.singers
                                               .map((e) => e.name)
                                               .join(', '),
+                                      contextMenuBuilder:
+                                          (context, editableTextState) {
+                                        final List<ContextMenuButtonItem>
+                                            buttonItems = editableTextState
+                                                .contextMenuButtonItems;
+                                        return AdaptiveTextSelectionToolbar(
+                                          anchors: editableTextState
+                                              .contextMenuAnchors,
+                                          children: [
+                                            ...buttonItems
+                                                .map<Widget>((buttonItem) {
+                                              return Material(
+                                                color: Colors.transparent,
+                                                child: InkWell(
+                                                  onTap: buttonItem.onPressed,
+                                                  child: Ink(
+                                                    padding:
+                                                        EdgeInsets.all(8.0),
+                                                    color: colorScheme.primary,
+                                                    child: Text(
+                                                      CupertinoTextSelectionToolbarButton
+                                                          .getButtonLabel(
+                                                              context,
+                                                              buttonItem),
+                                                      style: textTheme
+                                                          .labelSmall!
+                                                          .copyWith(
+                                                        color: colorScheme
+                                                            .onSecondary,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            }).toList()
+                                          ],
+                                        );
+                                      },
                                       style: textTheme.labelSmall!.copyWith(
                                         color: Colors.white,
                                         fontSize: 12.0,
@@ -1102,6 +1209,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
   }
 
   Stack buildReaderWidget(AudioPlayer? player) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Stack(
       children: [
         LyricsReader(
@@ -1120,6 +1229,34 @@ class _SongPlayerPageState extends State<SongPlayerPage>
           emptyBuilder: () => Center(
             child: SelectableText(
               'No lyrics',
+              contextMenuBuilder: (context, editableTextState) {
+                final List<ContextMenuButtonItem> buttonItems =
+                    editableTextState.contextMenuButtonItems;
+                return AdaptiveTextSelectionToolbar(
+                  anchors: editableTextState.contextMenuAnchors,
+                  children: [
+                    ...buttonItems.map<Widget>((buttonItem) {
+                      return Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: buttonItem.onPressed,
+                          child: Ink(
+                            padding: EdgeInsets.all(8.0),
+                            color: colorScheme.primary,
+                            child: Text(
+                              CupertinoTextSelectionToolbarButton
+                                  .getButtonLabel(context, buttonItem),
+                              style: textTheme.labelSmall!.copyWith(
+                                color: colorScheme.onSecondary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList()
+                  ],
+                );
+              },
               style: _lyricUI.getOtherMainTextStyle(),
             ),
           ),

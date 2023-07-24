@@ -42,7 +42,7 @@ class QQMusicUser extends BasicUser {
 
   factory QQMusicUser.fromJson(Map<String, dynamic> json) {
     return QQMusicUser(
-      json['qqNumber'],
+      json['qqNumber'].toString(),
       json['lvPic'],
       json['listenPic'],
       json['visitorNum'],

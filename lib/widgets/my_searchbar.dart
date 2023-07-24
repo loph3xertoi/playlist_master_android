@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -148,6 +149,34 @@ class _MySearchBarState extends State<MySearchBar>
       ),
       child: TextField(
         controller: _textEditingController,
+        contextMenuBuilder: (context, editableTextState) {
+          final List<ContextMenuButtonItem> buttonItems =
+              editableTextState.contextMenuButtonItems;
+          return AdaptiveTextSelectionToolbar(
+            anchors: editableTextState.contextMenuAnchors,
+            children: [
+              ...buttonItems.map<Widget>((buttonItem) {
+                return Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: buttonItem.onPressed,
+                    child: Ink(
+                      padding: EdgeInsets.all(8.0),
+                      color: colorScheme.primary,
+                      child: Text(
+                        CupertinoTextSelectionToolbarButton.getButtonLabel(
+                            context, buttonItem),
+                        style: textTheme.labelSmall!.copyWith(
+                          color: colorScheme.onSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList()
+            ],
+          );
+        },
         focusNode: _focusNode,
         textAlignVertical: TextAlignVertical.top,
         enabled: true,

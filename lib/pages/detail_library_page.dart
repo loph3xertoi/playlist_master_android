@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
@@ -129,6 +130,50 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                             SelectableText(
                                               '${snapshot.error}',
                                               textAlign: TextAlign.center,
+                                              contextMenuBuilder:
+                                                  (context, editableTextState) {
+                                                final List<
+                                                        ContextMenuButtonItem>
+                                                    buttonItems =
+                                                    editableTextState
+                                                        .contextMenuButtonItems;
+                                                return AdaptiveTextSelectionToolbar(
+                                                  anchors: editableTextState
+                                                      .contextMenuAnchors,
+                                                  children: [
+                                                    ...buttonItems.map<Widget>(
+                                                        (buttonItem) {
+                                                      return Material(
+                                                        color:
+                                                            Colors.transparent,
+                                                        child: InkWell(
+                                                          onTap: buttonItem
+                                                              .onPressed,
+                                                          child: Ink(
+                                                            padding:
+                                                                EdgeInsets.all(
+                                                                    8.0),
+                                                            color: colorScheme
+                                                                .primary,
+                                                            child: Text(
+                                                              CupertinoTextSelectionToolbarButton
+                                                                  .getButtonLabel(
+                                                                      context,
+                                                                      buttonItem),
+                                                              style: textTheme
+                                                                  .labelSmall!
+                                                                  .copyWith(
+                                                                color: colorScheme
+                                                                    .onSecondary,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }).toList()
+                                                  ],
+                                                );
+                                              },
                                               style: TextStyle(
                                                 color: Colors.white70,
                                                 fontFamily: 'Roboto',
@@ -302,6 +347,51 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                 ? detailLibrary
                                                                     .name
                                                                 : 'Hidden library',
+                                                            contextMenuBuilder:
+                                                                (context,
+                                                                    editableTextState) {
+                                                              final List<
+                                                                      ContextMenuButtonItem>
+                                                                  buttonItems =
+                                                                  editableTextState
+                                                                      .contextMenuButtonItems;
+                                                              return AdaptiveTextSelectionToolbar(
+                                                                anchors:
+                                                                    editableTextState
+                                                                        .contextMenuAnchors,
+                                                                children: [
+                                                                  ...buttonItems
+                                                                      .map<Widget>(
+                                                                          (buttonItem) {
+                                                                    return Material(
+                                                                      color: Colors
+                                                                          .transparent,
+                                                                      child:
+                                                                          InkWell(
+                                                                        onTap: buttonItem
+                                                                            .onPressed,
+                                                                        child:
+                                                                            Ink(
+                                                                          padding:
+                                                                              EdgeInsets.all(8.0),
+                                                                          color:
+                                                                              colorScheme.primary,
+                                                                          child:
+                                                                              Text(
+                                                                            CupertinoTextSelectionToolbarButton.getButtonLabel(context,
+                                                                                buttonItem),
+                                                                            style:
+                                                                                textTheme.labelSmall!.copyWith(
+                                                                              color: colorScheme.onSecondary,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  }).toList()
+                                                                ],
+                                                              );
+                                                            },
                                                             style: textTheme
                                                                 .labelLarge!
                                                                 .copyWith(
