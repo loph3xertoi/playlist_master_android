@@ -132,12 +132,20 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       Future<BasicVideo?> video, int platform) async {
     Map<String, ResolutionItem> resolutionList = {};
     List<String> videoLinks;
-    if (platform == 1) {
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
       QQMusicDetailVideo qqMusicDetailVideo =
           (await video) as QQMusicDetailVideo;
       videoLinks = qqMusicDetailVideo.links;
+    } else if (platform == 2) {
+      throw UnimplementedError('Not yet implement ncm platform');
+    } else if (platform == 3) {
+      throw UnimplementedError(
+        'Not yet implement bilibili platform',
+      );
     } else {
-      throw Exception('Only implement qq music platform');
+      throw UnsupportedError('Invalid platform');
     }
     // String? finalUrl = await _cachedVideoUrl(url);
     // if (finalUrl == null) {
@@ -252,10 +260,16 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           );
         } else {
           dynamic detailVideo;
-          if (currentPlatform == 1) {
+          if (currentPlatform == 0) {
+            throw UnimplementedError('Not yet implement pms platform');
+          } else if (currentPlatform == 1) {
             detailVideo = snapshot.data![0] as QQMusicDetailVideo;
+          } else if (currentPlatform == 2) {
+            throw UnimplementedError('Not yet implement ncm platform');
+          } else if (currentPlatform == 3) {
+            throw UnimplementedError('Not yet implement bilibili platform');
           } else {
-            throw Exception('Only implement qq music platform');
+            throw UnsupportedError('Invalid platform');
           }
           Map<String, ResolutionItem> resolutionList =
               snapshot.data![1] as Map<String, ResolutionItem>;

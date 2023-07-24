@@ -1,11 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/entities/qq_music/qqmusic_song.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_paged_songs.dart';
 import '../entities/basic/basic_song.dart';
 import '../entities/qq_music/qqmusic_paged_songs.dart';
+import '../entities/qq_music/qqmusic_song.dart';
 import '../states/app_state.dart';
 import 'basic_info.dart';
 
@@ -81,24 +81,36 @@ class _MySearchBarState extends State<MySearchBar>
             searchString, appState.firstPageNo, appState.pageSize, _platform);
         if (pagedSongs != null) {
           appState.totalSearchedSongs = pagedSongs.total;
-          if (_platform == 1) {
+          if (_platform == 0) {
+            throw UnimplementedError('Not yet implement pms platform');
+          } else if (_platform == 1) {
             appState.searchedSongs = (pagedSongs as QQMusicPagedSongs).songs;
+          } else if (_platform == 2) {
+            throw UnimplementedError('Not yet implement ncm platform');
+          } else if (_platform == 3) {
+            throw UnimplementedError('Not yet implement bilibili platform');
           } else {
-            throw Exception('Only implement qq music platform');
+            throw UnsupportedError('Invalid platform');
           }
         }
       }
     } else if (widget.inDetailLibraryPage) {
       if (searchString != '') {
         appState.searchingString = searchString;
-        if (_platform == 1) {
+        if (_platform == 0) {
+          throw UnimplementedError('Not yet implement pms platform');
+        } else if (_platform == 1) {
           appState.searchedSongs = appState.rawQueue!
               .where((e) =>
                   (e as QQMusicSong).name.contains(searchString) ||
                   e.singers.any((singer) => singer.name.contains(searchString)))
               .toList();
+        } else if (_platform == 2) {
+          throw UnimplementedError('Not yet implement ncm platform');
+        } else if (_platform == 3) {
+          throw UnimplementedError('Not yet implement bilibili platform');
         } else {
-          throw Exception('Only implement qq music platform');
+          throw UnsupportedError('Invalid platform');
         }
       } else {
         appState.searchedSongs = appState.rawQueue!;

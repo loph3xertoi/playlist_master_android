@@ -73,10 +73,18 @@ class _SearchPageState extends State<SearchPage> {
 
       if (songs != null) {
         setState(() {
-          if (_platform == 1) {
+          if (_platform == 0) {
+            throw UnimplementedError('Not yet implement pms platform');
+          } else if (_platform == 1) {
             _searchedSongs!.addAll((songs as QQMusicPagedSongs).songs);
+          } else if (_platform == 2) {
+            throw UnimplementedError('Not yet implement ncm platform');
+          } else if (_platform == 3) {
+            throw UnimplementedError(
+              'Not yet implement bilibili platform',
+            );
           } else {
-            throw Exception('Only implement qq music platform');
+            throw UnsupportedError('Invalid platform');
           }
           _currentPage++;
           state.currentPage++;
@@ -401,7 +409,7 @@ class _SearchPageState extends State<SearchPage> {
                                                             appState.prevSong =
                                                                 appState
                                                                     .currentSong;
-                                                            
+
                                                             appState.isFirstLoadSongPlayer =
                                                                 true;
 

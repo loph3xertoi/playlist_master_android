@@ -78,8 +78,7 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
                 ),
               ),
             ),
-            (appState.currentPlatform == 1 &&
-                    appState.openedLibrary!.itemCount > 0)
+            appState.openedLibrary!.itemCount > 0
                 ? InkWell(
                     borderRadius: BorderRadius.all(
                       Radius.circular(10.0),

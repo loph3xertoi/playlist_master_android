@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import '../entities/basic/basic_song.dart';
-import '../entities/qq_music/qqmusic_playlist.dart';
-import 'selectable_library_item.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
+import '../entities/basic/basic_song.dart';
+import '../entities/qq_music/qqmusic_playlist.dart';
 import '../states/app_state.dart';
 import 'create_library_popup.dart';
+import 'selectable_library_item.dart';
 
 class SelectLibraryPopup extends StatefulWidget {
   const SelectLibraryPopup({
@@ -101,10 +101,16 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
             );
           } else {
             List<BasicLibrary> libraries;
-            if (currentPlatform == 1) {
+            if (currentPlatform == 0) {
+              throw UnimplementedError('Not yet implement pms platform');
+            } else if (currentPlatform == 1) {
               libraries = snapshot.data as List<BasicLibrary>;
+            } else if (currentPlatform == 2) {
+              throw UnimplementedError('Not yet implement ncm platform');
+            } else if (currentPlatform == 3) {
+              throw UnimplementedError('Not yet implement bilibili platform');
             } else {
-              throw Exception('Only implement for qq music platform');
+              throw UnsupportedError('Invalid platform');
             }
             return Material(
               child: Column(
@@ -170,7 +176,10 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                               );
                               // Create library successfully.
                               if (result != null && result > 0) {
-                                if (appState.currentPlatform == 1) {
+                                if (currentPlatform == 0) {
+                                  throw UnimplementedError(
+                                      'Not yet implement pms platform');
+                                } else if (currentPlatform == 1) {
                                   // Temporarily library for holding dirId.
                                   BasicLibrary library = QQMusicPlaylist(
                                     result,
@@ -180,9 +189,14 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                                     itemCount: 1,
                                   );
                                   _addSongsToLibrary(appState, library);
+                                } else if (currentPlatform == 2) {
+                                  throw UnimplementedError(
+                                      'Not yet implement ncm platform');
+                                } else if (currentPlatform == 3) {
+                                  throw UnimplementedError(
+                                      'Not yet implement bilibili platform');
                                 } else {
-                                  throw Exception(
-                                      'Only implement qq music platform');
+                                  throw UnsupportedError('Invalid platform');
                                 }
                               }
                             },

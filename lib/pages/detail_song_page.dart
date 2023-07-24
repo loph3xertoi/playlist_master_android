@@ -53,6 +53,8 @@ class _DetailSongPageState extends State<DetailSongPage> {
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
+    var isUsingMockData = appState.isUsingMockData;
+    var currentPlatform = appState.currentPlatform;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return FutureBuilder(
@@ -108,10 +110,20 @@ class _DetailSongPageState extends State<DetailSongPage> {
           );
         } else {
           dynamic detailSong;
-          if (appState.currentPlatform == 1 || appState.isUsingMockData) {
+          if (isUsingMockData) {
             detailSong = snapshot.data as QQMusicDetailSong;
           } else {
-            throw Exception('Only qq music platform implemented');
+            if (currentPlatform == 0) {
+              throw UnimplementedError('Not yet implement pms platform');
+            } else if (currentPlatform == 1) {
+              detailSong = snapshot.data as QQMusicDetailSong;
+            } else if (currentPlatform == 2) {
+              throw UnimplementedError('Not yet implement ncm platform');
+            } else if (currentPlatform == 3) {
+              throw UnimplementedError('Not yet implement bilibili platform');
+            } else {
+              throw UnsupportedError('Invalid platform');
+            }
           }
           var name = detailSong.name;
           var singers = detailSong.singers;
@@ -123,7 +135,6 @@ class _DetailSongPageState extends State<DetailSongPage> {
           var size320 = detailSong.size320;
           var sizeApe = detailSong.sizeApe;
           var sizeFlac = detailSong.sizeFlac;
-          var isUsingMockData = appState.isUsingMockData;
           var currentDetailSong = detailSong;
           var lyrics = detailSong.lyrics;
           _lyricModel ??= LyricsModelBuilder.create()

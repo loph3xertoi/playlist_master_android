@@ -26,11 +26,16 @@ class LibraryItemMenuPopup extends StatelessWidget {
 
   void _editLibrary(MyAppState appState) async {
     int platform = appState.currentPlatform;
-    if (platform == 1) {
-      MyToast.showToast('API missing in qq music platform.');
-      return;
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
+      throw UnimplementedError('API missing in qq music platform');
+    } else if (platform == 2) {
+      throw UnimplementedError('Not yet implement ncm platform');
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
     } else {
-      throw Exception('Not implement');
+      throw UnsupportedError('Invalid platform');
     }
   }
 

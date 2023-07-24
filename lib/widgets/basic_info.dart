@@ -45,6 +45,7 @@ class _BasicInfoState extends State<BasicInfo> {
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
     var isUsingMockData = appState.isUsingMockData;
+    var currentPlatform = appState.currentPlatform;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Padding(
@@ -113,19 +114,20 @@ class _BasicInfoState extends State<BasicInfo> {
                     if (isUsingMockData) {
                       user = snapshot.data as QQMusicUser;
                     } else {
-                      if (appState.currentPlatform == 0) {
+                      if (currentPlatform == 0) {
                         user = snapshot.data as PMSUser;
-                      } else if (appState.currentPlatform == 1) {
+                      } else if (currentPlatform == 1) {
                         user = snapshot.data as QQMusicUser;
-                      } else if (appState.currentPlatform == 2) {
-                        throw Exception('Not implement netease music platform');
-                      } else if (appState.currentPlatform == 3) {
-                        throw Exception('Not implement bilibili platform');
+                      } else if (currentPlatform == 2) {
+                        throw UnimplementedError(
+                            'Not yet implement ncm platform');
+                      } else if (currentPlatform == 3) {
+                        throw UnimplementedError(
+                            'Not yet implement bilibili platform');
                       } else {
-                        throw Exception('Invalid platform');
+                        throw UnsupportedError('Invalid platform');
                       }
                     }
-
                     return Scaffold(
                       body: GestureDetector(
                         onVerticalDragUpdate: (details) {

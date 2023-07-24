@@ -84,6 +84,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     print('build song player page');
     MyAppState appState = context.watch<MyAppState>();
     var isUsingMockData = appState.isUsingMockData;
+    var currentPlatform = appState.currentPlatform;
     var player = appState.player;
     var queue = appState.queue;
     var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
@@ -262,11 +263,25 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                   );
                 } else {
                   dynamic detailSong;
-                  if (appState.currentPlatform == 1 || isUsingMockData) {
+                  if (isUsingMockData) {
                     detailSong = snapshot.data as QQMusicDetailSong;
                   } else {
-                    throw Exception('Only qq music platform implemented');
+                    if (currentPlatform == 0) {
+                      throw UnimplementedError(
+                          'Not yet implement pms platform');
+                    } else if (currentPlatform == 1) {
+                      detailSong = snapshot.data as QQMusicDetailSong;
+                    } else if (currentPlatform == 2) {
+                      throw UnimplementedError(
+                          'Not yet implement ncm platform');
+                    } else if (currentPlatform == 3) {
+                      throw UnimplementedError(
+                          'Not yet implement bilibili platform');
+                    } else {
+                      throw UnsupportedError('Invalid platform');
+                    }
                   }
+
                   mainLyrics = detailSong.lyrics.lyric;
                   if (_lyricModel == null || prevSong != currentSong) {
                     if (!isUsingMockData) {

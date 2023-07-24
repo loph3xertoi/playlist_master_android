@@ -172,16 +172,32 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                       );
                                     } else {
                                       dynamic detailLibrary;
-                                      if (currentPlatform == 1 ||
-                                          isUsingMockData) {
+                                      if (isUsingMockData) {
                                         detailLibrary = snapshot.data == null
                                             ? null
                                             : snapshot.data
                                                 as QQMusicDetailPlaylist;
                                       } else {
-                                        throw Exception(
-                                            'Only implement qq music platform');
+                                        if (currentPlatform == 0) {
+                                          throw UnimplementedError(
+                                              'Not yet implement pms platform');
+                                        } else if (currentPlatform == 1) {
+                                          detailLibrary = snapshot.data == null
+                                              ? null
+                                              : snapshot.data
+                                                  as QQMusicDetailPlaylist;
+                                        } else if (currentPlatform == 2) {
+                                          throw UnimplementedError(
+                                              'Not yet implement ncm platform');
+                                        } else if (currentPlatform == 3) {
+                                          throw UnimplementedError(
+                                              'Not yet implement bilibili platform');
+                                        } else {
+                                          throw UnsupportedError(
+                                              'Invalid platform');
+                                        }
                                       }
+
                                       if (detailLibrary != null) {
                                         rawQueue = detailLibrary.songs;
                                         // if (searchedSongs.isEmpty) {

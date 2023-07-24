@@ -37,6 +37,7 @@ class _RelatedVideosPageState extends State<RelatedVideosPage> {
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
     var currentPlatform = appState.currentPlatform;
+    var isUsingMockData = appState.isUsingMockData;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
@@ -94,10 +95,21 @@ class _RelatedVideosPageState extends State<RelatedVideosPage> {
               );
             } else {
               dynamic relatedVideos;
-              if (currentPlatform == 1) {
+              if (isUsingMockData) {
                 relatedVideos = snapshot.data as List<QQMusicVideo>;
               } else {
-                throw Exception('Only implement for qq music platform');
+                if (currentPlatform == 0) {
+                  throw UnimplementedError('Not yet implement pms platform');
+                } else if (currentPlatform == 1) {
+                  relatedVideos = snapshot.data as List<QQMusicVideo>;
+                } else if (currentPlatform == 2) {
+                  throw UnimplementedError('Not yet implement ncm platform');
+                } else if (currentPlatform == 3) {
+                  throw UnimplementedError(
+                      'Not yet implement bilibili platform');
+                } else {
+                  throw UnsupportedError('Invalid platform');
+                }
               }
               return relatedVideos.length == 0
                   ? Center(
