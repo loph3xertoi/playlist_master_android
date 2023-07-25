@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +17,7 @@ import '../widgets/bottom_player.dart';
 import '../widgets/library_item_menu_popup.dart';
 import '../widgets/multi_songs_select_popup.dart';
 import '../widgets/my_searchbar.dart';
+import '../widgets/my_selectable_text.dart';
 import '../widgets/song_item.dart';
 
 class DetailLibraryPage extends StatefulWidget {
@@ -127,57 +127,11 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.center,
                                           children: [
-                                            SelectableText(
+                                            MySelectableText(
                                               '${snapshot.error}',
-                                              textAlign: TextAlign.center,
-                                              contextMenuBuilder:
-                                                  (context, editableTextState) {
-                                                final List<
-                                                        ContextMenuButtonItem>
-                                                    buttonItems =
-                                                    editableTextState
-                                                        .contextMenuButtonItems;
-                                                return AdaptiveTextSelectionToolbar(
-                                                  anchors: editableTextState
-                                                      .contextMenuAnchors,
-                                                  children: [
-                                                    ...buttonItems.map<Widget>(
-                                                        (buttonItem) {
-                                                      return Material(
-                                                        color:
-                                                            Colors.transparent,
-                                                        child: InkWell(
-                                                          onTap: buttonItem
-                                                              .onPressed,
-                                                          child: Ink(
-                                                            padding:
-                                                                EdgeInsets.all(
-                                                                    8.0),
-                                                            color: colorScheme
-                                                                .primary,
-                                                            child: Text(
-                                                              CupertinoTextSelectionToolbarButton
-                                                                  .getButtonLabel(
-                                                                      context,
-                                                                      buttonItem),
-                                                              style: textTheme
-                                                                  .labelSmall!
-                                                                  .copyWith(
-                                                                color: colorScheme
-                                                                    .onSecondary,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      );
-                                                    }).toList()
-                                                  ],
-                                                );
-                                              },
-                                              style: TextStyle(
-                                                color: Colors.white70,
-                                                fontFamily: 'Roboto',
-                                                fontSize: 16.0,
+                                              style: textTheme.labelSmall!
+                                                  .copyWith(
+                                                color: colorScheme.onSecondary,
                                               ),
                                             ),
                                             TextButton.icon(
@@ -341,57 +295,12 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                             CrossAxisAlignment
                                                                 .start,
                                                         children: [
-                                                          SelectableText(
+                                                          MySelectableText(
                                                             detailLibrary !=
                                                                     null
                                                                 ? detailLibrary
                                                                     .name
                                                                 : 'Hidden library',
-                                                            contextMenuBuilder:
-                                                                (context,
-                                                                    editableTextState) {
-                                                              final List<
-                                                                      ContextMenuButtonItem>
-                                                                  buttonItems =
-                                                                  editableTextState
-                                                                      .contextMenuButtonItems;
-                                                              return AdaptiveTextSelectionToolbar(
-                                                                anchors:
-                                                                    editableTextState
-                                                                        .contextMenuAnchors,
-                                                                children: [
-                                                                  ...buttonItems
-                                                                      .map<Widget>(
-                                                                          (buttonItem) {
-                                                                    return Material(
-                                                                      color: Colors
-                                                                          .transparent,
-                                                                      child:
-                                                                          InkWell(
-                                                                        onTap: buttonItem
-                                                                            .onPressed,
-                                                                        child:
-                                                                            Ink(
-                                                                          padding:
-                                                                              EdgeInsets.all(8.0),
-                                                                          color:
-                                                                              colorScheme.primary,
-                                                                          child:
-                                                                              Text(
-                                                                            CupertinoTextSelectionToolbarButton.getButtonLabel(context,
-                                                                                buttonItem),
-                                                                            style:
-                                                                                textTheme.labelSmall!.copyWith(
-                                                                              color: colorScheme.onSecondary,
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    );
-                                                                  }).toList()
-                                                                ],
-                                                              );
-                                                            },
                                                             style: textTheme
                                                                 .labelLarge!
                                                                 .copyWith(

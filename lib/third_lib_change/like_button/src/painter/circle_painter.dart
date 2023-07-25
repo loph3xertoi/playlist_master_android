@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/third_lib_change/like_button/src/utils/like_button_model.dart';
+import '../utils/like_button_model.dart';
 import 'package:playlistmaster/third_lib_change/like_button/src/utils/like_button_util.dart';
 
 ///

@@ -145,6 +145,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
+  city_picker_china:
+    dependency: "direct main"
+    description:
+      name: city_picker_china
+      sha256: b300146b33c1059323b223054ba35cd712ae7f7a351694e09aaf43693feda733
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   clock:
     dependency: transitive
     description:
@@ -337,6 +345,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.18.1"
+  ip_geolocation_io:
+    dependency: "direct main"
+    description:
+      name: ip_geolocation_io
+      sha256: "302339e388bc6e2351279d23a3fa23083a727a012433bc6f4c326fae7daac6ec"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   js:
     dependency: transitive
     description:

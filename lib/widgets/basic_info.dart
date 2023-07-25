@@ -1,14 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:city_picker_china/city_picker_china.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:ip_geolocation_io/ip_geolocation_io.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_user.dart';
+import '../entities/netease_cloud_music/ncm_user.dart';
 import '../entities/pms/pms_user.dart';
 import '../entities/qq_music/qqmusic_user.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
+import 'my_selectable_text.dart';
 
 class BasicInfo extends StatefulWidget {
   @override
@@ -72,39 +76,8 @@ class _BasicInfoState extends State<BasicInfo> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          SelectableText(
+                          MySelectableText(
                             '${snapshot.error}',
-                            contextMenuBuilder: (context, editableTextState) {
-                              final List<ContextMenuButtonItem> buttonItems =
-                                  editableTextState.contextMenuButtonItems;
-                              return AdaptiveTextSelectionToolbar(
-                                anchors: editableTextState.contextMenuAnchors,
-                                children: [
-                                  ...buttonItems.map<Widget>((buttonItem) {
-                                    return Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        onTap: buttonItem.onPressed,
-                                        child: Ink(
-                                          padding: EdgeInsets.all(8.0),
-                                          color: colorScheme.primary,
-                                          child: Text(
-                                            CupertinoTextSelectionToolbarButton
-                                                .getButtonLabel(
-                                                    context, buttonItem),
-                                            style:
-                                                textTheme.labelSmall!.copyWith(
-                                              color: colorScheme.onSecondary,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }).toList()
-                                ],
-                              );
-                            },
-                            textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white70,
                               fontFamily: 'Roboto',
@@ -150,8 +123,7 @@ class _BasicInfoState extends State<BasicInfo> {
                       } else if (currentPlatform == 1) {
                         user = snapshot.data as QQMusicUser;
                       } else if (currentPlatform == 2) {
-                        throw UnimplementedError(
-                            'Not yet implement ncm platform');
+                        user = snapshot.data as NCMUser;
                       } else if (currentPlatform == 3) {
                         throw UnimplementedError(
                             'Not yet implement bilibili platform');
@@ -265,157 +237,622 @@ class _BasicInfoState extends State<BasicInfo> {
                                 duration: const Duration(milliseconds: 200),
                                 curve: Curves.easeInOut,
                                 // color: colorScheme.primary,
-                                child: Column(children: [
-                                  CircleAvatar(
-                                    radius: 36.0,
-                                    backgroundImage: isUsingMockData
-                                        ? Image.asset(
-                                                'assets/images/qqmusic.png')
-                                            .image
-                                        : CachedNetworkImageProvider(
-                                            user.headPic.isEmpty
-                                                ? MyAppState.defaultCoverImage
-                                                : user.headPic,
-                                          ),
-                                    // NetworkImage(user.headPic),
-                                  ),
-                                  Text(
-                                    user.name,
-                                    style: textTheme.labelMedium,
-                                  ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SizedBox(
-                                        width: 34.0,
-                                        height: 23.0,
-                                        child: isUsingMockData
-                                            ? Image.asset(user.lvPic)
-                                            : CachedNetworkImage(
-                                                imageUrl: user.lvPic.isEmpty
-                                                    ? MyAppState
-                                                        .defaultCoverImage
-                                                    : user.lvPic,
-                                                progressIndicatorBuilder:
-                                                    (context, url,
-                                                            downloadProgress) =>
-                                                        CircularProgressIndicator(
-                                                            value:
-                                                                downloadProgress
-                                                                    .progress),
-                                                errorWidget:
-                                                    (context, url, error) =>
-                                                        Icon(MdiIcons.debian),
-                                              ),
-                                      ),
-                                      SizedBox(
-                                        width: 10.0,
-                                      ),
-                                      SizedBox(
-                                        width: 18.0,
-                                        height: 14.0,
-                                        child: isUsingMockData
-                                            ? Image.asset(user.listenPic)
-                                            : CachedNetworkImage(
-                                                imageUrl: user.listenPic.isEmpty
-                                                    ? MyAppState
-                                                        .defaultCoverImage
-                                                    : user.listenPic,
-                                                progressIndicatorBuilder:
-                                                    (context, url,
-                                                            downloadProgress) =>
-                                                        CircularProgressIndicator(
-                                                            value:
-                                                                downloadProgress
-                                                                    .progress),
-                                                errorWidget:
-                                                    (context, url, error) =>
-                                                        Icon(MdiIcons.debian),
-                                              ),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        Text(
-                                          'Followers: ${user.fansNum}',
-                                          style: textTheme.labelSmall,
-                                        ),
-                                        Text(
-                                          'Following: ${user.followNum}',
-                                          style: textTheme.labelSmall,
-                                        ),
-                                        Text(
-                                          'friends: ${user.friendsNum}',
-                                          style: textTheme.labelSmall,
-                                        ),
-                                        Text(
-                                          'Visitors: ${user.visitorNum}',
-                                          style: textTheme.labelSmall,
-                                        ),
-                                      ]),
-                                ]),
+                                child: isUsingMockData
+                                    ? BuildMockUser(
+                                        user: user as QQMusicUser,
+                                      )
+                                    : currentPlatform == 1
+                                        ? BuildQQMusicUser(
+                                            user: user as QQMusicUser,
+                                          )
+                                        : currentPlatform == 2
+                                            ? BuildNCMUser(
+                                                user: user as NCMUser,
+                                              )
+                                            // :currentPlatform==3?BuildQQMusicUser( user: user, currentPlatform: currentPlatform, textTheme: textTheme)
+                                            : const Placeholder(),
                               ),
                             ),
                           ],
                         ),
                       ),
                     );
-
-                    // return Stack(
-                    //   alignment: Alignment.topCenter,
-                    //   children: [
-                    //     AnimatedContainer(
-
-                    //     )
-                    //   ],
-                    // );
-
-                    // return CustomScrollView(
-                    //   slivers: [
-                    //     SliverAppBar(
-                    //       backgroundColor: Colors.transparent,
-                    //       expandedHeight: MediaQuery.of(context).size.width,
-                    //       flexibleSpace: FlexibleSpaceBar(
-                    //         background: Stack(
-                    //           fit: StackFit.expand,
-                    //           children: [
-                    //             Image.network(
-                    //               user.bgPic,
-                    //               fit: BoxFit.cover,
-                    //             ),
-                    //           ],
-                    //         ),
-                    //       ),
-                    //       stretch: true,
-                    //       pinned: true,
-                    //     ),
-                    //     SliverList(
-                    //       delegate: SliverChildListDelegate(
-                    //         [
-                    //           Container(
-                    //             color: Colors.white,
-                    //             height: 600,
-                    //             child: Column(
-                    //               children: [
-                    //                 // Place your user information widgets here.
-                    //               ],
-                    //             ),
-                    //           ),
-                    //         ],
-                    //       ),
-                    //     ),
-                    //   ],
-                    // );
                   }
                 }),
           ),
         ),
       ),
+    );
+  }
+}
+
+class BuildMockUser extends StatelessWidget {
+  const BuildMockUser({
+    super.key,
+    required this.user,
+  });
+
+  final QQMusicUser user;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Column(children: [
+      CircleAvatar(
+        radius: 36.0,
+        backgroundImage: Image.asset('assets/images/qqmusic.png').image,
+      ),
+      Text(
+        '${user.name}(${user.qqNumber})',
+        style: textTheme.labelMedium,
+      ),
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 34.0,
+            height: 23.0,
+            child: Image.asset(user.lvPic),
+          ),
+          SizedBox(
+            width: 10.0,
+          ),
+          SizedBox(
+            width: 18.0,
+            height: 14.0,
+            child: Image.asset(user.listenPic),
+          ),
+        ],
+      ),
+      Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text(
+              'Followers: ${user.fansNum}',
+              style: textTheme.labelSmall,
+            ),
+            Text(
+              'Following: ${user.followNum}',
+              style: textTheme.labelSmall,
+            ),
+            Text(
+              'friends: ${user.friendsNum}',
+              style: textTheme.labelSmall,
+            ),
+            Text(
+              'Visitors: ${user.visitorNum}',
+              style: textTheme.labelSmall,
+            ),
+          ]),
+    ]);
+  }
+}
+
+class BuildQQMusicUser extends StatelessWidget {
+  const BuildQQMusicUser({
+    super.key,
+    required this.user,
+  });
+
+  final QQMusicUser user;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Column(children: [
+      CircleAvatar(
+        radius: 36.0,
+        backgroundImage: CachedNetworkImageProvider(
+          user.headPic.isEmpty ? MyAppState.defaultCoverImage : user.headPic,
+        ),
+      ),
+      MySelectableText(
+        '${user.name}(${user.qqNumber})',
+        style: textTheme.labelMedium,
+      ),
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 34.0,
+            height: 23.0,
+            child: CachedNetworkImage(
+              imageUrl: user.lvPic.isEmpty
+                  ? MyAppState.defaultCoverImage
+                  : user.lvPic,
+              progressIndicatorBuilder: (context, url, downloadProgress) =>
+                  CircularProgressIndicator(value: downloadProgress.progress),
+              errorWidget: (context, url, error) => Icon(MdiIcons.debian),
+            ),
+          ),
+          SizedBox(
+            width: 10.0,
+          ),
+          SizedBox(
+            width: 18.0,
+            height: 14.0,
+            child: CachedNetworkImage(
+              imageUrl: user.listenPic.isEmpty
+                  ? MyAppState.defaultCoverImage
+                  : user.listenPic,
+              progressIndicatorBuilder: (context, url, downloadProgress) =>
+                  CircularProgressIndicator(value: downloadProgress.progress),
+              errorWidget: (context, url, error) => Icon(MdiIcons.debian),
+            ),
+          ),
+        ],
+      ),
+      Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text(
+              'Followers: ${user.fansNum}',
+              style: textTheme.labelSmall,
+            ),
+            Text(
+              'Following: ${user.followNum}',
+              style: textTheme.labelSmall,
+            ),
+            Text(
+              'friends: ${user.friendsNum}',
+              style: textTheme.labelSmall,
+            ),
+            Text(
+              'Visitors: ${user.visitorNum}',
+              style: textTheme.labelSmall,
+            ),
+          ]),
+    ]);
+  }
+}
+
+class BuildNCMUser extends StatefulWidget {
+  const BuildNCMUser({
+    super.key,
+    required this.user,
+  });
+
+  final NCMUser user;
+
+  @override
+  State<BuildNCMUser> createState() => _BuildNCMUserState();
+}
+
+class _BuildNCMUserState extends State<BuildNCMUser> {
+  Future<CityResult?> resolvePostCode(String code) async {
+    return CityPicker.searchWithCode(code);
+  }
+
+  String province = '';
+  String city = '';
+  String area = '';
+
+  @override
+  void initState() {
+    super.initState();
+    const apiKey = '7e6e5a2ec2404fc8b3e846d45c5abb76';
+    final geolocation = IpGeoLocationIO(apiKey);
+    geolocation.getUserLocation().then((value) => setState(() {
+          area = '${value.city}, ${value.stateProv}, ${value.countryName}';
+        }));
+    resolvePostCode(widget.user.province.toString())
+        .then((value) => setState(() {
+              province = value!.province;
+            }));
+    resolvePostCode(widget.user.city.toString()).then((value) => setState(() {
+          city = value!.city!;
+        }));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final NCMUser user = widget.user;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 36.0,
+          backgroundImage: CachedNetworkImageProvider(
+            user.headPic.isEmpty ? MyAppState.defaultCoverImage : user.headPic,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: MySelectableText(
+            '${user.name}(${user.id})',
+            style: textTheme.labelMedium,
+          ),
+        ),
+        MySelectableText(
+          user.signature,
+          style: textTheme.labelSmall,
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Image.asset(
+                user.gender == 0
+                    ? 'assets/images/gender_secret.png'
+                    : user.gender == 1
+                        ? 'assets/images/male.png'
+                        : 'assets/images/female.png',
+                height: 12.0,
+                width: 12.0,
+              ),
+            ),
+            Text(
+              'Birthday: ${DateFormat('yyyy-MM-dd').format(
+                DateTime.fromMillisecondsSinceEpoch(user.birthday),
+              )}',
+              style: textTheme.labelSmall,
+            ),
+          ],
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Following: ${user.follows}',
+              style: textTheme.labelSmall,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                '|',
+                style: textTheme.labelLarge!.copyWith(
+                  color: textTheme.labelLarge!.color!.withOpacity(0.1),
+                ),
+              ),
+            ),
+            Text(
+              'Fans: ${user.fans}',
+              style: textTheme.labelSmall,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                '|',
+                style: textTheme.labelLarge!.copyWith(
+                  color: textTheme.labelLarge!.color!.withOpacity(0.1),
+                ),
+              ),
+            ),
+            Text(
+              'Level: ${user.level}',
+              style: textTheme.labelSmall,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                '|',
+                style: textTheme.labelLarge!.copyWith(
+                  color: textTheme.labelLarge!.color!.withOpacity(0.1),
+                ),
+              ),
+            ),
+            Text(
+              'VIP: ${user.vipType == 0 ? 'No' : 'Yes'}',
+              style: textTheme.labelSmall,
+            ),
+          ],
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: GestureDetector(
+                onTap: () {},
+                child: Tooltip(
+                  message:
+                      'Expired at ${DateFormat('yyyy-MM-dd HH:mm:ss').format(
+                    DateTime.fromMillisecondsSinceEpoch(user.redVipExpireTime),
+                  )}',
+                  triggerMode: TooltipTriggerMode.tap,
+                  textStyle: textTheme.labelSmall,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        height: 16.0,
+                        child: CachedNetworkImage(
+                          imageUrl: user.redVipLevelIcon.isEmpty
+                              ? MyAppState.defaultCoverImage
+                              : user.redVipLevelIcon,
+                          progressIndicatorBuilder:
+                              (context, url, downloadProgress) =>
+                                  CircularProgressIndicator(
+                                      value: downloadProgress.progress),
+                          errorWidget: (context, url, error) =>
+                              Icon(MdiIcons.debian),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(
+                          'Lv${user.redVipLevel}',
+                          style: textTheme.labelSmall,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: GestureDetector(
+                onTap: () {},
+                child: Tooltip(
+                  message:
+                      'Expired at ${DateFormat('yyyy-MM-dd HH:mm:ss').format(
+                    DateTime.fromMillisecondsSinceEpoch(
+                        user.redPlusVipExpireTime),
+                  )}',
+                  triggerMode: TooltipTriggerMode.tap,
+                  textStyle: textTheme.labelSmall,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        height: 16.0,
+                        child: CachedNetworkImage(
+                          imageUrl: user.redPlusVipLevelIcon.isEmpty
+                              ? MyAppState.defaultCoverImage
+                              : user.redPlusVipLevelIcon,
+                          progressIndicatorBuilder:
+                              (context, url, downloadProgress) =>
+                                  CircularProgressIndicator(
+                                      value: downloadProgress.progress),
+                          errorWidget: (context, url, error) =>
+                              Icon(MdiIcons.debian),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(
+                          'Lv${user.redPlusVipLevel}',
+                          style: textTheme.labelSmall,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: GestureDetector(
+                onTap: () {},
+                child: Tooltip(
+                  message:
+                      'Expired at ${DateFormat('yyyy-MM-dd HH:mm:ss').format(
+                    DateTime.fromMillisecondsSinceEpoch(
+                        user.musicPackageVipExpireTime),
+                  )}',
+                  triggerMode: TooltipTriggerMode.tap,
+                  textStyle: textTheme.labelSmall,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        height: 16.0,
+                        child: CachedNetworkImage(
+                          imageUrl: user.musicPackageVipLevelIcon.isEmpty
+                              ? MyAppState.defaultCoverImage
+                              : user.musicPackageVipLevelIcon,
+                          progressIndicatorBuilder:
+                              (context, url, downloadProgress) =>
+                                  CircularProgressIndicator(
+                                      value: downloadProgress.progress),
+                          errorWidget: (context, url, error) =>
+                              Icon(MdiIcons.debian),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(
+                          'Lv${user.musicPackageVipLevel}',
+                          style: textTheme.labelSmall,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      'Listened songs:',
+                      textAlign: TextAlign.end,
+                      style: textTheme.labelSmall,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      ' ${user.listenSongs}',
+                      textAlign: TextAlign.start,
+                      style: textTheme.labelSmall,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    'Playlists:',
+                    textAlign: TextAlign.end,
+                    style: textTheme.labelSmall,
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    ' ${user.playlistCount}',
+                    textAlign: TextAlign.start,
+                    style: textTheme.labelSmall,
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    'Province:',
+                    textAlign: TextAlign.end,
+                    style: textTheme.labelSmall,
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    ' $province',
+                    textAlign: TextAlign.start,
+                    style: textTheme.labelSmall!.copyWith(
+                      fontSize: 12.0,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    'City:',
+                    textAlign: TextAlign.end,
+                    style: textTheme.labelSmall,
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    ' $city',
+                    textAlign: TextAlign.start,
+                    style: textTheme.labelSmall!.copyWith(
+                      fontSize: 12.0,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    'Registration time:',
+                    textAlign: TextAlign.end,
+                    style: textTheme.labelSmall,
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    ' ${DateFormat('yyyy-MM-dd HH:mm:ss').format(
+                      DateTime.fromMillisecondsSinceEpoch(user.createTime),
+                    )}',
+                    textAlign: TextAlign.start,
+                    style: textTheme.labelSmall,
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    'Last login:',
+                    textAlign: TextAlign.end,
+                    style: textTheme.labelSmall,
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    ' ${DateFormat('yyyy-MM-dd HH:mm:ss').format(
+                      DateTime.fromMillisecondsSinceEpoch(user.lastLoginTime),
+                    )}',
+                    textAlign: TextAlign.start,
+                    style: textTheme.labelSmall,
+                  ),
+                ),
+              ],
+            ),
+            GestureDetector(
+              onTap: () {},
+              child: Tooltip(
+                message: user.lastLoginIP,
+                triggerMode: TooltipTriggerMode.tap,
+                textStyle: textTheme.labelSmall,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        'Area:',
+                        textAlign: TextAlign.end,
+                        style: textTheme.labelSmall,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 5.0),
+                        child: Text(
+                          area,
+                          textAlign: TextAlign.start,
+                          style: textTheme.labelSmall,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

@@ -36,7 +36,7 @@ class NCMSong extends BasicSong {
     };
   }
 
-  factory NCMSong.  fromJson(Map<String, dynamic> json) {
+  factory NCMSong.fromJson(Map<String, dynamic> json) {
     List<dynamic> singersJson = json['singers'];
     List<NCMSinger> singers = singersJson
         .map<NCMSinger>((singer) => NCMSinger.fromJson(singer))

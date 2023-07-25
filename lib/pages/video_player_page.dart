@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:fplayer/fplayer.dart';
@@ -13,6 +12,7 @@ import '../entities/qq_music/qqmusic_detail_video.dart';
 import '../http/my_http.dart';
 import '../states/app_state.dart';
 import '../utils/my_logger.dart';
+import '../widgets/my_selectable_text.dart';
 import '../widgets/show_video_player_sidebar.dart';
 
 /// FPlayer for video player, but the resolution list and playing button state and the
@@ -221,37 +221,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SelectableText(
+                MySelectableText(
                   '${snapshot.error}',
-                  contextMenuBuilder: (context, editableTextState) {
-                    final List<ContextMenuButtonItem> buttonItems =
-                        editableTextState.contextMenuButtonItems;
-                    return AdaptiveTextSelectionToolbar(
-                      anchors: editableTextState.contextMenuAnchors,
-                      children: [
-                        ...buttonItems.map<Widget>((buttonItem) {
-                          return Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: buttonItem.onPressed,
-                              child: Ink(
-                                padding: EdgeInsets.all(8.0),
-                                color: colorScheme.primary,
-                                child: Text(
-                                  CupertinoTextSelectionToolbarButton
-                                      .getButtonLabel(context, buttonItem),
-                                  style: textTheme.labelSmall!.copyWith(
-                                    color: colorScheme.onSecondary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList()
-                      ],
-                    );
-                  },
-                  textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white70,
                     fontFamily: 'Roboto',
@@ -453,7 +424,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 5.0, vertical: 20.0),
                               child: Text(
-                                DateFormat('yyyy-MM-dd HH:mm:ss').format(
+                                DateFormat('yyyy-MM-dd').format(
                                     DateTime.fromMillisecondsSinceEpoch(
                                         detailVideo.pubDate * 1000)),
                                 style: textTheme.labelSmall!.copyWith(

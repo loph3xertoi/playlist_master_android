@@ -39,6 +39,8 @@ dependencies:
   screen_brightness: ^0.2.2
   intl: ^0.18.1
   bottom_sheet: ^3.1.0
+  city_picker_china: ^0.1.0
+  ip_geolocation_io: ^1.0.1
   # bottom_sheet:
   #   git:
   #     url: git@github.com:loph3xertoi/flutter-bottom-sheet.git
@@ -60,6 +62,10 @@ flutter:
     - assets/images/default.jpg
     - assets/images/avatar.png
     - assets/images/home_button.png
+    - assets/images/male.png
+    - assets/images/female.png
+    - assets/images/gender_secret.png
+    - assets/images/song_playing_state.webp
     - assets/images/pm_round.png
     - assets/images/pm_square.png
     - assets/images/qqmusic.png

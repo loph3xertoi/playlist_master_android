@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:playlistmaster/entities/qq_music/qqmusic_singer.dart';
 
 import '../basic/basic_video.dart';
+import 'qqmusic_singer.dart';
 
 /// Detail video of qq music.
 @immutable

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +8,7 @@ import '../states/app_state.dart';
 import 'create_library_popup.dart';
 import 'libraries_settings_menu_popup.dart';
 import 'library_item.dart';
+import 'my_selectable_text.dart';
 
 class MyContentArea extends StatefulWidget {
   @override
@@ -74,37 +74,8 @@ class _MyContentAreaState extends State<MyContentArea> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SelectableText(
+                  MySelectableText(
                     '${snapshot.error}',
-                    contextMenuBuilder: (context, editableTextState) {
-                      final List<ContextMenuButtonItem> buttonItems =
-                          editableTextState.contextMenuButtonItems;
-                      return AdaptiveTextSelectionToolbar(
-                        anchors: editableTextState.contextMenuAnchors,
-                        children: [
-                          ...buttonItems.map<Widget>((buttonItem) {
-                            return Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: buttonItem.onPressed,
-                                child: Ink(
-                                  padding: EdgeInsets.all(8.0),
-                                  color: colorScheme.primary,
-                                  child: Text(
-                                    CupertinoTextSelectionToolbarButton
-                                        .getButtonLabel(context, buttonItem),
-                                    style: textTheme.labelSmall!.copyWith(
-                                      color: colorScheme.onSecondary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList()
-                        ],
-                      );
-                    },
-                    textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.grey,
                       fontFamily: 'Roboto',
@@ -141,7 +112,8 @@ class _MyContentAreaState extends State<MyContentArea> {
               ),
             );
           } else {
-            List<BasicLibrary> libraries = snapshot.data as List<BasicLibrary>;
+            List<BasicLibrary> libraries =
+                snapshot.data!.cast<BasicLibrary>().toList();
             return Container(
               decoration: BoxDecoration(
                 color: colorScheme.primary,

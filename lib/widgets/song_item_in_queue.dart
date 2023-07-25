@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_singer.dart';
+import '../states/app_state.dart';
 import '../third_lib_change/music_visualizer.dart';
 
 class SongItemInQueue extends StatefulWidget {
@@ -30,7 +32,9 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
 
   @override
   Widget build(BuildContext context) {
-    // MyAppState appState = context.watch<MyAppState>();
+    MyAppState appState = context.watch<MyAppState>();
+    var currentPlatform = appState.currentPlatform;
+    var isUsingMockData = appState.isUsingMockData;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return SizedBox(
@@ -45,11 +49,16 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
                     width: 12.0,
                     child: Align(
                       alignment: Alignment.bottomCenter,
-                      child: MusicVisualizer(
-                        barCount: 3,
-                        duration: 400,
-                        color: Color(0xFFD40000),
-                      ),
+                      child: currentPlatform == 2
+                          ? Image.asset(
+                              'assets/images/song_playing_state.webp',
+                              color: Color(0xFFD40000),
+                            )
+                          : MusicVisualizer(
+                              barCount: 3,
+                              duration: 400,
+                              color: Color(0xFFD40000),
+                            ),
                     ),
                   ),
                 )

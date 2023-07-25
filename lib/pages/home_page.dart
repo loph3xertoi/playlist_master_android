@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fplayer/fplayer.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:playlistmaster/utils/my_logger.dart';
 import 'package:provider/provider.dart';
 
 import '../http/my_http.dart';
 import '../states/app_state.dart';
+import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 import '../utils/theme_manager.dart';
 import '../widgets/bottom_player.dart';

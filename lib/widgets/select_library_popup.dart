@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +7,7 @@ import '../entities/basic/basic_song.dart';
 import '../entities/qq_music/qqmusic_playlist.dart';
 import '../states/app_state.dart';
 import 'create_library_popup.dart';
+import 'my_selectable_text.dart';
 import 'selectable_library_item.dart';
 
 class SelectLibraryPopup extends StatefulWidget {
@@ -63,37 +63,8 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SelectableText(
+                  MySelectableText(
                     '${snapshot.error}',
-                    contextMenuBuilder: (context, editableTextState) {
-                      final List<ContextMenuButtonItem> buttonItems =
-                          editableTextState.contextMenuButtonItems;
-                      return AdaptiveTextSelectionToolbar(
-                        anchors: editableTextState.contextMenuAnchors,
-                        children: [
-                          ...buttonItems.map<Widget>((buttonItem) {
-                            return Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: buttonItem.onPressed,
-                                child: Ink(
-                                  padding: EdgeInsets.all(8.0),
-                                  color: colorScheme.primary,
-                                  child: Text(
-                                    CupertinoTextSelectionToolbarButton
-                                        .getButtonLabel(context, buttonItem),
-                                    style: textTheme.labelSmall!.copyWith(
-                                      color: colorScheme.onSecondary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList()
-                        ],
-                      );
-                    },
-                    textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white70,
                       fontFamily: 'Roboto',
@@ -133,7 +104,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
             if (currentPlatform == 0) {
               throw UnimplementedError('Not yet implement pms platform');
             } else if (currentPlatform == 1) {
-              libraries = snapshot.data as List<BasicLibrary>;
+              libraries = snapshot.data!.cast<BasicLibrary>().toList();
             } else if (currentPlatform == 2) {
               throw UnimplementedError('Not yet implement ncm platform');
             } else if (currentPlatform == 3) {

@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +12,7 @@ import '../utils/my_toast.dart';
 import '../utils/theme_manager.dart';
 import '../widgets/bottom_player.dart';
 import '../widgets/multi_songs_select_popup.dart';
+import '../widgets/my_selectable_text.dart';
 import '../widgets/song_item.dart';
 
 class SimilarSongsPage extends StatefulWidget {
@@ -90,47 +90,8 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    SelectableText(
+                                    MySelectableText(
                                       '${snapshot.error}',
-                                      contextMenuBuilder:
-                                          (context, editableTextState) {
-                                        final List<ContextMenuButtonItem>
-                                            buttonItems = editableTextState
-                                                .contextMenuButtonItems;
-                                        return AdaptiveTextSelectionToolbar(
-                                          anchors: editableTextState
-                                              .contextMenuAnchors,
-                                          children: [
-                                            ...buttonItems
-                                                .map<Widget>((buttonItem) {
-                                              return Material(
-                                                color: Colors.transparent,
-                                                child: InkWell(
-                                                  onTap: buttonItem.onPressed,
-                                                  child: Ink(
-                                                    padding:
-                                                        EdgeInsets.all(8.0),
-                                                    color: colorScheme.primary,
-                                                    child: Text(
-                                                      CupertinoTextSelectionToolbarButton
-                                                          .getButtonLabel(
-                                                              context,
-                                                              buttonItem),
-                                                      style: textTheme
-                                                          .labelSmall!
-                                                          .copyWith(
-                                                        color: colorScheme
-                                                            .onSecondary,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                            }).toList()
-                                          ],
-                                        );
-                                      },
-                                      textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: Colors.white70,
                                         fontFamily: 'Roboto',
@@ -170,7 +131,7 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                               );
                             } else {
                               List<BasicSong> similarSongs =
-                                  snapshot.data as List<BasicSong>;
+                                  snapshot.data!.cast<BasicSong>().toList();
                               rawQueue = similarSongs;
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 if (appState.rawQueue == null ||
