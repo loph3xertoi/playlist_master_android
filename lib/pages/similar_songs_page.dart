@@ -401,9 +401,9 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                           // Real index in queue, not in raw queue as some songs may be taken down.
                                                           int realIndex = appState
                                                               .queue!
-                                                              .indexOf(appState
-                                                                      .rawQueue![
-                                                                  index]);
+                                                              .indexOf(
+                                                                  rawQueue![
+                                                                      index]);
 
                                                           try {
                                                             await appState
@@ -463,8 +463,7 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                               .play();
                                                         } else if (appState
                                                                 .currentSong ==
-                                                            appState.rawQueue![
-                                                                index]) {
+                                                            rawQueue![index]) {
                                                           if (!player!
                                                               .playerState
                                                               .playing) {
@@ -480,11 +479,12 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                               .toList();
 
                                                           // Real index in queue, not in raw queue as some songs may be taken down.
+
                                                           int realIndex = appState
                                                               .queue!
-                                                              .indexOf(appState
-                                                                      .rawQueue![
-                                                                  index]);
+                                                              .indexOf(
+                                                                  rawQueue![
+                                                                      index]);
 
                                                           appState.canSongPlayerPagePop =
                                                               true;

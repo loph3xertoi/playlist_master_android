@@ -227,7 +227,7 @@ class _DetailSongPageState extends State<DetailSongPage> {
                               child: Align(
                                 alignment: Alignment.center,
                                 child: MySelectableText(
-                                  title,
+                                  albumName,
                                   style: textTheme.labelMedium,
                                 ),
                               ),
@@ -242,7 +242,7 @@ class _DetailSongPageState extends State<DetailSongPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           MySelectableText(
-                            'albumName: $albumName',
+                            'title: $title',
                             style: textTheme.labelMedium,
                           ),
                           MySelectableText(
@@ -296,6 +296,7 @@ class _DetailSongPageState extends State<DetailSongPage> {
                                 child: MySelectableText(
                                   'description: $description',
                                   style: textTheme.labelMedium,
+                                  textAlign: TextAlign.start,
                                 ),
                               ),
                             ),
