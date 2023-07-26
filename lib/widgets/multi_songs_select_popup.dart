@@ -175,6 +175,8 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
         : appState.openedLibrary!.itemCount;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    var inSimilarSongsPage = widget.inSimilarSongsPage;
+    var similarSongs = widget.similarSongs;
     return Dialog(
       insetPadding: EdgeInsets.all(0.0),
       alignment: Alignment.bottomCenter,
@@ -255,7 +257,9 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
               child: ListView.builder(
                 itemCount: isUsingMockData
                     ? min(appState.rawQueue!.length, 10)
-                    : appState.rawQueue!.length,
+                    : inSimilarSongsPage
+                        ? similarSongs.length
+                        : appState.rawQueue!.length,
                 itemBuilder: (context, index) {
                   return Material(
                     color: Colors.transparent,
@@ -272,7 +276,9 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
                       child: SelectableSongItem(
                         index: index,
                         isSelected: _selectedIndex.contains(index),
-                        song: appState.rawQueue![index],
+                        song: inSimilarSongsPage
+                            ? similarSongs[index]
+                            : appState.rawQueue![index],
                       ),
                     ),
                   );
@@ -281,7 +287,7 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
             ),
             ButtonBar(
               children: <Widget>[
-                !widget.inSimilarSongsPage
+                !inSimilarSongsPage
                     ? TextButton(
                         onPressed: _selectedIndex.isNotEmpty
                             ? () {
@@ -343,7 +349,7 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
                           ),
                   ),
                 ),
-                !widget.inSimilarSongsPage
+                !inSimilarSongsPage
                     ? TextButton(
                         onPressed: _selectedIndex.isNotEmpty
                             ? () {
