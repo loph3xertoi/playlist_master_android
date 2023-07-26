@@ -19,6 +19,7 @@ import '../entities/basic/basic_song.dart';
 import '../entities/basic/basic_user.dart';
 import '../entities/basic/basic_video.dart';
 import '../entities/dto/result.dart';
+import '../entities/netease_cloud_music/ncm_detail_playlist.dart';
 import '../entities/netease_cloud_music/ncm_playlist.dart';
 import '../entities/netease_cloud_music/ncm_user.dart';
 import '../entities/qq_music/qqmusic_detail_playlist.dart';
@@ -943,15 +944,15 @@ class MyAppState extends ChangeNotifier {
         body: jsonEncode(requestBody),
       );
       final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      Result result = Result.fromJson(decodedResponse);
+      if (response.statusCode == 200 && result.success) {
         MyToast.showToast('Library created successfully');
-        return Result(true, data: decodedResponse['data']);
       } else {
-        MyToast.showToast(decodedResponse['errorMsg']);
-        MyLogger.logger.e(decodedResponse['errorMsg']);
-        return Result(false, errorMsg: decodedResponse['errorMsg']);
+        MyToast.showToast(result.message!);
+        MyLogger.logger.e(result.message!);
       }
+      return Future.value(result);
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -961,7 +962,7 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, Object>?> deleteLibraries(
+  Future<Result> deleteLibraries(
       List<BasicLibrary> libraries, int platform) async {
     String librariesIds;
     if (platform == 0) {
@@ -977,7 +978,14 @@ class MyAppState extends ChangeNotifier {
             .join(",");
       }
     } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
+      if (libraries[0] is NCMPlaylist) {
+        librariesIds =
+            libraries.map((library) => (library as NCMPlaylist).id).join(",");
+      } else {
+        librariesIds = libraries
+            .map((library) => (library as NCMDetailPlaylist).id)
+            .join(",");
+      }
     } else if (platform == 3) {
       throw UnimplementedError('Not yet implement bilibili platform');
     } else {
@@ -997,23 +1005,15 @@ class MyAppState extends ChangeNotifier {
       MyLogger.logger.i('Deleting libraries...');
       final response = await client.delete(url);
       final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        Map<String, Object> result = {};
-        Map<String, dynamic> resultJson = decodedResponse['data'];
-        int resultCode = resultJson['result'];
-        result.putIfAbsent('result', () => resultCode);
-        if (resultCode == 100) {
-          MyToast.showToast('Delete libraries successfully');
-        } else {
-          MyToast.showToast('Delete libraries failed: $resultJson');
-        }
-        return Future.value(result);
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      Result result = Result.fromJson(decodedResponse);
+      if (response.statusCode == 200 && result.success) {
+        MyToast.showToast('Delete libraries successfully');
       } else {
-        MyToast.showToast('Response error: $decodedResponse');
-        MyLogger.logger.e('Response error: $decodedResponse');
-        return null;
+        MyToast.showToast(result.message!);
+        MyLogger.logger.e(result.message!);
       }
+      return Future.value(result);
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -1146,7 +1146,7 @@ class MyAppState extends ChangeNotifier {
   //   }
   // }
 
-  Future<Map<String, Object>?> addSongsToLibrary(
+  Future<Result> addSongsToLibrary(
       List<BasicSong> songs, BasicLibrary library, int platform) async {
     Map<String, Object> requestBody;
     if (platform == 0) {
@@ -1185,25 +1185,14 @@ class MyAppState extends ChangeNotifier {
         body: jsonEncode(requestBody),
       );
       final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        Map<String, Object> result = {};
-        Map<String, dynamic> resultJson = decodedResponse['data'];
-        int resultCode = resultJson['result'];
-        result.putIfAbsent('result', () => resultCode);
-        if (resultCode == 100) {
-          // MyToast.showToast('Songs added');
-        } else if (resultCode == 200) {
-          result.putIfAbsent('errMsg', () => 'Name already exists');
-        } else {
-          throw Exception('Add songs to library failed: $decodedResponse');
-        }
-        return Future.value(result);
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      Result result = Result.fromJson(decodedResponse);
+      if (response.statusCode == 200 && result.success) {
       } else {
-        MyToast.showToast('Response error: $decodedResponse');
-        MyLogger.logger.e('Response error: $decodedResponse');
-        return null;
+        MyToast.showToast(result.message!);
+        MyLogger.logger.e(result.message!);
       }
+      return Future.value(result);
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -1213,7 +1202,7 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, Object>?> removeSongsFromLibrary(
+  Future<Result> removeSongsFromLibrary(
       List<BasicSong> songs, BasicLibrary library, int platform) async {
     BasicLibrary Function(Map<String, dynamic>) resolveJson;
     Map<String, Object> requestBody;
@@ -1249,26 +1238,15 @@ class MyAppState extends ChangeNotifier {
       MyLogger.logger.i('Removing songs from library...');
       final response = await client.delete(url);
       final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        Map<String, Object> result = {};
-        Map<String, dynamic> resultJson = decodedResponse['data'];
-        int resultCode = resultJson['result'];
-        result.putIfAbsent('result', () => resultCode);
-        if (resultCode == 100) {
-          MyToast.showToast('Songs removed from ${library.name}');
-        } else if (resultCode == 200) {
-          MyToast.showToast('Removing songs error: $decodedResponse');
-          result.putIfAbsent('errMsg', () => resultJson['errMsg']);
-        } else {
-          throw Exception('Remove songs from library failed: $resultJson');
-        }
-        return Future.value(result);
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      Result result = Result.fromJson(decodedResponse);
+      if (response.statusCode == 200 && result.success) {
+        MyToast.showToast('Songs removed from ${library.name}');
       } else {
-        MyToast.showToast('Response error: $decodedResponse');
-        MyLogger.logger.e('Response error: $decodedResponse');
-        return null;
+        MyToast.showToast(result.message!);
+        MyLogger.logger.e(result.message!);
       }
+      return Future.value(result);
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -1278,7 +1256,7 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, Object>?> moveSongsToOtherLibrary(
+  Future<Result> moveSongsToOtherLibrary(
     List<BasicSong> songs,
     BasicLibrary srcLibrary,
     BasicLibrary dstLibrary,
@@ -1328,26 +1306,15 @@ class MyAppState extends ChangeNotifier {
         body: jsonEncode(requestBody),
       );
       final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        Map<String, Object> result = {};
-        Map<String, dynamic> resultJson = decodedResponse['data'];
-        int resultCode = resultJson['result'];
-        result.putIfAbsent('result', () => resultCode);
-        if (resultCode == 100) {
-          MyToast.showToast('Songs moved successfully');
-        } else if (resultCode == 200) {
-          result.putIfAbsent('errMsg', () => resultJson['errMsg']);
-          MyToast.showToast('Songs moved error: $decodedResponse');
-        } else {
-          throw Exception('Moving songs failed: $resultJson');
-        }
-        return Future.value(result);
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      Result result = Result.fromJson(decodedResponse);
+      if (response.statusCode == 200 && result.success) {
+        MyToast.showToast('Songs moved successfully');
       } else {
-        MyToast.showToast('Response error: $decodedResponse');
-        MyLogger.logger.e('Response error: $decodedResponse');
-        return null;
+        MyToast.showToast(result.message!);
+        MyLogger.logger.e(result.message!);
       }
+      return Future.value(result);
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');

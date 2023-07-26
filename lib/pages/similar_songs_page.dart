@@ -338,7 +338,12 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                     showDialog(
                                                         context: context,
                                                         builder: (_) =>
-                                                            MultiSongsSelectPopup());
+                                                            MultiSongsSelectPopup(
+                                                              inSimilarSongsPage:
+                                                                  true,
+                                                              similarSongs:
+                                                                  similarSongs,
+                                                            ));
                                                   },
                                                   icon: Icon(
                                                     Icons.checklist_rounded,

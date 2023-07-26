@@ -2,6 +2,7 @@ import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../entities/dto/result.dart';
 import '../states/app_state.dart';
 import '../utils/my_toast.dart';
 import 'select_library_popup.dart';
@@ -200,8 +201,8 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
 
   void _addSongToLibrary(BuildContext context, MyAppState appState) async {
     if (context.mounted) {
-      List<Future<Map<String, Object>?>>? list =
-          await showFlexibleBottomSheet<List<Future<Map<String, Object>?>>>(
+      List<Future<Result>>? list =
+          await showFlexibleBottomSheet<List<Future<Result>>>(
         minHeight: 0,
         initHeight: 0.45,
         maxHeight: 0.9,
@@ -228,10 +229,9 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
         isSafeArea: true,
       );
       if (list != null) {
-        List<Map<String, Object>?> results =
-            await Future.wait<Map<String, Object>?>(list);
-        for (Map<String, Object>? result in results) {
-          if (result != null && result['result'] == 100) {
+        List<Result> results = await Future.wait<Result>(list);
+        for (Result result in results) {
+          if (result.success) {
             appState.refreshLibraries!(appState, true);
             MyToast.showToast('Add song successfully');
             break;

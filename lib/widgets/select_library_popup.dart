@@ -128,37 +128,37 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                         ),
                       ),
                       Spacer(),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _inMultiSelectMode = !_inMultiSelectMode;
-                            });
-                            if (_selectedIndex.isNotEmpty) {
-                              _addSongsToLibraries(appState, libraries);
-                            }
-                          },
-                          style: ButtonStyle(
-                            shadowColor: MaterialStateProperty.all(
-                              colorScheme.primary,
-                            ),
-                            overlayColor: MaterialStateProperty.all(
-                              Colors.grey,
-                            ),
-                          ),
-                          child: Text(
-                            !_inMultiSelectMode
-                                ? 'Multi-select'
-                                : _selectedIndex.isEmpty
-                                    ? 'Cancel'
-                                    : widget.action == 'add'
-                                        ? 'Save(${_selectedIndex.length})'
-                                        : 'Move(${_selectedIndex.length})',
-                            style: textTheme.labelSmall,
-                          ),
-                        ),
-                      )
+                      widget.action == 'add'
+                          ? Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _inMultiSelectMode = !_inMultiSelectMode;
+                                  });
+                                  if (_selectedIndex.isNotEmpty) {
+                                    _addSongsToLibraries(appState, libraries);
+                                  }
+                                },
+                                style: ButtonStyle(
+                                  shadowColor: MaterialStateProperty.all(
+                                    colorScheme.primary,
+                                  ),
+                                  overlayColor: MaterialStateProperty.all(
+                                    Colors.grey,
+                                  ),
+                                ),
+                                child: Text(
+                                  !_inMultiSelectMode
+                                      ? 'Multi-select'
+                                      : _selectedIndex.isEmpty
+                                          ? 'Cancel'
+                                          : 'Save(${_selectedIndex.length})',
+                                  style: textTheme.labelSmall,
+                                ),
+                              ),
+                            )
+                          : Container(),
                     ],
                   ),
                   Expanded(
@@ -189,7 +189,9 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                                     cover: '',
                                     itemCount: 1,
                                   );
-                                  _addSongsToLibrary(appState, library);
+                                  widget.action == 'add'
+                                      ? _addSongsToLibrary(appState, library)
+                                      : _moveSongsToLibrary(appState, library);
                                 } else if (currentPlatform == 2) {
                                   throw UnimplementedError(
                                       'Not yet implement ncm platform');
@@ -223,7 +225,11 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                                     }
                                   });
                                 } else {
-                                  _addSongsToLibrary(appState, libraries[i]);
+                                  widget.action == 'add'
+                                      ? _addSongsToLibrary(
+                                          appState, libraries[i])
+                                      : _moveSongsToLibrary(
+                                          appState, libraries[i]);
                                 }
                               },
                               child: SelectableLibraryItem(
@@ -247,8 +253,20 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
   }
 
   void _addSongsToLibrary(MyAppState appState, BasicLibrary library) async {
-    Future<Map<String, Object>?>? result = appState.addSongsToLibrary(
+    Future<Result> result = appState.addSongsToLibrary(
       widget.songs,
+      library,
+      appState.currentPlatform,
+    );
+    if (mounted) {
+      Navigator.pop(context, [result]);
+    }
+  }
+
+  void _moveSongsToLibrary(MyAppState appState, BasicLibrary library) async {
+    Future<Result> result = appState.moveSongsToOtherLibrary(
+      widget.songs,
+      appState.openedLibrary!,
       library,
       appState.currentPlatform,
     );
@@ -260,7 +278,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
   void _addSongsToLibraries(
       MyAppState appState, List<BasicLibrary> libraries) async {
     int platform = appState.currentPlatform;
-    List<Future<Map<String, Object>?>> results = [];
+    List<Future<Result>> results = [];
     for (int i = 0; i < _selectedIndex.length; i++) {
       results.add(appState.addSongsToLibrary(
         widget.songs,

@@ -2,16 +2,26 @@ import 'dart:math';
 
 import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_song.dart';
+import '../entities/dto/result.dart';
 import '../states/app_state.dart';
+import '../utils/my_toast.dart';
 import 'confirm_popup.dart';
 import 'select_library_popup.dart';
 import 'selectable_song_item.dart';
 
 class MultiSongsSelectPopup extends StatefulWidget {
+  const MultiSongsSelectPopup({
+    super.key,
+    this.inSimilarSongsPage = false,
+    this.similarSongs = const [],
+  });
+
+  final bool inSimilarSongsPage;
+  final List<BasicSong> similarSongs;
+
   @override
   State<MultiSongsSelectPopup> createState() => _MultiSongsSelectPopupState();
 }
@@ -20,11 +30,12 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
   List<int> _selectedIndex = [];
 
   void _addSongsToLibraries(BuildContext context, MyAppState appState) async {
-    List<BasicSong> selectedSongs =
-        _selectedIndex.map((index) => appState.rawQueue![index]).toList();
+    List<BasicSong> selectedSongs = widget.inSimilarSongsPage
+        ? _selectedIndex.map((index) => widget.similarSongs[index]).toList()
+        : _selectedIndex.map((index) => appState.rawQueue![index]).toList();
     if (mounted) {
-      List<Future<Map<String, Object>?>>? list =
-          await showFlexibleBottomSheet<List<Future<Map<String, Object>?>>>(
+      List<Future<Result>>? list =
+          await showFlexibleBottomSheet<List<Future<Result>>>(
         minHeight: 0,
         initHeight: 0.45,
         maxHeight: 0.9,
@@ -51,10 +62,9 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
         isSafeArea: true,
       );
       if (list != null) {
-        List<Map<String, Object>?> results =
-            await Future.wait<Map<String, Object>?>(list);
-        for (Map<String, Object>? result in results) {
-          if (result != null && result['result'] == 100) {
+        List<Result> results = await Future.wait<Result>(list);
+        for (Result result in results) {
+          if (result.success) {
             appState.refreshLibraries!(appState, true);
             MyToast.showToast('Add songs successfully');
             break;
@@ -89,8 +99,8 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
   void _moveSongsToLibraries(BuildContext context, MyAppState appState) async {
     List<BasicSong> selectedSongs =
         _selectedIndex.map((index) => appState.rawQueue![index]).toList();
-    List<Future<Map<String, Object>?>>? list =
-        await showFlexibleBottomSheet<List<Future<Map<String, Object>?>>>(
+    List<Future<Result>>? list =
+        await showFlexibleBottomSheet<List<Future<Result>>>(
       minHeight: 0,
       initHeight: 0.45,
       maxHeight: 0.9,
@@ -117,11 +127,21 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
       isSafeArea: true,
     );
 
+// if (list != null) {
+//         List<Result> results = await Future.wait<Result>(list);
+//         for (Result result in results) {
+//           if (result.success) {
+//             appState.refreshLibraries!(appState, true);
+//             MyToast.showToast('Add songs successfully');
+//             break;
+//           }
+//         }
+//       }
+
     if (list != null) {
-      List<Map<String, Object>?> results =
-          await Future.wait<Map<String, Object>?>(list);
-      for (Map<String, Object>? result in results) {
-        if (result != null && result['result'] == 100) {
+      List<Result> results = await Future.wait<Result>(list);
+      for (Result result in results) {
+        if (result.success) {
           appState.rawOpenedLibrary!.itemCount -= _selectedIndex.length;
           if (appState.rawOpenedLibrary!.itemCount == 0 && mounted) {
             Navigator.pop(context);
@@ -135,8 +155,8 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
             _selectedIndex.clear();
           });
           appState.searchedSongs = appState.rawQueue!;
-          await appState.removeSongsFromLibrary(
-              selectedSongs, appState.openedLibrary!, appState.currentPlatform);
+          // await appState.removeSongsFromLibrary(
+          //     selectedSongs, appState.openedLibrary!, appState.currentPlatform);
           appState.refreshLibraries!(appState, true);
           appState.refreshDetailLibraryPage!(appState);
           appState.refreshLibraries!(appState, true);
@@ -150,7 +170,9 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
     var isUsingMockData = appState.isUsingMockData;
-    int songsCount = appState.openedLibrary!.itemCount;
+    int songsCount = widget.inSimilarSongsPage
+        ? widget.similarSongs.length
+        : appState.openedLibrary!.itemCount;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Dialog(
@@ -259,40 +281,43 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
             ),
             ButtonBar(
               children: <Widget>[
-                TextButton(
-                  onPressed: _selectedIndex.isNotEmpty
-                      ? () {
-                          showDialog(
-                            context: context,
-                            builder: (_) => ShowConfirmDialog(
-                              title:
-                                  'Do you want to remove these songs from library?',
-                              onConfirm: () {
-                                _removeSelectedSongsFromLibrary(appState);
-                              },
-                            ),
-                          );
-                        }
-                      : null,
-                  style: _selectedIndex.isNotEmpty
-                      ? ButtonStyle(
-                          shadowColor: MaterialStateProperty.all(
-                            colorScheme.primary,
-                          ),
-                          overlayColor: MaterialStateProperty.all(
-                            Colors.grey,
-                          ),
-                        )
-                      : null,
-                  child: Text(
-                    'Remove',
-                    style: _selectedIndex.isNotEmpty
-                        ? textTheme.labelSmall
-                        : textTheme.labelSmall!.copyWith(
-                            color: colorScheme.onSecondary.withOpacity(0.5),
-                          ),
-                  ),
-                ),
+                !widget.inSimilarSongsPage
+                    ? TextButton(
+                        onPressed: _selectedIndex.isNotEmpty
+                            ? () {
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => ShowConfirmDialog(
+                                    title:
+                                        'Do you want to remove these songs from library?',
+                                    onConfirm: () {
+                                      _removeSelectedSongsFromLibrary(appState);
+                                    },
+                                  ),
+                                );
+                              }
+                            : null,
+                        style: _selectedIndex.isNotEmpty
+                            ? ButtonStyle(
+                                shadowColor: MaterialStateProperty.all(
+                                  colorScheme.primary,
+                                ),
+                                overlayColor: MaterialStateProperty.all(
+                                  Colors.grey,
+                                ),
+                              )
+                            : null,
+                        child: Text(
+                          'Remove',
+                          style: _selectedIndex.isNotEmpty
+                              ? textTheme.labelSmall
+                              : textTheme.labelSmall!.copyWith(
+                                  color:
+                                      colorScheme.onSecondary.withOpacity(0.5),
+                                ),
+                        ),
+                      )
+                    : Container(),
                 TextButton(
                   onPressed: _selectedIndex.isNotEmpty
                       ? () {
@@ -318,31 +343,34 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
                           ),
                   ),
                 ),
-                TextButton(
-                  onPressed: _selectedIndex.isNotEmpty
-                      ? () {
-                          _moveSongsToLibraries(context, appState);
-                        }
-                      : null,
-                  style: _selectedIndex.isNotEmpty
-                      ? ButtonStyle(
-                          shadowColor: MaterialStateProperty.all(
-                            colorScheme.primary,
-                          ),
-                          overlayColor: MaterialStateProperty.all(
-                            Colors.grey,
-                          ),
-                        )
-                      : null,
-                  child: Text(
-                    'Move to',
-                    style: _selectedIndex.isNotEmpty
-                        ? textTheme.labelSmall
-                        : textTheme.labelSmall!.copyWith(
-                            color: colorScheme.onSecondary.withOpacity(0.5),
-                          ),
-                  ),
-                ),
+                !widget.inSimilarSongsPage
+                    ? TextButton(
+                        onPressed: _selectedIndex.isNotEmpty
+                            ? () {
+                                _moveSongsToLibraries(context, appState);
+                              }
+                            : null,
+                        style: _selectedIndex.isNotEmpty
+                            ? ButtonStyle(
+                                shadowColor: MaterialStateProperty.all(
+                                  colorScheme.primary,
+                                ),
+                                overlayColor: MaterialStateProperty.all(
+                                  Colors.grey,
+                                ),
+                              )
+                            : null,
+                        child: Text(
+                          'Move to',
+                          style: _selectedIndex.isNotEmpty
+                              ? textTheme.labelSmall
+                              : textTheme.labelSmall!.copyWith(
+                                  color:
+                                      colorScheme.onSecondary.withOpacity(0.5),
+                                ),
+                        ),
+                      )
+                    : Container(),
               ],
             )
           ],

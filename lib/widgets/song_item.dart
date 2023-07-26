@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../entities/basic/basic_song.dart';
+import '../entities/dto/result.dart';
 import '../states/app_state.dart';
 import '../third_lib_change/like_button/like_button.dart';
 import '../utils/my_logger.dart';
@@ -35,8 +36,8 @@ class _SongItemState extends State<SongItem> {
 
   void _addSongToLibrary(BuildContext context, MyAppState appState) async {
     if (mounted) {
-      List<Future<Map<String, Object>?>>? list =
-          await showFlexibleBottomSheet<List<Future<Map<String, Object>?>>>(
+      List<Future<Result>>? list =
+          await showFlexibleBottomSheet<List<Future<Result>>>(
         minHeight: 0,
         initHeight: 0.45,
         maxHeight: 0.9,
@@ -63,10 +64,9 @@ class _SongItemState extends State<SongItem> {
         isSafeArea: true,
       );
       if (list != null) {
-        List<Map<String, Object>?> results =
-            await Future.wait<Map<String, Object>?>(list);
-        for (Map<String, Object>? result in results) {
-          if (result != null && result['result'] == 100) {
+        List<Result> results = await Future.wait<Result>(list);
+        for (Result result in results) {
+          if (result.success) {
             appState.refreshLibraries!(appState, true);
             MyToast.showToast('Add songs successfully');
             break;

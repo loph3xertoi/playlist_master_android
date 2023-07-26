@@ -543,7 +543,7 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
               ),
             ),
             Text(
-              'VIP: ${user.vipType == 0 ? 'No' : 'Yes'}',
+              'VIP: ${user.vipType == 0 ? 'no' : 'yes'}',
               style: textTheme.labelSmall,
             ),
           ],
