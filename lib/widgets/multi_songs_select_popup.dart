@@ -122,7 +122,6 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
           await Future.wait<Map<String, Object>?>(list);
       for (Map<String, Object>? result in results) {
         if (result != null && result['result'] == 100) {
-          MyToast.showToast('Move songs successfully');
           appState.rawOpenedLibrary!.itemCount -= _selectedIndex.length;
           if (appState.rawOpenedLibrary!.itemCount == 0 && mounted) {
             Navigator.pop(context);

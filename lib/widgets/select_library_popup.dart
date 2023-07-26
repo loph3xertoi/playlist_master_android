@@ -260,9 +260,9 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
   void _addSongsToLibraries(
       MyAppState appState, List<BasicLibrary> libraries) async {
     int platform = appState.currentPlatform;
-    List<Future<Map<String, Object>?>> _results = [];
+    List<Future<Map<String, Object>?>> results = [];
     for (int i = 0; i < _selectedIndex.length; i++) {
-      _results.add(appState.addSongsToLibrary(
+      results.add(appState.addSongsToLibrary(
         widget.songs,
         libraries[_selectedIndex[i]],
         platform,
@@ -270,7 +270,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
     }
     appState.refreshLibraries!(appState, true);
     if (mounted) {
-      Navigator.pop(context, _results);
+      Navigator.pop(context, results);
     }
   }
 }

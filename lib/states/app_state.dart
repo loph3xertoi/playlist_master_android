@@ -1192,7 +1192,7 @@ class MyAppState extends ChangeNotifier {
         int resultCode = resultJson['result'];
         result.putIfAbsent('result', () => resultCode);
         if (resultCode == 100) {
-          MyToast.showToast('Songs added');
+          // MyToast.showToast('Songs added');
         } else if (resultCode == 200) {
           result.putIfAbsent('errMsg', () => 'Name already exists');
         } else {
