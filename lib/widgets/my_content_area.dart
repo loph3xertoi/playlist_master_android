@@ -3,6 +3,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
+import '../entities/dto/result.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
 import 'create_library_popup.dart';
@@ -59,6 +60,7 @@ class _MyContentAreaState extends State<MyContentArea> {
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
+    var currentPlatform = appState.currentPlatform;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return FutureBuilder(
@@ -142,11 +144,15 @@ class _MyContentAreaState extends State<MyContentArea> {
                             icon: Icon(Icons.library_add_rounded),
                             color: colorScheme.tertiary,
                             tooltip: 'Create library',
-                            onPressed: () {
-                              showDialog(
+                            onPressed: () async {
+                              Result? result =
+                                  await await showDialog<Future<Result>>(
                                 context: context,
                                 builder: (_) => CreateLibraryDialog(),
                               );
+                              if (result != null && result.success) {
+                                appState.refreshLibraries!(appState, false);
+                              }
                             },
                           ),
                           IconButton(

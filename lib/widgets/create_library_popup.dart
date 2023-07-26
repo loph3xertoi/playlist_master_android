@@ -11,7 +11,7 @@ class CreateLibraryDialog extends StatefulWidget {
     this.initText,
   }) : super(key: key);
 
-  String? initText;
+  final String? initText;
 
   @override
   State<CreateLibraryDialog> createState() => _CreateLibraryDialogState();
@@ -31,22 +31,13 @@ class _CreateLibraryDialogState extends State<CreateLibraryDialog> {
 
   void _onSubmitted(
       BuildContext context, String value, MyAppState appState) async {
-    int libraryId = -1;
     if (value == '') {
       MyToast.showToast('Please enter library name!');
     } else {
-      int? result =
-          await appState.createLibrary(value, appState.currentPlatform);
-      if (result != null) {
-        MyToast.showToast('Create new library successfully!');
-        libraryId = result;
-        appState.refreshLibraries!(appState, true);
-      } else {
-        MyToast.showToast('Create library failed!');
+      var result = appState.createLibrary(value, appState.currentPlatform);
+      if (mounted) {
+        Navigator.pop(context, result);
       }
-    }
-    if (mounted) {
-      Navigator.pop(context, libraryId);
     }
   }
 
@@ -160,7 +151,7 @@ class _CreateLibraryDialogState extends State<CreateLibraryDialog> {
                     hintStyle: textTheme.titleMedium,
                     contentPadding:
                         EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
-                    suffixIcon: _textEditingController.text.isNotEmpty
+                    suffixIcon: _showSuffixIcon
                         ? GestureDetector(
                             onTap: () => _textEditingController.clear(),
                             child: Icon(Icons.cancel_rounded))

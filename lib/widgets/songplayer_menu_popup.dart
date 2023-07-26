@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../states/app_state.dart';
+import '../utils/my_toast.dart';
 import 'select_library_popup.dart';
 
 class CreateSongplayerMenuDialog extends StatelessWidget {
@@ -63,8 +64,8 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
               ),
               onTap: () {
                 print('remove from queue');
-
                 if (appState.queue!.length == 1) {
+                  Navigator.pop(context);
                   appState.queue = [];
                   appState.currentPlayingSongInQueue = 0;
                   appState.currentSong = null;
@@ -74,10 +75,9 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                   appState.player!.dispose();
                   appState.player = null;
                   appState.initQueue!.clear();
-                  Navigator.pop(context);
                   return;
                 }
-
+                Navigator.pop(context);
                 appState.isRemovingSongFromQueue = true;
                 appState.removeSongInQueue(appState.currentPlayingSongInQueue!);
                 if (appState.initQueue?.length != 0) {
@@ -98,7 +98,6 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                     index: appState.currentPlayingSongInQueue);
                 appState.carouselController
                     .jumpToPage(appState.currentPlayingSongInQueue!);
-                Navigator.pop(context);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -109,8 +108,8 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                       color: colorScheme.tertiary,
                       onPressed: () {
                         print('remove from queue');
-
                         if (appState.queue!.length == 1) {
+                          Navigator.pop(context);
                           appState.queue = [];
                           appState.currentPlayingSongInQueue = 0;
                           appState.currentSong = null;
@@ -120,10 +119,9 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                           appState.player!.dispose();
                           appState.player = null;
                           appState.initQueue!.clear();
-                          Navigator.pop(context);
                           return;
                         }
-
+                        Navigator.pop(context);
                         appState.isRemovingSongFromQueue = true;
                         appState.removeSongInQueue(
                             appState.currentPlayingSongInQueue!);
@@ -145,7 +143,6 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                             index: appState.currentPlayingSongInQueue);
                         appState.carouselController
                             .jumpToPage(appState.currentPlayingSongInQueue!);
-                        Navigator.pop(context);
                       },
                     ),
                     Expanded(
@@ -203,7 +200,8 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
 
   void _addSongToLibrary(BuildContext context, MyAppState appState) async {
     if (context.mounted) {
-      showFlexibleBottomSheet(
+      List<Future<Map<String, Object>?>>? list =
+          await showFlexibleBottomSheet<List<Future<Map<String, Object>?>>>(
         minHeight: 0,
         initHeight: 0.45,
         maxHeight: 0.9,
@@ -229,6 +227,17 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
         anchors: [0, 0.45, 0.9],
         isSafeArea: true,
       );
+      if (list != null) {
+        List<Map<String, Object>?> results =
+            await Future.wait<Map<String, Object>?>(list);
+        for (Map<String, Object>? result in results) {
+          if (result != null && result['result'] == 100) {
+            appState.refreshLibraries!(appState, true);
+            MyToast.showToast('Add song successfully');
+            break;
+          }
+        }
+      }
     }
   }
 }

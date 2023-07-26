@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../entities/basic/basic_song.dart';
+import '../entities/dto/result.dart';
 import '../entities/qq_music/qqmusic_playlist.dart';
 import '../states/app_state.dart';
 import 'create_library_popup.dart';
@@ -168,21 +169,21 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                           color: Colors.transparent,
                           child: InkWell(
                             onTap: () async {
-                              int? result = await showDialog(
+                              Result? result =
+                                  await await showDialog<Future<Result>>(
                                 context: context,
                                 builder: (_) => CreateLibraryDialog(
                                   initText: widget.songs[0].name,
                                 ),
                               );
-                              // Create library successfully.
-                              if (result != null && result > 0) {
+
+                              if (result != null && result.success) {
                                 if (currentPlatform == 0) {
                                   throw UnimplementedError(
                                       'Not yet implement pms platform');
                                 } else if (currentPlatform == 1) {
-                                  // Temporarily library for holding dirId.
                                   BasicLibrary library = QQMusicPlaylist(
-                                    result,
+                                    result.data as int,
                                     '',
                                     name: '',
                                     cover: '',
@@ -246,39 +247,30 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
   }
 
   void _addSongsToLibrary(MyAppState appState, BasicLibrary library) async {
-    int? result;
-    Map<String, Object>? resultMap = await appState.addSongsToLibrary(
+    Future<Map<String, Object>?>? result = appState.addSongsToLibrary(
       widget.songs,
       library,
       appState.currentPlatform,
     );
-    if (resultMap != null && resultMap['result'] == 100) {
-      appState.refreshLibraries!(appState, true);
-      result = 0;
-    }
     if (mounted) {
-      Navigator.pop(context, result);
+      Navigator.pop(context, [result]);
     }
   }
 
   void _addSongsToLibraries(
       MyAppState appState, List<BasicLibrary> libraries) async {
-    int? result;
     int platform = appState.currentPlatform;
-    Map<String, Object>? _result;
+    List<Future<Map<String, Object>?>> _results = [];
     for (int i = 0; i < _selectedIndex.length; i++) {
-      _result = await appState.addSongsToLibrary(
+      _results.add(appState.addSongsToLibrary(
         widget.songs,
         libraries[_selectedIndex[i]],
         platform,
-      );
-      if (_result != null && _result['result'] == 100) {
-        result = 0;
-      }
+      ));
     }
     appState.refreshLibraries!(appState, true);
     if (mounted) {
-      Navigator.pop(context, result);
+      Navigator.pop(context, _results);
     }
   }
 }

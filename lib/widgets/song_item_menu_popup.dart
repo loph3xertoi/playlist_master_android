@@ -25,9 +25,6 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
         [widget.song], appState.openedLibrary!, appState.currentPlatform);
     appState.refreshLibraries!(appState, true);
     appState.refreshDetailLibraryPage!(appState);
-    if (context.mounted) {
-      Navigator.pop(context);
-    }
   }
 
   @override
@@ -92,6 +89,7 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
                           onConfirm: () {
                             print('Remove from library.');
                             _removeSongFromLibrary(context, appState);
+                            Navigator.pop(context);
                           },
                         ),
                       );
@@ -112,6 +110,7 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
                                   onConfirm: () {
                                     print('Remove from library.');
                                     _removeSongFromLibrary(context, appState);
+                                    Navigator.pop(context);
                                   },
                                 ),
                               );

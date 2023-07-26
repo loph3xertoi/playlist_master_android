@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../states/app_state.dart';
-import '../utils/my_toast.dart';
 import 'confirm_popup.dart';
 import 'selectable_library_item.dart';
 
@@ -38,15 +37,23 @@ class _MultiLibrariesSelectPopupState extends State<MultiLibrariesSelectPopup> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
+            AppBar(
+              leading: IconButton(
+                color: colorScheme.tertiary,
+                icon: Icon(Icons.arrow_back_rounded),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              centerTitle: true,
+              title: Text(
                 _selectedIndex.isEmpty
                     ? 'Delete libraries'
                     : '${_selectedIndex.length} libraries selected',
                 textAlign: TextAlign.center,
                 style: textTheme.labelLarge,
               ),
+              backgroundColor: colorScheme.primary,
             ),
             Expanded(
               child: ListView.builder(
@@ -85,6 +92,7 @@ class _MultiLibrariesSelectPopupState extends State<MultiLibrariesSelectPopup> {
                             builder: (_) => ShowConfirmDialog(
                               title: 'Do you want to remove these libraries?',
                               onConfirm: () {
+                                Navigator.pop(context);
                                 _removeSelectedLibraries(appState);
                               },
                             ),
@@ -124,16 +132,7 @@ class _MultiLibrariesSelectPopupState extends State<MultiLibrariesSelectPopup> {
     setState(() {
       _selectedIndex.clear();
     });
-
-    var resultMap = await appState.deleteLibraries(
-        removedLibraries, appState.currentPlatform);
-    if (resultMap != null && resultMap['result'] == 100) {
-      MyToast.showToast('Delete successfully');
-    }
-
-    appState.refreshLibraries!(appState, true);
-    if (mounted) {
-      Navigator.pop(context);
-    }
+    await appState.deleteLibraries(removedLibraries, appState.currentPlatform);
+    appState.refreshLibraries!(appState, false);
   }
 }

@@ -18,6 +18,8 @@ import '../entities/basic/basic_paged_songs.dart';
 import '../entities/basic/basic_song.dart';
 import '../entities/basic/basic_user.dart';
 import '../entities/basic/basic_video.dart';
+import '../entities/dto/result.dart';
+import '../entities/netease_cloud_music/ncm_playlist.dart';
 import '../entities/netease_cloud_music/ncm_user.dart';
 import '../entities/qq_music/qqmusic_detail_playlist.dart';
 import '../entities/qq_music/qqmusic_detail_song.dart';
@@ -912,12 +914,11 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  Future<int?> createLibrary(String libraryName, int platform) async {
+  Future<Result> createLibrary(String libraryName, int platform) async {
     if (platform == 0) {
       throw UnimplementedError('Not yet implement pms platform');
     } else if (platform == 1) {
     } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
     } else if (platform == 3) {
       throw UnimplementedError('Not yet implement bilibili platform');
     } else {
@@ -945,11 +946,11 @@ class MyAppState extends ChangeNotifier {
           jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       if (response.statusCode == 200 && decodedResponse['success'] == true) {
         MyToast.showToast('Library created successfully');
-        return Future.value(decodedResponse['data']);
+        return Result(true, data: decodedResponse['data']);
       } else {
-        MyToast.showToast('Response error: $decodedResponse');
-        MyLogger.logger.e('Response error: $decodedResponse');
-        return null;
+        MyToast.showToast(decodedResponse['errorMsg']);
+        MyLogger.logger.e(decodedResponse['errorMsg']);
+        return Result(false, errorMsg: decodedResponse['errorMsg']);
       }
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
@@ -1003,7 +1004,7 @@ class MyAppState extends ChangeNotifier {
         int resultCode = resultJson['result'];
         result.putIfAbsent('result', () => resultCode);
         if (resultCode == 100) {
-          MyToast.showToast('Delete libraries succeed');
+          MyToast.showToast('Delete libraries successfully');
         } else {
           MyToast.showToast('Delete libraries failed: $resultJson');
         }
@@ -1072,7 +1073,7 @@ class MyAppState extends ChangeNotifier {
     } else if (platform == 1) {
       resolveJson = QQMusicPlaylist.fromJson;
     } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
+      resolveJson = NCMPlaylist.fromJson;
     } else if (platform == 3) {
       throw UnimplementedError('Not yet implement bilibili platform');
     } else {

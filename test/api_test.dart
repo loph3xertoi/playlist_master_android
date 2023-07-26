@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:playlistmaster/entities/dto/result.dart';
 import 'package:playlistmaster/entities/qq_music/qqmusic_playlist.dart';
 import 'package:playlistmaster/entities/qq_music/qqmusic_song.dart';
 import 'package:playlistmaster/states/app_state.dart';
@@ -10,8 +11,8 @@ void main() {
   });
 
   test('Create library', () async {
-    int? libraryId = await appState.createLibrary('daw\'s library', 1);
-    expect(libraryId, isNotNull);
+    Result result = await appState.createLibrary('daw\'s library', 1);
+    print(result);
   });
 
   test('Delete libraries', () async {

@@ -398,7 +398,7 @@ class _FullScreenPlayerPageState extends State<FullScreenPlayerPage> {
 
   void _getRendererDevices() async {
     var castDevices = await _vlcController.getRendererDevices();
-    if (castDevices.isNotEmpty) {
+    if (castDevices.isNotEmpty && mounted) {
       var selectedCastDeviceName = await showDialog(
         context: context,
         builder: (BuildContext context) {

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_song.dart';
@@ -17,6 +18,135 @@ class MultiSongsSelectPopup extends StatefulWidget {
 
 class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
   List<int> _selectedIndex = [];
+
+  void _addSongsToLibraries(BuildContext context, MyAppState appState) async {
+    List<BasicSong> selectedSongs =
+        _selectedIndex.map((index) => appState.rawQueue![index]).toList();
+    if (mounted) {
+      List<Future<Map<String, Object>?>>? list =
+          await showFlexibleBottomSheet<List<Future<Map<String, Object>?>>>(
+        minHeight: 0,
+        initHeight: 0.45,
+        maxHeight: 0.9,
+        context: context,
+        bottomSheetColor: Colors.transparent,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30.0),
+            topRight: Radius.circular(30.0),
+          ),
+        ),
+        builder: (
+          BuildContext context,
+          ScrollController scrollController,
+          double bottomSheetOffset,
+        ) {
+          return SelectLibraryPopup(
+            scrollController: scrollController,
+            songs: selectedSongs,
+            action: 'add',
+          );
+        },
+        anchors: [0, 0.45, 0.9],
+        isSafeArea: true,
+      );
+      if (list != null) {
+        List<Map<String, Object>?> results =
+            await Future.wait<Map<String, Object>?>(list);
+        for (Map<String, Object>? result in results) {
+          if (result != null && result['result'] == 100) {
+            appState.refreshLibraries!(appState, true);
+            MyToast.showToast('Add songs successfully');
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  void _removeSelectedSongsFromLibrary(MyAppState appState) async {
+    appState.rawOpenedLibrary!.itemCount -= _selectedIndex.length;
+    if (appState.rawOpenedLibrary!.itemCount == 0 && mounted) {
+      Navigator.pop(context);
+    }
+    Map<int, Object> map = appState.rawQueue!.asMap();
+    Map<int, Object> modifiableMap = Map.from(map);
+    List<BasicSong> removedSongs =
+        _selectedIndex.map((index) => appState.rawQueue![index]).toList();
+    modifiableMap
+        .removeWhere((index, object) => _selectedIndex.contains(index));
+    appState.rawQueue = modifiableMap.values.toList();
+    setState(() {
+      _selectedIndex.clear();
+    });
+    appState.searchedSongs = appState.rawQueue!;
+    await appState.removeSongsFromLibrary(
+        removedSongs, appState.openedLibrary!, appState.currentPlatform);
+    appState.refreshLibraries!(appState, true);
+    appState.refreshDetailLibraryPage!(appState);
+  }
+
+  void _moveSongsToLibraries(BuildContext context, MyAppState appState) async {
+    List<BasicSong> selectedSongs =
+        _selectedIndex.map((index) => appState.rawQueue![index]).toList();
+    List<Future<Map<String, Object>?>>? list =
+        await showFlexibleBottomSheet<List<Future<Map<String, Object>?>>>(
+      minHeight: 0,
+      initHeight: 0.45,
+      maxHeight: 0.9,
+      context: context,
+      bottomSheetColor: Colors.transparent,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30.0),
+          topRight: Radius.circular(30.0),
+        ),
+      ),
+      builder: (
+        BuildContext context,
+        ScrollController scrollController,
+        double bottomSheetOffset,
+      ) {
+        return SelectLibraryPopup(
+          scrollController: scrollController,
+          songs: selectedSongs,
+          action: 'move',
+        );
+      },
+      anchors: [0, 0.45, 0.9],
+      isSafeArea: true,
+    );
+
+    if (list != null) {
+      List<Map<String, Object>?> results =
+          await Future.wait<Map<String, Object>?>(list);
+      for (Map<String, Object>? result in results) {
+        if (result != null && result['result'] == 100) {
+          MyToast.showToast('Move songs successfully');
+          appState.rawOpenedLibrary!.itemCount -= _selectedIndex.length;
+          if (appState.rawOpenedLibrary!.itemCount == 0 && mounted) {
+            Navigator.pop(context);
+          }
+          Map<int, Object> map = appState.rawQueue!.asMap();
+          Map<int, Object> modifiableMap = Map.from(map);
+          modifiableMap
+              .removeWhere((index, object) => _selectedIndex.contains(index));
+          appState.rawQueue = modifiableMap.values.toList();
+          setState(() {
+            _selectedIndex.clear();
+          });
+          appState.searchedSongs = appState.rawQueue!;
+          await appState.removeSongsFromLibrary(
+              selectedSongs, appState.openedLibrary!, appState.currentPlatform);
+          appState.refreshLibraries!(appState, true);
+          appState.refreshDetailLibraryPage!(appState);
+          appState.refreshLibraries!(appState, true);
+          break;
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
@@ -220,113 +350,5 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
         ),
       ),
     );
-  }
-
-  void _addSongsToLibraries(BuildContext context, MyAppState appState) async {
-    List<BasicSong> selectedSongs =
-        _selectedIndex.map((index) => appState.rawQueue![index]).toList();
-    if (mounted) {
-      showFlexibleBottomSheet(
-        minHeight: 0,
-        initHeight: 0.45,
-        maxHeight: 0.9,
-        context: context,
-        bottomSheetColor: Colors.transparent,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30.0),
-            topRight: Radius.circular(30.0),
-          ),
-        ),
-        builder: (
-          BuildContext context,
-          ScrollController scrollController,
-          double bottomSheetOffset,
-        ) {
-          return SelectLibraryPopup(
-            scrollController: scrollController,
-            songs: selectedSongs,
-            action: 'add',
-          );
-        },
-        anchors: [0, 0.45, 0.9],
-        isSafeArea: true,
-      );
-    }
-  }
-
-  void _removeSelectedSongsFromLibrary(MyAppState appState) async {
-    appState.rawOpenedLibrary!.itemCount -= _selectedIndex.length;
-    Map<int, Object> map = appState.rawQueue!.asMap();
-    Map<int, Object> modifiableMap = Map.from(map);
-    List<BasicSong> removedSongs =
-        _selectedIndex.map((index) => appState.rawQueue![index]).toList();
-    modifiableMap
-        .removeWhere((index, object) => _selectedIndex.contains(index));
-    appState.rawQueue = modifiableMap.values.toList();
-    setState(() {
-      _selectedIndex.clear();
-    });
-    appState.searchedSongs = appState.rawQueue!;
-    await appState.removeSongsFromLibrary(
-        removedSongs, appState.openedLibrary!, appState.currentPlatform);
-    appState.refreshLibraries!(appState, true);
-    appState.refreshDetailLibraryPage!(appState);
-    if (appState.rawOpenedLibrary!.itemCount == 0 && mounted) {
-      Navigator.pop(context);
-    }
-  }
-
-  void _moveSongsToLibraries(BuildContext context, MyAppState appState) async {
-    List<BasicSong> selectedSongs =
-        _selectedIndex.map((index) => appState.rawQueue![index]).toList();
-    if (mounted) {
-      int? result = await showFlexibleBottomSheet(
-        minHeight: 0,
-        initHeight: 0.45,
-        maxHeight: 0.9,
-        context: context,
-        bottomSheetColor: Colors.transparent,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30.0),
-            topRight: Radius.circular(30.0),
-          ),
-        ),
-        builder: (
-          BuildContext context,
-          ScrollController scrollController,
-          double bottomSheetOffset,
-        ) {
-          return SelectLibraryPopup(
-            scrollController: scrollController,
-            songs: selectedSongs,
-            action: 'move',
-          );
-        },
-        anchors: [0, 0.45, 0.9],
-        isSafeArea: true,
-      );
-
-      if (result != null && result == 0) {
-        appState.rawOpenedLibrary!.itemCount -= _selectedIndex.length;
-        Map<int, Object> map = appState.rawQueue!.asMap();
-        Map<int, Object> modifiableMap = Map.from(map);
-        modifiableMap
-            .removeWhere((index, object) => _selectedIndex.contains(index));
-        appState.rawQueue = modifiableMap.values.toList();
-        setState(() {
-          _selectedIndex.clear();
-        });
-        appState.searchedSongs = appState.rawQueue!;
-        await appState.removeSongsFromLibrary(
-            selectedSongs, appState.openedLibrary!, appState.currentPlatform);
-        appState.refreshLibraries!(appState, true);
-        appState.refreshDetailLibraryPage!(appState);
-        if (appState.rawOpenedLibrary!.itemCount == 0 && mounted) {
-          Navigator.pop(context);
-        }
-      }
-    }
   }
 }
