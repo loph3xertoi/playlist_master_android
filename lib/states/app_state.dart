@@ -38,6 +38,9 @@ import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 
 class MyAppState extends ChangeNotifier {
+  // Error message by fetch* function.
+  String _errorMsg = '';
+
   // Refresh detail library page.
   void Function(MyAppState)? refreshDetailLibraryPage;
 
@@ -174,6 +177,8 @@ class MyAppState extends ChangeNotifier {
 
   // Raw opened library.
   BasicLibrary? _rawOpenedLibrary;
+
+  String get errorMsg => _errorMsg;
 
   int get currentPage => _currentPage;
 
@@ -501,829 +506,6 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  Future<BasicUser?> fetchUser(int platform) async {
-    BasicUser Function(Map<String, dynamic>) resolveJson;
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
-      resolveJson = QQMusicUser.fromJson;
-    } else if (platform == 2) {
-      resolveJson = NCMUser.fromJson;
-    } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
-    } else {
-      throw UnsupportedError('Invalid platform');
-    }
-
-    final Uri url = Uri.http(
-      API.host,
-      '${API.user}/${API.uid}',
-      {
-        'platform': platform.toString(),
-      },
-    );
-    final client = RetryClient(http.Client());
-
-    try {
-      MyLogger.logger.i('Loading User information from network...');
-      final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        Map<String, dynamic> user = decodedResponse['data'];
-        return Future.value(resolveJson(user));
-      } else {
-        MyToast.showToast('Response error: $decodedResponse');
-        MyLogger.logger.e('Response error: $decodedResponse');
-        return null;
-      }
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      MyLogger.logger.e('Network error with exception: $e');
-      rethrow;
-    } finally {
-      client.close();
-    }
-  }
-
-  Future<BasicSong?> fetchDetailSong(BasicSong song, int platform) async {
-    BasicSong Function(Map<String, dynamic>) resolveJson;
-    Uri? url;
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
-      resolveJson = QQMusicDetailSong.fromJson;
-      url = Uri.http(
-        API.host,
-        '${API.detailSong}/${(song as QQMusicSong).songMid}',
-        {
-          'platform': platform.toString(),
-        },
-      );
-    } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
-    } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
-    } else {
-      throw UnsupportedError('Invalid platform');
-    }
-
-    final client = RetryClient(http.Client());
-
-    try {
-      MyLogger.logger.i('Loading detail song from network...');
-      final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        return Future.value(resolveJson(decodedResponse['data']));
-      } else {
-        MyToast.showToast('Response error: $decodedResponse');
-        MyLogger.logger.e('Response error: $decodedResponse');
-        return null;
-      }
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      MyLogger.logger.e('Network error with exception: $e');
-      rethrow;
-    } finally {
-      client.close();
-    }
-  }
-
-  Future<Map<String, List<String>>?> fetchMVsLink(
-      List<String> vids, int platform) async {
-    // BasicLibrary Function(Map<String, dynamic>) resolveJson;
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
-      // resolveJson = QQMusicPlaylist.fromJson;
-    } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
-    } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
-    } else {
-      throw UnsupportedError('Invalid platform');
-    }
-
-    final Uri url = Uri.http(
-      API.host,
-      '${API.mvLink}/${vids.join(',')}',
-      {
-        'platform': platform.toString(),
-      },
-    );
-    final client = RetryClient(http.Client());
-
-    try {
-      MyLogger.logger.i('Loading MVs link from network...');
-      final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        var mvsLink = decodedResponse['data']!;
-        // if (mvsLink is Map<String, dynamic>) {
-        return Future.value(mvsLink.map((key, value) =>
-            MapEntry<String, List<String>>(key, List<String>.from(value))));
-      } else {
-        MyToast.showToast('Response error: $decodedResponse');
-        MyLogger.logger.e('Response error: $decodedResponse');
-        return null;
-      }
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      MyLogger.logger.e('Network error with exception: $e');
-      rethrow;
-    } finally {
-      client.close();
-    }
-  }
-
-  Future<Map<String, String>?> fetchSongsLink(
-      List<String> songIds, int platform) async {
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
-    } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
-    } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
-    } else {
-      throw UnsupportedError('Invalid platform');
-    }
-
-    final Uri url = Uri.http(
-      API.host,
-      '${API.songsLink}/${songIds.join(',')}',
-      {
-        'platform': platform.toString(),
-      },
-    );
-    final client = RetryClient(http.Client());
-
-    try {
-      MyLogger.logger.i('Loading songs link from network...');
-      final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        var songsLink = decodedResponse['data']!;
-        return Future.value(
-            songsLink.map((key, value) => MapEntry(key, value.toString())));
-      } else {
-        MyToast.showToast('Response error: $decodedResponse');
-        MyLogger.logger.e('Response error: $decodedResponse');
-        return null;
-      }
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      MyLogger.logger.e('Network error with exception: $e');
-      rethrow;
-    } finally {
-      client.close();
-    }
-  }
-
-  Future<BasicLibrary?> fetchDetailLibrary(
-      BasicLibrary library, int platform) async {
-    BasicLibrary Function(Map<String, dynamic>) resolveJson;
-    Uri? url;
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
-      resolveJson = QQMusicDetailPlaylist.fromJson;
-      url = Uri.http(
-        API.host,
-        '${API.detailLibrary}/${(library as QQMusicPlaylist).tid}',
-        {
-          'platform': platform.toString(),
-        },
-      );
-    } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
-    } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
-    } else {
-      throw UnsupportedError('Invalid platform');
-    }
-
-    final client = RetryClient(http.Client());
-
-    try {
-      MyLogger.logger.i('Loading detail library from network...');
-      final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        return Future.value(resolveJson(decodedResponse['data']));
-      } else if (response.statusCode == 200 &&
-          decodedResponse['success'] == false &&
-          platform == 1) {
-        MyToast.showToast('Request failure, tid is 0');
-        MyLogger.logger.e('Request failure, tid is 0');
-        return null;
-      } else {
-        MyToast.showToast('Response error: $decodedResponse');
-        MyLogger.logger.e('Response error: $decodedResponse');
-        return null;
-      }
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      MyLogger.logger.e('Network error with exception: $e');
-      rethrow;
-    } finally {
-      client.close();
-    }
-  }
-
-  Future<List<BasicSong>?> fetchSimilarSongs(
-      BasicSong song, int platform) async {
-    BasicSong Function(Map<String, dynamic>) resolveJson;
-    Uri? url;
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
-      resolveJson = QQMusicSong.fromJson;
-      url = Uri.http(
-        API.host,
-        '${API.similarSongs}/${(song as QQMusicSong).songId}',
-        {
-          'platform': platform.toString(),
-        },
-      );
-    } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
-    } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
-    } else {
-      throw UnsupportedError('Invalid platform');
-    }
-
-    final client = RetryClient(http.Client());
-
-    try {
-      MyLogger.logger.i('Loading similar songs from network...');
-      final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        List<dynamic> jsonList = decodedResponse['data'];
-        return Future.value(
-            jsonList.map<BasicSong>((e) => resolveJson(e)).toList());
-      } else {
-        MyToast.showToast('Response error: $decodedResponse');
-        MyLogger.logger.e('Response error: $decodedResponse');
-        return null;
-      }
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      MyLogger.logger.e('Network error with exception: $e');
-      rethrow;
-    } finally {
-      client.close();
-    }
-  }
-
-  Future<BasicVideo?> fetchDetailMV(BasicVideo video, int platform) async {
-    BasicVideo Function(Map<String, dynamic>) resolveJson;
-    Uri? url;
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
-      resolveJson = QQMusicDetailVideo.fromJson;
-      url = Uri.http(
-        API.host,
-        '${API.detailMV}/${(video as QQMusicVideo).vid}',
-        {
-          'platform': platform.toString(),
-        },
-      );
-    } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
-    } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
-    } else {
-      throw UnsupportedError('Invalid platform');
-    }
-
-    final client = RetryClient(http.Client());
-
-    try {
-      MyLogger.logger.i('Loading detail mv information from network...');
-      final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        return Future.value(resolveJson(decodedResponse['data']));
-      } else {
-        MyToast.showToast('Response error: $decodedResponse');
-        MyLogger.logger.e('Response error: $decodedResponse');
-        return null;
-      }
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      MyLogger.logger.e('Network error with exception: $e');
-      rethrow;
-    } finally {
-      client.close();
-    }
-  }
-
-  // Cache video.
-  Future<void> cacheVideo(String rawUrl) async {
-    final client = RetryClient(http.Client());
-    String? videoType = VideoUtil.getVideoType(rawUrl);
-    if (videoType == null) {
-      MyToast.showToast('Video url is corrupted');
-      throw Exception('Video url is corrupted');
-    }
-    CacheManager cacheManager = MyHttp.videoCacheManager;
-    dynamic result = await cacheManager.getFileFromCache(rawUrl);
-    if (result == null || !(result as FileInfo).file.existsSync()) {
-      try {
-        final response = await client.get(Uri.parse(rawUrl));
-        if (response.statusCode == 200) {
-          await cacheManager.putFile(
-            rawUrl,
-            response.bodyBytes,
-            fileExtension: videoType,
-          );
-          MyToast.showToast('Cache video successfully');
-          MyLogger.logger.i('Cache video successfully');
-        } else {
-          MyToast.showToast('Response error: $response');
-          MyLogger.logger.e('Response error: $response');
-        }
-      } catch (e) {
-        MyToast.showToast('Exception thrown: $e');
-        MyLogger.logger.e('Network error with exception: $e');
-        rethrow;
-      } finally {
-        client.close();
-      }
-    } else {
-      MyToast.showToast('Already cached');
-      MyLogger.logger.wtf('Already cached');
-    }
-  }
-
-  Future<List<BasicVideo>?> fetchRelatedMVs(
-      BasicSong song, int platform) async {
-    BasicVideo Function(Map<String, dynamic>) resolveJson;
-    Uri? url;
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
-      resolveJson = QQMusicVideo.fromJson;
-      url = Uri.http(
-        API.host,
-        '${API.relatedMV}/${(song as QQMusicSong).songId}',
-        {
-          'platform': platform.toString(),
-        },
-      );
-    } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
-    } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
-    } else {
-      throw UnsupportedError('Invalid platform');
-    }
-
-    final client = RetryClient(http.Client());
-
-    try {
-      MyLogger.logger.i('Loading related MVs from network...');
-      final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        List<dynamic> jsonList = decodedResponse['data'];
-        return Future.value(
-            jsonList.map<BasicVideo>((video) => resolveJson(video)).toList());
-      } else {
-        MyToast.showToast('Response error: $decodedResponse');
-        MyLogger.logger.e('Response error: $decodedResponse');
-        return null;
-      }
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      MyLogger.logger.e('Network error with exception: $e');
-      rethrow;
-    } finally {
-      client.close();
-    }
-  }
-
-  Future<Result> createLibrary(String libraryName, int platform) async {
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
-    } else if (platform == 2) {
-    } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
-    } else {
-      throw UnsupportedError('Invalid platform');
-    }
-
-    final Uri url = Uri.http(
-      API.host,
-      API.createLibrary,
-      {
-        'platform': platform.toString(),
-      },
-    );
-    final requestBody = {'name': libraryName};
-    final client = RetryClient(http.Client());
-
-    try {
-      MyLogger.logger.i('Creating library...');
-      final response = await client.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(requestBody),
-      );
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
-      Result result = Result.fromJson(decodedResponse);
-      if (response.statusCode == 200 && result.success) {
-        MyToast.showToast('Library created successfully');
-      } else {
-        MyToast.showToast(result.message!);
-        MyLogger.logger.e(result.message!);
-      }
-      return Future.value(result);
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      MyLogger.logger.e('Network error with exception: $e');
-      rethrow;
-    } finally {
-      client.close();
-    }
-  }
-
-  Future<Result> deleteLibraries(
-      List<BasicLibrary> libraries, int platform) async {
-    String librariesIds;
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
-      if (libraries[0] is QQMusicPlaylist) {
-        librariesIds = libraries
-            .map((library) => (library as QQMusicPlaylist).dirId)
-            .join(",");
-      } else {
-        librariesIds = libraries
-            .map((library) => (library as QQMusicDetailPlaylist).dirId)
-            .join(",");
-      }
-    } else if (platform == 2) {
-      if (libraries[0] is NCMPlaylist) {
-        librariesIds =
-            libraries.map((library) => (library as NCMPlaylist).id).join(",");
-      } else {
-        librariesIds = libraries
-            .map((library) => (library as NCMDetailPlaylist).id)
-            .join(",");
-      }
-    } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
-    } else {
-      throw UnsupportedError('Invalid platform');
-    }
-
-    final Uri url = Uri.http(
-      API.host,
-      '${API.deleteLibrary}/$librariesIds',
-      {
-        'platform': platform.toString(),
-      },
-    );
-    final client = RetryClient(http.Client());
-
-    try {
-      MyLogger.logger.i('Deleting libraries...');
-      final response = await client.delete(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
-      Result result = Result.fromJson(decodedResponse);
-      if (response.statusCode == 200 && result.success) {
-        MyToast.showToast('Delete libraries successfully');
-      } else {
-        MyToast.showToast(result.message!);
-        MyLogger.logger.e(result.message!);
-      }
-      return Future.value(result);
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      MyLogger.logger.e('Network error with exception: $e');
-      rethrow;
-    } finally {
-      client.close();
-    }
-  }
-
-  Future<BasicPagedSongs?> fetchSearchedSongs(
-      String keywords, int offset, int limit, int platform) async {
-    BasicPagedSongs Function(Map<String, dynamic>) resolveJson;
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
-      resolveJson = QQMusicPagedSongs.fromJson;
-    } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
-    } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
-    } else {
-      throw UnsupportedError('Invalid platform');
-    }
-
-    final Uri url = Uri.http(API.host, '${API.searchSong}/$keywords', {
-      'offset': offset.toString(),
-      'limit': limit.toString(),
-      'platform': platform.toString(),
-    });
-    final client = RetryClient(http.Client());
-
-    try {
-      MyLogger.logger.i('Searching songs from network...');
-      final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        return Future.value(resolveJson(decodedResponse['data']));
-      } else {
-        MyToast.showToast('Response error: $decodedResponse');
-        MyLogger.logger.e('Response error: $decodedResponse');
-        return null;
-      }
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      MyLogger.logger.e('Network error with exception: $e');
-      rethrow;
-    } finally {
-      client.close();
-    }
-  }
-
-  Future<List<BasicLibrary>?> fetchLibraries(int platform) async {
-    BasicLibrary Function(Map<String, dynamic>) resolveJson;
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
-      resolveJson = QQMusicPlaylist.fromJson;
-    } else if (platform == 2) {
-      resolveJson = NCMPlaylist.fromJson;
-    } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
-    } else {
-      throw UnsupportedError('Invalid platform');
-    }
-
-    final Uri url = Uri.http(
-      API.host,
-      API.libraries,
-      {
-        'id': API.uid,
-        'platform': platform.toString(),
-      },
-    );
-    final client = RetryClient(http.Client());
-
-    try {
-      MyLogger.logger.i('Loading libraries from network...');
-      final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      if (response.statusCode == 200 && decodedResponse['success'] == true) {
-        var jsonList = decodedResponse['data'];
-        return Future.value(
-            jsonList.map<BasicLibrary>((e) => resolveJson(e)).toList());
-      } else {
-        MyToast.showToast('Response error: $decodedResponse');
-        MyLogger.logger.e('Response error: $decodedResponse');
-        return null;
-      }
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      MyLogger.logger.e('Network error with exception: $e');
-      rethrow;
-    } finally {
-      client.close();
-    }
-  }
-
-  // Future<String?> fetchSongLink(
-  //     BasicSong song, String quality, int platform) async {
-  //   Uri? url;
-  //   if (platform == 1) {
-  //     url = Uri.http(
-  //         API.host, '${API.songLink}/${(song as QQMusicSong).songMid}', {
-  //       'mediaMid': song.mediaMid,
-  //       'type': quality,
-  //       'platform': platform.toString(),
-  //     });
-  //   }
-  //   final client = RetryClient(http.Client());
-  //   try {
-  //     MyLogger.logger.i('Loading song link from network...');
-  //     final response = await client.get(url!);
-  //     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-  //     if (response.statusCode == 200 && decodedResponse['success'] == true) {
-  //       String songLink = decodedResponse['data'];
-  //       return Future.value(songLink);
-  //     } else {
-  //       MyToast.showToast('Response error with code: ${response.statusCode}');
-  //       MyLogger.logger.e('Response error with code: ${response.statusCode}');
-  //       return null;
-  //     }
-  //   } catch (e) {
-  //     MyToast.showToast('Exception thrown: $e');
-  //     MyLogger.logger.e('Network error with exception: $e');
-  //     rethrow;
-  //   } finally {
-  //     client.close();
-  //   }
-  // }
-
-  Future<Result> addSongsToLibrary(
-      List<BasicSong> songs, BasicLibrary library, int platform) async {
-    Map<String, Object> requestBody;
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
-      int dirId = (library as QQMusicPlaylist).dirId;
-      String songsMid = songs.map((e) => (e as QQMusicSong).songMid).join(',');
-      String tid = library.tid;
-      requestBody = {
-        'libraryId': dirId.toString(),
-        'songsId': songsMid,
-        'tid': tid,
-      };
-    } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
-    } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
-    } else {
-      throw UnsupportedError('Invalid platform');
-    }
-
-    final Uri url = Uri.http(
-      API.host,
-      API.addSongsToLibrary,
-      {
-        'platform': platform.toString(),
-      },
-    );
-    final client = RetryClient(http.Client());
-
-    try {
-      MyLogger.logger.i('Adding songs to library...');
-      final response = await client.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(requestBody),
-      );
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
-      Result result = Result.fromJson(decodedResponse);
-      if (response.statusCode == 200 && result.success) {
-      } else {
-        MyToast.showToast(result.message!);
-        MyLogger.logger.e(result.message!);
-      }
-      return Future.value(result);
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      MyLogger.logger.e('Network error with exception: $e');
-      rethrow;
-    } finally {
-      client.close();
-    }
-  }
-
-  Future<Result> removeSongsFromLibrary(
-      List<BasicSong> songs, BasicLibrary library, int platform) async {
-    BasicLibrary Function(Map<String, dynamic>) resolveJson;
-    Map<String, Object> requestBody;
-    Uri? url;
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
-      resolveJson = QQMusicPlaylist.fromJson;
-      int dirId = (library as QQMusicPlaylist).dirId;
-      String tid = library.tid;
-      String songsId = songs.map((e) => (e as QQMusicSong).songId).join(',');
-      url = Uri.http(
-        API.host,
-        API.removeSongsFromLibrary,
-        {
-          'libraryId': dirId.toString(),
-          'songsId': songsId,
-          'platform': platform.toString(),
-          'tid': tid,
-        },
-      );
-    } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
-    } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
-    } else {
-      throw UnsupportedError('Invalid platform');
-    }
-
-    final client = RetryClient(http.Client());
-
-    try {
-      MyLogger.logger.i('Removing songs from library...');
-      final response = await client.delete(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
-      Result result = Result.fromJson(decodedResponse);
-      if (response.statusCode == 200 && result.success) {
-        MyToast.showToast('Songs removed from ${library.name}');
-      } else {
-        MyToast.showToast(result.message!);
-        MyLogger.logger.e(result.message!);
-      }
-      return Future.value(result);
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      MyLogger.logger.e('Network error with exception: $e');
-      rethrow;
-    } finally {
-      client.close();
-    }
-  }
-
-  Future<Result> moveSongsToOtherLibrary(
-    List<BasicSong> songs,
-    BasicLibrary srcLibrary,
-    BasicLibrary dstLibrary,
-    int platform,
-  ) async {
-    BasicLibrary Function(Map<String, dynamic>) resolveJson;
-    Map<String, Object> requestBody;
-    Uri? url;
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
-      resolveJson = QQMusicPlaylist.fromJson;
-      String songsId = songs.map((e) => (e as QQMusicSong).songId).join(',');
-      int srcDirId = (srcLibrary as QQMusicPlaylist).dirId;
-      int dstDirId = (dstLibrary as QQMusicPlaylist).dirId;
-      String srcTid = srcLibrary.tid;
-      String dstTid = dstLibrary.tid;
-      url = Uri.http(
-        API.host,
-        API.moveSongsToOtherLibrary,
-        {
-          'platform': platform.toString(),
-        },
-      );
-      requestBody = {
-        'songsId': songsId,
-        'fromLibrary': srcDirId.toString(),
-        'toLibrary': dstDirId.toString(),
-        'fromTid': srcTid,
-        'toTid': dstTid,
-      };
-    } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
-    } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
-    } else {
-      throw UnsupportedError('Invalid platform');
-    }
-
-    final client = RetryClient(http.Client());
-
-    try {
-      MyLogger.logger.i('Moving songs to other library...');
-      final response = await client.put(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(requestBody),
-      );
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
-      Result result = Result.fromJson(decodedResponse);
-      if (response.statusCode == 200 && result.success) {
-        MyToast.showToast('Songs moved successfully');
-      } else {
-        MyToast.showToast(result.message!);
-        MyLogger.logger.e(result.message!);
-      }
-      return Future.value(result);
-    } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
-      MyLogger.logger.e('Network error with exception: $e');
-      rethrow;
-    } finally {
-      client.close();
-    }
-  }
-
   Future<ConcatenatingAudioSource?> initTheQueue() async {
     List<AudioSource> queueList;
     List<Future<AudioSource>> songs = [];
@@ -1382,5 +564,880 @@ class MyAppState extends ChangeNotifier {
     return (await File(filePath).writeAsBytes(
             buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes)))
         .uri;
+  }
+
+  // Cache video.
+  Future<void> cacheVideo(String rawUrl) async {
+    final client = RetryClient(http.Client());
+    String? videoType = VideoUtil.getVideoType(rawUrl);
+    if (videoType == null) {
+      MyToast.showToast('Video url is corrupted');
+      throw Exception('Video url is corrupted');
+    }
+    CacheManager cacheManager = MyHttp.videoCacheManager;
+    dynamic result = await cacheManager.getFileFromCache(rawUrl);
+    if (result == null || !(result as FileInfo).file.existsSync()) {
+      try {
+        final response = await client.get(Uri.parse(rawUrl));
+        if (response.statusCode == 200) {
+          await cacheManager.putFile(
+            rawUrl,
+            response.bodyBytes,
+            fileExtension: videoType,
+          );
+          MyToast.showToast('Cache video successfully');
+          MyLogger.logger.i('Cache video successfully');
+        } else {
+          MyToast.showToast('Response error: $response');
+          MyLogger.logger.e('Response error: $response');
+        }
+      } catch (e) {
+        MyToast.showToast('Exception thrown: $e');
+        MyLogger.logger.e('Network error with exception: $e');
+        rethrow;
+      } finally {
+        client.close();
+      }
+    } else {
+      MyToast.showToast('Already cached');
+      MyLogger.logger.wtf('Already cached');
+    }
+  }
+
+  Future<BasicUser?> fetchUser(int platform) async {
+    BasicUser Function(Map<String, dynamic>) resolveJson;
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
+      resolveJson = QQMusicUser.fromJson;
+    } else if (platform == 2) {
+      resolveJson = NCMUser.fromJson;
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
+    } else {
+      throw UnsupportedError('Invalid platform');
+    }
+
+    final Uri url = Uri.http(
+      API.host,
+      '${API.user}/${API.uid}',
+      {
+        'platform': platform.toString(),
+      },
+    );
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger.i('Loading User information from network...');
+      final response = await client.get(url);
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          Map<String, dynamic> user = decodedResponse['data'];
+          return Future.value(resolveJson(user));
+        } else {
+          _errorMsg = result.message!;
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+      }
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<List<BasicLibrary>?> fetchLibraries(int platform) async {
+    BasicLibrary Function(Map<String, dynamic>) resolveJson;
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
+      resolveJson = QQMusicPlaylist.fromJson;
+    } else if (platform == 2) {
+      resolveJson = NCMPlaylist.fromJson;
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
+    } else {
+      throw UnsupportedError('Invalid platform');
+    }
+
+    final Uri url = Uri.http(
+      API.host,
+      API.libraries,
+      {
+        'id': API.uid,
+        'platform': platform.toString(),
+      },
+    );
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger.i('Loading libraries from network...');
+      final response = await client.get(url);
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          var jsonList = decodedResponse['data'];
+          return Future.value(
+              jsonList.map<BasicLibrary>((e) => resolveJson(e)).toList());
+        } else {
+          _errorMsg = result.message!;
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+      }
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<BasicSong?> fetchDetailSong(BasicSong song, int platform) async {
+    BasicSong Function(Map<String, dynamic>) resolveJson;
+    Uri? url;
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
+      resolveJson = QQMusicDetailSong.fromJson;
+      url = Uri.http(
+        API.host,
+        '${API.detailSong}/${(song as QQMusicSong).songMid}',
+        {
+          'platform': platform.toString(),
+        },
+      );
+    } else if (platform == 2) {
+      throw UnimplementedError('Not yet implement ncm platform');
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
+    } else {
+      throw UnsupportedError('Invalid platform');
+    }
+
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger.i('Loading detail song from network...');
+      final response = await client.get(url);
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          return Future.value(resolveJson(decodedResponse['data']));
+        } else {
+          _errorMsg = result.message!;
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+      }
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<Map<String, List<String>>?> fetchMVsLink(
+      List<String> vids, int platform) async {
+    // BasicLibrary Function(Map<String, dynamic>) resolveJson;
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
+      // resolveJson = QQMusicPlaylist.fromJson;
+    } else if (platform == 2) {
+      throw UnimplementedError('Not yet implement ncm platform');
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
+    } else {
+      throw UnsupportedError('Invalid platform');
+    }
+
+    final Uri url = Uri.http(
+      API.host,
+      '${API.mvLink}/${vids.join(',')}',
+      {
+        'platform': platform.toString(),
+      },
+    );
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger.i('Loading MVs link from network...');
+      final response = await client.get(url);
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          var mvsLink = decodedResponse['data']!;
+          return Future.value(mvsLink.map((key, value) =>
+              MapEntry<String, List<String>>(key, List<String>.from(value))));
+        } else {
+          _errorMsg = result.message!;
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+      }
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<Map<String, String>?> fetchSongsLink(
+      List<String> songIds, int platform) async {
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
+    } else if (platform == 2) {
+      throw UnimplementedError('Not yet implement ncm platform');
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
+    } else {
+      throw UnsupportedError('Invalid platform');
+    }
+
+    final Uri url = Uri.http(
+      API.host,
+      '${API.songsLink}/${songIds.join(',')}',
+      {
+        'platform': platform.toString(),
+      },
+    );
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger.i('Loading songs link from network...');
+      final response = await client.get(url);
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          var songsLink = decodedResponse['data']!;
+          return Future.value(
+              songsLink.map((key, value) => MapEntry(key, value.toString())));
+        } else {
+          _errorMsg = result.message!;
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+      }
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<BasicLibrary?> fetchDetailLibrary(
+      BasicLibrary library, int platform) async {
+    BasicLibrary Function(Map<String, dynamic>) resolveJson;
+    Uri? url;
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
+      resolveJson = QQMusicDetailPlaylist.fromJson;
+      url = Uri.http(
+        API.host,
+        '${API.detailLibrary}/${(library as QQMusicPlaylist).tid}',
+        {
+          'platform': platform.toString(),
+        },
+      );
+    } else if (platform == 2) {
+      resolveJson = NCMDetailPlaylist.fromJson;
+      url = Uri.http(
+        API.host,
+        '${API.detailLibrary}/${(library as NCMPlaylist).id}',
+        {
+          'platform': platform.toString(),
+        },
+      );
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
+    } else {
+      throw UnsupportedError('Invalid platform');
+    }
+
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger.i('Loading detail library from network...');
+      final response = await client.get(url);
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          return Future.value(resolveJson(decodedResponse['data']));
+        } else {
+          _errorMsg = result.message!;
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+      }
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<BasicPagedSongs?> fetchSearchedSongs(
+      String keywords, int offset, int limit, int platform) async {
+    BasicPagedSongs Function(Map<String, dynamic>) resolveJson;
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
+      resolveJson = QQMusicPagedSongs.fromJson;
+    } else if (platform == 2) {
+      throw UnimplementedError('Not yet implement ncm platform');
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
+    } else {
+      throw UnsupportedError('Invalid platform');
+    }
+
+    final Uri url = Uri.http(API.host, '${API.searchSong}/$keywords', {
+      'offset': offset.toString(),
+      'limit': limit.toString(),
+      'platform': platform.toString(),
+    });
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger.i('Searching songs from network...');
+      final response = await client.get(url);
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          return Future.value(resolveJson(decodedResponse['data']));
+        } else {
+          _errorMsg = result.message!;
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+      }
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<List<BasicSong>?> fetchSimilarSongs(
+      BasicSong song, int platform) async {
+    BasicSong Function(Map<String, dynamic>) resolveJson;
+    Uri? url;
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
+      resolveJson = QQMusicSong.fromJson;
+      url = Uri.http(
+        API.host,
+        '${API.similarSongs}/${(song as QQMusicSong).songId}',
+        {
+          'platform': platform.toString(),
+        },
+      );
+    } else if (platform == 2) {
+      throw UnimplementedError('Not yet implement ncm platform');
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
+    } else {
+      throw UnsupportedError('Invalid platform');
+    }
+
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger.i('Loading similar songs from network...');
+      final response = await client.get(url);
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          List<dynamic> jsonList = decodedResponse['data'];
+          return Future.value(
+              jsonList.map<BasicSong>((e) => resolveJson(e)).toList());
+        } else {
+          _errorMsg = result.message!;
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+      }
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<BasicVideo?> fetchDetailMV(BasicVideo video, int platform) async {
+    BasicVideo Function(Map<String, dynamic>) resolveJson;
+    Uri? url;
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
+      resolveJson = QQMusicDetailVideo.fromJson;
+      url = Uri.http(
+        API.host,
+        '${API.detailMV}/${(video as QQMusicVideo).vid}',
+        {
+          'platform': platform.toString(),
+        },
+      );
+    } else if (platform == 2) {
+      throw UnimplementedError('Not yet implement ncm platform');
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
+    } else {
+      throw UnsupportedError('Invalid platform');
+    }
+
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger.i('Loading detail mv information from network...');
+      final response = await client.get(url);
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          return Future.value(resolveJson(decodedResponse['data']));
+        } else {
+          _errorMsg = result.message!;
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+      }
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<List<BasicVideo>?> fetchRelatedMVs(
+      BasicSong song, int platform) async {
+    BasicVideo Function(Map<String, dynamic>) resolveJson;
+    Uri? url;
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
+      resolveJson = QQMusicVideo.fromJson;
+      url = Uri.http(
+        API.host,
+        '${API.relatedMV}/${(song as QQMusicSong).songId}',
+        {
+          'platform': platform.toString(),
+        },
+      );
+    } else if (platform == 2) {
+      throw UnimplementedError('Not yet implement ncm platform');
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
+    } else {
+      throw UnsupportedError('Invalid platform');
+    }
+
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger.i('Loading related MVs from network...');
+      final response = await client.get(url);
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          List<dynamic> jsonList = decodedResponse['data'];
+          return Future.value(
+              jsonList.map<BasicVideo>((video) => resolveJson(video)).toList());
+        } else {
+          _errorMsg = result.message!;
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+      }
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<Result?> createLibrary(String libraryName, int platform) async {
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
+    } else if (platform == 2) {
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
+    } else {
+      throw UnsupportedError('Invalid platform');
+    }
+
+    final Uri url = Uri.http(
+      API.host,
+      API.createLibrary,
+      {
+        'platform': platform.toString(),
+      },
+    );
+    final requestBody = {'name': libraryName};
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger.i('Creating library...');
+      final response = await client.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          MyToast.showToast('Library created successfully');
+        } else {
+          _errorMsg = result.message!;
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+      }
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<Result?> deleteLibraries(
+      List<BasicLibrary> libraries, int platform) async {
+    String librariesIds;
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
+      if (libraries[0] is QQMusicPlaylist) {
+        librariesIds = libraries
+            .map((library) => (library as QQMusicPlaylist).dirId)
+            .join(",");
+      } else {
+        librariesIds = libraries
+            .map((library) => (library as QQMusicDetailPlaylist).dirId)
+            .join(",");
+      }
+    } else if (platform == 2) {
+      if (libraries[0] is NCMPlaylist) {
+        librariesIds =
+            libraries.map((library) => (library as NCMPlaylist).id).join(",");
+      } else {
+        librariesIds = libraries
+            .map((library) => (library as NCMDetailPlaylist).id)
+            .join(",");
+      }
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
+    } else {
+      throw UnsupportedError('Invalid platform');
+    }
+
+    final Uri url = Uri.http(
+      API.host,
+      '${API.deleteLibrary}/$librariesIds',
+      {
+        'platform': platform.toString(),
+      },
+    );
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger.i('Deleting libraries...');
+      final response = await client.delete(url);
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          MyToast.showToast('Delete libraries successfully');
+        } else {
+          _errorMsg = result.message!;
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+      }
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<Result?> addSongsToLibrary(
+      List<BasicSong> songs, BasicLibrary library, int platform) async {
+    Map<String, Object> requestBody;
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
+      int dirId = (library as QQMusicPlaylist).dirId;
+      String songsMid = songs.map((e) => (e as QQMusicSong).songMid).join(',');
+      String tid = library.tid;
+      requestBody = {
+        'libraryId': dirId.toString(),
+        'songsId': songsMid,
+        'tid': tid,
+      };
+    } else if (platform == 2) {
+      throw UnimplementedError('Not yet implement ncm platform');
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
+    } else {
+      throw UnsupportedError('Invalid platform');
+    }
+
+    final Uri url = Uri.http(
+      API.host,
+      API.addSongsToLibrary,
+      {
+        'platform': platform.toString(),
+      },
+    );
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger.i('Adding songs to library...');
+      final response = await client.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+        } else {
+          _errorMsg = result.message!;
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+      }
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<Result?> removeSongsFromLibrary(
+      List<BasicSong> songs, BasicLibrary library, int platform) async {
+    BasicLibrary Function(Map<String, dynamic>) resolveJson;
+    Map<String, Object> requestBody;
+    Uri? url;
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
+      resolveJson = QQMusicPlaylist.fromJson;
+      int dirId = (library as QQMusicPlaylist).dirId;
+      String tid = library.tid;
+      String songsId = songs.map((e) => (e as QQMusicSong).songId).join(',');
+      url = Uri.http(
+        API.host,
+        API.removeSongsFromLibrary,
+        {
+          'libraryId': dirId.toString(),
+          'songsId': songsId,
+          'platform': platform.toString(),
+          'tid': tid,
+        },
+      );
+    } else if (platform == 2) {
+      throw UnimplementedError('Not yet implement ncm platform');
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
+    } else {
+      throw UnsupportedError('Invalid platform');
+    }
+
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger.i('Removing songs from library...');
+      final response = await client.delete(url);
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          MyToast.showToast('Songs removed from ${library.name}');
+        } else {
+          _errorMsg = result.message!;
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+      }
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<Result?> moveSongsToOtherLibrary(
+    List<BasicSong> songs,
+    BasicLibrary srcLibrary,
+    BasicLibrary dstLibrary,
+    int platform,
+  ) async {
+    BasicLibrary Function(Map<String, dynamic>) resolveJson;
+    Map<String, Object> requestBody;
+    Uri? url;
+    if (platform == 0) {
+      throw UnimplementedError('Not yet implement pms platform');
+    } else if (platform == 1) {
+      resolveJson = QQMusicPlaylist.fromJson;
+      String songsId = songs.map((e) => (e as QQMusicSong).songId).join(',');
+      int srcDirId = (srcLibrary as QQMusicPlaylist).dirId;
+      int dstDirId = (dstLibrary as QQMusicPlaylist).dirId;
+      String srcTid = srcLibrary.tid;
+      String dstTid = dstLibrary.tid;
+      url = Uri.http(
+        API.host,
+        API.moveSongsToOtherLibrary,
+        {
+          'platform': platform.toString(),
+        },
+      );
+      requestBody = {
+        'songsId': songsId,
+        'fromLibrary': srcDirId.toString(),
+        'toLibrary': dstDirId.toString(),
+        'fromTid': srcTid,
+        'toTid': dstTid,
+      };
+    } else if (platform == 2) {
+      throw UnimplementedError('Not yet implement ncm platform');
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
+    } else {
+      throw UnsupportedError('Invalid platform');
+    }
+
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger.i('Moving songs to other library...');
+      final response = await client.put(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          MyToast.showToast('Songs moved successfully');
+        } else {
+          _errorMsg = result.message!;
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+      }
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
   }
 }

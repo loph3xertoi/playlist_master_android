@@ -50,14 +50,16 @@ class _RelatedVideosPageState extends State<RelatedVideosPage> {
               return Center(
                 child: CircularProgressIndicator(),
               );
-            } else if (snapshot.hasError) {
+            } else if (snapshot.hasError || snapshot.data == null) {
               return Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     MySelectableText(
-                      '${snapshot.error}',
+                      snapshot.hasError
+                          ? '${snapshot.error}'
+                          : appState.errorMsg,
                       style: TextStyle(
                         color: Colors.white70,
                         fontFamily: 'Roboto',

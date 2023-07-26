@@ -120,7 +120,8 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                       return Center(
                                         child: CircularProgressIndicator(),
                                       );
-                                    } else if (snapshot.hasError) {
+                                    } else if (snapshot.hasError ||
+                                        snapshot.data == null) {
                                       return Center(
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -128,7 +129,9 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                               CrossAxisAlignment.center,
                                           children: [
                                             MySelectableText(
-                                              '${snapshot.error}',
+                                              snapshot.hasError
+                                                  ? '${snapshot.error}'
+                                                  : appState.errorMsg,
                                               style: textTheme.labelSmall!
                                                   .copyWith(
                                                 color: colorScheme.onSecondary,

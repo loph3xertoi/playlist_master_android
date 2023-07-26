@@ -58,14 +58,14 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
             return Center(
               child: CircularProgressIndicator(),
             );
-          } else if (snapshot.hasError) {
+          } else if (snapshot.hasError || snapshot.data == null) {
             return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   MySelectableText(
-                    '${snapshot.error}',
+                    snapshot.hasError ? '${snapshot.error}' : appState.errorMsg,
                     style: TextStyle(
                       color: Colors.white70,
                       fontFamily: 'Roboto',
@@ -253,7 +253,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
   }
 
   void _addSongsToLibrary(MyAppState appState, BasicLibrary library) async {
-    Future<Result> result = appState.addSongsToLibrary(
+    Future<Result?> result = appState.addSongsToLibrary(
       widget.songs,
       library,
       appState.currentPlatform,
@@ -264,7 +264,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
   }
 
   void _moveSongsToLibrary(MyAppState appState, BasicLibrary library) async {
-    Future<Result> result = appState.moveSongsToOtherLibrary(
+    Future<Result?> result = appState.moveSongsToOtherLibrary(
       widget.songs,
       appState.openedLibrary!,
       library,
@@ -278,7 +278,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
   void _addSongsToLibraries(
       MyAppState appState, List<BasicLibrary> libraries) async {
     int platform = appState.currentPlatform;
-    List<Future<Result>> results = [];
+    List<Future<Result?>> results = [];
     for (int i = 0; i < _selectedIndex.length; i++) {
       results.add(appState.addSongsToLibrary(
         widget.songs,

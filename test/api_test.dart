@@ -11,13 +11,13 @@ void main() {
   });
 
   test('Create library', () async {
-    Result result = await appState.createLibrary('daw\'s library', 1);
+    Result? result = await appState.createLibrary('daw\'s library', 1);
     print(result);
-    expect(result.success, equals(true));
+    expect(result!.success, equals(true));
   });
 
   test('Delete libraries', () async {
-    Result result = await appState.deleteLibraries(
+    Result? result = await appState.deleteLibraries(
       [
         QQMusicPlaylist(22, '22', name: 'name1', cover: 'cover1', itemCount: 1),
         QQMusicPlaylist(23, '23', name: 'name2', cover: 'cover2', itemCount: 1),
@@ -28,7 +28,7 @@ void main() {
   });
 
   test('Add songs to library', () async {
-    Result result = await appState.addSongsToLibrary(
+    Result? result = await appState.addSongsToLibrary(
       [
         QQMusicSong(
           '414119681',
@@ -68,12 +68,12 @@ void main() {
       1,
     );
     print(result);
-    expect(result.success, equals(true));
+    expect(result!.success, equals(true));
   });
   // songId: 414119681,105302677,414478884
   // songMid: 003nkjOy4dtZxc,000idahy2pT761,001OgIGc0B4OEL
   test('Remove songs from library', () async {
-    Result result = await appState.removeSongsFromLibrary(
+    Result? result = await appState.removeSongsFromLibrary(
       [
         QQMusicSong(
           '414119681',
@@ -113,11 +113,11 @@ void main() {
       1,
     );
     print(result);
-    expect(result.success, equals(true));
+    expect(result!.success, equals(true));
   });
 
   test('Move songs from one library to another library', () async {
-    Result result = await appState.moveSongsToOtherLibrary(
+    Result? result = await appState.moveSongsToOtherLibrary(
       [
         QQMusicSong(
           '414119681',
@@ -158,6 +158,6 @@ void main() {
       1,
     );
     print(result);
-    expect(result.success, equals(true));
+    expect(result!.success, equals(true));
   });
 }
