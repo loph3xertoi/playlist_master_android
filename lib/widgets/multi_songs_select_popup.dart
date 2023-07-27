@@ -159,7 +159,6 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
           //     selectedSongs, appState.openedLibrary!, appState.currentPlatform);
           appState.refreshLibraries!(appState, true);
           appState.refreshDetailLibraryPage!(appState);
-          appState.refreshLibraries!(appState, true);
           break;
         }
       }

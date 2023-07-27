@@ -50,7 +50,7 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
                 Radius.circular(10.0),
               ),
               onTap: () {
-                Navigator.pop(context, "Add to library");
+                Navigator.pop(context, 'Add to library');
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),

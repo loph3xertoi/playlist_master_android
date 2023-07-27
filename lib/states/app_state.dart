@@ -1017,7 +1017,14 @@ class MyAppState extends ChangeNotifier {
         },
       );
     } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
+      resolveJson = NCMSong.fromJson;
+      url = Uri.http(
+        API.host,
+        '${API.similarSongs}/${(song as NCMSong).id}',
+        {
+          'platform': platform.toString(),
+        },
+      );
     } else if (platform == 3) {
       throw UnimplementedError('Not yet implement bilibili platform');
     } else {

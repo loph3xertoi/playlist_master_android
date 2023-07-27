@@ -35,7 +35,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
   void _refreshDetailLibraryPage(MyAppState appState) {
     setState(() {
       _detailLibrary = appState.fetchDetailLibrary(
-          appState.openedLibrary!, appState.currentPlatform);
+          appState.rawOpenedLibrary!, appState.currentPlatform);
     });
   }
 

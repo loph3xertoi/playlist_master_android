@@ -68,6 +68,7 @@ class _SongItemState extends State<SongItem> {
         for (Result? result in results) {
           if (result != null && result.success) {
             appState.refreshLibraries!(appState, true);
+            appState.refreshDetailLibraryPage!(appState);
             MyToast.showToast('Add songs successfully');
             break;
           }
