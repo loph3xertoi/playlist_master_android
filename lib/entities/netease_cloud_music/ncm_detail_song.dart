@@ -49,7 +49,7 @@ class NCMDetailSong extends BasicSong {
   final NCMLyrics lyrics;
 
   /// The list of playlist in pm server the song beints to.
-  final List<int> pmPlaylists;
+  final List<int>? pmPlaylists;
 
   /// High bitrate of this song.
   final int hBr;
@@ -90,12 +90,12 @@ class NCMDetailSong extends BasicSong {
       'publishTime': publishTime,
       'lyrics': lyrics,
       'pmPlaylists': pmPlaylists,
-      'hBr': hBr,
-      'hSize': hSize,
-      'mBr': mBr,
-      'mSize': mSize,
-      'lBr': lBr,
-      'lSize': lSize,
+      'hbr': hBr,
+      'hsize': hSize,
+      'mbr': mBr,
+      'msize': mSize,
+      'lbr': lBr,
+      'lsize': lSize,
       'sqBr': sqBr,
       'sqSize': sqSize
     };
@@ -116,12 +116,12 @@ class NCMDetailSong extends BasicSong {
       json['publishTime'],
       lyrics,
       json['pmPlaylists'],
-      json['hBr'],
-      json['hSize'],
-      json['mBr'],
-      json['mSize'],
-      json['lBr'],
-      json['lSize'],
+      json['hbr'],
+      json['hsize'],
+      json['mbr'],
+      json['msize'],
+      json['lbr'],
+      json['lsize'],
       json['sqBr'],
       json['sqSize'],
       name: json['name'],

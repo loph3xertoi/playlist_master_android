@@ -1,12 +1,19 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lyric/lyrics_reader.dart';
 import 'package:flutter_lyric/lyrics_reader_model.dart';
+import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 
+import '../entities/basic/basic_singer.dart';
 import '../entities/basic/basic_song.dart';
+import '../entities/netease_cloud_music/ncm_detail_song.dart';
+import '../entities/netease_cloud_music/ncm_lyrics.dart';
 import '../entities/qq_music/qqmusic_detail_song.dart';
+import '../entities/qq_music/qqmusic_lyrics.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
 import '../widgets/my_lyrics_displayer.dart';
@@ -24,6 +31,7 @@ class _DetailSongPageState extends State<DetailSongPage> {
   Future<BasicSong?>? _detailSong;
   LyricsReaderModel? _lyricModel;
   late MyLyricsDisplayer _lyricUI;
+  int _position = 0;
 
   @override
   void initState() {
@@ -108,37 +116,71 @@ class _DetailSongPageState extends State<DetailSongPage> {
           );
         } else {
           dynamic detailSong;
+          String? name;
+          List<BasicSinger> singers;
+          String? title;
+          String? albumName;
+          String? description;
+          dynamic pubTime;
+          BasicSong currentDetailSong;
           if (isUsingMockData) {
             detailSong = snapshot.data as QQMusicDetailSong;
+            name = detailSong.name;
+            singers = detailSong.singers;
+            title = detailSong.subTitle;
+            albumName = detailSong.albumName;
+            description = detailSong.songDesc ?? 'No description';
+            pubTime = detailSong.pubTime;
+            currentDetailSong = detailSong;
+            QQMusicLyrics lyrics = detailSong.lyrics;
+            _lyricModel ??= LyricsModelBuilder.create()
+                .bindLyricToMain(lyrics.lyric)
+                .bindLyricToExt(lyrics.trans)
+                .getModel();
           } else {
             if (currentPlatform == 0) {
               throw UnimplementedError('Not yet implement pms platform');
             } else if (currentPlatform == 1) {
               detailSong = snapshot.data as QQMusicDetailSong;
+              name = detailSong.name;
+              singers = detailSong.singers;
+              title = detailSong.subTitle;
+              albumName = detailSong.albumName;
+              description = detailSong.songDesc ?? 'No description';
+              pubTime = detailSong.pubTime;
+              currentDetailSong = detailSong;
+              // var size128 = detailSong.size128;
+              // var size320 = detailSong.size320;
+              // var sizeApe = detailSong.sizeApe;
+              // var sizeFlac = detailSong.sizeFlac;
+              QQMusicLyrics lyrics = detailSong.lyrics;
+              _lyricModel ??= LyricsModelBuilder.create()
+                  .bindLyricToMain(lyrics.lyric)
+                  .bindLyricToExt(lyrics.trans)
+                  .getModel();
             } else if (currentPlatform == 2) {
-              throw UnimplementedError('Not yet implement ncm platform');
+              detailSong = snapshot.data as NCMDetailSong;
+              name = detailSong.name;
+              singers = detailSong.singers;
+              albumName = detailSong.albumName;
+              description = 'No description';
+              pubTime = DateFormat('yyyy-MM-dd').format(
+                  DateTime.fromMillisecondsSinceEpoch(
+                      int.parse(detailSong.publishTime)));
+              currentDetailSong = detailSong;
+              NCMLyrics lyrics = detailSong.lyrics;
+              //TODO: advanced lyrics.
+              _lyricModel ??= LyricsModelBuilder.create()
+                  .bindLyricToMain(lyrics.lyric)
+                  .bindLyricToExt(lyrics.tLyric)
+                  .getModel();
             } else if (currentPlatform == 3) {
               throw UnimplementedError('Not yet implement bilibili platform');
             } else {
               throw UnsupportedError('Invalid platform');
             }
           }
-          var name = detailSong.name;
-          var singers = detailSong.singers;
-          var title = detailSong.subTitle;
-          var albumName = detailSong.albumName;
-          var description = detailSong.songDesc;
-          var pubTime = detailSong.pubTime;
-          var size128 = detailSong.size128;
-          var size320 = detailSong.size320;
-          var sizeApe = detailSong.sizeApe;
-          var sizeFlac = detailSong.sizeFlac;
-          var currentDetailSong = detailSong;
-          var lyrics = detailSong.lyrics;
-          _lyricModel ??= LyricsModelBuilder.create()
-              .bindLyricToMain(lyrics.lyric)
-              .bindLyricToExt(lyrics.trans)
-              .getModel();
+
           return Center(
             child: Container(
               color: colorScheme.primary,
@@ -160,14 +202,14 @@ class _DetailSongPageState extends State<DetailSongPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             MySelectableText(
-                              name,
-                              style: textTheme.labelMedium!.copyWith(
+                              name ?? 'Unknown',
+                              style: textTheme.labelLarge!.copyWith(
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             MySelectableText(
                               singers.map((e) => e.name).join(', '),
-                              style: textTheme.labelMedium!.copyWith(
+                              style: textTheme.labelSmall!.copyWith(
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -225,8 +267,8 @@ class _DetailSongPageState extends State<DetailSongPage> {
                               child: Align(
                                 alignment: Alignment.center,
                                 child: MySelectableText(
-                                  albumName,
-                                  style: textTheme.labelMedium,
+                                  albumName ?? 'Unknown',
+                                  style: textTheme.labelLarge,
                                 ),
                               ),
                             ),
@@ -239,10 +281,12 @@ class _DetailSongPageState extends State<DetailSongPage> {
                         // mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          MySelectableText(
-                            'title: $title',
-                            style: textTheme.labelMedium,
-                          ),
+                          title != null
+                              ? MySelectableText(
+                                  'title: $title',
+                                  style: textTheme.labelMedium,
+                                )
+                              : Container(),
                           MySelectableText(
                             'pubTime: $pubTime',
                             style: textTheme.labelMedium,
@@ -264,24 +308,35 @@ class _DetailSongPageState extends State<DetailSongPage> {
                           //   'sizeFlac: $sizeFlac',
                           //   style: textTheme.labelMedium,
                           // ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10.0),
-                            child: LyricsReader(
-                              padding: EdgeInsets.symmetric(horizontal: 40.0),
-                              model: _lyricModel,
-                              lyricUi: _lyricUI,
-                              playing: false,
-                              size: Size(double.infinity, 400.0),
-                              onTap: () {
-                                // setState(() {
-                                //   _toggleLyrics = !_toggleLyrics;
-                                // });
-                              },
-                              emptyBuilder: () => Center(
-                                child: MySelectableText(
-                                  'No lyrics',
-                                  style: textTheme.labelMedium,
+                          Listener(
+                            onPointerUp: (details) {
+                              Future.delayed(const Duration(seconds: 2), () {
+                                if (mounted) {
+                                  setState(() {});
+                                }
+                              });
+                            },
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 10.0),
+                              child: LyricsReader(
+                                padding: EdgeInsets.symmetric(horizontal: 40.0),
+                                position: _position,
+                                model: _lyricModel,
+                                lyricUi: _lyricUI,
+                                playing: false,
+                                size: Size(double.infinity, 400.0),
+                                onTap: () {},
+                                emptyBuilder: () => Center(
+                                  child: MySelectableText(
+                                    'No lyrics',
+                                    style: textTheme.labelMedium,
+                                  ),
                                 ),
+                                selectLineBuilder: (progress, _) {
+                                  _position = progress;
+                                  return Container();
+                                },
                               ),
                             ),
                           ),
