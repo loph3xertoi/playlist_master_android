@@ -80,6 +80,7 @@ class _SongItemState extends State<SongItem> {
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
+    var currentPlatform = appState.currentPlatform;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return SizedBox(
@@ -163,91 +164,82 @@ class _SongItemState extends State<SongItem> {
               ),
               IconButton(
                   onPressed: () async {
-                    if (!widget.song.isTakenDown &&
-                        (widget.song.payPlay == 0)) {
-                      if (appState.player == null) {
-                        appState.queue = [widget.song];
-                        try {
-                          await appState.initAudioPlayer();
-                        } catch (e) {
-                          MyToast.showToast('Exception: $e');
-                          MyLogger.logger.e('Exception: $e');
-                          appState.queue = [];
-                          appState.currentDetailSong = null;
+                    // if (appState.currentPlatform == 1 &&
+                    //     !widget.song.isTakenDown &&
+                    //     (widget.song.payPlay == 0)||) {
+                    if (!widget.song.isTakenDown) {
+                      if (currentPlatform == 2 || widget.song.payPlay == 0) {
+                        if (appState.player == null) {
+                          appState.queue = [widget.song];
+                          try {
+                            await appState.initAudioPlayer();
+                          } catch (e) {
+                            MyToast.showToast('Exception: $e');
+                            MyLogger.logger.e('Exception: $e');
+                            appState.disposeSongPlayer();
+                            return;
+                          }
                           appState.currentPlayingSongInQueue = 0;
-                          appState.currentSong = null;
-                          appState.prevSong = null;
-                          appState.isPlaying = false;
-                          appState.player!.stop();
-                          appState.player!.dispose();
-                          appState.player = null;
-                          appState.initQueue!.clear();
-                          appState.isPlayerPageOpened = false;
-                          appState.canSongPlayerPagePop = false;
-                          return;
-                        }
-                        appState.currentPlayingSongInQueue = 0;
 
-                        appState.currentSong = widget.song;
+                          appState.currentSong = widget.song;
 
-                        appState.prevSong = appState.currentSong;
+                          appState.prevSong = appState.currentSong;
 
-                        appState.currentDetailSong = null;
+                          appState.currentDetailSong = null;
 
-                        appState.player!.play();
+                          appState.player!.play();
 
-                        MyToast.showToast('Added to queue');
-                      } else {
-                        appState.queue!.insert(
-                            appState.currentPlayingSongInQueue! + 1,
-                            widget.song);
-                        AudioSource newAudioSource;
-                        if (appState.isUsingMockData) {
-                          newAudioSource = AudioSource.asset(
-                            widget.song.songLink,
-                            tag: MediaItem(
-                              // Specify a unique ID for each media item:
-                              id: Uuid().v1(),
-                              // Metadata to display in the notification:
-                              album: 'Album name',
-                              artist: widget.song.singers
-                                  .map((e) => e.name)
-                                  .join(', '),
-                              title: widget.song.name,
-                              artUri: await appState.getImageFileFromAssets(
-                                  widget.song.cover,
-                                  appState.queue!.indexOf(widget.song)),
-                            ),
-                          );
+                          MyToast.showToast('Added to queue');
                         } else {
-                          newAudioSource = LockCachingAudioSource(
-                            Uri.parse(widget.song.songLink),
-                            tag: MediaItem(
-                              // Specify a unique ID for each media item:
-                              id: Uuid().v1(),
-                              // Metadata to display in the notification:
-                              album: 'Album name',
-                              artist: widget.song.singers
-                                  .map((e) => e.name)
-                                  .join(', '),
-                              title: widget.song.name,
-                              artUri: Uri.parse(widget.song.cover),
-                            ),
-                          );
+                          appState.queue!.insert(
+                              appState.currentPlayingSongInQueue! + 1,
+                              widget.song);
+                          AudioSource newAudioSource;
+                          if (appState.isUsingMockData) {
+                            newAudioSource = AudioSource.asset(
+                              widget.song.songLink,
+                              tag: MediaItem(
+                                // Specify a unique ID for each media item:
+                                id: Uuid().v1(),
+                                // Metadata to display in the notification:
+                                album: 'Album name',
+                                artist: widget.song.singers
+                                    .map((e) => e.name)
+                                    .join(', '),
+                                title: widget.song.name,
+                                artUri: await appState.getImageFileFromAssets(
+                                    widget.song.cover,
+                                    appState.queue!.indexOf(widget.song)),
+                              ),
+                            );
+                          } else {
+                            newAudioSource = LockCachingAudioSource(
+                              Uri.parse(widget.song.songLink),
+                              tag: MediaItem(
+                                // Specify a unique ID for each media item:
+                                id: Uuid().v1(),
+                                // Metadata to display in the notification:
+                                album: 'Album name',
+                                artist: widget.song.singers
+                                    .map((e) => e.name)
+                                    .join(', '),
+                                title: widget.song.name,
+                                artUri: Uri.parse(widget.song.cover),
+                              ),
+                            );
+                          }
+                          appState.initQueue!.insert(
+                              appState.currentPlayingSongInQueue! + 1,
+                              newAudioSource);
+                          MyToast.showToast('Added to queue');
                         }
-                        appState.initQueue!.insert(
-                            appState.currentPlayingSongInQueue! + 1,
-                            newAudioSource);
-                        MyToast.showToast('Added to queue');
-                      }
-                    } else {
-                      if (widget.song.payPlay == 1) {
+                      } else {
                         MyToast.showToast('This song need vip to play');
                         MyLogger.logger.e('This song need vip to play');
-                      } else if (widget.song.isTakenDown) {
-                        MyToast.showToast('This song is taken down');
-                        MyLogger.logger.e('This song is taken down');
                       }
+                    } else {
+                      MyToast.showToast('This song is taken down');
+                      MyLogger.logger.e('This song is taken down');
                     }
                   },
                   color: widget.song.isTakenDown || widget.song.payPlay == 1

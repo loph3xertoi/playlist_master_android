@@ -65,6 +65,9 @@ class _HomePageState extends State<HomePage>
             onTap: () async {
               MyToast.showToast('Switched to pms.');
               MyLogger.logger.i('Switched to pms.');
+              if (appState.currentPlatform != 0 && appState.player != null) {
+                appState.disposeSongPlayer();
+              }
               appState.currentPlatform = 0;
               appState.refreshLibraries!(appState, false);
               showDialog(
@@ -174,6 +177,10 @@ class _HomePageState extends State<HomePage>
                 onTap: () {
                   MyToast.showToast('Switched to bilibili.');
                   MyLogger.logger.i('Switched to bilibili.');
+                  if (appState.currentPlatform != 3 &&
+                      appState.player != null) {
+                    appState.disposeSongPlayer();
+                  }
                   appState.currentPlatform = 3;
                   appState.refreshLibraries!(appState, false);
                 },
@@ -183,6 +190,10 @@ class _HomePageState extends State<HomePage>
                 onTap: () {
                   MyToast.showToast('Switched to netease music.');
                   MyLogger.logger.i('Switched to netease music.');
+                  if (appState.currentPlatform != 2 &&
+                      appState.player != null) {
+                    appState.disposeSongPlayer();
+                  }
                   appState.currentPlatform = 2;
                   appState.refreshLibraries!(appState, false);
                 },
@@ -192,6 +203,10 @@ class _HomePageState extends State<HomePage>
                 onTap: () {
                   MyToast.showToast('Switched to qq music.');
                   MyLogger.logger.i('Switched to qq music.');
+                  if (appState.currentPlatform != 1 &&
+                      appState.player != null) {
+                    appState.disposeSongPlayer();
+                  }
                   appState.currentPlatform = 1;
                   appState.refreshLibraries!(appState, false);
                 },

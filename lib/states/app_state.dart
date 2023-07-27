@@ -430,6 +430,21 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void disposeSongPlayer() {
+    queue = [];
+    currentDetailSong = null;
+    currentPlayingSongInQueue = 0;
+    currentSong = null;
+    prevSong = null;
+    isPlaying = false;
+    player!.stop();
+    player!.dispose();
+    player = null;
+    initQueue!.clear();
+    isPlayerPageOpened = false;
+    canSongPlayerPagePop = false;
+  }
+
   void removeSongInQueue(int index) {
     if (_queue?.isNotEmpty ?? false) {
       _queue!.removeAt(index);

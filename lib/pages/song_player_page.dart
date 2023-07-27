@@ -13,6 +13,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_song.dart';
+import '../entities/netease_cloud_music/ncm_detail_song.dart';
 import '../entities/qq_music/qqmusic_detail_song.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
@@ -134,18 +135,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
         appState.isPlayerPageOpened = true;
       }
       if (_return) {
-        appState.queue = [];
-        appState.currentDetailSong = null;
-        appState.currentPlayingSongInQueue = 0;
-        appState.currentSong = null;
-        appState.prevSong = null;
-        appState.isPlaying = false;
-        appState.player!.stop();
-        appState.player!.dispose();
-        appState.player = null;
-        appState.initQueue!.clear();
-        appState.isPlayerPageOpened = false;
-        appState.canSongPlayerPagePop = false;
+        appState.disposeSongPlayer();
         Navigator.of(context).pop();
       }
       if ((queue?.isNotEmpty ?? false) &&
@@ -269,8 +259,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                     } else if (currentPlatform == 1) {
                       detailSong = snapshot.data as QQMusicDetailSong;
                     } else if (currentPlatform == 2) {
-                      throw UnimplementedError(
-                          'Not yet implement ncm platform');
+                      detailSong = snapshot.data as NCMDetailSong;
                     } else if (currentPlatform == 3) {
                       throw UnimplementedError(
                           'Not yet implement bilibili platform');
@@ -280,16 +269,38 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                   }
 
                   mainLyrics = detailSong.lyrics.lyric;
+                  // mainLyrics = detailSong.lyrics.yrc;
                   if (_lyricModel == null || prevSong != currentSong) {
                     if (!isUsingMockData) {
-                      if (mainLyrics == '[00:00:00]此歌曲为没有填词的纯音乐，请您欣赏') {
-                        _hasLyrics = false;
+                      if (currentPlatform == 0) {
+                        throw UnimplementedError(
+                            'Not yet implement pms platform');
+                      }
+                      if (currentPlatform == 1) {
+                        if (mainLyrics == '[00:00:00]此歌曲为没有填词的纯音乐，请您欣赏') {
+                          _hasLyrics = false;
+                        } else {
+                          _hasLyrics = true;
+                          _lyricModel = LyricsModelBuilder.create()
+                              .bindLyricToMain(detailSong.lyrics.lyric)
+                              .bindLyricToExt(detailSong.lyrics.trans)
+                              .getModel();
+                        }
+                      } else if (currentPlatform == 2) {
+                        if (mainLyrics == '[00:00:00]此歌曲为没有填词的纯音乐，请您欣赏') {
+                          _hasLyrics = false;
+                        } else {
+                          _hasLyrics = true;
+                          _lyricModel = LyricsModelBuilder.create()
+                              .bindLyricToMain(detailSong.lyrics.lyric)
+                              .bindLyricToExt(detailSong.lyrics.tLyric)
+                              .getModel();
+                        }
+                      } else if (currentPlatform == 3) {
+                        throw UnimplementedError(
+                            'Not yet implement bilibili platform');
                       } else {
-                        _hasLyrics = true;
-                        _lyricModel = LyricsModelBuilder.create()
-                            .bindLyricToMain(detailSong.lyrics.lyric)
-                            .bindLyricToExt(detailSong.lyrics.trans)
-                            .getModel();
+                        throw UnsupportedError('Invalid platform');
                       }
                     } else {
                       _lyricModel = LyricsModelBuilder.create()
