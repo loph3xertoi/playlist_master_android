@@ -36,8 +36,8 @@ class _SongItemState extends State<SongItem> {
 
   void _addSongToLibrary(BuildContext context, MyAppState appState) async {
     if (mounted) {
-      List<Future<Result>>? list =
-          await showFlexibleBottomSheet<List<Future<Result>>>(
+      List<Future<Result?>>? list =
+          await showFlexibleBottomSheet<List<Future<Result?>>>(
         minHeight: 0,
         initHeight: 0.45,
         maxHeight: 0.9,
@@ -64,9 +64,9 @@ class _SongItemState extends State<SongItem> {
         isSafeArea: true,
       );
       if (list != null) {
-        List<Result> results = await Future.wait<Result>(list);
-        for (Result result in results) {
-          if (result.success) {
+        List<Result?> results = await Future.wait<Result?>(list);
+        for (Result? result in results) {
+          if (result != null && result.success) {
             appState.refreshLibraries!(appState, true);
             MyToast.showToast('Add songs successfully');
             break;

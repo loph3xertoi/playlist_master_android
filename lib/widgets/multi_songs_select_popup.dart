@@ -34,8 +34,8 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
         ? _selectedIndex.map((index) => widget.similarSongs[index]).toList()
         : _selectedIndex.map((index) => appState.rawQueue![index]).toList();
     if (mounted) {
-      List<Future<Result>>? list =
-          await showFlexibleBottomSheet<List<Future<Result>>>(
+      List<Future<Result?>>? list =
+          await showFlexibleBottomSheet<List<Future<Result?>>>(
         minHeight: 0,
         initHeight: 0.45,
         maxHeight: 0.9,
@@ -62,9 +62,9 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
         isSafeArea: true,
       );
       if (list != null) {
-        List<Result> results = await Future.wait<Result>(list);
-        for (Result result in results) {
-          if (result.success) {
+        List<Result?> results = await Future.wait<Result?>(list);
+        for (Result? result in results) {
+          if (result != null && result.success) {
             appState.refreshLibraries!(appState, true);
             MyToast.showToast('Add songs successfully');
             break;
@@ -99,8 +99,8 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
   void _moveSongsToLibraries(BuildContext context, MyAppState appState) async {
     List<BasicSong> selectedSongs =
         _selectedIndex.map((index) => appState.rawQueue![index]).toList();
-    List<Future<Result>>? list =
-        await showFlexibleBottomSheet<List<Future<Result>>>(
+    List<Future<Result?>>? list =
+        await showFlexibleBottomSheet<List<Future<Result?>>>(
       minHeight: 0,
       initHeight: 0.45,
       maxHeight: 0.9,
@@ -139,9 +139,9 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
 //       }
 
     if (list != null) {
-      List<Result> results = await Future.wait<Result>(list);
-      for (Result result in results) {
-        if (result.success) {
+      List<Result?> results = await Future.wait<Result?>(list);
+      for (Result? result in results) {
+        if (result != null && result.success) {
           appState.rawOpenedLibrary!.itemCount -= _selectedIndex.length;
           if (appState.rawOpenedLibrary!.itemCount == 0 && mounted) {
             Navigator.pop(context);

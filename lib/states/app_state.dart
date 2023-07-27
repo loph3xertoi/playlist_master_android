@@ -639,13 +639,16 @@ class MyAppState extends ChangeNotifier {
           return Future.value(resolveJson(user));
         } else {
           _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
         }
       } else {
         _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       }
-      MyToast.showToast(_errorMsg);
-      MyLogger.logger.e(_errorMsg);
-      return null;
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -692,13 +695,16 @@ class MyAppState extends ChangeNotifier {
               jsonList.map<BasicLibrary>((e) => resolveJson(e)).toList());
         } else {
           _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
         }
       } else {
         _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       }
-      MyToast.showToast(_errorMsg);
-      MyLogger.logger.e(_errorMsg);
-      return null;
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -743,13 +749,16 @@ class MyAppState extends ChangeNotifier {
           return Future.value(resolveJson(decodedResponse['data']));
         } else {
           _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
         }
       } else {
         _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       }
-      MyToast.showToast(_errorMsg);
-      MyLogger.logger.e(_errorMsg);
-      return null;
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -796,13 +805,16 @@ class MyAppState extends ChangeNotifier {
               MapEntry<String, List<String>>(key, List<String>.from(value))));
         } else {
           _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
         }
       } else {
         _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       }
-      MyToast.showToast(_errorMsg);
-      MyLogger.logger.e(_errorMsg);
-      return null;
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -847,13 +859,16 @@ class MyAppState extends ChangeNotifier {
               songsLink.map((key, value) => MapEntry(key, value.toString())));
         } else {
           _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
         }
       } else {
         _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       }
-      MyToast.showToast(_errorMsg);
-      MyLogger.logger.e(_errorMsg);
-      return null;
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -906,13 +921,16 @@ class MyAppState extends ChangeNotifier {
           return Future.value(resolveJson(decodedResponse['data']));
         } else {
           _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
         }
       } else {
         _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       }
-      MyToast.showToast(_errorMsg);
-      MyLogger.logger.e(_errorMsg);
-      return null;
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -955,13 +973,16 @@ class MyAppState extends ChangeNotifier {
           return Future.value(resolveJson(decodedResponse['data']));
         } else {
           _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
         }
       } else {
         _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       }
-      MyToast.showToast(_errorMsg);
-      MyLogger.logger.e(_errorMsg);
-      return null;
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -1009,13 +1030,16 @@ class MyAppState extends ChangeNotifier {
               jsonList.map<BasicSong>((e) => resolveJson(e)).toList());
         } else {
           _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
         }
       } else {
         _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       }
-      MyToast.showToast(_errorMsg);
-      MyLogger.logger.e(_errorMsg);
-      return null;
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -1060,13 +1084,16 @@ class MyAppState extends ChangeNotifier {
           return Future.value(resolveJson(decodedResponse['data']));
         } else {
           _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
         }
       } else {
         _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       }
-      MyToast.showToast(_errorMsg);
-      MyLogger.logger.e(_errorMsg);
-      return null;
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -1114,13 +1141,16 @@ class MyAppState extends ChangeNotifier {
               jsonList.map<BasicVideo>((video) => resolveJson(video)).toList());
         } else {
           _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
         }
       } else {
         _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       }
-      MyToast.showToast(_errorMsg);
-      MyLogger.logger.e(_errorMsg);
-      return null;
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -1164,15 +1194,19 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Library created successfully');
+          return Future.value(result);
         } else {
           _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
         }
       } else {
         _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       }
-      MyToast.showToast(_errorMsg);
-      MyLogger.logger.e(_errorMsg);
-      return null;
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -1230,15 +1264,19 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Delete libraries successfully');
+          return Future.value(result);
         } else {
           _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
         }
       } else {
         _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       }
-      MyToast.showToast(_errorMsg);
-      MyLogger.logger.e(_errorMsg);
-      return null;
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -1291,15 +1329,19 @@ class MyAppState extends ChangeNotifier {
       if (response.statusCode == 200) {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
+          return Future.value(result);
         } else {
           _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
         }
       } else {
         _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       }
-      MyToast.showToast(_errorMsg);
-      MyLogger.logger.e(_errorMsg);
-      return null;
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -1350,15 +1392,19 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Songs removed from ${library.name}');
+          return Future.value(result);
         } else {
           _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
         }
       } else {
         _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       }
-      MyToast.showToast(_errorMsg);
-      MyLogger.logger.e(_errorMsg);
-      return null;
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
@@ -1423,15 +1469,19 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Songs moved successfully');
+          return Future.value(result);
         } else {
           _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
         }
       } else {
         _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       }
-      MyToast.showToast(_errorMsg);
-      MyLogger.logger.e(_errorMsg);
-      return null;
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');

@@ -168,7 +168,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                           child: InkWell(
                             onTap: () async {
                               Result? result =
-                                  await await showDialog<Future<Result>>(
+                                  await await showDialog<Future<Result?>>(
                                 context: context,
                                 builder: (_) => CreateLibraryDialog(
                                   initText: widget.songs[0].name,

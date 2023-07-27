@@ -144,7 +144,7 @@ class _MyContentAreaState extends State<MyContentArea> {
                             tooltip: 'Create library',
                             onPressed: () async {
                               Result? result =
-                                  await await showDialog<Future<Result>>(
+                                  await await showDialog<Future<Result?>>(
                                 context: context,
                                 builder: (_) => CreateLibraryDialog(),
                               );

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../entities/dto/result.dart';
 import '../states/app_state.dart';
 import '../utils/my_toast.dart';
 
@@ -34,7 +35,8 @@ class _CreateLibraryDialogState extends State<CreateLibraryDialog> {
     if (value == '') {
       MyToast.showToast('Please enter library name!');
     } else {
-      var result = appState.createLibrary(value, appState.currentPlatform);
+      Future<Result?> result =
+          appState.createLibrary(value, appState.currentPlatform);
       if (mounted) {
         Navigator.pop(context, result);
       }
