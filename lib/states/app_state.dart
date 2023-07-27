@@ -1468,7 +1468,26 @@ class MyAppState extends ChangeNotifier {
         'toTid': dstTid,
       };
     } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
+      resolveJson = NCMPlaylist.fromJson;
+      String songsId = songs.map((e) => (e as NCMSong).id).join(',');
+      int srcLibraryId = (srcLibrary as NCMPlaylist).id;
+      int dstLibraryId = (dstLibrary as NCMPlaylist).id;
+      String srcTid = srcLibraryId.toString();
+      String dstTid = dstLibraryId.toString();
+      url = Uri.http(
+        API.host,
+        API.moveSongsToOtherLibrary,
+        {
+          'platform': platform.toString(),
+        },
+      );
+      requestBody = {
+        'songsId': songsId,
+        'fromLibrary': srcLibraryId.toString(),
+        'toLibrary': dstLibraryId.toString(),
+        'fromTid': srcTid,
+        'toTid': dstTid,
+      };
     } else if (platform == 3) {
       throw UnimplementedError('Not yet implement bilibili platform');
     } else {
