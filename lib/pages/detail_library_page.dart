@@ -132,9 +132,9 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                               snapshot.hasError
                                                   ? '${snapshot.error}'
                                                   : appState.errorMsg,
-                                              style: textTheme.labelSmall!
+                                              style: textTheme.labelMedium!
                                                   .copyWith(
-                                                color: colorScheme.onSecondary,
+                                                color: colorScheme.onPrimary,
                                               ),
                                             ),
                                             TextButton.icon(

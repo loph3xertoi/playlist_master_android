@@ -223,10 +223,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               children: [
                 MySelectableText(
                   snapshot.hasError ? '${snapshot.error}' : appState.errorMsg,
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontFamily: 'Roboto',
-                    fontSize: 16.0,
+                  style: textTheme.labelMedium!.copyWith(
+                    color: colorScheme.onPrimary,
                   ),
                 ),
                 TextButton.icon(

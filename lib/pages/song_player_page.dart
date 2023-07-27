@@ -225,8 +225,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                           snapshot.hasError
                               ? '${snapshot.error}'
                               : appState.errorMsg,
-                          style: textTheme.labelLarge!.copyWith(
-                            color: Colors.white,
+                          style: textTheme.labelMedium!.copyWith(
+                            color: colorScheme.onPrimary,
                           ),
                         ),
                         TextButton.icon(
