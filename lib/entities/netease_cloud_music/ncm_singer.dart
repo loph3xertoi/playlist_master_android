@@ -18,7 +18,7 @@ class NCMSinger extends BasicSinger {
     return NCMSinger(
       json['id'],
       name: json['name'],
-      headPic: json['headPic'],
+      headPic: json['headPic'] ?? '',
     );
   }
 

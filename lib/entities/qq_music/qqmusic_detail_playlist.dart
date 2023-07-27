@@ -4,21 +4,21 @@ import 'qqmusic_song.dart';
 /// Detail playlist of qq music.
 class QQMusicDetailPlaylist extends BasicLibrary {
   QQMusicDetailPlaylist(
-    this.listenNum,
+    this.playCount,
     this.dirId,
     this.tid,
     this.songs, {
     required super.name,
     required super.cover,
     required super.itemCount,
-    this.desc = 'A description for your library.',
+    this.description = 'A description for your library.',
   });
 
   /// The description of your playlist.
-  final String desc;
+  final String description;
 
   /// Listen times of this playlist.
-  final int listenNum;
+  final int playCount;
 
   /// The dirId(local dawid) of this playlist.
   final int dirId;
@@ -34,8 +34,8 @@ class QQMusicDetailPlaylist extends BasicLibrary {
       'name': name,
       'cover': cover,
       'itemCount': itemCount,
-      'desc': desc,
-      'listenNum': listenNum,
+      'desc': description,
+      'listenNum': playCount,
       'dirId': dirId,
       'tid': tid,
       'songs': songs.map((song) => song.toJson()).toList(),
@@ -60,12 +60,12 @@ class QQMusicDetailPlaylist extends BasicLibrary {
       name: json['name'],
       cover: json['cover'],
       itemCount: itemCount,
-      desc: json['desc'],
+      description: json['desc'],
     );
   }
 
   @override
   String toString() {
-    return 'QQMusicDetailPlaylist{listenNum: $listenNum, dirId: $dirId, tid: $tid, songs: $songs, name: $name, cover: $cover, itemCount: $itemCount, desc: $desc}';
+    return 'QQMusicDetailPlaylist{playCount: $playCount, dirId: $dirId, tid: $tid, songs: $songs, name: $name, cover: $cover, itemCount: $itemCount, description: $description}';
   }
 }

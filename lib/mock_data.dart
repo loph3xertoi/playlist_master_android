@@ -435,7 +435,7 @@ class MockData {
     name: 'Bird',
     cover: 'assets/images/playlist_cover/bird.png',
     itemCount: 10,
-    desc:
+    description:
         'A bird does not sing because it has an answer, it sings because it has a song.',
   );
 

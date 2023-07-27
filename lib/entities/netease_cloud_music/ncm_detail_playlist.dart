@@ -56,6 +56,12 @@ class NCMDetailPlaylist extends BasicLibrary {
       songs = songsJson.map<NCMSong>((e) => NCMSong.fromJson(e)).toList();
     }
 
+    List<String> tags = [];
+    int tagsCount = json['tags'].length;
+    if (tagsCount > 0) {
+      List<dynamic> tagsJson = json['tags'];
+      tags = tagsJson.map<String>((e) => e.toString()).toList();
+    }
     return NCMDetailPlaylist(
       json['id'],
       json['trackUpdateTime'],
@@ -63,7 +69,7 @@ class NCMDetailPlaylist extends BasicLibrary {
       json['createTime'],
       json['playCount'],
       json['description'],
-      json['tags'],
+      tags,
       songs,
       name: json['name'],
       cover: json['cover'],

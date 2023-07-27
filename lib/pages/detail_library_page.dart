@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:playlistmaster/entities/netease_cloud_music/ncm_detail_playlist.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
@@ -189,8 +190,10 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                               : snapshot.data
                                                   as QQMusicDetailPlaylist;
                                         } else if (currentPlatform == 2) {
-                                          throw UnimplementedError(
-                                              'Not yet implement ncm platform');
+                                          detailLibrary = snapshot.data == null
+                                              ? null
+                                              : snapshot.data
+                                                  as NCMDetailPlaylist;
                                         } else if (currentPlatform == 3) {
                                           throw UnimplementedError(
                                               'Not yet implement bilibili platform');
@@ -202,14 +205,8 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
 
                                       if (detailLibrary != null) {
                                         rawQueue = detailLibrary.songs;
-                                        // if (searchedSongs.isEmpty) {
-                                        //   searchedSongs =
-                                        //       List.from(detailLibrary.songs);
-                                        // }
                                         WidgetsBinding.instance
                                             .addPostFrameCallback((_) {
-                                          // if (appState.rawQueue!.isEmpty ||
-                                          // _changeRawQueue) {
                                           if (_changeRawQueue) {
                                             appState.rawQueue =
                                                 detailLibrary.songs;
@@ -341,7 +338,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                 ),
                                                               ),
                                                               Text(
-                                                                '${detailLibrary != null ? detailLibrary.listenNum : 0} listened',
+                                                                '${detailLibrary != null ? detailLibrary.playCount : 0} listened',
                                                                 textAlign:
                                                                     TextAlign
                                                                         .start,
@@ -364,7 +361,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                 detailLibrary !=
                                                                         null
                                                                     ? detailLibrary
-                                                                        .desc
+                                                                        .description
                                                                     : 'This library is a hidden library.',
                                                                 style: textTheme
                                                                     .labelLarge!
