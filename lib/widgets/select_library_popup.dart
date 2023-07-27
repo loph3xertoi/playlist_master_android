@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../entities/basic/basic_library.dart';
 import '../entities/basic/basic_song.dart';
 import '../entities/dto/result.dart';
+import '../entities/netease_cloud_music/ncm_playlist.dart';
 import '../entities/qq_music/qqmusic_playlist.dart';
 import '../states/app_state.dart';
 import 'create_library_popup.dart';
@@ -105,7 +106,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
             } else if (currentPlatform == 1) {
               libraries = snapshot.data!.cast<BasicLibrary>().toList();
             } else if (currentPlatform == 2) {
-              throw UnimplementedError('Not yet implement ncm platform');
+              libraries = snapshot.data!.cast<BasicLibrary>().toList();
             } else if (currentPlatform == 3) {
               throw UnimplementedError('Not yet implement bilibili platform');
             } else {
@@ -191,8 +192,15 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                                       ? _addSongsToLibrary(appState, library)
                                       : _moveSongsToLibrary(appState, library);
                                 } else if (currentPlatform == 2) {
-                                  throw UnimplementedError(
-                                      'Not yet implement ncm platform');
+                                  BasicLibrary library = NCMPlaylist(
+                                    result.data as int,
+                                    name: '',
+                                    cover: '',
+                                    itemCount: 1,
+                                  );
+                                  widget.action == 'add'
+                                      ? _addSongsToLibrary(appState, library)
+                                      : _moveSongsToLibrary(appState, library);
                                 } else if (currentPlatform == 3) {
                                   throw UnimplementedError(
                                       'Not yet implement bilibili platform');

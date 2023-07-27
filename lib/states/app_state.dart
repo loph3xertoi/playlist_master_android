@@ -21,6 +21,7 @@ import '../entities/basic/basic_video.dart';
 import '../entities/dto/result.dart';
 import '../entities/netease_cloud_music/ncm_detail_playlist.dart';
 import '../entities/netease_cloud_music/ncm_playlist.dart';
+import '../entities/netease_cloud_music/ncm_song.dart';
 import '../entities/netease_cloud_music/ncm_user.dart';
 import '../entities/qq_music/qqmusic_detail_playlist.dart';
 import '../entities/qq_music/qqmusic_detail_song.dart';
@@ -1301,7 +1302,14 @@ class MyAppState extends ChangeNotifier {
         'tid': tid,
       };
     } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
+      int id = (library as NCMPlaylist).id;
+      String songIds = songs.map((e) => (e as NCMSong).id).join(',');
+      String tid = id.toString();
+      requestBody = {
+        'libraryId': id.toString(),
+        'songsId': songIds,
+        'tid': tid,
+      };
     } else if (platform == 3) {
       throw UnimplementedError('Not yet implement bilibili platform');
     } else {
