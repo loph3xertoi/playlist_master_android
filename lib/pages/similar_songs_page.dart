@@ -374,102 +374,46 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                     // TODO: fix bug: the init cover will be wrong sometimes when first loading
                                                     // song player in shuffle mode.
                                                     onTap: () async {
-                                                      if (rawQueue![index]
-                                                              .payPlay ==
-                                                          1) {
+                                                      var isTakenDown =
+                                                          rawQueue![index]
+                                                              .isTakenDown;
+                                                      var payPlayType =
+                                                          rawQueue![index]
+                                                              .payPlay;
+                                                      var currentPlatform =
+                                                          appState
+                                                              .currentPlatform;
+                                                      var player =
+                                                          appState.player;
+
+                                                      if (currentPlatform ==
+                                                              1 &&
+                                                          payPlayType == 1) {
                                                         MyToast.showToast(
                                                             'This song need vip to play');
                                                         MyLogger.logger.e(
                                                             'This song need vip to play');
-                                                      } else if (rawQueue![
-                                                              index]
-                                                          .isTakenDown) {
+                                                        return;
+                                                      }
+
+                                                      if (isTakenDown) {
                                                         MyToast.showToast(
                                                             'This song is taken down');
                                                         MyLogger.logger.e(
                                                             'This song is taken down');
-                                                      } else {
-                                                        if (appState.player ==
-                                                            null) {
-                                                          appState.queue = similarSongs
-                                                              .where((song) =>
-                                                                  !song
-                                                                      .isTakenDown &&
-                                                                  (song.payPlay ==
-                                                                      0))
-                                                              .toList();
+                                                        return;
+                                                      }
 
-                                                          // Real index in queue, not in raw queue as some songs may be taken down.
-                                                          int realIndex = appState
-                                                              .queue!
-                                                              .indexOf(
-                                                                  rawQueue![
-                                                                      index]);
-
-                                                          try {
-                                                            await appState
-                                                                .initAudioPlayer();
-                                                          } catch (e) {
-                                                            MyToast.showToast(
-                                                                'Exception: $e');
-                                                            MyLogger.logger.e(
-                                                                'Exception: $e');
-                                                            appState.queue = [];
-                                                            appState.currentDetailSong =
-                                                                null;
-                                                            appState
-                                                                .currentPlayingSongInQueue = 0;
-                                                            appState.currentSong =
-                                                                null;
-                                                            appState.prevSong =
-                                                                null;
-                                                            appState.isPlaying =
-                                                                false;
-                                                            appState.player!
-                                                                .stop();
-                                                            appState.player!
-                                                                .dispose();
-                                                            appState.player =
-                                                                null;
-                                                            appState.initQueue!
-                                                                .clear();
-                                                            appState.isPlayerPageOpened =
-                                                                false;
-                                                            appState.canSongPlayerPagePop =
-                                                                false;
-                                                            return;
-                                                          }
-
-                                                          appState.canSongPlayerPagePop =
-                                                              true;
-
-                                                          appState.currentPlayingSongInQueue =
-                                                              realIndex;
-
-                                                          appState.currentSong =
-                                                              appState.queue![
-                                                                  realIndex];
-
-                                                          appState.prevSong =
-                                                              appState
-                                                                  .currentSong;
-
-                                                          appState.currentDetailSong =
-                                                              null;
-
-                                                          appState.isFirstLoadSongPlayer =
-                                                              true;
-
-                                                          appState.player!
-                                                              .play();
-                                                        } else if (appState
-                                                                .currentSong ==
-                                                            rawQueue![index]) {
-                                                          if (!player!
-                                                              .playerState
-                                                              .playing) {
-                                                            player.play();
-                                                          }
+                                                      if (appState.player ==
+                                                          null) {
+                                                        if (currentPlatform ==
+                                                            2) {
+                                                          appState.queue =
+                                                              similarSongs
+                                                                  .where((song) =>
+                                                                      !song
+                                                                          .isTakenDown)
+                                                                  .toList();
                                                         } else {
                                                           appState.queue = similarSongs
                                                               .where((song) =>
@@ -478,91 +422,173 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                                   (song.payPlay ==
                                                                       0))
                                                               .toList();
+                                                        }
 
-                                                          // Real index in queue, not in raw queue as some songs may be taken down.
+                                                        // Real index in queue, not in raw queue as some songs may be taken down.
+                                                        int realIndex = appState
+                                                            .queue!
+                                                            .indexOf(rawQueue![
+                                                                index]);
 
-                                                          int realIndex = appState
-                                                              .queue!
-                                                              .indexOf(
-                                                                  rawQueue![
-                                                                      index]);
-
-                                                          appState.canSongPlayerPagePop =
-                                                              true;
-
-                                                          appState.player!
-                                                              .stop();
-
-                                                          appState.player!
-                                                              .dispose();
-
-                                                          appState.player =
-                                                              null;
-
-                                                          appState.initQueue!
-                                                              .clear();
-
-                                                          try {
-                                                            await appState
-                                                                .initAudioPlayer();
-                                                          } catch (e) {
-                                                            MyToast.showToast(
-                                                                'Exception: $e');
-                                                            MyLogger.logger.e(
-                                                                'Exception: $e');
-                                                            appState.queue = [];
-                                                            appState.currentDetailSong =
-                                                                null;
-                                                            appState
-                                                                .currentPlayingSongInQueue = 0;
-                                                            appState.currentSong =
-                                                                null;
-                                                            appState.prevSong =
-                                                                null;
-                                                            appState.isPlaying =
-                                                                false;
-                                                            appState.player!
-                                                                .stop();
-                                                            appState.player!
-                                                                .dispose();
-                                                            appState.player =
-                                                                null;
-                                                            appState.initQueue!
-                                                                .clear();
-                                                            appState.isPlayerPageOpened =
-                                                                false;
-                                                            appState.canSongPlayerPagePop =
-                                                                false;
-                                                            return;
-                                                          }
-
-                                                          appState.currentPlayingSongInQueue =
-                                                              realIndex;
-
-                                                          appState.currentSong =
-                                                              appState.queue![
-                                                                  realIndex];
-
+                                                        try {
+                                                          await appState
+                                                              .initAudioPlayer();
+                                                        } catch (e) {
+                                                          MyToast.showToast(
+                                                              'Exception: $e');
+                                                          MyLogger.logger.e(
+                                                              'Exception: $e');
+                                                          appState.queue = [];
                                                           appState.currentDetailSong =
                                                               null;
-
+                                                          appState
+                                                              .currentPlayingSongInQueue = 0;
+                                                          appState.currentSong =
+                                                              null;
                                                           appState.prevSong =
-                                                              appState
-                                                                  .currentSong;
-
-                                                          appState.isFirstLoadSongPlayer =
-                                                              true;
-
+                                                              null;
+                                                          appState.isPlaying =
+                                                              false;
                                                           appState.player!
-                                                              .play();
+                                                              .stop();
+                                                          appState.player!
+                                                              .dispose();
+                                                          appState.player =
+                                                              null;
+                                                          appState.initQueue!
+                                                              .clear();
+                                                          appState.isPlayerPageOpened =
+                                                              false;
+                                                          appState.canSongPlayerPagePop =
+                                                              false;
+                                                          return;
                                                         }
-                                                        appState.isPlayerPageOpened =
+
+                                                        appState.canSongPlayerPagePop =
                                                             true;
-                                                        if (context.mounted) {
-                                                          Navigator.pushNamed(
-                                                              context,
-                                                              '/song_player_page');
+
+                                                        appState.currentPlayingSongInQueue =
+                                                            realIndex;
+
+                                                        appState.currentSong =
+                                                            appState.queue![
+                                                                realIndex];
+
+                                                        appState.prevSong =
+                                                            appState
+                                                                .currentSong;
+
+                                                        appState.currentDetailSong =
+                                                            null;
+
+                                                        appState.isFirstLoadSongPlayer =
+                                                            true;
+
+                                                        appState.player!.play();
+                                                      } else if (appState
+                                                              .currentSong ==
+                                                          rawQueue![index]) {
+                                                        if (!player!.playerState
+                                                            .playing) {
+                                                          player.play();
                                                         }
+                                                      } else {
+                                                        if (currentPlatform ==
+                                                            2) {
+                                                          appState.queue =
+                                                              similarSongs
+                                                                  .where((song) =>
+                                                                      !song
+                                                                          .isTakenDown)
+                                                                  .toList();
+                                                        } else {
+                                                          appState.queue = similarSongs
+                                                              .where((song) =>
+                                                                  !song
+                                                                      .isTakenDown &&
+                                                                  (song.payPlay ==
+                                                                      0))
+                                                              .toList();
+                                                        }
+
+                                                        // Real index in queue, not in raw queue as some songs may be taken down.
+                                                        int realIndex = appState
+                                                            .queue!
+                                                            .indexOf(rawQueue![
+                                                                index]);
+
+                                                        appState.canSongPlayerPagePop =
+                                                            true;
+
+                                                        appState.player!.stop();
+
+                                                        appState.player!
+                                                            .dispose();
+
+                                                        appState.player = null;
+
+                                                        appState.initQueue!
+                                                            .clear();
+
+                                                        try {
+                                                          await appState
+                                                              .initAudioPlayer();
+                                                        } catch (e) {
+                                                          MyToast.showToast(
+                                                              'Exception: $e');
+                                                          MyLogger.logger.e(
+                                                              'Exception: $e');
+                                                          appState.queue = [];
+                                                          appState.currentDetailSong =
+                                                              null;
+                                                          appState
+                                                              .currentPlayingSongInQueue = 0;
+                                                          appState.currentSong =
+                                                              null;
+                                                          appState.prevSong =
+                                                              null;
+                                                          appState.isPlaying =
+                                                              false;
+                                                          appState.player!
+                                                              .stop();
+                                                          appState.player!
+                                                              .dispose();
+                                                          appState.player =
+                                                              null;
+                                                          appState.initQueue!
+                                                              .clear();
+                                                          appState.isPlayerPageOpened =
+                                                              false;
+                                                          appState.canSongPlayerPagePop =
+                                                              false;
+                                                          return;
+                                                        }
+
+                                                        appState.currentPlayingSongInQueue =
+                                                            realIndex;
+
+                                                        appState.currentSong =
+                                                            appState.queue![
+                                                                realIndex];
+
+                                                        appState.currentDetailSong =
+                                                            null;
+
+                                                        appState.prevSong =
+                                                            appState
+                                                                .currentSong;
+
+                                                        appState.isFirstLoadSongPlayer =
+                                                            true;
+
+                                                        appState.player!.play();
+                                                      }
+                                                      appState.isPlayerPageOpened =
+                                                          true;
+                                                      if (context.mounted) {
+                                                        Navigator.pushNamed(
+                                                            context,
+                                                            '/song_player_page');
                                                       }
                                                     },
                                                     child: SongItem(

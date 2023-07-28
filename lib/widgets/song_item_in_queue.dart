@@ -7,6 +7,7 @@ import '../third_lib_change/music_visualizer.dart';
 
 class SongItemInQueue extends StatefulWidget {
   final String name;
+  final int payPlayType;
   final List<BasicSinger> singers;
   final String cover;
   final bool isPlaying;
@@ -15,6 +16,7 @@ class SongItemInQueue extends StatefulWidget {
   const SongItemInQueue({
     super.key,
     required this.name,
+    required this.payPlayType,
     required this.singers,
     required this.cover,
     required this.isPlaying,
@@ -43,16 +45,16 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
         children: <Widget>[
           widget.isPlaying
               ? Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.only(bottom: 5.0, right: 5.0),
                   child: SizedBox(
-                    height: 12.0,
-                    width: 12.0,
+                    height: 20.0,
+                    width: 20.0,
                     child: Align(
                       alignment: Alignment.bottomCenter,
                       child: currentPlatform == 2
                           ? Image.asset(
                               'assets/images/song_playing_state.webp',
-                              color: Color(0xFFD40000),
+                              color: Color.fromARGB(255, 187, 0, 0),
                             )
                           : MusicVisualizer(
                               barCount: 3,
@@ -66,6 +68,15 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
           Expanded(
             child: Row(
               children: [
+                (currentPlatform == 2 && widget.payPlayType == 1)
+                    ? Padding(
+                        padding: const EdgeInsets.only(right: 3.0),
+                        child: Image.asset(
+                          'assets/images/vip_item_ncm.png',
+                          width: 20.0,
+                        ),
+                      )
+                    : Container(),
                 Flexible(
                   flex: 3,
                   child: Text(
@@ -73,7 +84,7 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
                     style: textTheme.labelMedium!.copyWith(
                       fontSize: 15.0,
                       color: widget.isPlaying
-                          ? Color(0xFFFF0000)
+                          ? Color.fromARGB(255, 187, 0, 0)
                           : colorScheme.onSecondary,
                     ),
                     overflow: TextOverflow.ellipsis,

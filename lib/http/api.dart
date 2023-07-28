@@ -3,7 +3,7 @@ class API {
   static const uid = '0';
 
   /// Host of playlist server.
-  static const host = '192.168.8.171:8089';
+  static const host = '192.168.8.171:8080';
   // static const host = '192.168.0.114:8080';
 
   /// Get user information according to [uid] in [platform].

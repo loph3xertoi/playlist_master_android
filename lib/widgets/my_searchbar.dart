@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_paged_songs.dart';
 import '../entities/basic/basic_song.dart';
+import '../entities/netease_cloud_music/ncm_paged_songs.dart';
+import '../entities/netease_cloud_music/ncm_song.dart';
 import '../entities/qq_music/qqmusic_paged_songs.dart';
 import '../entities/qq_music/qqmusic_song.dart';
 import '../states/app_state.dart';
@@ -87,7 +89,7 @@ class _MySearchBarState extends State<MySearchBar>
           } else if (_platform == 1) {
             appState.searchedSongs = (pagedSongs as QQMusicPagedSongs).songs;
           } else if (_platform == 2) {
-            throw UnimplementedError('Not yet implement ncm platform');
+            appState.searchedSongs = (pagedSongs as NCMPagedSongs).songs;
           } else if (_platform == 3) {
             throw UnimplementedError('Not yet implement bilibili platform');
           } else {
@@ -107,7 +109,11 @@ class _MySearchBarState extends State<MySearchBar>
                   e.singers.any((singer) => singer.name.contains(searchString)))
               .toList();
         } else if (_platform == 2) {
-          throw UnimplementedError('Not yet implement ncm platform');
+          appState.searchedSongs = appState.rawQueue!
+              .where((e) =>
+                  (e as NCMSong).name.contains(searchString) ||
+                  e.singers.any((singer) => singer.name.contains(searchString)))
+              .toList();
         } else if (_platform == 3) {
           throw UnimplementedError('Not yet implement bilibili platform');
         } else {

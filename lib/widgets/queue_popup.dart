@@ -96,6 +96,7 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                           var name = queue[index].name;
                           var singers = queue[index].singers;
                           var cover = queue[index].cover;
+                          var payPlayType = queue[index].payPlay;
                           return Material(
                             color: Colors.transparent,
                             child: InkWell(
@@ -133,6 +134,7 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                     EdgeInsets.fromLTRB(25.0, 0.0, 12.0, 0.0),
                                 child: SongItemInQueue(
                                   name: name,
+                                  payPlayType: payPlayType,
                                   cover: cover,
                                   singers: singers,
                                   isPlaying:

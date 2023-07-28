@@ -21,6 +21,7 @@ import '../entities/basic/basic_video.dart';
 import '../entities/dto/result.dart';
 import '../entities/netease_cloud_music/ncm_detail_playlist.dart';
 import '../entities/netease_cloud_music/ncm_detail_song.dart';
+import '../entities/netease_cloud_music/ncm_paged_songs.dart';
 import '../entities/netease_cloud_music/ncm_playlist.dart';
 import '../entities/netease_cloud_music/ncm_song.dart';
 import '../entities/netease_cloud_music/ncm_user.dart';
@@ -972,7 +973,7 @@ class MyAppState extends ChangeNotifier {
     } else if (platform == 1) {
       resolveJson = QQMusicPagedSongs.fromJson;
     } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
+      resolveJson = NCMPagedSongs.fromJson;
     } else if (platform == 3) {
       throw UnimplementedError('Not yet implement bilibili platform');
     } else {

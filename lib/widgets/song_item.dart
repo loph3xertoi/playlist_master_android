@@ -83,6 +83,8 @@ class _SongItemState extends State<SongItem> {
     var currentPlatform = appState.currentPlatform;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    bool isTakenDown = widget.song.isTakenDown;
+    int payPlayType = widget.song.payPlay;
     return SizedBox(
       height: 50.0,
       child: Row(
@@ -95,16 +97,7 @@ class _SongItemState extends State<SongItem> {
               child: Center(
                 child: Text(
                   (widget.index + 1).toString(),
-                  style: widget.song.payPlay == 1
-                      ? textTheme.labelSmall!.copyWith(
-                          color: colorScheme.onTertiary,
-                        )
-                      : widget.song.isTakenDown
-                          ? textTheme.labelSmall!.copyWith(
-                              color: colorScheme.onTertiary,
-                              fontStyle: FontStyle.italic,
-                            )
-                          : textTheme.labelSmall,
+                  style: textTheme.labelSmall,
                 ),
               ),
             ),
@@ -116,35 +109,50 @@ class _SongItemState extends State<SongItem> {
               children: [
                 Text(
                   widget.song.name,
-                  style: widget.song.payPlay == 1
-                      ? textTheme.labelMedium!.copyWith(
-                          color: colorScheme.onTertiary,
-                        )
-                      : widget.song.isTakenDown
-                          ? textTheme.labelMedium!.copyWith(
-                              color: colorScheme.onTertiary,
-                              fontStyle: FontStyle.italic,
-                            )
-                          : textTheme.labelMedium,
+                  style: textTheme.labelMedium,
                   overflow: TextOverflow.ellipsis,
                 ),
-                Text(
-                  widget.song.singers.map((e) => e.name).join(', '),
-                  style: widget.song.payPlay == 1
-                      ? textTheme.labelSmall!.copyWith(
-                          color: colorScheme.onTertiary,
-                          fontSize: 10.0,
-                        )
-                      : widget.song.isTakenDown
-                          ? textTheme.labelSmall!.copyWith(
-                              fontSize: 10.0,
-                              color: colorScheme.onTertiary,
-                              fontStyle: FontStyle.italic,
-                            )
-                          : textTheme.labelSmall!.copyWith(
-                              fontSize: 10.0,
+                Row(
+                  children: [
+                    (payPlayType == 1 && currentPlatform == 1)
+                        ? Padding(
+                            padding: const EdgeInsets.only(right: 3.0),
+                            child: Image.asset(
+                              'assets/images/vip_item_qqmusic.png',
+                              width: 20.0,
                             ),
-                  overflow: TextOverflow.ellipsis,
+                          )
+                        : (payPlayType == 1 && currentPlatform == 2)
+                            ? Padding(
+                                padding: const EdgeInsets.only(right: 3.0),
+                                child: Image.asset(
+                                  'assets/images/vip_item_ncm.png',
+                                  width: 20.0,
+                                ),
+                              )
+                            : Container(),
+                    isTakenDown &&
+                            (currentPlatform == 2 ||
+                                (currentPlatform == 1 && payPlayType == 0))
+                        ? Padding(
+                            padding:
+                                const EdgeInsets.only(top: 3.0, right: 3.0),
+                            child: Image.asset(
+                              'assets/images/no_song.png',
+                              width: 30.0,
+                            ),
+                          )
+                        : Container(),
+                    Expanded(
+                      child: Text(
+                        widget.song.singers.map((e) => e.name).join(', '),
+                        style: textTheme.labelSmall!.copyWith(
+                          fontSize: 10.0,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -155,96 +163,90 @@ class _SongItemState extends State<SongItem> {
               Padding(
                 padding: const EdgeInsets.only(right: 5.0),
                 child: LikeButton(
-                  iconColor: widget.song.isTakenDown || widget.song.payPlay == 1
-                      ? colorScheme.onTertiary
-                      : colorScheme.tertiary,
+                  iconColor: colorScheme.tertiary,
                   size: 24.0,
                   isLiked: false,
                 ),
               ),
               IconButton(
                   onPressed: () async {
-                    // if (appState.currentPlatform == 1 &&
-                    //     !widget.song.isTakenDown &&
-                    //     (widget.song.payPlay == 0)||) {
-                    if (!widget.song.isTakenDown) {
-                      if (currentPlatform == 2 || widget.song.payPlay == 0) {
-                        if (appState.player == null) {
-                          appState.queue = [widget.song];
-                          try {
-                            await appState.initAudioPlayer();
-                          } catch (e) {
-                            MyToast.showToast('Exception: $e');
-                            MyLogger.logger.e('Exception: $e');
-                            appState.disposeSongPlayer();
-                            return;
-                          }
-                          appState.currentPlayingSongInQueue = 0;
+                    if (currentPlatform == 1 && payPlayType == 1) {
+                      MyToast.showToast('This song need vip to play');
+                      MyLogger.logger.e('This song need vip to play');
+                      return;
+                    }
 
-                          appState.currentSong = widget.song;
-
-                          appState.prevSong = appState.currentSong;
-
-                          appState.currentDetailSong = null;
-
-                          appState.player!.play();
-
-                          MyToast.showToast('Added to queue');
-                        } else {
-                          appState.queue!.insert(
-                              appState.currentPlayingSongInQueue! + 1,
-                              widget.song);
-                          AudioSource newAudioSource;
-                          if (appState.isUsingMockData) {
-                            newAudioSource = AudioSource.asset(
-                              widget.song.songLink,
-                              tag: MediaItem(
-                                // Specify a unique ID for each media item:
-                                id: Uuid().v1(),
-                                // Metadata to display in the notification:
-                                album: 'Album name',
-                                artist: widget.song.singers
-                                    .map((e) => e.name)
-                                    .join(', '),
-                                title: widget.song.name,
-                                artUri: await appState.getImageFileFromAssets(
-                                    widget.song.cover,
-                                    appState.queue!.indexOf(widget.song)),
-                              ),
-                            );
-                          } else {
-                            newAudioSource = LockCachingAudioSource(
-                              Uri.parse(widget.song.songLink),
-                              tag: MediaItem(
-                                // Specify a unique ID for each media item:
-                                id: Uuid().v1(),
-                                // Metadata to display in the notification:
-                                album: 'Album name',
-                                artist: widget.song.singers
-                                    .map((e) => e.name)
-                                    .join(', '),
-                                title: widget.song.name,
-                                artUri: Uri.parse(widget.song.cover),
-                              ),
-                            );
-                          }
-                          appState.initQueue!.insert(
-                              appState.currentPlayingSongInQueue! + 1,
-                              newAudioSource);
-                          MyToast.showToast('Added to queue');
-                        }
-                      } else {
-                        MyToast.showToast('This song need vip to play');
-                        MyLogger.logger.e('This song need vip to play');
-                      }
-                    } else {
+                    if (isTakenDown) {
                       MyToast.showToast('This song is taken down');
                       MyLogger.logger.e('This song is taken down');
+                      return;
+                    }
+
+                    if (appState.player == null) {
+                      appState.queue = [widget.song];
+                      try {
+                        await appState.initAudioPlayer();
+                      } catch (e) {
+                        MyToast.showToast('Exception: $e');
+                        MyLogger.logger.e('Exception: $e');
+                        appState.disposeSongPlayer();
+                        return;
+                      }
+                      appState.currentPlayingSongInQueue = 0;
+
+                      appState.currentSong = widget.song;
+
+                      appState.prevSong = appState.currentSong;
+
+                      appState.currentDetailSong = null;
+
+                      appState.player!.play();
+
+                      MyToast.showToast('Added to queue');
+                    } else {
+                      appState.queue!.insert(
+                          appState.currentPlayingSongInQueue! + 1, widget.song);
+                      AudioSource newAudioSource;
+                      if (appState.isUsingMockData) {
+                        newAudioSource = AudioSource.asset(
+                          widget.song.songLink,
+                          tag: MediaItem(
+                            // Specify a unique ID for each media item:
+                            id: Uuid().v1(),
+                            // Metadata to display in the notification:
+                            album: 'Album name',
+                            artist: widget.song.singers
+                                .map((e) => e.name)
+                                .join(', '),
+                            title: widget.song.name,
+                            artUri: await appState.getImageFileFromAssets(
+                                widget.song.cover,
+                                appState.queue!.indexOf(widget.song)),
+                          ),
+                        );
+                      } else {
+                        newAudioSource = LockCachingAudioSource(
+                          Uri.parse(widget.song.songLink),
+                          tag: MediaItem(
+                            // Specify a unique ID for each media item:
+                            id: Uuid().v1(),
+                            // Metadata to display in the notification:
+                            album: 'Album name',
+                            artist: widget.song.singers
+                                .map((e) => e.name)
+                                .join(', '),
+                            title: widget.song.name,
+                            artUri: Uri.parse(widget.song.cover),
+                          ),
+                        );
+                      }
+                      appState.initQueue!.insert(
+                          appState.currentPlayingSongInQueue! + 1,
+                          newAudioSource);
+                      MyToast.showToast('Added to queue');
                     }
                   },
-                  color: widget.song.isTakenDown || widget.song.payPlay == 1
-                      ? colorScheme.onTertiary
-                      : colorScheme.tertiary,
+                  color: colorScheme.tertiary,
                   tooltip: 'Add to queue',
                   icon: Icon(
                     Icons.queue_play_next_rounded,
@@ -260,9 +262,7 @@ class _SongItemState extends State<SongItem> {
                       _addSongToLibrary(context, appState);
                     }
                   },
-                  color: widget.song.isTakenDown || widget.song.payPlay == 1
-                      ? colorScheme.onTertiary
-                      : colorScheme.tertiary,
+                  color: colorScheme.tertiary,
                   tooltip: 'Edit song',
                   icon: Icon(
                     Icons.more_vert_rounded,

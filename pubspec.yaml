@@ -65,6 +65,9 @@ flutter:
     - assets/images/male.png
     - assets/images/female.png
     - assets/images/gender_secret.png
+    - assets/images/no_song.png
+    - assets/images/vip_item_qqmusic.png
+    - assets/images/vip_item_ncm.png
     - assets/images/song_playing_state.webp
     - assets/images/pm_round.png
     - assets/images/pm_square.png

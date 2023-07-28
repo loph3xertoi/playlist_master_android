@@ -3,10 +3,11 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/entities/netease_cloud_music/ncm_detail_playlist.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
+import '../entities/basic/basic_song.dart';
+import '../entities/netease_cloud_music/ncm_detail_playlist.dart';
 import '../entities/qq_music/qqmusic_detail_playlist.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
@@ -37,6 +38,93 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
       _detailLibrary = appState.fetchDetailLibrary(
           appState.rawOpenedLibrary!, appState.currentPlatform);
     });
+  }
+
+  void onSongTap(MyAppState appState, int index, BuildContext context,
+      List<BasicSong> searchedSongs) async {
+    var isTakenDown = searchedSongs[index].isTakenDown;
+    var payPlayType = searchedSongs[index].payPlay;
+    var currentPlatform = appState.currentPlatform;
+    var player = appState.player;
+    
+    if (currentPlatform == 1 && payPlayType == 1) {
+      MyToast.showToast('This song need vip to play');
+      MyLogger.logger.e('This song need vip to play');
+      return;
+    }
+
+    if (isTakenDown) {
+      MyToast.showToast('This song is taken down');
+      MyLogger.logger.e('This song is taken down');
+      return;
+    }
+
+    if (appState.player == null) {
+      if (currentPlatform == 2) {
+        appState.queue =
+            searchedSongs.where((song) => !song.isTakenDown).toList();
+      } else {
+        appState.queue = searchedSongs
+            .where((song) => !song.isTakenDown && (song.payPlay == 0))
+            .toList();
+      }
+      // Real index in queue, not in raw queue as some songs may be taken down.
+      int realIndex = appState.queue!.indexOf(searchedSongs[index]);
+
+      try {
+        await appState.initAudioPlayer();
+      } catch (e) {
+        MyToast.showToast('Exception: $e');
+        MyLogger.logger.e('Exception: $e');
+        appState.disposeSongPlayer();
+        return;
+      }
+      appState.canSongPlayerPagePop = true;
+      appState.currentPlayingSongInQueue = realIndex;
+      appState.currentSong = appState.queue![realIndex];
+      appState.prevSong = appState.currentSong;
+      appState.currentDetailSong = null;
+      appState.isFirstLoadSongPlayer = true;
+      appState.player!.play();
+    } else if (appState.currentSong == searchedSongs[index]) {
+      if (!player!.playerState.playing) {
+        player.play();
+      }
+    } else {
+      if (currentPlatform == 2) {
+        appState.queue =
+            searchedSongs.where((song) => !song.isTakenDown).toList();
+      } else {
+        appState.queue = searchedSongs
+            .where((song) => !song.isTakenDown && (song.payPlay == 0))
+            .toList();
+      }
+      // Real index in queue, not in raw queue as some songs may be taken down.
+      int realIndex = appState.queue!.indexOf(searchedSongs[index]);
+      appState.canSongPlayerPagePop = true;
+      appState.player!.stop();
+      appState.player!.dispose();
+      appState.player = null;
+      appState.initQueue!.clear();
+      try {
+        await appState.initAudioPlayer();
+      } catch (e) {
+        MyToast.showToast('Exception: $e');
+        MyLogger.logger.e('Exception: $e');
+        appState.disposeSongPlayer();
+        return;
+      }
+      appState.currentPlayingSongInQueue = realIndex;
+      appState.currentSong = appState.queue![realIndex];
+      appState.currentDetailSong = null;
+      appState.prevSong = appState.currentSong;
+      appState.isFirstLoadSongPlayer = true;
+      appState.player!.play();
+    }
+    appState.isPlayerPageOpened = true;
+    if (context.mounted) {
+      Navigator.pushNamed(context, '/song_player_page');
+    }
   }
 
   @override
@@ -75,11 +163,9 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
 
     var isUsingMockData = appState.isUsingMockData;
     var openedLibrary = appState.rawOpenedLibrary;
-    var player = appState.player;
     var searchedSongs = appState.searchedSongs;
     var currentPlatform = appState.currentPlatform;
     var rawQueue = appState.rawQueue;
-
     return Consumer<ThemeNotifier>(
       builder: (context, theme, _) => Material(
         child: Scaffold(
@@ -400,86 +486,12 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                     children: [
                                                                       IconButton(
                                                                         onPressed:
-                                                                            () async {
-                                                                          if (appState.player ==
-                                                                              null) {
-                                                                            if (currentPlatform ==
-                                                                                2) {
-                                                                              appState.queue = searchedSongs.where((song) => !song.isTakenDown).toList();
-                                                                            } else {
-                                                                              appState.queue = searchedSongs.where((song) => !song.isTakenDown && (song.payPlay == 0)).toList();
-                                                                            }
-
-                                                                            // Real index in queue, not in raw queue as some songs may be taken down.
-                                                                            int realIndex =
-                                                                                appState.queue!.indexOf(searchedSongs[0]);
-
-                                                                            try {
-                                                                              await appState.initAudioPlayer();
-                                                                            } catch (e) {
-                                                                              MyToast.showToast('Exception: $e');
-                                                                              MyLogger.logger.e('Exception: $e');
-                                                                              appState.disposeSongPlayer();
-                                                                              return;
-                                                                            }
-
-                                                                            appState.currentPlayingSongInQueue =
-                                                                                realIndex;
-
-                                                                            appState.currentSong =
-                                                                                appState.queue![realIndex];
-
-                                                                            appState.prevSong =
-                                                                                appState.currentSong;
-
-                                                                            appState.currentDetailSong =
-                                                                                null;
-
-                                                                            appState.player!.play();
-                                                                          } else {
-                                                                            if (currentPlatform ==
-                                                                                2) {
-                                                                              appState.queue = searchedSongs.where((song) => !song.isTakenDown).toList();
-                                                                            } else {
-                                                                              appState.queue = searchedSongs.where((song) => !song.isTakenDown && (song.payPlay == 0)).toList();
-                                                                            }
-
-                                                                            // Real index in queue, not in raw queue as some songs may be taken down.
-                                                                            int realIndex =
-                                                                                appState.queue!.indexOf(searchedSongs[0]);
-
-                                                                            appState.player!.stop();
-
-                                                                            appState.player!.dispose();
-
-                                                                            appState.player =
-                                                                                null;
-
-                                                                            appState.initQueue!.clear();
-
-                                                                            try {
-                                                                              await appState.initAudioPlayer();
-                                                                            } catch (e) {
-                                                                              MyToast.showToast('Exception: $e');
-                                                                              MyLogger.logger.e('Exception: $e');
-                                                                              appState.disposeSongPlayer();
-                                                                              return;
-                                                                            }
-
-                                                                            appState.currentPlayingSongInQueue =
-                                                                                realIndex;
-
-                                                                            appState.currentSong =
-                                                                                appState.queue![realIndex];
-
-                                                                            appState.currentDetailSong =
-                                                                                null;
-
-                                                                            appState.prevSong =
-                                                                                appState.currentSong;
-
-                                                                            appState.player!.play();
-                                                                          }
+                                                                            () {
+                                                                          onSongTap(
+                                                                              appState,
+                                                                              0,
+                                                                              context,
+                                                                              searchedSongs);
                                                                         },
                                                                         icon:
                                                                             Icon(
@@ -559,114 +571,12 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                           // TODO: fix bug: the init cover will be wrong sometimes when first loading
                                                                           // song player in shuffle mode.
                                                                           onTap:
-                                                                              () async {
-                                                                            if (searchedSongs[index].payPlay ==
-                                                                                1) {
-                                                                              MyToast.showToast('This song need vip to play');
-                                                                              MyLogger.logger.e('This song need vip to play');
-                                                                            } else if (searchedSongs[index].isTakenDown) {
-                                                                              MyToast.showToast('This song is taken down');
-                                                                              MyLogger.logger.e('This song is taken down');
-                                                                            } else {
-                                                                              if (appState.player == null) {
-                                                                                if (currentPlatform == 2) {
-                                                                                  appState.queue = searchedSongs.where((song) => !song.isTakenDown).toList();
-                                                                                } else {
-                                                                                  appState.queue = searchedSongs.where((song) => !song.isTakenDown && (song.payPlay == 0)).toList();
-                                                                                }
-
-                                                                                // Real index in queue, not in raw queue as some songs may be taken down.
-                                                                                int realIndex = appState.queue!.indexOf(searchedSongs[index]);
-
-                                                                                try {
-                                                                                  await appState.initAudioPlayer();
-                                                                                } catch (e) {
-                                                                                  MyToast.showToast('Exception: $e');
-                                                                                  MyLogger.logger.e('Exception: $e');
-                                                                                  appState.queue = [];
-                                                                                  appState.currentDetailSong = null;
-                                                                                  appState.currentPlayingSongInQueue = 0;
-                                                                                  appState.currentSong = null;
-                                                                                  appState.prevSong = null;
-                                                                                  appState.isPlaying = false;
-                                                                                  appState.player!.stop();
-                                                                                  appState.player!.dispose();
-                                                                                  appState.player = null;
-                                                                                  appState.initQueue!.clear();
-                                                                                  appState.isPlayerPageOpened = false;
-                                                                                  appState.canSongPlayerPagePop = false;
-                                                                                  return;
-                                                                                }
-
-                                                                                appState.canSongPlayerPagePop = true;
-
-                                                                                appState.currentPlayingSongInQueue = realIndex;
-
-                                                                                appState.currentSong = appState.queue![realIndex];
-
-                                                                                appState.prevSong = appState.currentSong;
-
-                                                                                appState.currentDetailSong = null;
-
-                                                                                appState.isFirstLoadSongPlayer = true;
-
-                                                                                // appState.player!
-                                                                                //     .seek(
-                                                                                //         Duration
-                                                                                //             .zero,
-                                                                                //         index:
-                                                                                //             index);
-                                                                                appState.player!.play();
-                                                                              } else if (appState.currentSong == searchedSongs[index]) {
-                                                                                if (!player!.playerState.playing) {
-                                                                                  player.play();
-                                                                                }
-                                                                              } else {
-                                                                                if (currentPlatform == 2) {
-                                                                                  appState.queue = searchedSongs.where((song) => !song.isTakenDown).toList();
-                                                                                } else {
-                                                                                  appState.queue = searchedSongs.where((song) => !song.isTakenDown && (song.payPlay == 0)).toList();
-                                                                                }
-
-                                                                                // Real index in queue, not in raw queue as some songs may be taken down.
-                                                                                int realIndex = appState.queue!.indexOf(searchedSongs[index]);
-
-                                                                                appState.canSongPlayerPagePop = true;
-
-                                                                                appState.player!.stop();
-
-                                                                                appState.player!.dispose();
-
-                                                                                appState.player = null;
-
-                                                                                appState.initQueue!.clear();
-
-                                                                                try {
-                                                                                  await appState.initAudioPlayer();
-                                                                                } catch (e) {
-                                                                                  MyToast.showToast('Exception: $e');
-                                                                                  MyLogger.logger.e('Exception: $e');
-                                                                                  appState.disposeSongPlayer();
-                                                                                  return;
-                                                                                }
-
-                                                                                appState.currentPlayingSongInQueue = realIndex;
-
-                                                                                appState.currentSong = appState.queue![realIndex];
-
-                                                                                appState.currentDetailSong = null;
-
-                                                                                appState.prevSong = appState.currentSong;
-
-                                                                                appState.isFirstLoadSongPlayer = true;
-
-                                                                                appState.player!.play();
-                                                                              }
-                                                                              appState.isPlayerPageOpened = true;
-                                                                              if (context.mounted) {
-                                                                                Navigator.pushNamed(context, '/song_player_page');
-                                                                              }
-                                                                            }
+                                                                              () {
+                                                                            onSongTap(
+                                                                                appState,
+                                                                                index,
+                                                                                context,
+                                                                                searchedSongs);
                                                                           },
                                                                           child:
                                                                               SongItem(
