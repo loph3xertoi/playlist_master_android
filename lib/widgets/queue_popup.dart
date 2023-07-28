@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,6 +14,29 @@ class ShowQueueDialog extends StatefulWidget {
 
 class _ShowQueueDialogState extends State<ShowQueueDialog>
     with SingleTickerProviderStateMixin {
+  ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final state = Provider.of<MyAppState>(context, listen: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      int index = state.currentPlayingSongInQueue!;
+      int realIndex = index <= 2
+          ? 0
+          : index >= (state.queue!.length - 9)
+              ? max(state.queue!.length - 11, 0)
+              : index - 2;
+      _scrollController.jumpTo(realIndex * 40.0);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
@@ -92,6 +117,7 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                       ))
                     : ListView.builder(
                         itemCount: queueLength,
+                        controller: _scrollController,
                         itemBuilder: (context, index) {
                           var name = queue[index].name;
                           var singers = queue[index].singers;
