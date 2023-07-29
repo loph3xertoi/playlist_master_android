@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_video.dart';
+import '../entities/netease_cloud_music/ncm_video.dart';
 import '../entities/qq_music/qqmusic_video.dart';
 import '../states/app_state.dart';
 
@@ -26,7 +27,7 @@ class _VideoItemState extends State<VideoItem> {
     } else if (currentPlatform == 1) {
       _video = widget.video as QQMusicVideo;
     } else if (currentPlatform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
+      _video = widget.video as NCMVideo;
     } else if (currentPlatform == 3) {
       throw UnimplementedError('Not yet implement bilibili platform');
     } else {
@@ -37,8 +38,31 @@ class _VideoItemState extends State<VideoItem> {
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
+    var currentPlatform = appState.currentPlatform;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    return currentPlatform == 1
+        ? QQMusicVideoItem(video: _video, textTheme: textTheme)
+        : NCMVideoItem(
+            video: _video,
+            textTheme: textTheme,
+            colorTheme: colorScheme,
+          );
+  }
+}
+
+class QQMusicVideoItem extends StatelessWidget {
+  const QQMusicVideoItem({
+    super.key,
+    required video,
+    required this.textTheme,
+  }) : _video = video;
+
+  final QQMusicVideo _video;
+  final TextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
       height: 100.0,
       child: Row(
@@ -55,14 +79,6 @@ class _VideoItemState extends State<VideoItem> {
                   height: 100.0,
                   width: 160.0,
                   fit: BoxFit.cover,
-                  // child: CachedNetworkImage(
-                  //   imageUrl: _video.cover,
-                  //   progressIndicatorBuilder:
-                  //       (context, url, downloadProgress) =>
-                  //           CircularProgressIndicator(
-                  //               value: downloadProgress.progress),
-                  //   errorWidget: (context, url, error) => Icon(MdiIcons.debian),
-                  // ),
                 ),
                 Icon(
                   Icons.play_arrow_rounded,
@@ -73,11 +89,12 @@ class _VideoItemState extends State<VideoItem> {
                   left: 8.0,
                   bottom: 2.0,
                   child: Text(
-                    '${NumberFormat('#,###').format(_video.playCnt)} viewed',
+                    '${NumberFormat('#,###').format(_video.playCount)} viewed',
                     style: textTheme.labelSmall!.copyWith(
                       color: Colors.white,
                       fontSize: 10.0,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 )
               ],
@@ -90,17 +107,173 @@ class _VideoItemState extends State<VideoItem> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    widget.video.name,
+                    _video.name,
                     style: textTheme.labelLarge!.copyWith(
                       fontSize: 16.0,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Text(
-                    widget.video.singers.map((e) => e.name).join(', '),
+                    _video.singers.map((e) => e.name).join(', '),
                     style: textTheme.titleSmall,
                     overflow: TextOverflow.ellipsis,
                   ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class NCMVideoItem extends StatelessWidget {
+  const NCMVideoItem({
+    super.key,
+    required video,
+    required this.textTheme,
+    required this.colorTheme,
+  }) : _video = video;
+
+  final NCMVideo _video;
+  final TextTheme textTheme;
+  final ColorScheme colorTheme;
+
+  String formatDuration(int milliseconds) {
+    Duration duration = Duration(milliseconds: milliseconds);
+    int seconds = duration.inSeconds % 60;
+    String formattedSeconds = seconds < 10 ? '0$seconds' : '$seconds';
+    String formattedMinutes = (duration.inMinutes % 60).toString();
+    return '$formattedMinutes:$formattedSeconds';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    RegExp regex = RegExp(r'[a-zA-Z]');
+    bool isMV = !regex.hasMatch(_video.id);
+    return SizedBox(
+      height: 100.0,
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10.0),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Ink.image(
+                  image: CachedNetworkImageProvider(
+                    _video.cover,
+                  ),
+                  height: 100.0,
+                  width: 160.0,
+                  fit: BoxFit.cover,
+                ),
+                Icon(
+                  Icons.play_arrow_rounded,
+                  color: Colors.white70,
+                  size: 80.0,
+                ),
+                Positioned(
+                  right: 8.0,
+                  bottom: 2.0,
+                  child: Text(
+                    formatDuration(_video.duration),
+                    style: textTheme.labelSmall!.copyWith(
+                      color: Colors.white,
+                      fontSize: 14.0,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                )
+              ],
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 10.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: RichText(
+                          maxLines: 2,
+                          text: TextSpan(
+                            children: [
+                              isMV
+                                  ? WidgetSpan(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                            right: 4.0, bottom: 3.0),
+                                        child: Image.asset(
+                                          'assets/images/ncm_mv.png',
+                                          width: 20.0,
+                                        ),
+                                      ),
+                                    )
+                                  : WidgetSpan(child: Container()),
+                              TextSpan(
+                                text: _video.name,
+                                style: textTheme.labelLarge!.copyWith(
+                                  fontSize: 16.0,
+                                  overflow: TextOverflow.ellipsis,
+                                  color: colorTheme.onPrimary.withOpacity(0.9),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )),
+                  ),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _video.singers.map((e) => e.name).join(', '),
+                          style: textTheme.labelSmall!.copyWith(
+                            fontSize: 12.0,
+                            color: colorTheme.onPrimary.withOpacity(0.5),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${NumberFormat('#,###').format(_video.playCount)}viewed',
+                              style: textTheme.labelSmall!.copyWith(
+                                color: colorTheme.onPrimary.withOpacity(0.5),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 2.0),
+                              child: Text(
+                                '·',
+                                style: textTheme.labelSmall!.copyWith(
+                                  color: colorTheme.onPrimary.withOpacity(0.5),
+                                ),
+                              ),
+                            ),
+                            Text(
+                              DateFormat('yyyy-MM-dd').format(
+                                  DateTime.fromMillisecondsSinceEpoch(
+                                      int.parse(_video.publishTime))),
+                              style: textTheme.labelSmall!.copyWith(
+                                color: colorTheme.onPrimary.withOpacity(0.5),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  )
                 ],
               ),
             ),

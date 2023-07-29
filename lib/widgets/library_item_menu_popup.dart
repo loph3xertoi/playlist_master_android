@@ -25,7 +25,7 @@ class LibraryItemMenuPopup extends StatelessWidget {
     } else if (platform == 1) {
       throw UnimplementedError('API missing in qq music platform');
     } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
+      throw UnimplementedError('API missing in ncm platform');
     } else if (platform == 3) {
       throw UnimplementedError('Not yet implement bilibili platform');
     } else {

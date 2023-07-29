@@ -10,7 +10,7 @@ class QQMusicDetailVideo extends BasicVideo {
     this.pubDate,
     this.vid,
     this.duration,
-    this.playCnt,
+    this.playCount,
     this.desc,
     this.links, {
     required super.name,
@@ -28,7 +28,7 @@ class QQMusicDetailVideo extends BasicVideo {
   final int duration;
 
   /// Viewed times of the mv.
-  final int playCnt;
+  final int playCount;
 
   /// Description of the mv.
   final String desc;
@@ -59,6 +59,6 @@ class QQMusicDetailVideo extends BasicVideo {
 
   @override
   String toString() {
-    return 'QQMusicDetailVideo{pubDate: $pubDate, vid: $vid, duration: $duration, playCnt: $playCnt, desc: $desc, links: $links, name: $name, cover: $cover, singers: $singers}';
+    return 'QQMusicDetailVideo{name: $name, vid: $vid, pubDate: $pubDate, duration: $duration, playCount: $playCount, desc: $desc, links: $links, cover: $cover, singers: $singers}';
   }
 }

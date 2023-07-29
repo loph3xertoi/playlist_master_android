@@ -21,10 +21,12 @@ import '../entities/basic/basic_video.dart';
 import '../entities/dto/result.dart';
 import '../entities/netease_cloud_music/ncm_detail_playlist.dart';
 import '../entities/netease_cloud_music/ncm_detail_song.dart';
+import '../entities/netease_cloud_music/ncm_detail_video.dart';
 import '../entities/netease_cloud_music/ncm_paged_songs.dart';
 import '../entities/netease_cloud_music/ncm_playlist.dart';
 import '../entities/netease_cloud_music/ncm_song.dart';
 import '../entities/netease_cloud_music/ncm_user.dart';
+import '../entities/netease_cloud_music/ncm_video.dart';
 import '../entities/qq_music/qqmusic_detail_playlist.dart';
 import '../entities/qq_music/qqmusic_detail_song.dart';
 import '../entities/qq_music/qqmusic_detail_video.dart';
@@ -793,6 +795,7 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
+  /// DON'T USE. TODO: Make a uniform result in different platforms.
   Future<Map<String, List<String>>?> fetchMVsLink(
       List<String> vids, int platform) async {
     // BasicLibrary Function(Map<String, dynamic>) resolveJson;
@@ -849,6 +852,7 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
+  /// Not usedbug.
   Future<Map<String, String>?> fetchSongsLink(
       List<String> songIds, int platform) async {
     if (platform == 0) {
@@ -1096,7 +1100,14 @@ class MyAppState extends ChangeNotifier {
         },
       );
     } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
+      resolveJson = NCMDetailVideo.fromJson;
+      url = Uri.http(
+        API.host,
+        '${API.detailMV}/${(video as NCMVideo).id}',
+        {
+          'platform': platform.toString(),
+        },
+      );
     } else if (platform == 3) {
       throw UnimplementedError('Not yet implement bilibili platform');
     } else {
@@ -1151,7 +1162,16 @@ class MyAppState extends ChangeNotifier {
         },
       );
     } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
+      resolveJson = NCMVideo.fromJson;
+      url = Uri.http(
+        API.host,
+        '${API.relatedMV}/${(song as NCMSong).id}',
+        {
+          'mvId': song.mvId?.toString(),
+          'limit': '50',
+          'platform': platform.toString(),
+        },
+      );
     } else if (platform == 3) {
       throw UnimplementedError('Not yet implement bilibili platform');
     } else {

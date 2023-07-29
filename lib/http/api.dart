@@ -39,7 +39,7 @@ class API {
   static const detailMV = '/mv';
 
   /// Get all related MVs according to [songId] in [platform].
-  /// api: GET /relatedMV/[songId]?platform=[platform]
+  /// api: GET /relatedMV/[songId]?mvId=[mvId]&limit=[limit]&platform=[platform]
   static const relatedMV = '/relatedMV';
 
   /// Get all libraries according to [uid] in [platform].

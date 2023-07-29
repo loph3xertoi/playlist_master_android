@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:fplayer/fplayer.dart';
@@ -8,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 
 import '../entities/basic/basic_video.dart';
+import '../entities/netease_cloud_music/ncm_detail_video.dart';
 import '../entities/qq_music/qqmusic_detail_video.dart';
 import '../http/my_http.dart';
 import '../states/app_state.dart';
@@ -132,15 +134,48 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   Future<Map<String, ResolutionItem>> _getResolutionList(
       Future<BasicVideo?> video, int platform) async {
     Map<String, ResolutionItem> resolutionList = {};
-    List<String> videoLinks;
     if (platform == 0) {
       throw UnimplementedError('Not yet implement pms platform');
     } else if (platform == 1) {
+      List<String> videoLinks;
       QQMusicDetailVideo qqMusicDetailVideo =
           (await video) as QQMusicDetailVideo;
       videoLinks = qqMusicDetailVideo.links;
+      if (videoLinks.isNotEmpty) {
+        String finalUrl = await _getVideoUrlIfCached(videoLinks[0]);
+        resolutionList['360p'] = ResolutionItem(value: 360, url: finalUrl);
+      }
+      if (videoLinks.length >= 2) {
+        String finalUrl = await _getVideoUrlIfCached(videoLinks[1]);
+        resolutionList['480p'] = ResolutionItem(value: 480, url: finalUrl);
+      }
+      if (videoLinks.length >= 3) {
+        String finalUrl = await _getVideoUrlIfCached(videoLinks[2]);
+        resolutionList['720p'] = ResolutionItem(value: 720, url: finalUrl);
+      }
+      if (videoLinks.length >= 4) {
+        String finalUrl = await _getVideoUrlIfCached(videoLinks[3]);
+        resolutionList['1080p'] = ResolutionItem(value: 1080, url: finalUrl);
+      }
+      if (videoLinks.length >= 5) {
+        for (int i = 4; i < videoLinks.length; i++) {
+          String finalUrl = await _getVideoUrlIfCached(videoLinks[i]);
+          String resolutionName = '1080p${i - 3}';
+          resolutionList[resolutionName] =
+              ResolutionItem(value: 1080, url: finalUrl);
+        }
+      }
     } else if (platform == 2) {
-      throw UnimplementedError('Not yet implement ncm platform');
+      NCMDetailVideo ncmDetailVideo = (await video) as NCMDetailVideo;
+      Map<String, String> videoLinks = ncmDetailVideo.links;
+
+      await Future.forEach(videoLinks.entries,
+          (MapEntry<String, String> entry) async {
+        String newUrl = await _getVideoUrlIfCached(entry.value);
+        ResolutionItem newValue =
+            ResolutionItem(value: int.parse(entry.key), url: newUrl);
+        resolutionList['${entry.key}p'] = newValue;
+      });
     } else if (platform == 3) {
       throw UnimplementedError(
         'Not yet implement bilibili platform',
@@ -148,36 +183,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-    // String? finalUrl = await _cachedVideoUrl(url);
-    // if (finalUrl == null) {
-    //   throw Exception('Http request error.');
-    // }
-    // Add resolutions based on the length of videoLinks
-    if (videoLinks.isNotEmpty) {
-      String finalUrl = await _getVideoUrlIfCached(videoLinks[0]);
-      resolutionList['360p'] = ResolutionItem(value: 360, url: finalUrl);
-    }
-    if (videoLinks.length >= 2) {
-      String finalUrl = await _getVideoUrlIfCached(videoLinks[1]);
-      resolutionList['480p'] = ResolutionItem(value: 480, url: finalUrl);
-    }
-    if (videoLinks.length >= 3) {
-      String finalUrl = await _getVideoUrlIfCached(videoLinks[2]);
-      resolutionList['720p'] = ResolutionItem(value: 720, url: finalUrl);
-    }
-    if (videoLinks.length >= 4) {
-      String finalUrl = await _getVideoUrlIfCached(videoLinks[3]);
-      resolutionList['1080p'] = ResolutionItem(value: 1080, url: finalUrl);
-    }
-    if (videoLinks.length >= 5) {
-      for (int i = 4; i < videoLinks.length; i++) {
-        String finalUrl = await _getVideoUrlIfCached(videoLinks[i]);
-        String resolutionName = '1080p${i - 3}';
-        resolutionList[resolutionName] =
-            ResolutionItem(value: 1080, url: finalUrl);
-      }
-    }
-
     return resolutionList;
   }
 
@@ -263,7 +268,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           } else if (currentPlatform == 1) {
             detailVideo = snapshot.data![0] as QQMusicDetailVideo;
           } else if (currentPlatform == 2) {
-            throw UnimplementedError('Not yet implement ncm platform');
+            detailVideo = snapshot.data![0] as NCMDetailVideo;
           } else if (currentPlatform == 3) {
             throw UnimplementedError('Not yet implement bilibili platform');
           } else {
@@ -313,7 +318,16 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           },
                           onError: () async {
                             await _player.reset();
-                            _setVideoUrl(detailVideo.videoLinks[0]);
+                            String originalUrl;
+                            if (currentPlatform == 1) {
+                              originalUrl = detailVideo.links[0];
+                            } else if (currentPlatform == 2) {
+                              originalUrl = detailVideo.links.values[0];
+                            } else {
+                              throw UnimplementedError(
+                                  'Not yet implement other platform');
+                            }
+                            _setVideoUrl(originalUrl);
                           },
                           onVideoEnd: () async {
                             // await _player.reset();
@@ -326,11 +340,19 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           },
                           onVideoPrepared: () async {
                             // 视频初始化完毕，如有历史记录时间段则可以触发快进
-                            print('daw${detailVideo.vid}');
                             int seekTime = appState.videoSeekTime;
+                            dynamic videoId;
+                            if (currentPlatform == 1) {
+                              videoId = detailVideo.vid;
+                            } else if (currentPlatform == 2) {
+                              videoId = detailVideo.id;
+                            } else {
+                              throw UnimplementedError(
+                                  'Not yet implement other platform');
+                            }
                             try {
                               if (seekTime >= 1 &&
-                                  detailVideo.vid == appState.lastVideoVid) {
+                                  videoId == appState.lastVideoVid) {
                                 /// seekTo必须在FState.prepared
                                 print('seekTo');
                                 await _player.seekTo(seekTime);
@@ -342,7 +364,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                 // MyToast.showToast('Seek to $formattedTime');
                                 appState.videoSeekTime = 0;
                               } else {
-                                appState.lastVideoVid = detailVideo.vid;
+                                appState.lastVideoVid = videoId;
                               }
                             } catch (error) {
                               print('Exception: $error');
@@ -352,94 +374,290 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       ),
                     ),
                   ),
-                  SizedBox(
-                    height: size.width * 0.6,
-                    width: size.width,
-                    child: Column(children: [
-                      Row(children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SizedBox(
-                            height: 30.0,
-                            width: 30.0,
-                            child: CircleAvatar(
-                              radius: 15.0,
-                              backgroundImage: CachedNetworkImageProvider(
-                                'https://y.qq.com/music/photo_new/T001R300x300M000${detailVideo.singers[0].mid}_2.jpg',
-                              ),
-                            ),
-                          ),
-                        ),
-                        Text(
-                          detailVideo.singers.map((e) => e.name).join(', '),
-                          style: textTheme.labelMedium!
-                              .copyWith(color: Colors.white),
-                        ),
-                      ]),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: SizedBox(
-                          width: size.width,
-                          child: Text(
-                            detailVideo.name,
-                            style: textTheme.labelSmall!
-                                .copyWith(color: Colors.white.withOpacity(0.8)),
-                          ),
-                        ),
-                      ),
-                      detailVideo.desc.isNotEmpty
-                          ? Align(
-                              alignment: Alignment.bottomLeft,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  detailVideo.desc,
-                                  style: textTheme.labelSmall!.copyWith(
-                                      fontSize: 10.0,
-                                      color: Colors.white.withOpacity(0.8)),
-                                ),
-                              ),
-                            )
-                          : Container(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Align(
-                            alignment: Alignment.bottomLeft,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 5.0, vertical: 20.0),
-                              child: Text(
-                                'viewed times: ${NumberFormat('#,###').format(detailVideo.playCnt)}',
-                                style: textTheme.labelSmall!.copyWith(
-                                    color: Colors.white.withOpacity(0.4)),
-                              ),
-                            ),
-                          ),
-                          Align(
-                            alignment: Alignment.bottomLeft,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 5.0, vertical: 20.0),
-                              child: Text(
-                                DateFormat('yyyy-MM-dd').format(
-                                    DateTime.fromMillisecondsSinceEpoch(
-                                        detailVideo.pubDate * 1000)),
-                                style: textTheme.labelSmall!.copyWith(
-                                    color: Colors.white.withOpacity(0.4)),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ]),
-                  )
+                  currentPlatform == 1
+                      ? QQMusicVideoInfoArea(
+                          size: size,
+                          detailVideo: detailVideo,
+                          textTheme: textTheme)
+                      : NCMVideoInfoArea(
+                          size: size,
+                          detailVideo: detailVideo,
+                          textTheme: textTheme),
                 ],
               ),
             ),
           );
         }
       },
+    );
+  }
+}
+
+class QQMusicVideoInfoArea extends StatelessWidget {
+  const QQMusicVideoInfoArea({
+    super.key,
+    required this.size,
+    required this.detailVideo,
+    required this.textTheme,
+  });
+
+  final Size size;
+  final QQMusicDetailVideo detailVideo;
+  final TextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: size.width * 0.6,
+      width: size.width,
+      child: Column(children: [
+        Row(children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              height: 30.0,
+              width: 30.0,
+              child: CircleAvatar(
+                radius: 15.0,
+                backgroundImage: CachedNetworkImageProvider(
+                  detailVideo.singers.isNotEmpty
+                      ? detailVideo.singers[0].headPic
+                      : MyAppState.defaultCoverImage,
+                ),
+              ),
+            ),
+          ),
+          Text(
+            detailVideo.singers.map((e) => e.name).join('/'),
+            style: textTheme.labelMedium!.copyWith(color: Colors.white),
+          ),
+        ]),
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: SizedBox(
+            width: size.width,
+            child: Text(
+              detailVideo.name,
+              style: textTheme.labelSmall!
+                  .copyWith(color: Colors.white.withOpacity(0.8)),
+            ),
+          ),
+        ),
+        detailVideo.desc.isNotEmpty
+            ? Align(
+                alignment: Alignment.bottomLeft,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    detailVideo.desc,
+                    style: textTheme.labelSmall!.copyWith(
+                        fontSize: 10.0, color: Colors.white.withOpacity(0.8)),
+                  ),
+                ),
+              )
+            : Container(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10.0, vertical: 20.0),
+                child: Text(
+                  'viewed times: ${NumberFormat('#,###').format(detailVideo.playCount)}',
+                  style: textTheme.labelSmall!
+                      .copyWith(color: Colors.white.withOpacity(0.4)),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5.0, vertical: 20.0),
+                child: Text(
+                  DateFormat('yyyy-MM-dd').format(
+                      DateTime.fromMillisecondsSinceEpoch(
+                          detailVideo.pubDate * 1000)),
+                  style: textTheme.labelSmall!
+                      .copyWith(color: Colors.white.withOpacity(0.4)),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ]),
+    );
+  }
+}
+
+class NCMVideoInfoArea extends StatelessWidget {
+  const NCMVideoInfoArea({
+    super.key,
+    required this.size,
+    required this.detailVideo,
+    required this.textTheme,
+  });
+
+  final Size size;
+  final NCMDetailVideo detailVideo;
+  final TextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    RegExp regex = RegExp(r'[a-zA-Z]');
+    bool isMV = !regex.hasMatch(detailVideo.id);
+    return SizedBox(
+      height: size.width * 0.6,
+      width: size.width,
+      child: Column(children: [
+        Row(children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              height: 30.0,
+              width: 30.0,
+              child: CircleAvatar(
+                radius: 15.0,
+                backgroundImage: CachedNetworkImageProvider(
+                  detailVideo.singers.isNotEmpty
+                      ? detailVideo.singers[0].headPic
+                      : MyAppState.defaultCoverImage,
+                ),
+              ),
+            ),
+          ),
+          Text(
+            detailVideo.singers.map((e) => e.name).join('/'),
+            style: textTheme.labelMedium!.copyWith(color: Colors.white),
+          ),
+        ]),
+        Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            isMV
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: SizedBox(
+                      width: 20.0,
+                      child: Image.asset('assets/images/ncm_mv.png'),
+                    ),
+                  )
+                : Container(),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text(
+                detailVideo.name,
+                style: textTheme.labelSmall!
+                    .copyWith(color: Colors.white.withOpacity(0.8)),
+              ),
+            ),
+          ],
+        ),
+        detailVideo.desc.isNotEmpty
+            ? Align(
+                alignment: Alignment.bottomLeft,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    detailVideo.desc,
+                    style: textTheme.labelSmall!.copyWith(
+                        fontSize: 10.0, color: Colors.white.withOpacity(0.8)),
+                  ),
+                ),
+              )
+            : Container(),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10.0, vertical: 20.0),
+                    child: Text(
+                      'viewed times: ${NumberFormat('#,###').format(detailVideo.playCount)}',
+                      style: textTheme.labelSmall!
+                          .copyWith(color: Colors.white.withOpacity(0.4)),
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 5.0, vertical: 20.0),
+                    child: Text(
+                      isMV
+                          ? detailVideo.publishTime
+                          : DateFormat('yyyy-MM-dd').format(
+                              DateTime.fromMillisecondsSinceEpoch(
+                                  int.parse(detailVideo.publishTime))),
+                      style: textTheme.labelSmall!
+                          .copyWith(color: Colors.white.withOpacity(0.4)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  children: [
+                    Icon(
+                      Icons.insert_comment_sharp,
+                      color: Colors.white,
+                    ),
+                    Text(
+                      '${detailVideo.commentCount}',
+                      style: textTheme.labelSmall!.copyWith(
+                        color: Colors.white,
+                        fontSize: 10.0,
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Icon(
+                      Icons.thumb_up_rounded,
+                      color: Colors.white,
+                    ),
+                    Text(
+                      '${detailVideo.subCount}',
+                      style: textTheme.labelSmall!.copyWith(
+                        color: Colors.white,
+                        fontSize: 10.0,
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Icon(
+                      Icons.share_rounded,
+                      color: Colors.white,
+                    ),
+                    Text(
+                      '${detailVideo.shareCount}',
+                      style: textTheme.labelSmall!.copyWith(
+                        color: Colors.white,
+                        fontSize: 10.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ]),
     );
   }
 }

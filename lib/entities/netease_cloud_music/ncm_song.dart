@@ -21,7 +21,7 @@ class NCMSong extends BasicSong {
   final int id;
 
   /// The MV's id of this song.
-  final int mvId;
+  final int? mvId;
 
   Map<String, dynamic> toJson() {
     return {

@@ -8,7 +8,7 @@ import '../basic/basic_video.dart';
 class QQMusicVideo extends BasicVideo {
   const QQMusicVideo(
     this.vid,
-    this.playCnt, {
+    this.playCount, {
     required super.name,
     required super.cover,
     required super.singers,
@@ -18,7 +18,7 @@ class QQMusicVideo extends BasicVideo {
   final String vid;
 
   /// Viewed times of the video.
-  final int playCnt;
+  final int playCount;
 
   factory QQMusicVideo.fromJson(Map<String, dynamic> json) {
     List<dynamic> singersJson = json['singers'];
@@ -36,6 +36,6 @@ class QQMusicVideo extends BasicVideo {
 
   @override
   String toString() {
-    return 'QQMusicVideo{vid: $vid, playCnt: $playCnt, name: $name, cover: $cover, singers: $singers}';
+    return 'QQMusicVideo{vid: $vid, playCount: $playCount, name: $name, cover: $cover, singers: $singers}';
   }
 }

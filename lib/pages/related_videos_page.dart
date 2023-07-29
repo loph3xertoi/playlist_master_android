@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_song.dart';
 import '../entities/basic/basic_video.dart';
+import '../entities/netease_cloud_music/ncm_video.dart';
 import '../entities/qq_music/qqmusic_video.dart';
 import '../states/app_state.dart';
 import '../widgets/my_selectable_text.dart';
@@ -103,7 +104,7 @@ class _RelatedVideosPageState extends State<RelatedVideosPage> {
                 } else if (currentPlatform == 1) {
                   relatedVideos = snapshot.data!.cast<QQMusicVideo>().toList();
                 } else if (currentPlatform == 2) {
-                  throw UnimplementedError('Not yet implement ncm platform');
+                  relatedVideos = snapshot.data!.cast<NCMVideo>().toList();
                 } else if (currentPlatform == 3) {
                   throw UnimplementedError(
                       'Not yet implement bilibili platform');
