@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:city_picker_china/city_picker_china.dart';
 import 'package:flutter/material.dart';
@@ -7,11 +9,13 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_user.dart';
+import '../entities/bilibili/bilibili_user.dart';
 import '../entities/netease_cloud_music/ncm_user.dart';
 import '../entities/pms/pms_user.dart';
 import '../entities/qq_music/qqmusic_user.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
+import 'bilibili_level_bar.dart';
 import 'my_selectable_text.dart';
 
 class BasicInfo extends StatefulWidget {
@@ -125,8 +129,7 @@ class _BasicInfoState extends State<BasicInfo> {
                       } else if (currentPlatform == 2) {
                         user = snapshot.data as NCMUser;
                       } else if (currentPlatform == 3) {
-                        throw UnimplementedError(
-                            'Not yet implement bilibili platform');
+                        user = snapshot.data as BilibiliUser;
                       } else {
                         throw UnsupportedError('Invalid platform');
                       }
@@ -232,26 +235,30 @@ class _BasicInfoState extends State<BasicInfo> {
                               curve: Curves.easeInOut,
                               top: userTopOffset,
                               child: AnimatedContainer(
-                                width: imageSize,
-                                height: imageSize * 3.0,
-                                duration: const Duration(milliseconds: 200),
-                                curve: Curves.easeInOut,
-                                // color: colorScheme.primary,
-                                child: isUsingMockData
-                                    ? BuildMockUser(
-                                        user: user as QQMusicUser,
-                                      )
-                                    : currentPlatform == 1
-                                        ? BuildQQMusicUser(
-                                            user: user as QQMusicUser,
-                                          )
-                                        : currentPlatform == 2
-                                            ? BuildNCMUser(
-                                                user: user as NCMUser,
-                                              )
-                                            // :currentPlatform==3?BuildQQMusicUser( user: user, currentPlatform: currentPlatform, textTheme: textTheme)
-                                            : const Placeholder(),
-                              ),
+                                  width: imageSize,
+                                  height: imageSize * 3.0,
+                                  duration: const Duration(milliseconds: 200),
+                                  curve: Curves.easeInOut,
+                                  // color: colorScheme.primary,
+                                  child: isUsingMockData
+                                      ? BuildMockUser(user: user as QQMusicUser)
+                                      : currentPlatform == 0
+                                          ? ErrorWidget(UnsupportedError(
+                                              'Not yet implement pms platform'))
+                                          // ? BuildPMSUser(user: user as PMSUser)
+                                          : currentPlatform == 1
+                                              ? BuildQQMusicUser(
+                                                  user: user as QQMusicUser)
+                                              : currentPlatform == 2
+                                                  ? BuildNCMUser(
+                                                      user: user as NCMUser)
+                                                  : currentPlatform == 3
+                                                      ? BuildBilibiliUser(
+                                                          user: user
+                                                              as BilibiliUser)
+                                                      : ErrorWidget(
+                                                          UnsupportedError(
+                                                              'Invalid platform'))),
                             ),
                           ],
                         ),
@@ -398,7 +405,7 @@ class BuildQQMusicUser extends StatelessWidget {
               style: textTheme.labelSmall,
             ),
             Text(
-              'friends: ${user.friendsNum}',
+              'Friends: ${user.friendsNum}',
               style: textTheme.labelSmall,
             ),
             Text(
@@ -849,6 +856,392 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
                   ],
                 ),
               ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class BuildBilibiliUser extends StatelessWidget {
+  const BuildBilibiliUser({
+    super.key,
+    required this.user,
+  });
+
+  final BilibiliUser user;
+
+  int rgbIntToARGBInt(int rgbInt) {
+    String hexString = 'FF${rgbInt.toRadixString(16).toUpperCase()}';
+    return int.parse(hexString, radix: 16);
+  }
+
+  Map<String, Object> getIconAndColorByLevel(int level) {
+    Map<String, Object> map = HashMap();
+    String levelIcon;
+    Color levelColor;
+    switch (level) {
+      case 0:
+        levelIcon = 'assets/images/bili_lv0.png';
+        levelColor = Color(0xFFBFBFBF);
+        break;
+      case 1:
+        levelIcon = 'assets/images/bili_lv1.png';
+        levelColor = Color(0xFFBFBFBF);
+        break;
+      case 2:
+        levelIcon = 'assets/images/bili_lv2.png';
+        levelColor = Color(0xFF95DDB2);
+        break;
+      case 3:
+        levelIcon = 'assets/images/bili_lv3.png';
+        levelColor = Color(0xFF92D1E5);
+        break;
+      case 4:
+        levelIcon = 'assets/images/bili_lv4.png';
+        levelColor = Color(0xFFFFB37C);
+        break;
+      case 5:
+        levelIcon = 'assets/images/bili_lv5.png';
+        levelColor = Color(0xFFFF6C00);
+        break;
+      case 6:
+        levelIcon = 'assets/images/bili_lv6.png';
+        levelColor = Color(0xFFFF0000);
+        break;
+      default:
+        throw Exception('Invalid level');
+    }
+    map.putIfAbsent('levelIcon', () => levelIcon);
+    map.putIfAbsent('levelColor', () => levelColor);
+    return map;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    double proportion;
+    int currentLevelExp = user.currentLevelExp;
+    dynamic nextLevelExp;
+    if (user.level == 6) {
+      nextLevelExp = '--';
+      proportion = 1;
+    } else {
+      nextLevelExp = user.nextLevelExp;
+      proportion = user.currentLevelExp / user.nextLevelExp;
+    }
+    Map<String, Object> map = getIconAndColorByLevel(user.level);
+    Color levelColor = map['levelColor'] as Color;
+    String levelIcon = map['levelIcon'] as String;
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              CircleAvatar(
+                radius: 36.0,
+                backgroundImage: CachedNetworkImageProvider(
+                  user.headPic.isEmpty
+                      ? MyAppState.defaultCoverImage
+                      : user.headPic,
+                ),
+              ),
+              Opacity(
+                opacity: 1,
+                child: user.pendantImage.isNotEmpty
+                    ? GestureDetector(
+                        onTap: () {},
+                        child: Tooltip(
+                          message: user.pendantName,
+                          triggerMode: TooltipTriggerMode.tap,
+                          textStyle: textTheme.labelSmall,
+                          child: CachedNetworkImage(
+                            imageUrl: user.dynamicPendantImage,
+                            progressIndicatorBuilder:
+                                (context, url, downloadProgress) =>
+                                    CircularProgressIndicator(
+                                        value: downloadProgress.progress),
+                            errorWidget: (context, url, error) =>
+                                Icon(MdiIcons.debian),
+                            width: 125.0,
+                          ),
+                        ),
+                      )
+                    : Container(),
+              )
+            ],
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 4.0),
+              child: Text(user.name,
+                  style: textTheme.labelMedium!.copyWith(fontSize: 18.0)),
+            ),
+            GestureDetector(
+              onTap: () {},
+              child: Tooltip(
+                message: 'Expired at ${DateFormat('yyyy-MM-dd').format(
+                  DateTime.fromMillisecondsSinceEpoch(user.vipExpireTime),
+                )}',
+                triggerMode: TooltipTriggerMode.tap,
+                textStyle: textTheme.labelSmall,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 6.0, right: 4.0),
+                  child: CachedNetworkImage(
+                    imageUrl: user.vipIcon.isEmpty
+                        ? MyAppState.defaultCoverImage
+                        : user.vipIcon,
+                    progressIndicatorBuilder:
+                        (context, url, downloadProgress) =>
+                            CircularProgressIndicator(
+                                value: downloadProgress.progress),
+                    errorWidget: (context, url, error) => Icon(MdiIcons.debian),
+                    width: 46.0,
+                  ),
+                ),
+              ),
+            ),
+            user.wearingFansBadge
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 6.0, right: 4.0),
+                    child: Container(
+                      height: 14.0,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Color(rgbIntToARGBInt(user
+                              .fansBadgeBorderColor)), // Set border color here
+                          width: 1, // Set border width here
+                        ),
+                        borderRadius: BorderRadius.circular(2.0),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment
+                                    .topLeft, // Define the gradient start point
+                                end: Alignment
+                                    .bottomRight, // Define the gradient end point
+                                colors: [
+                                  Color(rgbIntToARGBInt(
+                                      user.fansBadgeStartColor)),
+                                  Color(
+                                      rgbIntToARGBInt(user.fansBadgeEndColor)),
+                                ], // Define the gradient colors
+                                stops: [0.0, 1.0], // Define the gradient stops
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  bottom: 2.0, left: 2.0, right: 2.0),
+                              child: Center(
+                                child: Text(
+                                  user.fansBadgeText,
+                                  style: TextStyle(
+                                    height: 0.8,
+                                    fontSize: 8.0,
+                                    // fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                              width: 14.0,
+                              height: 14.0,
+                              child: Text(
+                                '${user.fansBadgeLevel}',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  height: 1.3,
+                                  fontSize: 10.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(rgbIntToARGBInt(
+                                      user.fansBadgeBorderColor)),
+                                ),
+                              ))
+                        ],
+                      ),
+                    ),
+                  )
+                : Container(),
+            user.nameplateImage.isNotEmpty
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: GestureDetector(
+                      onTap: () {},
+                      child: Tooltip(
+                        message:
+                            '${user.nameplateName}: ${user.nameplateCondition}',
+                        triggerMode: TooltipTriggerMode.tap,
+                        textStyle: textTheme.labelSmall,
+                        child: CachedNetworkImage(
+                          imageUrl: user.nameplateImage,
+                          progressIndicatorBuilder:
+                              (context, url, downloadProgress) =>
+                                  CircularProgressIndicator(
+                                      value: downloadProgress.progress),
+                          errorWidget: (context, url, error) =>
+                              Icon(MdiIcons.debian),
+                          width: 12.0,
+                        ),
+                      ),
+                    ),
+                  )
+                : Container(),
+          ],
+        ),
+        MySelectableText(
+          user.sign,
+          style: textTheme.labelSmall!.copyWith(
+              fontSize: 12.0, color: colorScheme.onPrimary.withOpacity(0.5)),
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Image.asset(
+                user.gender == 0
+                    ? 'assets/images/gender_secret.png'
+                    : user.gender == 1
+                        ? 'assets/images/male.png'
+                        : 'assets/images/female.png',
+                height: 12.0,
+                width: 12.0,
+              ),
+            ),
+            Text(
+              'uid: ',
+              style: textTheme.labelSmall!.copyWith(
+                  fontSize: 12.0,
+                  color: colorScheme.onPrimary.withOpacity(0.5)),
+            ),
+            MySelectableText(
+              '${user.mid}',
+              style: textTheme.labelSmall!.copyWith(
+                  fontSize: 12.0,
+                  color: colorScheme.onPrimary.withOpacity(0.5)),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: GestureDetector(
+                onTap: () {},
+                child: Tooltip(
+                  message: user.ip,
+                  triggerMode: TooltipTriggerMode.tap,
+                  textStyle: textTheme.labelSmall,
+                  child: Text(
+                    'ip: ${user.countryCode == 86 ? user.province : user.country}',
+                    style: textTheme.labelSmall!.copyWith(
+                        fontSize: 12.0,
+                        color: colorScheme.onPrimary.withOpacity(0.5)),
+                  ),
+                ),
+              ),
+            ),
+            user.isp == 0
+                ? Image.asset('assets/images/china_mobile.png', width: 20.0)
+                : user.isp == 1
+                    ? Image.asset('assets/images/china_telecom.png',
+                        width: 20.0)
+                    : Container(),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 5.0),
+                    child: Image.asset(
+                      levelIcon,
+                      width: 26.0,
+                    ),
+                  ),
+                  Text(
+                    '$currentLevelExp/$nextLevelExp',
+                    style: textTheme.labelSmall!.copyWith(
+                        fontSize: 12.0,
+                        color: colorScheme.onPrimary.withOpacity(0.5)),
+                  )
+                ],
+              ),
+              LevelBar(
+                proportion: proportion,
+                activeColor: levelColor,
+                inactiveColor: Colors.grey,
+                height: 2.0,
+                width: 100.0,
+              ),
+            ],
+          ),
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text(
+              'Followers: ${user.follower}',
+              style: textTheme.labelSmall,
+            ),
+            Text(
+              'Following: ${user.following}',
+              style: textTheme.labelSmall,
+            ),
+            Text(
+              'Dynamics: ${user.dynamicCount}',
+              style: textTheme.labelSmall,
+            ),
+          ],
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text(
+              'Coins: ${user.coins}',
+              style: textTheme.labelSmall,
+            ),
+            Text(
+              'B coins: ${user.bcoin}',
+              style: textTheme.labelSmall,
+            ),
+            Text(
+              'Moral: ${user.moral}',
+              style: textTheme.labelSmall,
+            ),
+          ],
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text(
+              'Bind email: ${user.bindEmail}',
+              style: textTheme.labelSmall,
+            ),
+            Text(
+              'Birthday: ${user.birthday}',
+              style: textTheme.labelSmall,
+            ),
+            Text(
+              'Bind phone: ${user.bindPhone}',
+              style: textTheme.labelSmall,
             ),
           ],
         ),

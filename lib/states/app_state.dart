@@ -18,6 +18,7 @@ import '../entities/basic/basic_paged_songs.dart';
 import '../entities/basic/basic_song.dart';
 import '../entities/basic/basic_user.dart';
 import '../entities/basic/basic_video.dart';
+import '../entities/bilibili/bilibili_user.dart';
 import '../entities/dto/result.dart';
 import '../entities/netease_cloud_music/ncm_detail_playlist.dart';
 import '../entities/netease_cloud_music/ncm_detail_song.dart';
@@ -633,7 +634,7 @@ class MyAppState extends ChangeNotifier {
     } else if (platform == 2) {
       resolveJson = NCMUser.fromJson;
     } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
+      resolveJson = BilibiliUser.fromJson;
     } else {
       throw UnsupportedError('Invalid platform');
     }

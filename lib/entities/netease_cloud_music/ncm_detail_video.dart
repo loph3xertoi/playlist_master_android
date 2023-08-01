@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:playlistmaster/entities/qq_music/qqmusic_singer.dart';
 
 import '../basic/basic_video.dart';
 import 'ncm_singer.dart';

@@ -77,6 +77,21 @@ flutter:
     - assets/images/bilibili.png
     - assets/images/qqmusic_vip.png
     - assets/images/qqmusic_listenlv.png
+    - assets/images/china_mobile.png
+    - assets/images/china_telecom.png
+    - assets/images/bili_lv0.png
+    - assets/images/bili_lv1.png
+    - assets/images/bili_lv2.png
+    - assets/images/bili_lv3.png
+    - assets/images/bili_lv4.png
+    - assets/images/bili_lv5.png
+    - assets/images/bili_lv6.png
+    - assets/images/bili_lv7.png
+    - assets/images/bili_lv7_2.png
+    - assets/images/bili_lv8.png
+    - assets/images/bili_lv8_2.png
+    - assets/images/bili_lv9.png
+    - assets/images/bili_lv9_2.png
     - assets/images/songs_cover/parrot.jpeg
     - assets/images/songs_cover/tit.jpeg
     - assets/images/songs_cover/tit.png
