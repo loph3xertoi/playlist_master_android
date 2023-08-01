@@ -24,10 +24,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-  /// Current selected music app,
-  /// 0 represents local music app, 1 represents QQ music,
-  /// 2 represents netease music, 3 represents bilibili.
-  var currentMusicApp = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override

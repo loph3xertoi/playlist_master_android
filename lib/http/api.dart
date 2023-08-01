@@ -73,4 +73,8 @@ class API {
   /// [tid] is used to evict cache.
   /// api: DELETE /removeSongsFromLibrary?libraryId=[libraryId]&songsId=[songsId]&platform=[platform]&tid=[tid]
   static const removeSongsFromLibrary = '/removeSongsFromLibrary';
+
+  /// Get bilibili splash screen images.
+  static const getBiliSplashScreenImage =
+      'app.bilibili.com/x/v2/splash/brand/list';
 }

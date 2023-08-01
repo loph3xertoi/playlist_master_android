@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
@@ -87,7 +88,7 @@ class MyAppState extends ChangeNotifier {
   bool _isUsingMockData = false;
 
   /// The current platform, 0 for pm server, 1 for qq music, 2 for netease music, 3 for bilibili.
-  int _currentPlatform = 1;
+  int _currentPlatform = 3;
 
   // Default image for cover.
   static const String defaultCoverImage =
@@ -1573,6 +1574,50 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<String> getBiliSplashScreenImage() async {
+    final Uri url = Uri.https('app.bilibili.com', '/x/v2/splash/brand/list', {
+      'appkey': '1d8b6e7d45233436',
+      'ts': '0',
+      'sign': '78a89e153cd6231a4a4d55013aa063ce',
+    });
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger.i('Loading bilibili splash screen iamges...');
+      final response = await client.get(url);
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        int resultCode = decodedResponse['code'];
+        if (resultCode == 0) {
+          List<dynamic> splashScreenMapList =
+              decodedResponse['data']['list'];
+          List<String> splashScreenlist =
+              splashScreenMapList.map<String>((e) => e['thumb']).toList();
+          Random random = Random();
+          int index = random.nextInt(splashScreenlist.length);
+          return splashScreenlist[index];
+        } else {
+          _errorMsg = decodedResponse['message'];
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return '';
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return '';
       }
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/utils/storage_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -40,9 +41,10 @@ class NightBackgroundState extends State<NightBackground>
   }
 
   Future<void> _getValueFromSharedPreferences(MyAppState state) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String value = prefs.getString('themeMode') ?? 'dark';
-    bool val = value == 'dark';
+    var themeMode = await StorageManager.readData('themeMode');
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    // String value = prefs.getString('themeMode') ?? 'dark';
+    bool val = themeMode == 'dark';
     state.isDarkMode = val;
     setState(() {
       this.val = val;

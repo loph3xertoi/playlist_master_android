@@ -6,9 +6,8 @@ class MyHttp {
   static VideoCacheManager videoCacheManager = VideoCacheManager();
 
   static clearCache() async {
-    await defaultCacheManager.emptyCache();
-
-    await videoCacheManager.emptyCache();
+    defaultCacheManager.emptyCache();
+    videoCacheManager.emptyCache();
   }
 }
 

@@ -6,6 +6,10 @@ import 'package:playlistmaster/states/app_state.dart';
 
 void main() {
   MyAppState appState = MyAppState();
+  test('Fetch bilibili splash screen images', () async {
+    print(await appState.getBiliSplashScreenImage());
+  });
+
   test('Fetch user', () async {
     print(await appState.fetchUser(1));
   });
