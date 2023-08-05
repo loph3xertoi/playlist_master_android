@@ -24,7 +24,7 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
     await appState.removeSongsFromLibrary(
         [widget.song], appState.openedLibrary!, appState.currentPlatform);
     appState.refreshLibraries!(appState, true);
-    appState.refreshDetailLibraryPage!(appState);
+    appState.refreshDetailLibraryPage!();
   }
 
   @override

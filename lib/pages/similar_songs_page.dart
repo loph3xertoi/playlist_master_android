@@ -208,7 +208,8 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                           .queue!
                                                           .indexOf(
                                                               similarSongs[0]);
-
+                                                      appState.currentPlayingSongInQueue =
+                                                          realIndex;
                                                       try {
                                                         await appState
                                                             .initAudioPlayer();
@@ -240,9 +241,6 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                             false;
                                                         return;
                                                       }
-
-                                                      appState.currentPlayingSongInQueue =
-                                                          realIndex;
 
                                                       appState.currentSong =
                                                           appState.queue![
@@ -280,6 +278,8 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                       appState.initQueue!
                                                           .clear();
 
+                                                      appState.currentPlayingSongInQueue =
+                                                          realIndex;
                                                       try {
                                                         await appState
                                                             .initAudioPlayer();
@@ -311,9 +311,6 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                             false;
                                                         return;
                                                       }
-
-                                                      appState.currentPlayingSongInQueue =
-                                                          realIndex;
 
                                                       appState.currentSong =
                                                           appState.queue![
@@ -429,7 +426,8 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                             .queue!
                                                             .indexOf(rawQueue![
                                                                 index]);
-
+                                                        appState.currentPlayingSongInQueue =
+                                                            realIndex;
                                                         try {
                                                           await appState
                                                               .initAudioPlayer();
@@ -466,9 +464,6 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
 
                                                         appState.canSongPlayerPagePop =
                                                             true;
-
-                                                        appState.currentPlayingSongInQueue =
-                                                            realIndex;
 
                                                         appState.currentSong =
                                                             appState.queue![
@@ -529,7 +524,8 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
 
                                                         appState.initQueue!
                                                             .clear();
-
+                                                        appState.currentPlayingSongInQueue =
+                                                            realIndex;
                                                         try {
                                                           await appState
                                                               .initAudioPlayer();
@@ -563,9 +559,6 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                               false;
                                                           return;
                                                         }
-
-                                                        appState.currentPlayingSongInQueue =
-                                                            realIndex;
 
                                                         appState.currentSong =
                                                             appState.queue![

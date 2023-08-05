@@ -68,7 +68,7 @@ class _SongItemState extends State<SongItem> {
         for (Result? result in results) {
           if (result != null && result.success) {
             appState.refreshLibraries!(appState, true);
-            appState.refreshDetailLibraryPage!(appState);
+            appState.refreshDetailLibraryPage!();
             MyToast.showToast('Add songs successfully');
             break;
           }
@@ -184,6 +184,7 @@ class _SongItemState extends State<SongItem> {
 
                     if (appState.player == null) {
                       appState.queue = [widget.song];
+                      appState.currentPlayingSongInQueue = 0;
                       try {
                         await appState.initAudioPlayer();
                       } catch (e) {
@@ -192,7 +193,6 @@ class _SongItemState extends State<SongItem> {
                         appState.disposeSongPlayer();
                         return;
                       }
-                      appState.currentPlayingSongInQueue = 0;
 
                       appState.currentSong = widget.song;
 

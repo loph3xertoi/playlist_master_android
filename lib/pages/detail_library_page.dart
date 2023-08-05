@@ -30,13 +30,13 @@ class DetailLibraryPage extends StatefulWidget {
 class _DetailLibraryPageState extends State<DetailLibraryPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late Future<BasicLibrary?> _detailLibrary;
-  late MyAppState _appState;
+  late MyAppState _state;
   bool _changeRawQueue = true;
 
-  void _refreshDetailLibraryPage(MyAppState appState) {
+  void _refreshDetailLibraryPage() {
     setState(() {
-      _detailLibrary = appState.fetchDetailLibrary(
-          appState.rawOpenedLibrary!, appState.currentPlatform);
+      _detailLibrary = _state.fetchDetailLibrary(
+          _state.rawOpenedLibrary!, _state.currentPlatform);
     });
   }
 
@@ -70,7 +70,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
       }
       // Real index in queue, not in raw queue as some songs may be taken down.
       int realIndex = appState.queue!.indexOf(searchedSongs[index]);
-
+      appState.currentPlayingSongInQueue = realIndex;
       try {
         await appState.initAudioPlayer();
       } catch (e) {
@@ -80,7 +80,6 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
         return;
       }
       appState.canSongPlayerPagePop = true;
-      appState.currentPlayingSongInQueue = realIndex;
       appState.currentSong = appState.queue![realIndex];
       appState.prevSong = appState.currentSong;
       appState.currentDetailSong = null;
@@ -106,6 +105,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
       appState.player!.dispose();
       appState.player = null;
       appState.initQueue!.clear();
+      appState.currentPlayingSongInQueue = realIndex;
       try {
         await appState.initAudioPlayer();
       } catch (e) {
@@ -114,7 +114,6 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
         appState.disposeSongPlayer();
         return;
       }
-      appState.currentPlayingSongInQueue = realIndex;
       appState.currentSong = appState.queue![realIndex];
       appState.currentDetailSong = null;
       appState.prevSong = appState.currentSong;
@@ -134,7 +133,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
     final state = Provider.of<MyAppState>(context, listen: false);
     var isUsingMockData = state.isUsingMockData;
     var openedLibrary = state.rawOpenedLibrary;
-    _appState = state;
+    _state = state;
     // var rawQueue = state.rawQueue;
     // WidgetsBinding.instance.addPostFrameCallback((_) {
     //   state.rawQueue = null;

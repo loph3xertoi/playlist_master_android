@@ -287,7 +287,8 @@ class _SearchPageState extends State<SearchPage> {
                                                               .indexOf(appState
                                                                       .rawQueue![
                                                                   index]);
-
+                                                          appState.currentPlayingSongInQueue =
+                                                              realIndex;
                                                           try {
                                                             await appState
                                                                 .initAudioPlayer();
@@ -296,11 +297,12 @@ class _SearchPageState extends State<SearchPage> {
                                                                 'Exception: $e');
                                                             MyLogger.logger.e(
                                                                 'Exception: $e');
+
                                                             appState.queue = [];
-                                                            appState.currentDetailSong =
-                                                                null;
                                                             appState
                                                                 .currentPlayingSongInQueue = 0;
+                                                            appState.currentDetailSong =
+                                                                null;
                                                             appState.currentSong =
                                                                 null;
                                                             appState.prevSong =
@@ -324,9 +326,6 @@ class _SearchPageState extends State<SearchPage> {
 
                                                           appState.canSongPlayerPagePop =
                                                               true;
-
-                                                          appState.currentPlayingSongInQueue =
-                                                              realIndex;
 
                                                           appState.currentSong =
                                                               appState.queue![
@@ -394,6 +393,8 @@ class _SearchPageState extends State<SearchPage> {
                                                           appState.initQueue!
                                                               .clear();
 
+                                                          appState.currentPlayingSongInQueue =
+                                                              realIndex;
                                                           try {
                                                             await appState
                                                                 .initAudioPlayer();
@@ -402,11 +403,12 @@ class _SearchPageState extends State<SearchPage> {
                                                                 'Exception: $e');
                                                             MyLogger.logger.e(
                                                                 'Exception: $e');
+
                                                             appState.queue = [];
-                                                            appState.currentDetailSong =
-                                                                null;
                                                             appState
                                                                 .currentPlayingSongInQueue = 0;
+                                                            appState.currentDetailSong =
+                                                                null;
                                                             appState.currentSong =
                                                                 null;
                                                             appState.prevSong =
@@ -427,9 +429,6 @@ class _SearchPageState extends State<SearchPage> {
                                                                 false;
                                                             return;
                                                           }
-
-                                                          appState.currentPlayingSongInQueue =
-                                                              realIndex;
 
                                                           appState.currentSong =
                                                               appState.queue![

@@ -93,7 +93,7 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
     await appState.removeSongsFromLibrary(
         removedSongs, appState.openedLibrary!, appState.currentPlatform);
     appState.refreshLibraries!(appState, true);
-    appState.refreshDetailLibraryPage!(appState);
+    appState.refreshDetailLibraryPage!();
   }
 
   void _moveSongsToLibraries(BuildContext context, MyAppState appState) async {
@@ -158,7 +158,7 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
           // await appState.removeSongsFromLibrary(
           //     selectedSongs, appState.openedLibrary!, appState.currentPlatform);
           appState.refreshLibraries!(appState, true);
-          appState.refreshDetailLibraryPage!(appState);
+          appState.refreshDetailLibraryPage!();
           break;
         }
       }
