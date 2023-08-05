@@ -41,6 +41,7 @@ dependencies:
   bottom_sheet: ^3.1.0
   city_picker_china: ^0.1.0
   ip_geolocation_io: ^1.0.1
+  humanize_big_int: ^1.0.1
   # bottom_sheet:
   #   git:
   #     url: git@github.com:loph3xertoi/flutter-bottom-sheet.git
@@ -92,6 +93,11 @@ flutter:
     - assets/images/bili_lv8_2.png
     - assets/images/bili_lv9.png
     - assets/images/bili_lv9_2.png
+    - assets/images/bili_thumbup.png
+    - assets/images/bili_danmaku.png
+    - assets/images/bili_play_count.png
+    - assets/images/bili_page.png
+    - assets/images/up.png
     - assets/images/songs_cover/parrot.jpeg
     - assets/images/songs_cover/tit.jpeg
     - assets/images/songs_cover/tit.png

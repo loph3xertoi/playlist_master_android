@@ -15,7 +15,6 @@ class LibraryItemMenuPopup extends StatelessWidget {
     int platform = appState.currentPlatform;
     await appState.deleteLibraries([library], platform);
     appState.refreshLibraries!(appState, false);
-    // appState.removeLibraryFromLibraries!(library);
   }
 
   void _editLibrary(MyAppState appState) async {

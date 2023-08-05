@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:fplayer/fplayer.dart';
+import 'package:humanize_big_int/humanize_big_int.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
@@ -465,7 +466,7 @@ class QQMusicVideoInfoArea extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 10.0, vertical: 20.0),
                 child: Text(
-                  'viewed times: ${NumberFormat('#,###').format(detailVideo.playCount)}',
+                  '${humanizeInt(detailVideo.playCount)} views',
                   style: textTheme.labelSmall!
                       .copyWith(color: Colors.white.withOpacity(0.4)),
                 ),
@@ -581,7 +582,7 @@ class NCMVideoInfoArea extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10.0, vertical: 20.0),
                     child: Text(
-                      'viewed times: ${NumberFormat('#,###').format(detailVideo.playCount)}',
+                      '${humanizeInt(detailVideo.playCount)} views',
                       style: textTheme.labelSmall!
                           .copyWith(color: Colors.white.withOpacity(0.4)),
                     ),

@@ -24,10 +24,17 @@ class LibraryItem extends StatelessWidget {
           appState.rawOpenedLibrary = library;
           appState.openedLibrary = library;
           appState.rawQueue = [];
-          Navigator.pushNamed(
-            context,
-            '/detail_library_page',
-          );
+          if (appState.currentPlatform != 3) {
+            Navigator.pushNamed(
+              context,
+              '/detail_library_page',
+            );
+          } else {
+            Navigator.pushNamed(
+              context,
+              '/detail_favlist_page',
+            );
+          }
         },
         child: Ink(
           height: 60.0,

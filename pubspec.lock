@@ -337,6 +337,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  humanize_big_int:
+    dependency: "direct main"
+    description:
+      name: humanize_big_int
+      sha256: "46e48673608148734374dbde272fd2fff5d72ad4749d4e5ccc23020c5449129d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   intl:
     dependency: "direct main"
     description:

@@ -3,10 +3,12 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:playlistmaster/entities/bilibili/bili_detail_fav_list.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../entities/basic/basic_song.dart';
+import '../entities/bilibili/bili_resource.dart';
 import '../entities/netease_cloud_music/ncm_detail_playlist.dart';
 import '../entities/qq_music/qqmusic_detail_playlist.dart';
 import '../mock_data.dart';
@@ -22,21 +24,105 @@ import '../widgets/my_searchbar.dart';
 import '../widgets/my_selectable_text.dart';
 import '../widgets/song_item.dart';
 
-class DetailLibraryPage extends StatefulWidget {
+class DetailFavListPage extends StatefulWidget {
   @override
-  State<DetailLibraryPage> createState() => _DetailLibraryPageState();
+  State<DetailFavListPage> createState() => _DetailFavListPageState();
 }
 
-class _DetailLibraryPageState extends State<DetailLibraryPage> {
+class _DetailFavListPageState extends State<DetailFavListPage> {
+  // Current page number, only for bilibili.
+  int _currentPage = 1;
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  late Future<BasicLibrary?> _detailLibrary;
-  late MyAppState _appState;
+
+  late Future<BasicLibrary?> _futureDetailLibrary;
+
   bool _changeRawQueue = true;
+
+  // All resources fetched, in local storage.
+  List<BiliResource> _localResources = [];
+
+  bool _isLoading = false;
+
+  // Whether has more libraries.
+  bool _hasMore = true;
+
+  late MyAppState _state;
+
+  ScrollController _scrollController = ScrollController();
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      if (_hasMore) {
+        _fetchingResourcesInLibrary();
+      } else {
+        MyToast.showToast('No more resources');
+      }
+    }
+  }
+
+  // Only called in bilibili.
+  Future<void> _fetchingResourcesInLibrary() async {
+    int platform = _state.currentPlatform;
+    if (!_isLoading) {
+      setState(() {
+        _isLoading = true;
+      });
+      _currentPage++;
+      List<BiliResource>? pageResources;
+      BiliDetailFavList? detailFavList = await _state.fetchDetailLibrary(
+              _state.rawOpenedLibrary!, platform, _currentPage.toString())
+          as BiliDetailFavList?;
+      if (detailFavList != null) {
+        _hasMore = detailFavList.hasMore;
+        pageResources = detailFavList.resources;
+        if (pageResources.isNotEmpty) {
+          _localResources.addAll(pageResources);
+        }
+      }
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final state = Provider.of<MyAppState>(context, listen: false);
+    var isUsingMockData = state.isUsingMockData;
+    var openedLibrary = state.rawOpenedLibrary;
+    _state = state;
+    if (isUsingMockData) {
+      _futureDetailLibrary = Future.value(MockData.detailLibrary);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        state.rawQueue = MockData.songs;
+        state.queue = MockData.songs;
+        state.openedLibrary = state.rawOpenedLibrary;
+      });
+    } else {
+      state.refreshDetailLibraryPage = _refreshDetailLibraryPage;
+      _futureDetailLibrary =
+          state.fetchDetailLibrary(openedLibrary!, state.currentPlatform, '1');
+    }
+    _scrollController.addListener(_scrollListener);
+  }
 
   void _refreshDetailLibraryPage(MyAppState appState) {
     setState(() {
-      _detailLibrary = appState.fetchDetailLibrary(
-          appState.rawOpenedLibrary!, appState.currentPlatform);
+      _currentPage = 1;
+      _hasMore = false;
+      _futureDetailLibrary = appState.fetchDetailLibrary(
+          appState.rawOpenedLibrary!, appState.currentPlatform, '1');
+      _localResources.clear();
     });
   }
 
@@ -128,33 +214,6 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    // _songs = _detailLibrary.songs;
-    final state = Provider.of<MyAppState>(context, listen: false);
-    var isUsingMockData = state.isUsingMockData;
-    var openedLibrary = state.rawOpenedLibrary;
-    _appState = state;
-    // var rawQueue = state.rawQueue;
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   state.rawQueue = null;
-    // });
-    // _tid = ModalRoute.of(context)!.settings.arguments as String;
-    if (isUsingMockData) {
-      _detailLibrary = Future.value(MockData.detailLibrary);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        state.rawQueue = MockData.songs;
-        state.queue = MockData.songs;
-        state.openedLibrary = state.rawOpenedLibrary;
-      });
-    } else {
-      state.refreshDetailLibraryPage = _refreshDetailLibraryPage;
-      _detailLibrary =
-          state.fetchDetailLibrary(openedLibrary!, state.currentPlatform);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     print('build detail library page');
     MyAppState appState = context.watch<MyAppState>();
@@ -200,7 +259,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                               margin:
                                   EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
                               child: FutureBuilder(
-                                  future: _detailLibrary,
+                                  future: _futureDetailLibrary,
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState ==
                                         ConnectionState.waiting) {
@@ -248,7 +307,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                               ),
                                               onPressed: () {
                                                 setState(() {
-                                                  _detailLibrary = appState
+                                                  _futureDetailLibrary = appState
                                                       .fetchDetailLibrary(
                                                           openedLibrary!,
                                                           appState
@@ -281,16 +340,38 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                               : snapshot.data
                                                   as NCMDetailPlaylist;
                                         } else if (currentPlatform == 3) {
-                                          throw UnimplementedError(
-                                              'Not yet implement bilibili platform');
+                                          detailLibrary = snapshot.data == null
+                                              ? null
+                                              : snapshot.data
+                                                  as BiliDetailFavList;
+                                          if (_currentPage == 1) {
+                                            List<BiliResource>? libraries =
+                                                detailLibrary.resources;
+                                            _hasMore = detailLibrary.hasMore;
+                                            _localResources.addAll(libraries!);
+                                          }
                                         } else {
                                           throw UnsupportedError(
                                               'Invalid platform');
                                         }
                                       }
 
-                                      if (detailLibrary != null) {
+                                      if (detailLibrary != null &&
+                                          currentPlatform != 3) {
                                         rawQueue = detailLibrary.songs;
+                                        WidgetsBinding.instance
+                                            .addPostFrameCallback((_) {
+                                          if (_changeRawQueue) {
+                                            appState.rawQueue =
+                                                detailLibrary.songs;
+                                            appState.searchedSongs =
+                                                detailLibrary.songs;
+                                            _changeRawQueue = false;
+                                          }
+                                        });
+                                      } else if (detailLibrary != null &&
+                                          currentPlatform == 3) {
+                                        rawQueue = _localResources;
                                         WidgetsBinding.instance
                                             .addPostFrameCallback((_) {
                                           if (_changeRawQueue) {
@@ -552,7 +633,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                   child: ListView
                                                                       .builder(
                                                                     // TODO: fix this. Mock.songs have 10 songs only.
-                                                                    // itemCount: _detailLibrary.songsCount,
+                                                                    // itemCount: _futureDetailLibrary.songsCount,
                                                                     itemCount: isUsingMockData
                                                                         ? min(
                                                                             detailLibrary
@@ -647,5 +728,22 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildLoadingIndicator(ColorScheme colorScheme) {
+    return _isLoading
+        ? Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: SizedBox(
+                  height: 10.0,
+                  width: 10.0,
+                  child: CircularProgressIndicator(
+                    color: colorScheme.onPrimary,
+                    strokeWidth: 2.0,
+                  )),
+            ),
+          )
+        : Container();
   }
 }

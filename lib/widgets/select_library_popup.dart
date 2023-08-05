@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../entities/basic/basic_song.dart';
+import '../entities/dto/paged_data.dart';
 import '../entities/dto/result.dart';
 import '../entities/netease_cloud_music/ncm_playlist.dart';
 import '../entities/qq_music/qqmusic_playlist.dart';
@@ -29,9 +30,14 @@ class SelectLibraryPopup extends StatefulWidget {
 }
 
 class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
-  late Future<List<BasicLibrary>?> _libraries;
+  late Future<PagedDataDTO<BasicLibrary>?> _libraries;
+
+  // All libraries fetched.
+  List<BasicLibrary>? _localLibraries;
+
   // Selected libraries.
   List<int> _selectedIndex = [];
+
   bool _inMultiSelectMode = false;
 
   @override
@@ -93,6 +99,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                     onPressed: () {
                       setState(() {
                         _libraries = appState.refreshLibraries!(appState, true);
+                        _localLibraries?.clear();
                       });
                     },
                   ),
@@ -100,18 +107,25 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
               ),
             );
           } else {
-            List<BasicLibrary> libraries;
-            if (currentPlatform == 0) {
-              throw UnimplementedError('Not yet implement pms platform');
-            } else if (currentPlatform == 1) {
-              libraries = snapshot.data!.cast<BasicLibrary>().toList();
-            } else if (currentPlatform == 2) {
-              libraries = snapshot.data!.cast<BasicLibrary>().toList();
-            } else if (currentPlatform == 3) {
-              throw UnimplementedError('Not yet implement bilibili platform');
-            } else {
-              throw UnsupportedError('Invalid platform');
+            PagedDataDTO<BasicLibrary>? pagedDataDTO = snapshot.data!;
+            var totalCount = pagedDataDTO.count;
+            if (totalCount != 0) {
+              List<BasicLibrary>? libraries = pagedDataDTO.list;
+              _localLibraries!.addAll(libraries!);
             }
+
+            // List<BasicLibrary> libraries;
+            // if (currentPlatform == 0) {
+            //   throw UnimplementedError('Not yet implement pms platform');
+            // } else if (currentPlatform == 1) {
+            //   libraries = snapshot.data!.cast<BasicLibrary>().toList();
+            // } else if (currentPlatform == 2) {
+            //   libraries = snapshot.data!.cast<BasicLibrary>().toList();
+            // } else if (currentPlatform == 3) {
+            //   throw UnimplementedError('Not yet implement bilibili platform');
+            // } else {
+            //   throw UnsupportedError('Invalid platform');
+            // }
             return Material(
               child: Column(
                 children: [
@@ -136,7 +150,8 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                                     _inMultiSelectMode = !_inMultiSelectMode;
                                   });
                                   if (_selectedIndex.isNotEmpty) {
-                                    _addSongsToLibraries(appState, libraries);
+                                    _addSongsToLibraries(
+                                        appState, _localLibraries!);
                                   }
                                 },
                                 style: ButtonStyle(
@@ -217,7 +232,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                             ),
                           ),
                         ),
-                        for (int i = 0; i < libraries.length; i++)
+                        for (int i = 0; i < _localLibraries!.length; i++)
                           Material(
                             color: Colors.transparent,
                             child: InkWell(
@@ -233,13 +248,13 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                                 } else {
                                   widget.action == 'add'
                                       ? _addSongsToLibrary(
-                                          appState, libraries[i])
+                                          appState, _localLibraries![i])
                                       : _moveSongsToLibrary(
-                                          appState, libraries[i]);
+                                          appState, _localLibraries![i]);
                                 }
                               },
                               child: SelectableLibraryItem(
-                                library: libraries[i],
+                                library: _localLibraries![i],
                                 isCreateLibraryItem: false,
                                 inMultiSelectMode: _inMultiSelectMode,
                                 selected: _selectedIndex.contains(i),

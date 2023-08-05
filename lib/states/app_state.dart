@@ -19,7 +19,11 @@ import '../entities/basic/basic_paged_songs.dart';
 import '../entities/basic/basic_song.dart';
 import '../entities/basic/basic_user.dart';
 import '../entities/basic/basic_video.dart';
-import '../entities/bilibili/bilibili_user.dart';
+import '../entities/bilibili/bili_detail_fav_list.dart';
+import '../entities/bilibili/bili_fav_list.dart';
+import '../entities/bilibili/bili_resource.dart';
+import '../entities/bilibili/bili_user.dart';
+import '../entities/dto/paged_data.dart';
 import '../entities/dto/result.dart';
 import '../entities/netease_cloud_music/ncm_detail_playlist.dart';
 import '../entities/netease_cloud_music/ncm_detail_song.dart';
@@ -51,11 +55,9 @@ class MyAppState extends ChangeNotifier {
   // Refresh detail library page.
   void Function(MyAppState)? refreshDetailLibraryPage;
 
-  // Remove library from libraries in home page.
-  void Function(BasicLibrary)? removeLibraryFromLibraries;
-
   // Refresh home page's libraries.
-  Future<List<BasicLibrary>?> Function(MyAppState, bool)? refreshLibraries;
+  Future<PagedDataDTO<BasicLibrary>?> Function(MyAppState, bool)?
+      refreshLibraries;
 
   // Current page.
   int _currentPage = 2;
@@ -68,6 +70,9 @@ class MyAppState extends ChangeNotifier {
 
   // Total searched songs count.
   int _totalSearchedSongs = 0;
+
+  // Searched resources, for bilibili.
+  List<BiliResource> _searchedResources = [];
 
   // Searched songs.
   List<BasicSong> _searchedSongs = [];
@@ -195,6 +200,8 @@ class MyAppState extends ChangeNotifier {
 
   int get totalSearchedSongs => _totalSearchedSongs;
 
+  List<BiliResource> get searchedResources => _searchedResources;
+
   List<BasicSong> get searchedSongs => _searchedSongs;
 
   String? get searchingString => _searchingString;
@@ -273,6 +280,11 @@ class MyAppState extends ChangeNotifier {
 
   set totalSearchedSongs(int value) {
     _totalSearchedSongs = value;
+    notifyListeners();
+  }
+
+  set searchedResources(List<BiliResource> value) {
+    _searchedResources = List.from(value);
     notifyListeners();
   }
 
@@ -635,7 +647,7 @@ class MyAppState extends ChangeNotifier {
     } else if (platform == 2) {
       resolveJson = NCMUser.fromJson;
     } else if (platform == 3) {
-      resolveJson = BilibiliUser.fromJson;
+      resolveJson = BiliUser.fromJson;
     } else {
       throw UnsupportedError('Invalid platform');
     }
@@ -680,16 +692,34 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  Future<List<BasicLibrary>?> fetchLibraries(int platform) async {
+  Future<PagedDataDTO<BasicLibrary>?> fetchLibraries(int platform,
+      [String? pn]) async {
     BasicLibrary Function(Map<String, dynamic>) resolveJson;
+    Map<String, dynamic>? params;
     if (platform == 0) {
       throw UnimplementedError('Not yet implement pms platform');
     } else if (platform == 1) {
       resolveJson = QQMusicPlaylist.fromJson;
+      params = {
+        'id': API.uid,
+        'platform': platform.toString(),
+      };
     } else if (platform == 2) {
       resolveJson = NCMPlaylist.fromJson;
+      params = {
+        'id': API.uid,
+        'platform': platform.toString(),
+      };
     } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
+      resolveJson = BiliFavList.fromJson;
+      params = {
+        'id': API.uid,
+        'pn': pn!,
+        'ps': '20',
+        'biliPlatform': 'web',
+        'type': '0',
+        'platform': platform.toString(),
+      };
     } else {
       throw UnsupportedError('Invalid platform');
     }
@@ -697,10 +727,7 @@ class MyAppState extends ChangeNotifier {
     final Uri url = Uri.http(
       API.host,
       API.libraries,
-      {
-        'id': API.uid,
-        'platform': platform.toString(),
-      },
+      params,
     );
     final client = RetryClient(http.Client());
 
@@ -713,8 +740,14 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           var jsonList = decodedResponse['data'];
-          return Future.value(
-              jsonList.map<BasicLibrary>((e) => resolveJson(e)).toList());
+          int count = jsonList['count'];
+          bool hasMore = jsonList['hasMore'];
+          List<dynamic> librariesList = jsonList['list'];
+          List<BasicLibrary>? list =
+              librariesList.map<BasicLibrary>((e) => resolveJson(e)).toList();
+          PagedDataDTO<BasicLibrary> data =
+              PagedDataDTO<BasicLibrary>(count, list, hasMore);
+          return Future.value(data);
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -910,7 +943,15 @@ class MyAppState extends ChangeNotifier {
   }
 
   Future<BasicLibrary?> fetchDetailLibrary(
-      BasicLibrary library, int platform) async {
+    BasicLibrary library,
+    int platform, [
+    String? pn,
+    String? ps,
+    String? type,
+    String? keyword,
+    String? order,
+    String? range,
+  ]) async {
     BasicLibrary Function(Map<String, dynamic>) resolveJson;
     Uri? url;
     if (platform == 0) {
@@ -934,7 +975,20 @@ class MyAppState extends ChangeNotifier {
         },
       );
     } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
+      resolveJson = BiliDetailFavList.fromJson;
+      url = Uri.http(
+        API.host,
+        '${API.detailLibrary}/${(library as BiliFavList).id}',
+        {
+          'pn': pn!,
+          'ps': ps ?? '20',
+          'type': type ?? '0',
+          'keyword': keyword,
+          'order': order,
+          'range': range,
+          'platform': platform.toString(),
+        },
+      );
     } else {
       throw UnsupportedError('Invalid platform');
     }
@@ -1214,13 +1268,18 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  Future<Result?> createLibrary(String libraryName, int platform) async {
+  Future<Result?> createLibrary(
+    String libraryName,
+    int platform, [
+    String? intro,
+    int? privacy,
+    String? cover,
+  ]) async {
     if (platform == 0) {
       throw UnimplementedError('Not yet implement pms platform');
     } else if (platform == 1) {
     } else if (platform == 2) {
     } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
     } else {
       throw UnsupportedError('Invalid platform');
     }
@@ -1232,9 +1291,20 @@ class MyAppState extends ChangeNotifier {
         'platform': platform.toString(),
       },
     );
-    final requestBody = {'name': libraryName};
-    final client = RetryClient(http.Client());
+    Map<String, String> requestBody = {};
+    requestBody.putIfAbsent('name', () => libraryName);
 
+    // Only used in bilibili platform.
+    if (intro != null) {
+      requestBody.putIfAbsent('intro', () => intro);
+    }
+    if (privacy != null) {
+      requestBody.putIfAbsent('privacy', () => privacy.toString());
+    }
+    if (cover != null) {
+      requestBody.putIfAbsent('cover', () => cover);
+    }
+    final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Creating library...');
       final response = await client.post(
@@ -1295,7 +1365,14 @@ class MyAppState extends ChangeNotifier {
             .join(",");
       }
     } else if (platform == 3) {
-      throw UnimplementedError('Not yet implement bilibili platform');
+      if (libraries[0] is BiliFavList) {
+        librariesIds =
+            libraries.map((library) => (library as BiliFavList).id).join(",");
+      } else {
+        librariesIds = libraries
+            .map((library) => (library as BiliDetailFavList).id)
+            .join(",");
+      }
     } else {
       throw UnsupportedError('Invalid platform');
     }
@@ -1600,8 +1677,7 @@ class MyAppState extends ChangeNotifier {
       if (response.statusCode == 200) {
         int resultCode = decodedResponse['code'];
         if (resultCode == 0) {
-          List<dynamic> splashScreenMapList =
-              decodedResponse['data']['list'];
+          List<dynamic> splashScreenMapList = decodedResponse['data']['list'];
           List<String> splashScreenlist =
               splashScreenMapList.map<String>((e) => e['thumb']).toList();
           Random random = Random();

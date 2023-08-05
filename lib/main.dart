@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'entities/basic/basic_song.dart';
 import 'entities/basic/basic_video.dart';
+import 'pages/detail_favlist_page.dart';
 import 'pages/detail_library_page.dart';
 import 'pages/detail_song_page.dart';
 import 'pages/home_page.dart';
@@ -61,6 +62,7 @@ class MyApp extends StatelessWidget {
             '/home_page': (context) => HomePage(),
             '/search_page': (context) => SearchPage(),
             '/detail_library_page': (context) => DetailLibraryPage(),
+            '/detail_favlist_page': (context) => DetailFavListPage(),
             '/song_player_page': (context) => SongPlayerPage(),
           },
           onGenerateRoute: (settings) {

@@ -1,0 +1,112 @@
+{
+    "code": 0,
+    "message": "0",
+    "ttl": 1,
+    "data": {
+        "bvid": "BV11M411u7T2",
+        "aid": 526507008,
+        "videos": 1,
+        "tid": 161,
+        "tname": "手工",
+        "copyright": 1,
+        "pic": "http://i2.hdslb.com/bfs/archive/a46247f678d68d304447920db747792380abc97c.jpg",
+        "title": "订书针的神话空间",
+        "pubdate": 1679733583,
+        "ctime": 1679733584,
+        "desc": "-",
+        "desc_v2": [
+            {
+                "raw_text": "-",
+                "type": 1,
+                "biz_id": 0
+            }
+        ],
+        "state": 0,
+        "duration": 61,
+        "rights": {
+            "bp": 0,
+            "elec": 0,
+            "download": 1,
+            "movie": 0,
+            "pay": 0,
+            "hd5": 1,
+            "no_reprint": 0,
+            "autoplay": 1,
+            "ugc_pay": 0,
+            "is_cooperation": 0,
+            "ugc_pay_preview": 0,
+            "no_background": 0,
+            "clean_mode": 0,
+            "is_stein_gate": 0,
+            "is_360": 0,
+            "no_share": 0,
+            "arc_pay": 0,
+            "free_watch": 0
+        },
+        "owner": {
+            "mid": 2057014140,
+            "name": "夜阑听风雨wsd",
+            "face": "https://i0.hdslb.com/bfs/face/bb695ca1df346933ee02a14cd95a42c75a07577e.jpg"
+        },
+        "stat": {
+            "aid": 526507008,
+            "view": 348929,
+            "danmaku": 127,
+            "reply": 742,
+            "favorite": 16776,
+            "coin": 4279,
+            "share": 3007,
+            "now_rank": 0,
+            "his_rank": 0,
+            "like": 28520,
+            "dislike": 0,
+            "evaluation": "",
+            "argue_msg": "",
+            "vt": 0
+        },
+        "dynamic": "",
+        "cid": 1070271947,
+        "dimension": {
+            "width": 1080,
+            "height": 1920,
+            "rotate": 0
+        },
+        "premiere": null,
+        "teenage_mode": 0,
+        "is_chargeable_season": false,
+        "is_story": true,
+        "is_upower_exclusive": false,
+        "is_upower_play": false,
+        "enable_vt": 0,
+        "no_cache": false,
+        "pages": [
+            {
+                "cid": 1070271947,
+                "page": 1,
+                "from": "vupload",
+                "part": "1679733011975.mp4",
+                "duration": 61,
+                "vid": "",
+                "weblink": "",
+                "dimension": {
+                    "width": 1080,
+                    "height": 1920,
+                    "rotate": 0
+                },
+                "first_frame": "http://i0.hdslb.com/bfs/storyff/n230325qn3lo1k05mplwwj2pviro27lw_firsti.jpg"
+            }
+        ],
+        "subtitle": {
+            "allow_submit": false,
+            "list": []
+        },
+        "is_season_display": false,
+        "user_garb": {
+            "url_image_ani_cut": ""
+        },
+        "honor_reply": {},
+        "like_icon": "",
+        "need_jump_bv": false,
+        "disable_show_up_info": false
+    }
+}

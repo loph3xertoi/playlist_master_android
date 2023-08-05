@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
+import '../entities/dto/paged_data.dart';
 import '../entities/dto/result.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
@@ -17,11 +19,30 @@ class MyContentArea extends StatefulWidget {
 }
 
 class _MyContentAreaState extends State<MyContentArea> {
-  late Future<List<BasicLibrary>?> _libraries;
+  late Future<PagedDataDTO<BasicLibrary>?> _futurePagedLibraries;
 
-  Future<List<BasicLibrary>?> _refreshLibraries(
+  // Current page number, only for bilibili.
+  int _currentPage = 1;
+
+  // All libraries fetched, in local storage.
+  List<BasicLibrary>? _localLibraries = [];
+
+  bool _isLoading = false;
+
+  // Whether has more libraries.
+  bool _hasMore = true;
+
+  late MyAppState _state;
+
+  ScrollController _scrollController = ScrollController();
+
+  Future<PagedDataDTO<BasicLibrary>?> _refreshLibraries(
       MyAppState appState, bool delayRebuild) async {
-    _libraries = appState.fetchLibraries(appState.currentPlatform);
+    _currentPage = 1;
+    _hasMore = true;
+    _futurePagedLibraries = appState.fetchLibraries(
+        appState.currentPlatform, _currentPage.toString());
+    _localLibraries?.clear();
     if (delayRebuild) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() {});
@@ -29,42 +50,94 @@ class _MyContentAreaState extends State<MyContentArea> {
     } else {
       setState(() {});
     }
-
-    return _libraries;
+    return _futurePagedLibraries;
   }
 
-  void _removeLibraryFromLibraries(BasicLibrary library) async {
-    List<BasicLibrary>? libraries = await _libraries;
-    libraries!.remove(library);
-    setState(() {
-      _libraries = Future.value(libraries);
-    });
+  void _scrollListener() {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      if (_hasMore) {
+        _fetchingLibraries();
+      } else {
+        MyToast.showToast('No more libraries');
+      }
+    }
+  }
+
+  // Future<void> _fetchingLibraries() async {
+  //   int platform = _state.currentPlatform;
+  //   if (!_isLoading && _hasMore) {
+  //     setState(() {
+  //       _isLoading = true;
+  //     });
+  //     _currentPage++;
+  //     Future<PagedDataDTO<BasicLibrary>?> pagedData =
+  //         _state.fetchLibraries(platform, _currentPage.toString());
+  //     setState(() {
+  //       _futurePagedLibraries = pagedData;
+  //       _isLoading = false;
+  //     });
+  //   } else {
+  //     MyToast.showToast('No more data');
+  //   }
+  // }
+
+  Future<void> _fetchingLibraries() async {
+    int platform = _state.currentPlatform;
+    if (!_isLoading) {
+      setState(() {
+        _isLoading = true;
+      });
+      _currentPage++;
+      List<BasicLibrary>? pageLibraries;
+      PagedDataDTO<BasicLibrary>? pagedData =
+          await _state.fetchLibraries(platform, _currentPage.toString());
+      setState(() {
+        if (pagedData != null) {
+          _hasMore = pagedData.hasMore;
+          pageLibraries = pagedData.list;
+          if (pageLibraries != null && pageLibraries!.isNotEmpty) {
+            _localLibraries!.addAll(pageLibraries!);
+          }
+        }
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
+    _state = state;
     var isUsingMockData = state.isUsingMockData;
     if (isUsingMockData) {
-      _libraries = Future.value(MockData.libraries);
+      var pagedDataDTO = PagedDataDTO<BasicLibrary>(
+          MockData.libraries.length, MockData.libraries, false);
+      _futurePagedLibraries = Future.value(pagedDataDTO);
     } else {
-      _libraries = state.fetchLibraries(state.currentPlatform);
+      _futurePagedLibraries = state.fetchLibraries(state.currentPlatform, '1');
     }
+    _scrollController.addListener(_scrollListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       state.refreshLibraries = _refreshLibraries;
-      state.removeLibraryFromLibraries = _removeLibraryFromLibraries;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
-    var currentPlatform = appState.currentPlatform;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return FutureBuilder(
-        future: _libraries,
+        future: _futurePagedLibraries,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
@@ -103,8 +176,8 @@ class _MyContentAreaState extends State<MyContentArea> {
                     ),
                     onPressed: () {
                       setState(() {
-                        _libraries =
-                            appState.fetchLibraries(appState.currentPlatform);
+                        _futurePagedLibraries =
+                            _refreshLibraries(appState, false);
                       });
                     },
                   ),
@@ -112,8 +185,16 @@ class _MyContentAreaState extends State<MyContentArea> {
               ),
             );
           } else {
-            List<BasicLibrary> libraries =
-                snapshot.data!.cast<BasicLibrary>().toList();
+            PagedDataDTO<BasicLibrary>? pagedDataDTO = snapshot.data!;
+            var totalCount = pagedDataDTO.count;
+            // Only add libraries of this snapshot.data in the first page,
+            // add other libraries to _localLibraries inside _fetchingLibraries.
+            // To avoid stuck, don't rebuild the widget when fetching new libraries.
+            if (totalCount != 0 && _currentPage == 1) {
+              List<BasicLibrary>? libraries = pagedDataDTO.list;
+              _hasMore = pagedDataDTO.hasMore;
+              _localLibraries?.addAll(libraries!);
+            }
             return Container(
               decoration: BoxDecoration(
                 color: colorScheme.primary,
@@ -129,7 +210,7 @@ class _MyContentAreaState extends State<MyContentArea> {
                         child: Padding(
                           padding: const EdgeInsets.only(left: 13.0),
                           child: Text(
-                            'Create Libraries (${libraries.length})',
+                            'Create Libraries ($totalCount)',
                             style: textTheme.titleMedium,
                             textAlign: TextAlign.left,
                           ),
@@ -160,9 +241,7 @@ class _MyContentAreaState extends State<MyContentArea> {
                             onPressed: () {
                               showDialog(
                                 context: context,
-                                builder: (_) => LibrariesSettingsPopup(
-                                  libraries: libraries,
-                                ),
+                                builder: (_) => LibrariesSettingsPopup(),
                               );
                             },
                           ),
@@ -171,13 +250,21 @@ class _MyContentAreaState extends State<MyContentArea> {
                     ]),
                   ),
                   Expanded(
-                    child: libraries.isNotEmpty
+                    child: _localLibraries!.isNotEmpty
                         ? ListView.builder(
-                            itemCount: libraries.length,
+                            controller: _scrollController,
+                            itemCount: _localLibraries!.length + 1,
                             itemBuilder: (context, index) {
-                              return LibraryItem(
-                                library: libraries[index],
-                              );
+                              if (index < _localLibraries!.length) {
+                                return Material(
+                                  color: Colors.transparent,
+                                  child: LibraryItem(
+                                    library: _localLibraries![index],
+                                  ),
+                                );
+                              } else {
+                                return _buildLoadingIndicator(colorScheme);
+                              }
                             },
                           )
                         : Center(
@@ -191,5 +278,22 @@ class _MyContentAreaState extends State<MyContentArea> {
             );
           }
         });
+  }
+
+  Widget _buildLoadingIndicator(ColorScheme colorScheme) {
+    return _isLoading
+        ? Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: SizedBox(
+                  height: 10.0,
+                  width: 10.0,
+                  child: CircularProgressIndicator(
+                    color: colorScheme.onPrimary,
+                    strokeWidth: 2.0,
+                  )),
+            ),
+          )
+        : Container();
   }
 }

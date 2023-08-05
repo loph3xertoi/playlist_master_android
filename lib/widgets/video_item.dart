@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:humanize_big_int/humanize_big_int.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -46,7 +47,7 @@ class _VideoItemState extends State<VideoItem> {
         : NCMVideoItem(
             video: _video,
             textTheme: textTheme,
-            colorTheme: colorScheme,
+            colorScheme: colorScheme,
           );
   }
 }
@@ -89,7 +90,7 @@ class QQMusicVideoItem extends StatelessWidget {
                   left: 8.0,
                   bottom: 2.0,
                   child: Text(
-                    '${NumberFormat('#,###').format(_video.playCount)} viewed',
+                    '${humanizeInt(_video.playCount)} views',
                     style: textTheme.labelSmall!.copyWith(
                       color: Colors.white,
                       fontSize: 10.0,
@@ -133,19 +134,27 @@ class NCMVideoItem extends StatelessWidget {
     super.key,
     required video,
     required this.textTheme,
-    required this.colorTheme,
+    required this.colorScheme,
   }) : _video = video;
 
   final NCMVideo _video;
   final TextTheme textTheme;
-  final ColorScheme colorTheme;
+  final ColorScheme colorScheme;
 
   String formatDuration(int milliseconds) {
     Duration duration = Duration(milliseconds: milliseconds);
-    int seconds = duration.inSeconds % 60;
-    String formattedSeconds = seconds < 10 ? '0$seconds' : '$seconds';
-    String formattedMinutes = (duration.inMinutes % 60).toString();
-    return '$formattedMinutes:$formattedSeconds';
+    int remainedSeconds = duration.inSeconds % 60;
+    String formattedSeconds =
+        remainedSeconds < 10 ? '0$remainedSeconds' : '$remainedSeconds';
+    int remainedMinutes = duration.inMinutes % 60;
+    String formattedMinutes =
+        remainedMinutes < 10 ? '0$remainedMinutes' : '$remainedMinutes';
+    int remainedHours = duration.inHours;
+    String formattedHours =
+        remainedHours < 10 ? '0$remainedHours' : '$remainedHours';
+    return formattedHours == '00'
+        ? '$formattedMinutes:$formattedSeconds'
+        : '$formattedHours:$formattedMinutes:$formattedSeconds';
   }
 
   @override
@@ -220,7 +229,7 @@ class NCMVideoItem extends StatelessWidget {
                                 style: textTheme.labelLarge!.copyWith(
                                   fontSize: 16.0,
                                   overflow: TextOverflow.ellipsis,
-                                  color: colorTheme.onPrimary.withOpacity(0.9),
+                                  color: colorScheme.onPrimary.withOpacity(0.9),
                                 ),
                               ),
                             ],
@@ -236,7 +245,7 @@ class NCMVideoItem extends StatelessWidget {
                           _video.singers.map((e) => e.name).join(', '),
                           style: textTheme.labelSmall!.copyWith(
                             fontSize: 12.0,
-                            color: colorTheme.onPrimary.withOpacity(0.5),
+                            color: colorScheme.onPrimary.withOpacity(0.5),
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -244,9 +253,9 @@ class NCMVideoItem extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Text(
-                              '${NumberFormat('#,###').format(_video.playCount)}viewed',
+                              '${humanizeInt(_video.playCount)} views',
                               style: textTheme.labelSmall!.copyWith(
-                                color: colorTheme.onPrimary.withOpacity(0.5),
+                                color: colorScheme.onPrimary.withOpacity(0.5),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -256,7 +265,7 @@ class NCMVideoItem extends StatelessWidget {
                               child: Text(
                                 '·',
                                 style: textTheme.labelSmall!.copyWith(
-                                  color: colorTheme.onPrimary.withOpacity(0.5),
+                                  color: colorScheme.onPrimary.withOpacity(0.5),
                                 ),
                               ),
                             ),
@@ -265,7 +274,7 @@ class NCMVideoItem extends StatelessWidget {
                                   DateTime.fromMillisecondsSinceEpoch(
                                       int.parse(_video.publishTime))),
                               style: textTheme.labelSmall!.copyWith(
-                                color: colorTheme.onPrimary.withOpacity(0.5),
+                                color: colorScheme.onPrimary.withOpacity(0.5),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),

@@ -5,8 +5,8 @@ import '../basic/basic_user.dart';
 
 /// User for bilibili.
 @immutable
-class BilibiliUser extends BasicUser {
-  const BilibiliUser(
+class BiliUser extends BasicUser {
+  const BiliUser(
       this.mid,
       this.gender,
       this.sign,
@@ -175,8 +175,8 @@ class BilibiliUser extends BasicUser {
   /// Your country code.
   final int countryCode;
 
-  factory BilibiliUser.fromJson(Map<String, dynamic> json) {
-    return BilibiliUser(
+  factory BiliUser.fromJson(Map<String, dynamic> json) {
+    return BiliUser(
       json['mid'],
       json['gender'],
       json['sign'],

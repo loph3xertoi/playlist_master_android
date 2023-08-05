@@ -9,7 +9,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_user.dart';
-import '../entities/bilibili/bilibili_user.dart';
+import '../entities/bilibili/bili_user.dart';
 import '../entities/netease_cloud_music/ncm_user.dart';
 import '../entities/pms/pms_user.dart';
 import '../entities/qq_music/qqmusic_user.dart';
@@ -129,7 +129,7 @@ class _BasicInfoState extends State<BasicInfo> {
                       } else if (currentPlatform == 2) {
                         user = snapshot.data as NCMUser;
                       } else if (currentPlatform == 3) {
-                        user = snapshot.data as BilibiliUser;
+                        user = snapshot.data as BiliUser;
                       } else {
                         throw UnsupportedError('Invalid platform');
                       }
@@ -255,7 +255,7 @@ class _BasicInfoState extends State<BasicInfo> {
                                                   : currentPlatform == 3
                                                       ? BuildBilibiliUser(
                                                           user: user
-                                                              as BilibiliUser)
+                                                              as BiliUser)
                                                       : ErrorWidget(
                                                           UnsupportedError(
                                                               'Invalid platform'))),
@@ -870,7 +870,7 @@ class BuildBilibiliUser extends StatelessWidget {
     required this.user,
   });
 
-  final BilibiliUser user;
+  final BiliUser user;
 
   int rgbIntToARGBInt(int rgbInt) {
     String hexString = 'FF${rgbInt.toRadixString(16).toUpperCase()}';

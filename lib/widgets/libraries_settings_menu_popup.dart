@@ -1,17 +1,9 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/entities/basic/basic_library.dart';
 
 import 'multi_libraries_select_popup.dart';
 
 class LibrariesSettingsPopup extends StatelessWidget {
-  const LibrariesSettingsPopup({
-    Key? key,
-    required this.libraries,
-  }) : super(key: key);
-
-  final List<BasicLibrary> libraries;
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -47,9 +39,7 @@ class LibrariesSettingsPopup extends StatelessWidget {
                 Navigator.pop(context);
                 showDialog(
                     context: context,
-                    builder: (_) => MultiLibrariesSelectPopup(
-                          libraries: libraries,
-                        ));
+                    builder: (_) => MultiLibrariesSelectPopup());
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -62,9 +52,7 @@ class LibrariesSettingsPopup extends StatelessWidget {
                         Navigator.pop(context);
                         showDialog(
                             context: context,
-                            builder: (_) => MultiLibrariesSelectPopup(
-                                  libraries: libraries,
-                                ));
+                            builder: (_) => MultiLibrariesSelectPopup());
                       },
                     ),
                     Expanded(
