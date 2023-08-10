@@ -1,0 +1,35 @@
+{
+    "id": 956078940,
+    "type": 2,
+    "title": "自制打农药机甲",
+    "cover": "http://i0.hdslb.com/bfs/archive/6bf0067486cb095d256815e0b83a88e282a7791e.jpg",
+    "intro": "",
+    "page": 1,
+    "duration": 929,
+    "upper": {
+        "mid": 280793434,
+        "name": "手工耿",
+        "face": "http://i1.hdslb.com/bfs/face/b8a75ae7d2a0e2af1d36ca9f1084d850eebb28e3.jpg"
+    },
+    "attr": 0,
+    "cnt_info": {
+        "collect": 63509,
+        "play": 8114045,
+        "danmaku": 70348,
+        "vt": 0,
+        "play_switch": 0,
+        "reply": 0,
+        "view_text_1": "811.4万"
+    },
+    "link": "bilibili://video/956078940",
+    "ctime": 1689504612,
+    "pubtime": 1689505607,
+    "fav_time": 1691462339,
+    "bv_id": "BV1GW4y1d7s6",
+    "bvid": "BV1GW4y1d7s6",
+    "season": null,
+    "ogv": null,
+    "ugc": {
+        "first_cid": 1198636459
+    }
+}

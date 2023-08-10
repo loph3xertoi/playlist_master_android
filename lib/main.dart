@@ -6,12 +6,13 @@ import 'entities/basic/basic_song.dart';
 import 'entities/basic/basic_video.dart';
 import 'pages/detail_favlist_page.dart';
 import 'pages/detail_library_page.dart';
+import 'pages/detail_resource_page.dart';
 import 'pages/detail_song_page.dart';
 import 'pages/home_page.dart';
 import 'pages/related_videos_page.dart';
 import 'pages/search_page.dart';
 import 'pages/similar_songs_page.dart';
-import 'pages/song_player_page.dart';
+import 'pages/songs_player_page.dart';
 import 'pages/splash_screen.dart';
 import 'pages/video_player_page.dart';
 import 'states/app_state.dart';
@@ -63,7 +64,9 @@ class MyApp extends StatelessWidget {
             '/search_page': (context) => SearchPage(),
             '/detail_library_page': (context) => DetailLibraryPage(),
             '/detail_favlist_page': (context) => DetailFavListPage(),
-            '/song_player_page': (context) => SongPlayerPage(),
+            '/songs_player_page': (context) => SongsPlayerPage(),
+            '/detail_resource_page': (context) => DetailResourcePage(),
+            // '/resources_player_page': (context) => ResourcesPlayerPage(),
           },
           onGenerateRoute: (settings) {
             if (settings.name == '/detail_song_page') {

@@ -3,11 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../entities/basic/basic_paged_songs.dart';
 import '../entities/basic/basic_song.dart';
-import '../entities/netease_cloud_music/ncm_paged_songs.dart';
+import '../entities/bilibili/bili_resource.dart';
 import '../entities/netease_cloud_music/ncm_song.dart';
-import '../entities/qq_music/qqmusic_paged_songs.dart';
 import '../entities/qq_music/qqmusic_song.dart';
 import '../states/app_state.dart';
 import 'basic_info.dart';
@@ -32,15 +30,15 @@ class _MySearchBarState extends State<MySearchBar>
   late AnimationController _animationController;
   late TextEditingController _textEditingController;
   late FocusNode _focusNode;
-  late int _platform;
+  late int _currentPlatform;
+  late bool _isUsingMockData;
   late List<BasicSong?> _searchedSongs;
+  late List<BiliResource?> _searchedResources;
+  MyAppState? _appState;
 
   @override
   void initState() {
     super.initState();
-    final state = Provider.of<MyAppState>(context, listen: false);
-    _platform = state.currentPlatform;
-    _searchedSongs = state.searchedSongs;
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
@@ -77,50 +75,53 @@ class _MySearchBarState extends State<MySearchBar>
     searchString = searchString.trim();
     print(searchString);
     if (widget.notInHomepage && !widget.inDetailLibraryPage) {
-      appState.currentPage = 2;
-      if (searchString != '') {
-        appState.searchingString = searchString;
-        BasicPagedSongs? pagedSongs = await appState.fetchSearchedSongs(
-            searchString, appState.firstPageNo, appState.pageSize, _platform);
-        if (pagedSongs != null) {
-          appState.totalSearchedSongs = pagedSongs.total;
-          if (_platform == 0) {
-            throw UnimplementedError('Not yet implement pms platform');
-          } else if (_platform == 1) {
-            appState.searchedSongs = (pagedSongs as QQMusicPagedSongs).songs;
-          } else if (_platform == 2) {
-            appState.searchedSongs = (pagedSongs as NCMPagedSongs).songs;
-          } else if (_platform == 3) {
-            throw UnimplementedError('Not yet implement bilibili platform');
-          } else {
-            throw UnsupportedError('Invalid platform');
-          }
+      // Only search once per keyword, more resources of this keyword should be fetched by drag down the list in search page.
+      if (searchString != '' && appState.keyword != searchString) {
+        appState.keyword = searchString;
+        var pagedDataDTO = await appState.fetchSearchedSongs(
+            searchString, 1, 20, _currentPlatform);
+        if (pagedDataDTO != null) {
+          setState(() {
+            appState.hasMore = pagedDataDTO.hasMore;
+            var list = pagedDataDTO.list;
+            if (_currentPlatform == 0) {
+              throw UnimplementedError('Not yet implement pms platform');
+            } else if (_currentPlatform == 1) {
+              _searchedSongs = list as List<QQMusicSong>;
+            } else if (_currentPlatform == 2) {
+              _searchedSongs = list as List<NCMSong>;
+            } else if (_currentPlatform == 3) {
+              _searchedResources = list as List<BiliResource>;
+            } else {
+              throw UnsupportedError('Invalid platform');
+            }
+          });
         }
       }
     } else if (widget.inDetailLibraryPage) {
       if (searchString != '') {
-        appState.searchingString = searchString;
-        if (_platform == 0) {
+        appState.keyword = searchString;
+        if (_currentPlatform == 0) {
           throw UnimplementedError('Not yet implement pms platform');
-        } else if (_platform == 1) {
-          appState.searchedSongs = appState.rawQueue!
+        } else if (_currentPlatform == 1) {
+          appState.searchedSongs = appState.rawSongsInLibrary!
               .where((e) =>
                   (e as QQMusicSong).name.contains(searchString) ||
                   e.singers.any((singer) => singer.name.contains(searchString)))
               .toList();
-        } else if (_platform == 2) {
-          appState.searchedSongs = appState.rawQueue!
+        } else if (_currentPlatform == 2) {
+          appState.searchedSongs = appState.rawSongsInLibrary!
               .where((e) =>
                   (e as NCMSong).name.contains(searchString) ||
                   e.singers.any((singer) => singer.name.contains(searchString)))
               .toList();
-        } else if (_platform == 3) {
+        } else if (_currentPlatform == 3) {
           throw UnimplementedError('Not yet implement bilibili platform');
         } else {
           throw UnsupportedError('Invalid platform');
         }
       } else {
-        appState.searchedSongs = appState.rawQueue!;
+        appState.searchedSongs = appState.rawSongsInLibrary!;
       }
     }
   }
@@ -140,12 +141,13 @@ class _MySearchBarState extends State<MySearchBar>
 
   @override
   Widget build(BuildContext context) {
-    // final mySearchState = context.watch<MySearchState>();
-    // bool isSearching = mySearchState.isSearching;
-    MyAppState appState = context.watch<MyAppState>();
-    var isUsingMockData = appState.isUsingMockData;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    MyAppState appState = context.watch<MyAppState>();
+    _currentPlatform = appState.currentPlatform;
+    _isUsingMockData = appState.isUsingMockData;
+    _searchedSongs = appState.searchedSongs;
+    _searchedResources = appState.searchedResources;
     return Container(
       height: 40.0,
       margin: EdgeInsets.all(12.0),
@@ -215,8 +217,8 @@ class _MySearchBarState extends State<MySearchBar>
                 onPressed: widget.notInHomepage
                     ? () {
                         appState.searchedSongs.clear();
-                        appState.totalSearchedSongs = 0;
-                        appState.currentPage = 2;
+                        // appState.totalSearchedSongs = 0;
+                        // appState.currentPage = 2;
                         _onBackIconPressed();
                       }
                     : _onMenuIconPressed,
@@ -252,7 +254,7 @@ class _MySearchBarState extends State<MySearchBar>
                           padding: EdgeInsets.zero,
                           icon: CircleAvatar(
                             radius: 15.0,
-                            backgroundImage: isUsingMockData
+                            backgroundImage: _isUsingMockData
                                 ? Image.asset('assets/images/avatar.png').image
                                 : CachedNetworkImageProvider(
                                     MyAppState.defaultCoverImage,

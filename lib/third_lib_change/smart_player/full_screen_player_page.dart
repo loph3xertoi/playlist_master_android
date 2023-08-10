@@ -408,6 +408,7 @@ class _FullScreenPlayerPageState extends State<FullScreenPlayerPage> {
               width: double.maxFinite,
               height: 250,
               child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: castDevices.keys.length /*+ 1*/,
                 itemBuilder: (context, index) {
                   return ListTile(

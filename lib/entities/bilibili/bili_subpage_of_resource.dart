@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 @immutable
 class BiliSubpageOfResource {
   BiliSubpageOfResource(this.cid, this.page, this.partName, this.duration,
-      this.width, this.height, this.firstFrame);
+      this.width, this.height);
 
   /// The cid of this resource.
   final int cid;
@@ -26,8 +26,8 @@ class BiliSubpageOfResource {
   /// The height of this part of resource.
   final int height;
 
-  /// The first frame of this part of resource.
-  final String firstFrame;
+  // /// The first frame of this part of resource.
+  // final String firstFrame;
 
   factory BiliSubpageOfResource.fromJson(Map<String, dynamic> json) {
     return BiliSubpageOfResource(
@@ -37,7 +37,7 @@ class BiliSubpageOfResource {
       json['duration'],
       json['width'],
       json['height'],
-      json['firstFrame'],
+      // json['firstFrame'],
     );
   }
 
@@ -49,12 +49,12 @@ class BiliSubpageOfResource {
       'duration': duration,
       'width': width,
       'height': height,
-      'firstFrame': firstFrame,
+      // 'firstFrame': firstFrame,
     };
   }
 
   @override
   String toString() {
-    return 'BiliSubpageOfResource{cid: $cid, page: $page, partName: $partName, duration: $duration, width: $width, height: $height, firstFrame: $firstFrame}';
+    return 'BiliSubpageOfResource{cid: $cid, page: $page, partName: $partName, duration: $duration, width: $width, height: $height}';
   }
 }

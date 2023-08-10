@@ -38,10 +38,10 @@ class _VideoItemState extends State<VideoItem> {
 
   @override
   Widget build(BuildContext context) {
-    MyAppState appState = context.watch<MyAppState>();
-    var currentPlatform = appState.currentPlatform;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    MyAppState appState = context.watch<MyAppState>();
+    var currentPlatform = appState.currentPlatform;
     return currentPlatform == 1
         ? QQMusicVideoItem(video: _video, textTheme: textTheme)
         : NCMVideoItem(
@@ -210,6 +210,7 @@ class NCMVideoItem extends StatelessWidget {
                         alignment: Alignment.centerLeft,
                         child: RichText(
                           maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           text: TextSpan(
                             children: [
                               isMV
@@ -223,7 +224,7 @@ class NCMVideoItem extends StatelessWidget {
                                         ),
                                       ),
                                     )
-                                  : WidgetSpan(child: Container()),
+                                  : TextSpan(),
                               TextSpan(
                                 text: _video.name,
                                 style: textTheme.labelLarge!.copyWith(

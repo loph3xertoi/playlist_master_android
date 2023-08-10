@@ -18,7 +18,7 @@ class ThemeNotifier with ChangeNotifier {
     Color(0xFFCE8B46),
   ];
 
-  final List<Color> _songPlayerPageBgColors = [
+  final List<Color> _playerPageBackgroundColors = [
     Color(0xFF011934),
     Color(0xFF092B47),
     Color(0xFF142B41),
@@ -49,13 +49,13 @@ class ThemeNotifier with ChangeNotifier {
 
   List<Color>? _homepageBg;
   List<Color>? _detailLibraryPageBg;
-  List<Color>? _songPlayerPageBg;
+  List<Color>? _playerPageBackground;
 
   List<Color>? get homepageBg => _homepageBg;
 
   List<Color>? get detailLibraryPageBg => _detailLibraryPageBg;
 
-  List<Color>? get songPlayerPageBg => _songPlayerPageBg;
+  List<Color>? get playerPageBackground => _playerPageBackground;
 
   final lightTheme = ThemeData(
     useMaterial3: true,
@@ -70,6 +70,7 @@ class ThemeNotifier with ChangeNotifier {
       onTertiary: const Color.fromARGB(47, 0, 0, 0),
       background: Colors.white,
       primaryContainer: Colors.white,
+      onPrimaryContainer: Color(0xFFF7F6F9),
     ),
     textSelectionTheme: TextSelectionThemeData(
       selectionHandleColor: Color(0xFF212121),
@@ -148,6 +149,7 @@ class ThemeNotifier with ChangeNotifier {
       onTertiary: Colors.white38,
       background: Color(0xFF212121),
       primaryContainer: Colors.black,
+      onPrimaryContainer: Colors.black26,
     ),
     textSelectionTheme: TextSelectionThemeData(
       selectionHandleColor: Colors.amber,
@@ -220,13 +222,13 @@ class ThemeNotifier with ChangeNotifier {
         _themeData = lightTheme;
         _homepageBg = _homepageBgColors;
         _detailLibraryPageBg = _playlistDetailPageBgColors;
-        _songPlayerPageBg = _songPlayerPageBgColors;
+        _playerPageBackground = _playerPageBackgroundColors;
       } else {
         print('setting dark theme');
         _themeData = darkTheme;
         _homepageBg = _darkHomepageBgColors;
         _detailLibraryPageBg = _darkPlaylistDetailPageBgColors;
-        _songPlayerPageBg = _darkSongPlayerPageBgColors;
+        _playerPageBackground = _darkSongPlayerPageBgColors;
       }
       notifyListeners();
     });
@@ -236,7 +238,7 @@ class ThemeNotifier with ChangeNotifier {
     _themeData = lightTheme;
     _homepageBg = _homepageBgColors;
     _detailLibraryPageBg = _playlistDetailPageBgColors;
-    _songPlayerPageBg = _songPlayerPageBgColors;
+    _playerPageBackground = _playerPageBackgroundColors;
     StorageManager.saveData('themeMode', 'light');
     notifyListeners();
   }
@@ -245,7 +247,7 @@ class ThemeNotifier with ChangeNotifier {
     _themeData = darkTheme;
     _homepageBg = _darkHomepageBgColors;
     _detailLibraryPageBg = _darkPlaylistDetailPageBgColors;
-    _songPlayerPageBg = _darkSongPlayerPageBgColors;
+    _playerPageBackground = _darkSongPlayerPageBgColors;
     StorageManager.saveData('themeMode', 'dark');
     notifyListeners();
   }

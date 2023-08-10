@@ -29,11 +29,6 @@ class SongItem extends StatefulWidget {
 }
 
 class _SongItemState extends State<SongItem> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
   void _addSongToLibrary(BuildContext context, MyAppState appState) async {
     if (mounted) {
       List<Future<Result?>>? list =
@@ -68,7 +63,7 @@ class _SongItemState extends State<SongItem> {
         for (Result? result in results) {
           if (result != null && result.success) {
             appState.refreshLibraries!(appState, true);
-            appState.refreshDetailLibraryPage!();
+            appState.refreshDetailLibraryPage!(appState);
             MyToast.showToast('Add songs successfully');
             break;
           }
@@ -79,10 +74,10 @@ class _SongItemState extends State<SongItem> {
 
   @override
   Widget build(BuildContext context) {
-    MyAppState appState = context.watch<MyAppState>();
-    var currentPlatform = appState.currentPlatform;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    MyAppState appState = context.watch<MyAppState>();
+    var currentPlatform = appState.currentPlatform;
     bool isTakenDown = widget.song.isTakenDown;
     int payPlayType = widget.song.payPlay;
     return SizedBox(
@@ -182,15 +177,15 @@ class _SongItemState extends State<SongItem> {
                       return;
                     }
 
-                    if (appState.player == null) {
-                      appState.queue = [widget.song];
+                    if (appState.songsPlayer == null) {
+                      appState.songsQueue = [widget.song];
                       appState.currentPlayingSongInQueue = 0;
                       try {
-                        await appState.initAudioPlayer();
+                        await appState.initSongsPlayer();
                       } catch (e) {
                         MyToast.showToast('Exception: $e');
                         MyLogger.logger.e('Exception: $e');
-                        appState.disposeSongPlayer();
+                        appState.disposeSongsPlayer();
                         return;
                       }
 
@@ -200,11 +195,11 @@ class _SongItemState extends State<SongItem> {
 
                       appState.currentDetailSong = null;
 
-                      appState.player!.play();
+                      appState.songsPlayer!.play();
 
                       MyToast.showToast('Added to queue');
                     } else {
-                      appState.queue!.insert(
+                      appState.songsQueue!.insert(
                           appState.currentPlayingSongInQueue! + 1, widget.song);
                       AudioSource newAudioSource;
                       if (appState.isUsingMockData) {
@@ -221,7 +216,7 @@ class _SongItemState extends State<SongItem> {
                             title: widget.song.name,
                             artUri: await appState.getImageFileFromAssets(
                                 widget.song.cover,
-                                appState.queue!.indexOf(widget.song)),
+                                appState.songsQueue!.indexOf(widget.song)),
                           ),
                         );
                       } else {
@@ -240,7 +235,7 @@ class _SongItemState extends State<SongItem> {
                           ),
                         );
                       }
-                      appState.initQueue!.insert(
+                      appState.songsAudioSource!.insert(
                           appState.currentPlayingSongInQueue! + 1,
                           newAudioSource);
                       MyToast.showToast('Added to queue');

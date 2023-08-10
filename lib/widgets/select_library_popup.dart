@@ -49,10 +49,10 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
 
   @override
   Widget build(BuildContext context) {
-    MyAppState appState = context.watch<MyAppState>();
-    var currentPlatform = appState.currentPlatform;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    MyAppState appState = context.watch<MyAppState>();
+    var currentPlatform = appState.currentPlatform;
     return ClipRRect(
       borderRadius: BorderRadius.only(
         topLeft: Radius.circular(30.0),
@@ -176,92 +176,106 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                     ],
                   ),
                   Expanded(
-                    child: ListView(
-                      controller: widget.scrollController,
-                      children: [
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () async {
-                              Result? result =
-                                  await await showDialog<Future<Result?>>(
-                                context: context,
-                                builder: (_) => CreateLibraryDialog(
-                                  initText: widget.songs[0].name,
-                                ),
-                              );
-
-                              if (result != null && result.success) {
-                                if (currentPlatform == 0) {
-                                  throw UnimplementedError(
-                                      'Not yet implement pms platform');
-                                } else if (currentPlatform == 1) {
-                                  BasicLibrary library = QQMusicPlaylist(
-                                    result.data as int,
-                                    '',
-                                    name: '',
-                                    cover: '',
-                                    itemCount: 1,
-                                  );
-                                  widget.action == 'add'
-                                      ? _addSongsToLibrary(appState, library)
-                                      : _moveSongsToLibrary(appState, library);
-                                } else if (currentPlatform == 2) {
-                                  BasicLibrary library = NCMPlaylist(
-                                    result.data as int,
-                                    name: '',
-                                    cover: '',
-                                    itemCount: 1,
-                                  );
-                                  widget.action == 'add'
-                                      ? _addSongsToLibrary(appState, library)
-                                      : _moveSongsToLibrary(appState, library);
-                                } else if (currentPlatform == 3) {
-                                  throw UnimplementedError(
-                                      'Not yet implement bilibili platform');
-                                } else {
-                                  throw UnsupportedError('Invalid platform');
-                                }
-                              }
-                            },
-                            child: SelectableLibraryItem(
-                              library: null,
-                              isCreateLibraryItem: true,
-                              inMultiSelectMode: false,
-                              selected: false,
-                            ),
-                          ),
-                        ),
-                        for (int i = 0; i < _localLibraries!.length; i++)
+                    child: RefreshIndicator(
+                      color: colorScheme.onPrimary,
+                      strokeWidth: 2.0,
+                      onRefresh: () async {
+                        setState(() {
+                          _libraries =
+                              appState.refreshLibraries!(appState, true);
+                          _localLibraries?.clear();
+                        });
+                      },
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        controller: widget.scrollController,
+                        children: [
                           Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              onTap: () {
-                                if (_inMultiSelectMode) {
-                                  setState(() {
-                                    if (_selectedIndex.contains(i)) {
-                                      _selectedIndex.remove(i);
-                                    } else {
-                                      _selectedIndex.add(i);
-                                    }
-                                  });
-                                } else {
-                                  widget.action == 'add'
-                                      ? _addSongsToLibrary(
-                                          appState, _localLibraries![i])
-                                      : _moveSongsToLibrary(
-                                          appState, _localLibraries![i]);
+                              onTap: () async {
+                                Result? result =
+                                    await await showDialog<Future<Result?>>(
+                                  context: context,
+                                  builder: (_) => CreateLibraryDialog(
+                                    initText: widget.songs[0].name,
+                                  ),
+                                );
+
+                                if (result != null && result.success) {
+                                  if (currentPlatform == 0) {
+                                    throw UnimplementedError(
+                                        'Not yet implement pms platform');
+                                  } else if (currentPlatform == 1) {
+                                    BasicLibrary library = QQMusicPlaylist(
+                                      result.data as int,
+                                      '',
+                                      name: '',
+                                      cover: '',
+                                      itemCount: 1,
+                                    );
+                                    widget.action == 'add'
+                                        ? _addSongsToLibrary(appState, library)
+                                        : _moveSongsToLibrary(
+                                            appState, library);
+                                  } else if (currentPlatform == 2) {
+                                    BasicLibrary library = NCMPlaylist(
+                                      result.data as int,
+                                      name: '',
+                                      cover: '',
+                                      itemCount: 1,
+                                    );
+                                    widget.action == 'add'
+                                        ? _addSongsToLibrary(appState, library)
+                                        : _moveSongsToLibrary(
+                                            appState, library);
+                                  } else if (currentPlatform == 3) {
+                                    throw UnimplementedError(
+                                        'Not yet implement bilibili platform');
+                                  } else {
+                                    throw UnsupportedError('Invalid platform');
+                                  }
                                 }
                               },
                               child: SelectableLibraryItem(
-                                library: _localLibraries![i],
-                                isCreateLibraryItem: false,
-                                inMultiSelectMode: _inMultiSelectMode,
-                                selected: _selectedIndex.contains(i),
+                                library: null,
+                                isCreateLibraryItem: true,
+                                inMultiSelectMode: false,
+                                selected: false,
                               ),
                             ),
                           ),
-                      ],
+                          for (int i = 0; i < _localLibraries!.length; i++)
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  if (_inMultiSelectMode) {
+                                    setState(() {
+                                      if (_selectedIndex.contains(i)) {
+                                        _selectedIndex.remove(i);
+                                      } else {
+                                        _selectedIndex.add(i);
+                                      }
+                                    });
+                                  } else {
+                                    widget.action == 'add'
+                                        ? _addSongsToLibrary(
+                                            appState, _localLibraries![i])
+                                        : _moveSongsToLibrary(
+                                            appState, _localLibraries![i]);
+                                  }
+                                },
+                                child: SelectableLibraryItem(
+                                  library: _localLibraries![i],
+                                  isCreateLibraryItem: false,
+                                  inMultiSelectMode: _inMultiSelectMode,
+                                  selected: _selectedIndex.contains(i),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ],

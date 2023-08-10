@@ -29,25 +29,36 @@ class DetailLibraryPage extends StatefulWidget {
 
 class _DetailLibraryPageState extends State<DetailLibraryPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   late Future<BasicLibrary?> _detailLibrary;
-  late MyAppState _state;
+
+  // Current fav list.
+  late BasicLibrary _currentLibrary;
+
+  MyAppState? _appState;
+
   bool _changeRawQueue = true;
 
-  void _refreshDetailLibraryPage() {
+  // Current platform.
+  late int _currentPlatform;
+
+  // Is using mock data?
+  late bool _isUsingMockData;
+
+  void _refreshDetailLibraryPage(MyAppState appState) {
     setState(() {
-      _detailLibrary = _state.fetchDetailLibrary(
-          _state.rawOpenedLibrary!, _state.currentPlatform);
+      _detailLibrary =
+          appState.fetchDetailLibrary(_currentLibrary, _currentPlatform);
     });
   }
 
-  void onSongTap(MyAppState appState, int index, BuildContext context,
-      List<BasicSong> searchedSongs) async {
+  void onSongTap(
+      int index, List<BasicSong> searchedSongs, MyAppState appState) async {
     var isTakenDown = searchedSongs[index].isTakenDown;
     var payPlayType = searchedSongs[index].payPlay;
-    var currentPlatform = appState.currentPlatform;
-    var player = appState.player;
+    var songsPlayer = appState.songsPlayer;
 
-    if (currentPlatform == 1 && payPlayType == 1) {
+    if (_currentPlatform == 1 && payPlayType == 1) {
       MyToast.showToast('This song need vip to play');
       MyLogger.logger.e('This song need vip to play');
       return;
@@ -59,112 +70,104 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
       return;
     }
 
-    if (appState.player == null) {
-      if (currentPlatform == 2) {
-        appState.queue =
+    if (songsPlayer == null) {
+      if (_currentPlatform == 2) {
+        appState.songsQueue =
             searchedSongs.where((song) => !song.isTakenDown).toList();
       } else {
-        appState.queue = searchedSongs
+        appState.songsQueue = searchedSongs
             .where((song) => !song.isTakenDown && (song.payPlay == 0))
             .toList();
       }
-      // Real index in queue, not in raw queue as some songs may be taken down.
-      int realIndex = appState.queue!.indexOf(searchedSongs[index]);
+      // Real index in songsQueue, not in raw songsQueue as some songs may be taken down.
+      int realIndex = appState.songsQueue!.indexOf(searchedSongs[index]);
       appState.currentPlayingSongInQueue = realIndex;
       try {
-        await appState.initAudioPlayer();
+        await appState.initSongsPlayer();
       } catch (e) {
         MyToast.showToast('Exception: $e');
         MyLogger.logger.e('Exception: $e');
-        appState.disposeSongPlayer();
+        appState.disposeSongsPlayer();
         return;
       }
-      appState.canSongPlayerPagePop = true;
-      appState.currentSong = appState.queue![realIndex];
+      appState.canSongsPlayerPagePop = true;
+      appState.currentSong = appState.songsQueue![realIndex];
       appState.prevSong = appState.currentSong;
       appState.currentDetailSong = null;
-      appState.isFirstLoadSongPlayer = true;
-      appState.player!.play();
+      appState.isFirstLoadSongsPlayer = true;
+      appState.songsPlayer!.play();
     } else if (appState.currentSong == searchedSongs[index]) {
-      if (!player!.playerState.playing) {
-        player.play();
+      if (!songsPlayer.playerState.playing) {
+        songsPlayer.play();
       }
     } else {
-      if (currentPlatform == 2) {
-        appState.queue =
+      if (_currentPlatform == 2) {
+        appState.songsQueue =
             searchedSongs.where((song) => !song.isTakenDown).toList();
       } else {
-        appState.queue = searchedSongs
+        appState.songsQueue = searchedSongs
             .where((song) => !song.isTakenDown && (song.payPlay == 0))
             .toList();
       }
-      // Real index in queue, not in raw queue as some songs may be taken down.
-      int realIndex = appState.queue!.indexOf(searchedSongs[index]);
-      appState.canSongPlayerPagePop = true;
-      appState.player!.stop();
-      appState.player!.dispose();
-      appState.player = null;
-      appState.initQueue!.clear();
+      // Real index in songsQueue, not in raw songsQueue as some songs may be taken down.
+      int realIndex = appState.songsQueue!.indexOf(searchedSongs[index]);
+      appState.canSongsPlayerPagePop = true;
+      appState.songsPlayer!.stop();
+      appState.songsPlayer!.dispose();
+      appState.songsPlayer = null;
+      appState.songsAudioSource!.clear();
       appState.currentPlayingSongInQueue = realIndex;
       try {
-        await appState.initAudioPlayer();
+        await appState.initSongsPlayer();
       } catch (e) {
         MyToast.showToast('Exception: $e');
         MyLogger.logger.e('Exception: $e');
-        appState.disposeSongPlayer();
+        appState.disposeSongsPlayer();
         return;
       }
-      appState.currentSong = appState.queue![realIndex];
+      appState.currentSong = appState.songsQueue![realIndex];
       appState.currentDetailSong = null;
       appState.prevSong = appState.currentSong;
-      appState.isFirstLoadSongPlayer = true;
-      appState.player!.play();
+      appState.isFirstLoadSongsPlayer = true;
+      appState.songsPlayer!.play();
     }
-    appState.isPlayerPageOpened = true;
+    appState.isSongsPlayerPageOpened = true;
     if (context.mounted) {
-      Navigator.pushNamed(context, '/song_player_page');
+      Navigator.pushNamed(context, '/songs_player_page');
     }
   }
 
   @override
   void initState() {
     super.initState();
-    // _songs = _detailLibrary.songs;
     final state = Provider.of<MyAppState>(context, listen: false);
-    var isUsingMockData = state.isUsingMockData;
-    var openedLibrary = state.rawOpenedLibrary;
-    _state = state;
-    // var rawQueue = state.rawQueue;
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   state.rawQueue = null;
-    // });
-    // _tid = ModalRoute.of(context)!.settings.arguments as String;
-    if (isUsingMockData) {
+    _isUsingMockData = state.isUsingMockData;
+    _currentPlatform = state.currentPlatform;
+    _currentLibrary = state.rawOpenedLibrary!;
+    if (_isUsingMockData) {
       _detailLibrary = Future.value(MockData.detailLibrary);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        state.rawQueue = MockData.songs;
-        state.queue = MockData.songs;
+        state.rawSongsInLibrary = MockData.songs;
+        state.songsQueue = MockData.songs;
         state.openedLibrary = state.rawOpenedLibrary;
       });
     } else {
       state.refreshDetailLibraryPage = _refreshDetailLibraryPage;
       _detailLibrary =
-          state.fetchDetailLibrary(openedLibrary!, state.currentPlatform);
+          state.fetchDetailLibrary(_currentLibrary, _currentPlatform);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     print('build detail library page');
-    MyAppState appState = context.watch<MyAppState>();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-
-    var isUsingMockData = appState.isUsingMockData;
-    var openedLibrary = appState.rawOpenedLibrary;
+    MyAppState appState = context.watch<MyAppState>();
+    _isUsingMockData = appState.isUsingMockData;
+    _currentPlatform = appState.currentPlatform;
+    _currentLibrary = appState.rawOpenedLibrary!;
     var searchedSongs = appState.searchedSongs;
-    var currentPlatform = appState.currentPlatform;
-    var rawQueue = appState.rawQueue;
     return Consumer<ThemeNotifier>(
       builder: (context, theme, _) => Material(
         child: Scaffold(
@@ -247,11 +250,11 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                               ),
                                               onPressed: () {
                                                 setState(() {
+                                                  _changeRawQueue = true;
                                                   _detailLibrary = appState
                                                       .fetchDetailLibrary(
-                                                          openedLibrary!,
-                                                          appState
-                                                              .currentPlatform);
+                                                          _currentLibrary,
+                                                          _currentPlatform);
                                                 });
                                               },
                                             ),
@@ -260,26 +263,26 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                       );
                                     } else {
                                       dynamic detailLibrary;
-                                      if (isUsingMockData) {
+                                      if (_isUsingMockData) {
                                         detailLibrary = snapshot.data == null
                                             ? null
                                             : snapshot.data
                                                 as QQMusicDetailPlaylist;
                                       } else {
-                                        if (currentPlatform == 0) {
+                                        if (_currentPlatform == 0) {
                                           throw UnimplementedError(
                                               'Not yet implement pms platform');
-                                        } else if (currentPlatform == 1) {
+                                        } else if (_currentPlatform == 1) {
                                           detailLibrary = snapshot.data == null
                                               ? null
                                               : snapshot.data
                                                   as QQMusicDetailPlaylist;
-                                        } else if (currentPlatform == 2) {
+                                        } else if (_currentPlatform == 2) {
                                           detailLibrary = snapshot.data == null
                                               ? null
                                               : snapshot.data
                                                   as NCMDetailPlaylist;
-                                        } else if (currentPlatform == 3) {
+                                        } else if (_currentPlatform == 3) {
                                           throw UnimplementedError(
                                               'Not yet implement bilibili platform');
                                         } else {
@@ -289,11 +292,10 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                       }
 
                                       if (detailLibrary != null) {
-                                        rawQueue = detailLibrary.songs;
                                         WidgetsBinding.instance
                                             .addPostFrameCallback((_) {
                                           if (_changeRawQueue) {
-                                            appState.rawQueue =
+                                            appState.rawSongsInLibrary =
                                                 detailLibrary.songs;
                                             appState.searchedSongs =
                                                 detailLibrary.songs;
@@ -352,7 +354,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                     .circular(
                                                                         4.0),
                                                             child:
-                                                                isUsingMockData
+                                                                _isUsingMockData
                                                                     ? Image.asset(
                                                                         detailLibrary
                                                                             .cover)
@@ -487,10 +489,9 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                         onPressed:
                                                                             () {
                                                                           onSongTap(
-                                                                              appState,
                                                                               0,
-                                                                              context,
-                                                                              searchedSongs);
+                                                                              searchedSongs,
+                                                                              appState);
                                                                         },
                                                                         icon:
                                                                             Icon(
@@ -548,45 +549,57 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                   ),
                                                                 ),
                                                                 Expanded(
-                                                                  child: ListView
-                                                                      .builder(
-                                                                    // TODO: fix this. Mock.songs have 10 songs only.
-                                                                    // itemCount: _detailLibrary.songsCount,
-                                                                    itemCount: isUsingMockData
-                                                                        ? min(
-                                                                            detailLibrary
-                                                                                .itemCount,
-                                                                            10)
-                                                                        : searchedSongs
-                                                                            .length,
-                                                                    itemBuilder:
-                                                                        (context,
-                                                                            index) {
-                                                                      return Material(
-                                                                        color: Colors
-                                                                            .transparent,
-                                                                        child:
-                                                                            InkWell(
-                                                                          // TODO: fix bug: the init cover will be wrong sometimes when first loading
-                                                                          // song player in shuffle mode.
-                                                                          onTap:
-                                                                              () {
-                                                                            onSongTap(
-                                                                                appState,
-                                                                                index,
-                                                                                context,
-                                                                                searchedSongs);
-                                                                          },
-                                                                          child:
-                                                                              SongItem(
-                                                                            index:
-                                                                                index,
-                                                                            song:
-                                                                                searchedSongs[index],
-                                                                          ),
-                                                                        ),
-                                                                      );
+                                                                  child:
+                                                                      RefreshIndicator(
+                                                                    color: colorScheme
+                                                                        .onPrimary,
+                                                                    strokeWidth:
+                                                                        2.0,
+                                                                    onRefresh:
+                                                                        () async {
+                                                                      setState(
+                                                                          () {
+                                                                        _changeRawQueue =
+                                                                            true;
+                                                                        _detailLibrary = appState.fetchDetailLibrary(
+                                                                            _currentLibrary,
+                                                                            _currentPlatform);
+                                                                      });
                                                                     },
+                                                                    child: ListView
+                                                                        .builder(
+                                                                      physics:
+                                                                          const AlwaysScrollableScrollPhysics(),
+                                                                      // TODO: fix this. Mock.songs have 10 songs only.
+                                                                      // itemCount: _detailLibrary.songsCount,
+                                                                      itemCount: _isUsingMockData
+                                                                          ? min(
+                                                                              detailLibrary.itemCount,
+                                                                              10)
+                                                                          : searchedSongs.length,
+                                                                      itemBuilder:
+                                                                          (context,
+                                                                              index) {
+                                                                        return Material(
+                                                                          color:
+                                                                              Colors.transparent,
+                                                                          child:
+                                                                              InkWell(
+                                                                            // TODO: fix bug: the init cover will be wrong sometimes when first loading
+                                                                            // song songsPlayer in shuffle mode.
+                                                                            onTap:
+                                                                                () {
+                                                                              onSongTap(index, searchedSongs, appState);
+                                                                            },
+                                                                            child:
+                                                                                SongItem(
+                                                                              index: index,
+                                                                              song: searchedSongs[index],
+                                                                            ),
+                                                                          ),
+                                                                        );
+                                                                      },
+                                                                    ),
                                                                   ),
                                                                 )
                                                               ],

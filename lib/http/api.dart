@@ -19,8 +19,8 @@ class API {
   /// api: GET /similarSongs/[songId]?platform=[platform]
   static const similarSongs = '/similarSongs';
 
-  /// Search songs according to [keywords] in [platform] with [offset] and [limit].
-  /// api: GET /search/song/[keywords]?offset=[offset]&limit=[limit]&platform=[platform]
+  /// Search songs according to [keywords] in [platform] with [pageNo] and [pageSize].
+  /// api: GET /search/song/[keywords]?pageNo=[pageNo]&pageSize=[pageSize]&platform=[platform]
   static const searchSong = '/search/song';
 
   // /// Get song's link according to [songMid], [mediaMid] and [type] in [platform].

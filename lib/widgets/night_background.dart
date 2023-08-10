@@ -59,8 +59,8 @@ class NightBackgroundState extends State<NightBackground>
 
   @override
   Widget build(BuildContext context) {
-    size = MediaQuery.of(context).size;
     MyAppState appState = context.watch<MyAppState>();
+    size = MediaQuery.of(context).size;
     return Consumer<ThemeNotifier>(
       builder: (context, theme, _) => Scaffold(
         backgroundColor: const Color(0xFF414a4c),

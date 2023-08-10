@@ -22,10 +22,10 @@ class SelectableLibraryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    MyAppState appState = context.watch<MyAppState>();
-    var isUsingMockData = appState.isUsingMockData;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    MyAppState appState = context.watch<MyAppState>();
+    var isUsingMockData = appState.isUsingMockData;
     return Ink(
       height: 60.0,
       width: double.infinity,

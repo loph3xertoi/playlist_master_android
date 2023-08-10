@@ -19,19 +19,19 @@ class CreateSongItemMenuDialog extends StatefulWidget {
 class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
   void _removeSongFromLibrary(BuildContext context, MyAppState appState) async {
     appState.rawOpenedLibrary!.itemCount -= 1;
-    appState.rawQueue!.remove(widget.song);
+    appState.rawSongsInLibrary!.remove(widget.song);
     appState.searchedSongs.remove(widget.song);
     await appState.removeSongsFromLibrary(
         [widget.song], appState.openedLibrary!, appState.currentPlatform);
     appState.refreshLibraries!(appState, true);
-    appState.refreshDetailLibraryPage!();
+    appState.refreshDetailLibraryPage!(appState);
   }
 
   @override
   Widget build(BuildContext context) {
-    MyAppState appState = context.watch<MyAppState>();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    MyAppState appState = context.watch<MyAppState>();
     return Dialog(
       insetPadding: EdgeInsets.all(0.0),
       alignment: Alignment.bottomCenter,
@@ -167,7 +167,7 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
                 Radius.circular(10.0),
               ),
               onTap: () {
-                appState.isPlayerPageOpened = false;
+                appState.isSongsPlayerPageOpened = false;
                 BasicLibrary originLibrary = appState.openedLibrary!;
                 appState.openedLibrary = BasicLibrary(
                   name: 'similar song',
@@ -186,7 +186,7 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
                       icon: Icon(Icons.library_music_rounded),
                       color: colorScheme.tertiary,
                       onPressed: () {
-                        appState.isPlayerPageOpened = false;
+                        appState.isSongsPlayerPageOpened = false;
                         BasicLibrary originLibrary = appState.openedLibrary!;
                         appState.openedLibrary = BasicLibrary(
                           name: 'similar song',
@@ -218,7 +218,7 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
               ),
               onTap: () {
                 print('song\'s detail');
-                appState.isPlayerPageOpened = false;
+                appState.isSongsPlayerPageOpened = false;
                 Navigator.popAndPushNamed(context, '/detail_song_page',
                     arguments: widget.song);
               },
@@ -230,7 +230,7 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
                       icon: Icon(Icons.description_rounded),
                       color: colorScheme.tertiary,
                       onPressed: () {
-                        appState.isPlayerPageOpened = false;
+                        appState.isSongsPlayerPageOpened = false;
                         Navigator.popAndPushNamed(context, '/detail_song_page',
                             arguments: widget.song);
                       },

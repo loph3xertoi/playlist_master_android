@@ -1,0 +1,1007 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+      "bvid": "BV1Ls411o76k",
+      "aid": 3380200,
+      "videos": 65,
+      "tid": 193,
+      "tname": "MV",
+      "copyright": 2,
+      "pic": "http://i0.hdslb.com/bfs/archive/76dc9969bf6d5d1128817e1aeb0db89792966f6f.jpg",
+      "title": "【音乐】带你走进德语歌大坑(65P)",
+      "pubdate": 1449997143,
+      "ctime": 1497425353,
+      "desc": "收编了一些值得听听的德语歌",
+      "desc_v2": [
+          {
+              "raw_text": "收编了一些值得听听的德语歌",
+              "type": 1,
+              "biz_id": 0
+          }
+      ],
+      "state": 0,
+      "duration": 14828,
+      "rights": {
+          "bp": 0,
+          "elec": 0,
+          "download": 1,
+          "movie": 0,
+          "pay": 0,
+          "hd5": 0,
+          "no_reprint": 0,
+          "autoplay": 1,
+          "ugc_pay": 0,
+          "is_cooperation": 0,
+          "ugc_pay_preview": 0,
+          "no_background": 0,
+          "clean_mode": 0,
+          "is_stein_gate": 0,
+          "is_360": 0,
+          "no_share": 0,
+          "arc_pay": 0,
+          "free_watch": 0
+      },
+      "owner": {
+          "mid": 933537,
+          "name": "Joe_Grey",
+          "face": "https://i0.hdslb.com/bfs/face/a8e5a7597bfde24dc1dfcec5cbdb555f709499c7.jpg"
+      },
+      "stat": {
+          "aid": 3380200,
+          "view": 58953,
+          "danmaku": 318,
+          "reply": 126,
+          "favorite": 4345,
+          "coin": 405,
+          "share": 195,
+          "now_rank": 0,
+          "his_rank": 0,
+          "like": 1076,
+          "dislike": 0,
+          "evaluation": "",
+          "argue_msg": "",
+          "vt": 0
+      },
+      "dynamic": "",
+      "cid": 5351627,
+      "dimension": {
+          "width": 640,
+          "height": 360,
+          "rotate": 0
+      },
+      "premiere": null,
+      "teenage_mode": 0,
+      "is_chargeable_season": false,
+      "is_story": false,
+      "is_upower_exclusive": false,
+      "is_upower_play": false,
+      "enable_vt": 0,
+      "no_cache": false,
+      "pages": [
+          {
+              "cid": 5351627,
+              "page": 1,
+              "from": "vupload",
+              "part": "3A - Sind wir Freunde",
+              "duration": 222,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5555329,
+              "page": 2,
+              "from": "vupload",
+              "part": "3A - Parallel",
+              "duration": 204,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5351628,
+              "page": 3,
+              "from": "vupload",
+              "part": "Yvonne Catterfeld - Für Dich",
+              "duration": 273,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 642,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5352277,
+              "page": 4,
+              "from": "vupload",
+              "part": "Yvonne Catterfeld - Pendel",
+              "duration": 206,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 8187325,
+              "page": 5,
+              "from": "vupload",
+              "part": "Yvonne Catterfeld - Blau Im Blau",
+              "duration": 187,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 368,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5351629,
+              "page": 6,
+              "from": "vupload",
+              "part": "Blümchen - Es Ist Vorbei",
+              "duration": 211,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 480,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5351630,
+              "page": 7,
+              "from": "vupload",
+              "part": "Silbermond - Symphonie",
+              "duration": 243,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 642,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5351632,
+              "page": 8,
+              "from": "vupload",
+              "part": "Silbermond - Das Beste",
+              "duration": 270,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 642,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6556471,
+              "page": 9,
+              "from": "vupload",
+              "part": "Kate and Ben - Ich Lieb Dich Immer Noch So Sehr（换源）",
+              "duration": 196,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5370072,
+              "page": 10,
+              "from": "vupload",
+              "part": "Kate and Ben - Schlaflied",
+              "duration": 207,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 320,
+                  "height": 240,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5351922,
+              "page": 11,
+              "from": "vupload",
+              "part": "Pride Katha - So wie Ich",
+              "duration": 177,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 480,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5351923,
+              "page": 12,
+              "from": "vupload",
+              "part": "SDP - Ich muss immer an dich denken",
+              "duration": 216,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 8187326,
+              "page": 13,
+              "from": "vupload",
+              "part": "SDP - Ich Will Nur Dass Du Weißt",
+              "duration": 222,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 8187327,
+              "page": 14,
+              "from": "vupload",
+              "part": "SDP - Candle Light",
+              "duration": 229,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 8187328,
+              "page": 15,
+              "from": "vupload",
+              "part": "SDP - Als ich Mädchen noch scheiße fand",
+              "duration": 194,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5352043,
+              "page": 16,
+              "from": "vupload",
+              "part": "Helene Fisher - Die Rose(The Rose)",
+              "duration": 231,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 480,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5554385,
+              "page": 17,
+              "from": "vupload",
+              "part": "Helene Fischer - Von hier bis unendlich",
+              "duration": 228,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 480,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5352896,
+              "page": 18,
+              "from": "vupload",
+              "part": "Unheilig - Als wär's das erste Mal",
+              "duration": 186,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5365965,
+              "page": 19,
+              "from": "vupload",
+              "part": "Die Prinzen - Ich schenk dir die Welt",
+              "duration": 230,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 480,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5370073,
+              "page": 20,
+              "from": "vupload",
+              "part": "Annett Louisan - Das Spiel",
+              "duration": 185,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 480,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6534275,
+              "page": 21,
+              "from": "vupload",
+              "part": "Annette Louisan - Das Liebeslied",
+              "duration": 207,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 480,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5375329,
+              "page": 22,
+              "from": "vupload",
+              "part": "MoTrip - So wie du bist(feat. Lary)",
+              "duration": 311,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5375330,
+              "page": 23,
+              "from": "vupload",
+              "part": "Austria - Du bist (Eurovision Song Contest)",
+              "duration": 192,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5554386,
+              "page": 24,
+              "from": "vupload",
+              "part": "Mariannenplatz - Wohin(Die Wolke)",
+              "duration": 182,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 480,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5555330,
+              "page": 25,
+              "from": "vupload",
+              "part": "SIDO - Astronaut",
+              "duration": 268,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5555562,
+              "page": 26,
+              "from": "vupload",
+              "part": "Juli - Du lü so schön(Live)",
+              "duration": 262,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 642,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5555332,
+              "page": 27,
+              "from": "vupload",
+              "part": "Juli - Insel",
+              "duration": 252,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6686302,
+              "page": 28,
+              "from": "vupload",
+              "part": "Juli - November",
+              "duration": 175,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 320,
+                  "height": 240,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5555333,
+              "page": 29,
+              "from": "vupload",
+              "part": "Outbreakband - Du bist gut",
+              "duration": 263,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5668322,
+              "page": 30,
+              "from": "vupload",
+              "part": "Daniel Wirtz - Mantra",
+              "duration": 315,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5668666,
+              "page": 31,
+              "from": "vupload",
+              "part": "Revolverheld - Halt dich an mir fest(ft. Marta Jandová)",
+              "duration": 210,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5668667,
+              "page": 32,
+              "from": "vupload",
+              "part": "Revolverheld - Deine Nähe tut mir weh",
+              "duration": 441,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5777866,
+              "page": 33,
+              "from": "vupload",
+              "part": "Revolverheld - Lass Uns Gehen",
+              "duration": 213,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 160059464,
+              "page": 34,
+              "from": "vupload",
+              "part": "Revolverheld,Antje Schomaker - Liebe auf Distanz",
+              "duration": 197,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 1920,
+                  "height": 1080,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5668668,
+              "page": 35,
+              "from": "vupload",
+              "part": "Johannes Oerding - Heimat",
+              "duration": 232,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6686761,
+              "page": 36,
+              "from": "vupload",
+              "part": "Johannes Oerding - Einfach nur weg",
+              "duration": 206,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5773002,
+              "page": 37,
+              "from": "vupload",
+              "part": "Tokis Hotel - Monsoon",
+              "duration": 251,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 346,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 160046281,
+              "page": 38,
+              "from": "vupload",
+              "part": "Mark Forster - Wir sind groß",
+              "duration": 205,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 1920,
+                  "height": 1080,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6062786,
+              "page": 39,
+              "from": "vupload",
+              "part": "Mark Forster - Au Revoir",
+              "duration": 226,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6062787,
+              "page": 40,
+              "from": "vupload",
+              "part": "Gregor Meyle - Du bist das Licht",
+              "duration": 231,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 320,
+                  "height": 180,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6167502,
+              "page": 41,
+              "from": "vupload",
+              "part": "Doreen - Wie konntest du nur",
+              "duration": 229,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 634,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6167503,
+              "page": 42,
+              "from": "vupload",
+              "part": "Doreen - Vorsicht Zerbrechlich",
+              "duration": 208,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 480,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6168115,
+              "page": 43,
+              "from": "vupload",
+              "part": "Philipp Dittberner - Das ist dein Leben (Offcial Video)",
+              "duration": 281,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6471967,
+              "page": 44,
+              "from": "vupload",
+              "part": "Dagi Bee - BIST DU REAL",
+              "duration": 185,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 270,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6471968,
+              "page": 45,
+              "from": "vupload",
+              "part": "PS - Ich werde dich immer lieben",
+              "duration": 276,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 5554387,
+              "page": 46,
+              "from": "vupload",
+              "part": "Rosenstolz - Ich bin Ich",
+              "duration": 243,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 480,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6534276,
+              "page": 47,
+              "from": "vupload",
+              "part": "Rosenstolz - Liebe ist alles",
+              "duration": 209,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 480,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6686303,
+              "page": 48,
+              "from": "vupload",
+              "part": "Rosenstolz - Auch im Regen",
+              "duration": 228,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6534277,
+              "page": 49,
+              "from": "vupload",
+              "part": "Nena - Liebe ist",
+              "duration": 228,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6546525,
+              "page": 50,
+              "from": "vupload",
+              "part": "Claudia Jung - Mein Plan fürs nächste Leben",
+              "duration": 210,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6549962,
+              "page": 51,
+              "from": "vupload",
+              "part": "Tagtraeumer - Mein Herz",
+              "duration": 199,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6549963,
+              "page": 52,
+              "from": "vupload",
+              "part": "Tagtraeumer - Sinn",
+              "duration": 212,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6557388,
+              "page": 53,
+              "from": "vupload",
+              "part": "Sarah Connor - Wie schön du biist",
+              "duration": 215,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6557389,
+              "page": 54,
+              "from": "vupload",
+              "part": "Eisblume - Für immer",
+              "duration": 224,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6557390,
+              "page": 55,
+              "from": "vupload",
+              "part": "Elif - Nichts tut für immer weh",
+              "duration": 215,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6686928,
+              "page": 56,
+              "from": "vupload",
+              "part": "Elif - Zirkus",
+              "duration": 235,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6669026,
+              "page": 57,
+              "from": "vupload",
+              "part": "SDP - Ne Leiche",
+              "duration": 327,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 6686760,
+              "page": 58,
+              "from": "vupload",
+              "part": "Das Gezeichnete Ich - Du,Es und Ich",
+              "duration": 211,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 480,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 8025068,
+              "page": 59,
+              "from": "vupload",
+              "part": "Gregor Meyle - Keine Ist Wie Du",
+              "duration": 236,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 854,
+                  "height": 480,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 8044926,
+              "page": 60,
+              "from": "vupload",
+              "part": "Philipp Poisel - Für keine Kohle dieser Welt",
+              "duration": 282,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 8070639,
+              "page": 61,
+              "from": "vupload",
+              "part": "Wincent Weiss - Regenbogen",
+              "duration": 162,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 8080163,
+              "page": 62,
+              "from": "vupload",
+              "part": "Ich + Ich - Wenn ich tot bin",
+              "duration": 202,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 8187329,
+              "page": 63,
+              "from": "vupload",
+              "part": "Glasperlenspiel - Echt(修复)",
+              "duration": 200,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 480,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 8187538,
+              "page": 64,
+              "from": "vupload",
+              "part": "Andreas Bourani - Auf Anderen Wegen",
+              "duration": 244,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          },
+          {
+              "cid": 156049572,
+              "page": 65,
+              "from": "vupload",
+              "part": "Höhner - Schenk Mir Dein Herz",
+              "duration": 211,
+              "vid": "",
+              "weblink": "",
+              "dimension": {
+                  "width": 640,
+                  "height": 360,
+                  "rotate": 0
+              }
+          }
+      ],
+      "subtitle": {
+          "allow_submit": true,
+          "list": []
+      },
+      "is_season_display": false,
+      "user_garb": {
+          "url_image_ani_cut": ""
+      },
+      "honor_reply": {},
+      "like_icon": "",
+      "need_jump_bv": false,
+      "disable_show_up_info": false
+  }
+}

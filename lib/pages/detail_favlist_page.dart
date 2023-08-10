@@ -2,20 +2,21 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:humanize_big_int/humanize_big_int.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../entities/bilibili/bili_detail_fav_list.dart';
+import '../entities/bilibili/bili_fav_list.dart';
 import '../entities/bilibili/bili_resource.dart';
-import '../mock_data.dart';
 import '../states/app_state.dart';
 import '../states/my_search_state.dart';
-import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 import '../utils/theme_manager.dart';
 import '../widgets/bili_resource_item.dart';
 import '../widgets/bottom_player.dart';
+import '../widgets/library_item_menu_popup.dart';
 import '../widgets/multi_songs_select_popup.dart';
 import '../widgets/my_searchbar.dart';
 import '../widgets/my_selectable_text.dart';
@@ -26,57 +27,109 @@ class DetailFavListPage extends StatefulWidget {
 }
 
 class _DetailFavListPageState extends State<DetailFavListPage> {
-  // Current page number, only for bilibili.
-  int _currentPage = 1;
-
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  late Future<BasicLibrary?> _futureDetailLibrary;
+  // Current fav list.
+  late BasicLibrary _currentBiliFavList;
 
-  bool _changeRawQueue = true;
+  // Current page number of original resources.
+  int _currentPageNumberInOriginalResources = 1;
 
-  // All resources fetched, in local storage.
-  List<BiliResource> _localResources = [];
+  // Current page number of searched resources.
+  int _currentPageNumberInSearchedResources = 1;
 
+  // All original resources of this fav list.
+  List<BiliResource> _originalResources = [];
+
+  // All searched resources of this fav list.
+  List<BiliResource> _searchedResources = [];
+
+  // The future detail fav list with first page of resources.
+  late Future<BasicLibrary?> _firstFutureDetailFavList;
+
+  // Current platform.
+  late int _currentPlatform;
+
+  // Is using mock data?
+  late bool _isUsingMockData;
+
+  // Is loding the new resources?
   bool _isLoading = false;
 
-  // Whether has more libraries.
-  bool _hasMore = true;
+  // Is searching this fav list?
+  bool _inSearchMode = false;
 
-  late MyAppState _state;
+  // Keyword for searching.
+  String _keyword = '';
+
+  // Are there more original resources?
+  bool _hasMoreOriginalResources = false;
+
+  // Are there more searched resources?
+  bool _hasMoreSearchedResources = false;
+
+  MyAppState? _appState;
 
   ScrollController _scrollController = ScrollController();
+
+  bool _changeRawQueue = true;
 
   void _scrollListener() {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
-      if (_hasMore) {
-        _fetchingResourcesInLibrary();
+      if ((_inSearchMode && _hasMoreSearchedResources) ||
+          (!_inSearchMode && _hasMoreOriginalResources)) {
+        _fetchMoreResources(_appState!);
       } else {
         MyToast.showToast('No more resources');
       }
     }
   }
 
-  // Only called in bilibili.
-  Future<void> _fetchingResourcesInLibrary() async {
-    int platform = _state.currentPlatform;
+  // Fetch more original/searched resources in this fav list.
+  Future<void> _fetchMoreResources(MyAppState appState) async {
     if (!_isLoading) {
       setState(() {
         _isLoading = true;
       });
-      _currentPage++;
-      List<BiliResource>? pageResources;
-      BiliDetailFavList? detailFavList = await _state.fetchDetailLibrary(
-              _state.rawOpenedLibrary!, platform, _currentPage.toString())
-          as BiliDetailFavList?;
-      if (detailFavList != null) {
-        _hasMore = detailFavList.hasMore;
-        pageResources = detailFavList.resources;
-        if (pageResources.isNotEmpty) {
-          _localResources.addAll(pageResources);
+
+      List<BiliResource>? pagedResources;
+      BiliDetailFavList? newDetailFavList;
+      if (_inSearchMode) {
+        _currentPageNumberInSearchedResources++;
+        newDetailFavList = await appState.fetchDetailLibrary(
+          _currentBiliFavList,
+          _currentPlatform,
+          pn: _currentPageNumberInSearchedResources as String?,
+          keyword: _keyword,
+        ) as BiliDetailFavList?;
+        if (newDetailFavList != null) {
+          _hasMoreSearchedResources = newDetailFavList.hasMore;
+          pagedResources = newDetailFavList.resources;
+        } else {
+          throw Exception('Failed to fetch new resources');
+        }
+        if (pagedResources.isNotEmpty) {
+          _searchedResources.addAll(pagedResources);
+        }
+      } else {
+        _currentPageNumberInOriginalResources++;
+        newDetailFavList = await appState.fetchDetailLibrary(
+          _currentBiliFavList,
+          _currentPlatform,
+          pn: _currentPageNumberInOriginalResources.toString(),
+        ) as BiliDetailFavList?;
+        if (newDetailFavList != null) {
+          _hasMoreOriginalResources = newDetailFavList.hasMore;
+          pagedResources = newDetailFavList.resources;
+        } else {
+          throw Exception('Failed to fetch new resources');
+        }
+        if (pagedResources.isNotEmpty) {
+          _originalResources.addAll(pagedResources);
         }
       }
+
       setState(() {
         _isLoading = false;
       });
@@ -94,102 +147,113 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
-    var isUsingMockData = state.isUsingMockData;
-    var openedLibrary = state.rawOpenedLibrary;
-    _state = state;
-    if (isUsingMockData) {
-      _futureDetailLibrary = Future.value(MockData.detailLibrary);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        state.rawQueue = MockData.songs;
-        state.queue = MockData.songs;
-        state.openedLibrary = state.rawOpenedLibrary;
-      });
+    _isUsingMockData = state.isUsingMockData;
+    _currentPlatform = state.currentPlatform;
+    _currentBiliFavList = state.rawOpenedLibrary!;
+    // _state = state;
+    if (_isUsingMockData) {
+      // _firstFutureDetailFavList = Future.value(MockData.detailLibrary);
+      // WidgetsBinding.instance.addPostFrameCallback((_) {
+      //   state.rawSongsInLibrary = MockData.songs;
+      //   state.queue = MockData.songs;
+      //   state.openedLibrary = state.rawOpenedLibrary;
+      // });
+      throw UnimplementedError('Not yet implement mock data for bilibili');
     } else {
-      state.refreshDetailLibraryPage = _refreshDetailLibraryPage;
-      _futureDetailLibrary =
-          state.fetchDetailLibrary(openedLibrary!, state.currentPlatform, '1');
+      state.refreshDetailFavListPage = _refreshDetailFavListPage;
+      _firstFutureDetailFavList = state
+          .fetchDetailLibrary(_currentBiliFavList, _currentPlatform, pn: '1');
     }
     _scrollController.addListener(_scrollListener);
   }
 
-  void _refreshDetailLibraryPage(MyAppState appState) {
+  void _refreshDetailFavListPage(MyAppState appState) {
     setState(() {
-      _currentPage = 1;
-      _hasMore = false;
-      _futureDetailLibrary = appState.fetchDetailLibrary(
-          appState.rawOpenedLibrary!, appState.currentPlatform, '1');
-      _localResources.clear();
+      _currentPageNumberInOriginalResources = 1;
+      _currentPageNumberInSearchedResources = 1;
+      _hasMoreOriginalResources = false;
+      _hasMoreSearchedResources = false;
+      _originalResources = [];
+      _searchedResources = [];
+      _inSearchMode = false;
+      _firstFutureDetailFavList = appState
+          .fetchDetailLibrary(_currentBiliFavList, _currentPlatform, pn: '1');
     });
   }
 
-  void onSongTap(MyAppState appState, int index, BuildContext context,
-      List<BiliResource> searchedResources) async {
-    var currentPlatform = appState.currentPlatform;
-    var player = appState.player;
+  void onResourceTap(int index, MyAppState appState) async {
+    // var resourcesPlayer = appState.resourcesPlayer;
 
-    if (appState.player == null) {
-      appState.queue = searchedResources;
-
-      try {
-        await appState.initAudioPlayer();
-      } catch (e) {
-        MyToast.showToast('Exception: $e');
-        MyLogger.logger.e('Exception: $e');
-        appState.disposeSongPlayer();
-        return;
-      }
-      appState.canSongPlayerPagePop = true;
-      appState.currentPlayingSongInQueue = index;
-      appState.currentSong = appState.queue![index];
-      appState.prevSong = appState.currentSong;
-      appState.currentDetailSong = null;
-      appState.isFirstLoadSongPlayer = true;
-      appState.player!.play();
-    } else if (appState.currentSong == searchedResources[index]) {
-      if (!player!.playerState.playing) {
-        player.play();
-      }
-    } else {
-      appState.queue = searchedResources;
-
-      appState.canSongPlayerPagePop = true;
-      appState.player!.stop();
-      appState.player!.dispose();
-      appState.player = null;
-      appState.initQueue!.clear();
-      try {
-        await appState.initAudioPlayer();
-      } catch (e) {
-        MyToast.showToast('Exception: $e');
-        MyLogger.logger.e('Exception: $e');
-        appState.disposeSongPlayer();
-        return;
-      }
-      appState.currentPlayingSongInQueue = index;
-      appState.currentSong = appState.queue![index];
-      appState.currentDetailSong = null;
-      appState.prevSong = appState.currentSong;
-      appState.isFirstLoadSongPlayer = true;
-      appState.player!.play();
-    }
-    appState.isPlayerPageOpened = true;
+    // if (resourcesPlayer == null) {
+    //   appState.resourcesQueue =
+    //       _inSearchMode ? _searchedResources : _originalResources;
+    //   try {
+    //     await appState.initResourcesPlayer();
+    //   } catch (e) {
+    //     MyToast.showToast('Exception: $e');
+    //     MyLogger.logger.e('Exception: $e');
+    //     appState.disposeResourcesPlayer();
+    //     return;
+    //   }
+    //   appState.canResourcesPlayerPagePop = true;
+    //   appState.currentPlayingResourceInQueue = index;
+    //   appState.currentResource = appState.resourcesQueue![index];
+    //   appState.prevResource = appState.currentResource;
+    //   appState.currentDetailResource = null;
+    //   appState.isFirstLoadResourcesPlayer = true;
+    //   appState.resourcesPlayer!.play();
+    // } else if ((!_inSearchMode &&
+    //         appState.currentResource == _originalResources[index]) ||
+    //     (_inSearchMode &&
+    //         appState.currentResource == _searchedResources[index])) {
+    //   if (!resourcesPlayer.playerState.playing) {
+    //     resourcesPlayer.play();
+    //   }
+    // } else {
+    //   appState.resourcesQueue =
+    //       _inSearchMode ? _searchedResources : _originalResources;
+    //   appState.canResourcesPlayerPagePop = true;
+    //   appState.resourcesPlayer!.stop();
+    //   appState.resourcesPlayer!.dispose();
+    //   appState.resourcesPlayer = null;
+    //   appState.resourcesAudioSource!.clear();
+    //   try {
+    //     await appState.initResourcesPlayer();
+    //   } catch (e) {
+    //     MyToast.showToast('Exception: $e');
+    //     MyLogger.logger.e('Exception: $e');
+    //     appState.disposeResourcesPlayer();
+    //     return;
+    //   }
+    //   appState.currentPlayingResourceInQueue = index;
+    //   appState.currentResource = appState.resourcesQueue![index];
+    //   appState.currentDetailResource = null;
+    //   appState.prevResource = appState.currentResource;
+    //   appState.isFirstLoadResourcesPlayer = true;
+    //   appState.resourcesPlayer!.play();
+    // }
+    // appState.isResourcesPlayerPageOpened = true;
     if (context.mounted) {
-      Navigator.pushNamed(context, '/song_player_page');
+      if (_inSearchMode) {
+        appState.currentResource = _searchedResources[index];
+      } else {
+        appState.currentResource = _originalResources[index];
+      }
+      Navigator.pushNamed(context, '/detail_resource_page');
+      // Navigator.pushNamed(context, '/resources_player_page');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     print('build detail fav list page');
-    MyAppState appState = context.watch<MyAppState>();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-
-    var isUsingMockData = appState.isUsingMockData;
-    var openedLibrary = appState.rawOpenedLibrary;
-    var searchedResources = appState.searchedResources;
-    var currentPlatform = appState.currentPlatform;
-    var rawQueue = appState.rawQueue;
+    MyAppState appState = context.watch<MyAppState>();
+    _appState = appState;
+    _isUsingMockData = appState.isUsingMockData;
+    _currentPlatform = appState.currentPlatform;
+    _currentBiliFavList = appState.rawOpenedLibrary!;
     return Consumer<ThemeNotifier>(
       builder: (context, theme, _) => Material(
         child: Scaffold(
@@ -224,7 +288,7 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                               margin:
                                   EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
                               child: FutureBuilder(
-                                  future: _futureDetailLibrary,
+                                  future: _firstFutureDetailFavList,
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState ==
                                         ConnectionState.waiting) {
@@ -272,12 +336,20 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                               ),
                                               onPressed: () {
                                                 setState(() {
-                                                  _futureDetailLibrary = appState
-                                                      .fetchDetailLibrary(
-                                                          openedLibrary!,
-                                                          appState
-                                                              .currentPlatform,
-                                                          '1');
+                                                  _firstFutureDetailFavList =
+                                                      appState.fetchDetailLibrary(
+                                                          _currentBiliFavList,
+                                                          _currentPlatform,
+                                                          pn: '1');
+                                                  if (_inSearchMode) {
+                                                    _currentPageNumberInSearchedResources =
+                                                        1;
+                                                    _searchedResources = [];
+                                                  } else {
+                                                    _currentPageNumberInOriginalResources =
+                                                        1;
+                                                    _originalResources = [];
+                                                  }
                                                 });
                                               },
                                             ),
@@ -286,7 +358,7 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                       );
                                     } else {
                                       BiliDetailFavList? detailFavList;
-                                      if (isUsingMockData) {
+                                      if (_isUsingMockData) {
                                         // detailFavList = snapshot.data == null
                                         //     ? null
                                         //     : snapshot.data
@@ -298,25 +370,36 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                             ? null
                                             : snapshot.data
                                                 as BiliDetailFavList;
-                                        if (_currentPage == 1) {
-                                          List<BiliResource>? libraries =
-                                              detailFavList!.resources;
-                                          _hasMore = detailFavList.hasMore;
-                                          _localResources.addAll(libraries);
+                                        List<BiliResource>? libraries =
+                                            detailFavList!.resources;
+                                        if (!_inSearchMode &&
+                                            _currentPageNumberInOriginalResources ==
+                                                1 &&
+                                            _originalResources.isEmpty) {
+                                          _hasMoreOriginalResources =
+                                              detailFavList.hasMore;
+                                          _originalResources.addAll(libraries);
+                                        }
+                                        // TODO: handle search mode.
+                                        if (_inSearchMode &&
+                                            _currentPageNumberInSearchedResources ==
+                                                1 &&
+                                            _searchedResources.isEmpty) {
+                                          _hasMoreSearchedResources =
+                                              detailFavList.hasMore;
+                                          _searchedResources.addAll(libraries);
                                         }
                                       }
-                                      if (detailFavList != null) {
-                                        // WidgetsBinding.instance
-                                        //     .addPostFrameCallback((_) {
-                                        //   if (_changeRawQueue) {
-                                        //     appState.rawQueue =
-                                        //         detailFavList.songs;
-                                        //     appState.searchedResources =
-                                        //         detailFavList.songs;
-                                        //     _changeRawQueue = false;
-                                        //   }
-                                        // });
-                                      }
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback((_) {
+                                        if (_changeRawQueue) {
+                                          appState.rawResourcesInFavList =
+                                              _originalResources;
+                                          appState.searchedResources =
+                                              _searchedResources;
+                                          _changeRawQueue = false;
+                                        }
+                                      });
                                       return Container(
                                         decoration: BoxDecoration(
                                           color: colorScheme.primary,
@@ -359,7 +442,7 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                                             print(
                                                                 detailFavList);
                                                             print(
-                                                                searchedResources);
+                                                                _searchedResources);
                                                             setState(() {});
                                                           },
                                                           child: ClipRRect(
@@ -367,18 +450,17 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                                                 BorderRadius
                                                                     .circular(
                                                                         4.0),
-                                                            child: isUsingMockData
+                                                            child: _isUsingMockData
                                                                 ? Image.asset(
-                                                                    detailFavList!
+                                                                    detailFavList
                                                                         .cover,
                                                                     fit: BoxFit
                                                                         .cover,
                                                                   )
                                                                 : CachedNetworkImage(
-                                                                    imageUrl: detailFavList !=
-                                                                                null &&
-                                                                            detailFavList
-                                                                                .cover.isNotEmpty
+                                                                    imageUrl: detailFavList
+                                                                            .cover
+                                                                            .isNotEmpty
                                                                         ? detailFavList
                                                                             .cover
                                                                         : MyAppState
@@ -408,7 +490,7 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                                                 .start,
                                                         children: [
                                                           MySelectableText(
-                                                            detailFavList!.name,
+                                                            detailFavList.name,
                                                             style: textTheme
                                                                 .labelLarge!
                                                                 .copyWith(
@@ -446,7 +528,7 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                                                 ),
                                                               ),
                                                               Text(
-                                                                '${detailFavList.viewCount} views',
+                                                                '${humanizeInt(detailFavList.viewCount)} views',
                                                                 textAlign:
                                                                     TextAlign
                                                                         .start,
@@ -508,160 +590,189 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                               ),
                                             ),
                                             Expanded(
-                                              child:
-                                                  detailFavList.itemCount != 0
-                                                      ? _localResources
-                                                              .isNotEmpty
-                                                          ? Column(
-                                                              children: [
-                                                                SizedBox(
-                                                                  height: 40.0,
-                                                                  child: Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .end,
-                                                                    children: [
-                                                                      IconButton(
-                                                                        onPressed:
-                                                                            () {
-                                                                          onSongTap(
-                                                                              appState,
-                                                                              0,
-                                                                              context,
-                                                                              searchedResources);
-                                                                        },
-                                                                        icon:
-                                                                            Icon(
-                                                                          Icons
-                                                                              .playlist_play_rounded,
-                                                                        ),
-                                                                        color: colorScheme
-                                                                            .tertiary,
-                                                                        tooltip:
-                                                                            'Play all',
-                                                                      ),
-                                                                      IconButton(
-                                                                        onPressed:
-                                                                            () {
-                                                                          showDialog(
-                                                                              context: context,
-                                                                              builder: (_) => MultiSongsSelectPopup());
-                                                                        },
-                                                                        icon:
-                                                                            Icon(
-                                                                          Icons
-                                                                              .checklist_rounded,
-                                                                        ),
-                                                                        color: colorScheme
-                                                                            .tertiary,
-                                                                        tooltip:
-                                                                            'Multi select',
-                                                                      ),
-                                                                      IconButton(
-                                                                        onPressed:
-                                                                            () {
-                                                                          // showDialog(
-                                                                          //   context:
-                                                                          //       context,
-                                                                          //   builder: (_) =>
-                                                                          //       LibraryItemMenuPopup(
-                                                                          //     library: detailFavList,
-                                                                          //     isInDetailLibraryPage: true,
-                                                                          //   ),
-                                                                          // );
-                                                                        },
-                                                                        icon:
-                                                                            Icon(
-                                                                          Icons
-                                                                              .more_vert_rounded,
-                                                                        ),
-                                                                        color: colorScheme
-                                                                            .tertiary,
-                                                                        tooltip:
-                                                                            'Edit library',
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                                Expanded(
-                                                                  child: ListView
-                                                                      .builder(
-                                                                    controller:
-                                                                        _scrollController,
-                                                                    itemCount: isUsingMockData
-                                                                        ? min(
-                                                                            detailFavList
-                                                                                .itemCount,
-                                                                            10)
-                                                                        : _localResources.length +
-                                                                            1,
-                                                                    itemBuilder:
-                                                                        (context,
-                                                                            index) {
-                                                                      if (index <
-                                                                          _localResources
-                                                                              .length) {
-                                                                        return Material(
-                                                                          color:
-                                                                              Colors.transparent,
-                                                                          child:
-                                                                              InkWell(
-                                                                            onTap:
-                                                                                () {
-                                                                              onSongTap(appState, index, context, searchedResources);
-                                                                            },
-                                                                            child:
-                                                                                Padding(
-                                                                              padding: const EdgeInsets.all(12.0),
-                                                                              child: BiliResourceItem(
-                                                                                index: index,
-                                                                                resource: _localResources[index],
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        );
-                                                                      } else {
-                                                                        return _buildLoadingIndicator(
-                                                                            colorScheme);
-                                                                      }
+                                              child: detailFavList.itemCount !=
+                                                      0
+                                                  ? (_inSearchMode &&
+                                                              _searchedResources
+                                                                  .isNotEmpty) ||
+                                                          (!_inSearchMode &&
+                                                              _originalResources
+                                                                  .isNotEmpty)
+                                                      ? Column(
+                                                          children: [
+                                                            SizedBox(
+                                                              height: 40.0,
+                                                              child: Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .end,
+                                                                children: [
+                                                                  IconButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      onResourceTap(
+                                                                          0,
+                                                                          appState);
                                                                     },
+                                                                    icon: Icon(
+                                                                      Icons
+                                                                          .playlist_play_rounded,
+                                                                    ),
+                                                                    color: colorScheme
+                                                                        .tertiary,
+                                                                    tooltip:
+                                                                        'Play all',
                                                                   ),
-                                                                )
-                                                              ],
-                                                            )
-                                                          : Center(
-                                                              child: Text(
-                                                                'Not found',
-                                                                style: textTheme
-                                                                    .labelMedium,
+                                                                  IconButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      showDialog(
+                                                                          context:
+                                                                              context,
+                                                                          builder: (_) =>
+                                                                              MultiSongsSelectPopup());
+                                                                    },
+                                                                    icon: Icon(
+                                                                      Icons
+                                                                          .checklist_rounded,
+                                                                    ),
+                                                                    color: colorScheme
+                                                                        .tertiary,
+                                                                    tooltip:
+                                                                        'Multi select',
+                                                                  ),
+                                                                  IconButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      showDialog(
+                                                                        context:
+                                                                            context,
+                                                                        builder:
+                                                                            (_) =>
+                                                                                LibraryItemMenuPopup(
+                                                                          library:
+                                                                              detailFavList!,
+                                                                          isInDetailLibraryPage:
+                                                                              true,
+                                                                        ),
+                                                                      );
+                                                                    },
+                                                                    icon: Icon(
+                                                                      Icons
+                                                                          .more_vert_rounded,
+                                                                    ),
+                                                                    color: colorScheme
+                                                                        .tertiary,
+                                                                    tooltip:
+                                                                        'Edit library',
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            Expanded(
+                                                              child:
+                                                                  RefreshIndicator(
+                                                                color: Color(
+                                                                    0xFB6A9D),
+                                                                strokeWidth:
+                                                                    2.0,
+                                                                onRefresh:
+                                                                    () async {
+                                                                  setState(() {
+                                                                    _firstFutureDetailFavList = appState.fetchDetailLibrary(
+                                                                        _currentBiliFavList,
+                                                                        _currentPlatform,
+                                                                        pn: '1');
+                                                                    if (_inSearchMode) {
+                                                                      _currentPageNumberInSearchedResources =
+                                                                          1;
+                                                                      _searchedResources =
+                                                                          [];
+                                                                    } else {
+                                                                      _currentPageNumberInOriginalResources =
+                                                                          1;
+                                                                      _originalResources =
+                                                                          [];
+                                                                    }
+                                                                  });
+                                                                },
+                                                                child: ListView
+                                                                    .builder(
+                                                                  physics:
+                                                                      const AlwaysScrollableScrollPhysics(),
+                                                                  controller:
+                                                                      _scrollController,
+                                                                  itemCount: _isUsingMockData
+                                                                      ? min(detailFavList.itemCount, 10)
+                                                                      : _inSearchMode
+                                                                          ? _searchedResources.length
+                                                                          : _originalResources.length,
+                                                                  itemBuilder:
+                                                                      (context,
+                                                                          index) {
+                                                                    if (index <
+                                                                        (_inSearchMode
+                                                                            ? _searchedResources.length +
+                                                                                1
+                                                                            : _originalResources.length +
+                                                                                1)) {
+                                                                      return BiliResourceItem(
+                                                                        biliSourceFavListId:
+                                                                            (_currentBiliFavList as BiliFavList).id,
+                                                                        resource: _inSearchMode
+                                                                            ? _searchedResources[index]
+                                                                            : _originalResources[index],
+                                                                        isSelected:
+                                                                            false,
+                                                                        onTap:
+                                                                            () {
+                                                                          onResourceTap(
+                                                                              index,
+                                                                              appState);
+                                                                        },
+                                                                      );
+                                                                    } else {
+                                                                      return _buildLoadingIndicator(
+                                                                          colorScheme);
+                                                                    }
+                                                                  },
+                                                                ),
                                                               ),
                                                             )
+                                                          ],
+                                                        )
                                                       : Center(
-                                                          child: TextButton(
-                                                            onPressed: () {
-                                                              MyToast.showToast(
-                                                                  'To be implement');
-                                                            },
-                                                            style: ButtonStyle(
-                                                              shadowColor:
-                                                                  MaterialStateProperty
-                                                                      .all(
-                                                                colorScheme
-                                                                    .primary,
-                                                              ),
-                                                              overlayColor:
-                                                                  MaterialStateProperty
-                                                                      .all(
-                                                                Colors.grey,
-                                                              ),
-                                                            ),
-                                                            child: Text(
-                                                              'Add resources',
-                                                              style: textTheme
-                                                                  .labelMedium,
-                                                            ),
+                                                          child: Text(
+                                                            'Not found',
+                                                            style: textTheme
+                                                                .labelMedium,
+                                                          ),
+                                                        )
+                                                  : Center(
+                                                      child: TextButton(
+                                                        onPressed: () {
+                                                          MyToast.showToast(
+                                                              'To be implement');
+                                                        },
+                                                        style: ButtonStyle(
+                                                          shadowColor:
+                                                              MaterialStateProperty
+                                                                  .all(
+                                                            colorScheme.primary,
+                                                          ),
+                                                          overlayColor:
+                                                              MaterialStateProperty
+                                                                  .all(
+                                                            Colors.grey,
                                                           ),
                                                         ),
+                                                        child: Text(
+                                                          'Add resources',
+                                                          style: textTheme
+                                                              .labelMedium,
+                                                        ),
+                                                      ),
+                                                    ),
                                             ),
                                           ],
                                         ),
@@ -670,7 +781,7 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                   }),
                             ),
                           ),
-                          appState.currentSong == null
+                          appState.currentResource == null
                               ? Container()
                               : BottomPlayer(),
                         ],

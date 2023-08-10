@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
@@ -8,6 +7,7 @@ import '../entities/dto/paged_data.dart';
 import '../entities/dto/result.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
+import '../utils/my_toast.dart';
 import 'create_library_popup.dart';
 import 'libraries_settings_menu_popup.dart';
 import 'library_item.dart';
@@ -32,7 +32,7 @@ class _MyContentAreaState extends State<MyContentArea> {
   // Whether has more libraries.
   bool _hasMore = true;
 
-  late MyAppState _state;
+  MyAppState? _appState;
 
   ScrollController _scrollController = ScrollController();
 
@@ -57,7 +57,7 @@ class _MyContentAreaState extends State<MyContentArea> {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
       if (_hasMore) {
-        _fetchingLibraries();
+        _fetchingLibraries(_appState!);
       } else {
         MyToast.showToast('No more libraries');
       }
@@ -82,8 +82,8 @@ class _MyContentAreaState extends State<MyContentArea> {
   //   }
   // }
 
-  Future<void> _fetchingLibraries() async {
-    int platform = _state.currentPlatform;
+  Future<void> _fetchingLibraries(MyAppState appState) async {
+    int platform = appState.currentPlatform;
     if (!_isLoading) {
       setState(() {
         _isLoading = true;
@@ -91,7 +91,7 @@ class _MyContentAreaState extends State<MyContentArea> {
       _currentPage++;
       List<BasicLibrary>? pageLibraries;
       PagedDataDTO<BasicLibrary>? pagedData =
-          await _state.fetchLibraries(platform, _currentPage.toString());
+          await appState.fetchLibraries(platform, _currentPage.toString());
       setState(() {
         if (pagedData != null) {
           _hasMore = pagedData.hasMore;
@@ -116,7 +116,6 @@ class _MyContentAreaState extends State<MyContentArea> {
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
-    _state = state;
     var isUsingMockData = state.isUsingMockData;
     if (isUsingMockData) {
       var pagedDataDTO = PagedDataDTO<BasicLibrary>(
@@ -133,9 +132,10 @@ class _MyContentAreaState extends State<MyContentArea> {
 
   @override
   Widget build(BuildContext context) {
-    MyAppState appState = context.watch<MyAppState>();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    MyAppState appState = context.watch<MyAppState>();
+    _appState = appState;
     return FutureBuilder(
         future: _futurePagedLibraries,
         builder: (context, snapshot) {
@@ -176,6 +176,7 @@ class _MyContentAreaState extends State<MyContentArea> {
                     ),
                     onPressed: () {
                       setState(() {
+                        _currentPage = 1;
                         _futurePagedLibraries =
                             _refreshLibraries(appState, false);
                       });
@@ -251,21 +252,33 @@ class _MyContentAreaState extends State<MyContentArea> {
                   ),
                   Expanded(
                     child: _localLibraries!.isNotEmpty
-                        ? ListView.builder(
-                            controller: _scrollController,
-                            itemCount: _localLibraries!.length + 1,
-                            itemBuilder: (context, index) {
-                              if (index < _localLibraries!.length) {
-                                return Material(
-                                  color: Colors.transparent,
-                                  child: LibraryItem(
-                                    library: _localLibraries![index],
-                                  ),
-                                );
-                              } else {
-                                return _buildLoadingIndicator(colorScheme);
-                              }
+                        ? RefreshIndicator(
+                            color: colorScheme.onPrimary,
+                            strokeWidth: 2.0,
+                            onRefresh: () async {
+                              setState(() {
+                                _currentPage = 1;
+                                _futurePagedLibraries =
+                                    _refreshLibraries(appState, false);
+                              });
                             },
+                            child: ListView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              controller: _scrollController,
+                              itemCount: _localLibraries!.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index < _localLibraries!.length) {
+                                  return Material(
+                                    color: Colors.transparent,
+                                    child: LibraryItem(
+                                      library: _localLibraries![index],
+                                    ),
+                                  );
+                                } else {
+                                  return _buildLoadingIndicator(colorScheme);
+                                }
+                              },
+                            ),
                           )
                         : Center(
                             child: Text(

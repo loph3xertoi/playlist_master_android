@@ -34,11 +34,11 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
     var currentPlatform = appState.currentPlatform;
     var isUsingMockData = appState.isUsingMockData;
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     return SizedBox(
       height: 40.0,
       child: Row(

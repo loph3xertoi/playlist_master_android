@@ -27,19 +27,20 @@ import '../widgets/my_selectable_text.dart';
 import '../widgets/queue_popup.dart';
 import '../widgets/songplayer_menu_popup.dart';
 
-class SongPlayerPage extends StatefulWidget {
-  const SongPlayerPage({super.key});
-
+class SongsPlayerPage extends StatefulWidget {
+  const SongsPlayerPage({super.key});
   @override
-  State<SongPlayerPage> createState() => _SongPlayerPageState();
+  State<SongsPlayerPage> createState() => _SongsPlayerPageState();
 }
 
 // TODO: The widget tree will always be rebuild when open lyrics page.
-class _SongPlayerPageState extends State<SongPlayerPage>
+class _SongsPlayerPageState extends State<SongsPlayerPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _songCoverRotateAnimation;
-  bool _isFirstLoadSongPlayer = false;
+  bool? _isUsingMockData;
+  int? _currentPlatform;
+  bool _isFirstLoadSongsPlayer = false;
   bool _toggleLyrics = false;
   bool _isPlaying = false;
   int _prevSongIndex = 0;
@@ -83,12 +84,12 @@ class _SongPlayerPageState extends State<SongPlayerPage>
 
   @override
   Widget build(BuildContext context) {
-    print('build song player page');
+    print('build songs player page');
     MyAppState appState = context.watch<MyAppState>();
-    var isUsingMockData = appState.isUsingMockData;
-    var currentPlatform = appState.currentPlatform;
-    var player = appState.player;
-    var queue = appState.queue;
+    _isUsingMockData = appState.isUsingMockData;
+    _currentPlatform = appState.currentPlatform;
+    var songsPlayer = appState.songsPlayer;
+    var songsQueue = appState.songsQueue;
     var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
     var currentSong = appState.currentSong;
     var prevSong = appState.prevSong;
@@ -96,62 +97,61 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     var userPlayingMode = appState.userPlayingMode;
     var volume = appState.volume;
     var speed = appState.speed;
-    var positionDataStream = appState.positionDataStream;
+    var songsPlayerPositionDataStream = appState.songsPlayerPositionDataStream;
     var carouselController = appState.carouselController;
     var prevCarouselIndex = appState.prevCarouselIndex;
     String? mainLyrics;
-
-    _isFirstLoadSongPlayer = appState.isFirstLoadSongPlayer;
-    _isPlaying = appState.isPlaying;
+    _isFirstLoadSongsPlayer = appState.isFirstLoadSongsPlayer;
+    _isPlaying = appState.isSongPlaying;
 
     if (_simpleDetailSong != currentDetailSong) {
       _simpleDetailSong = currentDetailSong;
       _detailSong = Future.value(currentDetailSong);
     }
 
-    if (_isFirstLoadSongPlayer) {
-      player!.seek(Duration.zero, index: currentPlayingSongInQueue);
+    if (_isFirstLoadSongsPlayer) {
+      songsPlayer!.seek(Duration.zero, index: currentPlayingSongInQueue);
       _controller.repeat();
     }
 
-    if ((queue?.isNotEmpty ?? false) &&
-        (queue!.length > currentPlayingSongInQueue!) &&
-        (currentSong!.name != queue[currentPlayingSongInQueue].name)) {
+    if ((songsQueue?.isNotEmpty ?? false) &&
+        (songsQueue!.length > currentPlayingSongInQueue!) &&
+        (currentSong!.name != songsQueue[currentPlayingSongInQueue].name)) {
       _controller.reset();
     }
 
-    if (queue?.isEmpty ?? false) {
+    if (songsQueue?.isEmpty ?? false) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (appState.canSongPlayerPagePop) {
-          appState.isPlayerPageOpened = false;
-          appState.canSongPlayerPagePop = false;
+        if (appState.canSongsPlayerPagePop) {
+          appState.isSongsPlayerPageOpened = false;
+          appState.canSongsPlayerPagePop = false;
           Navigator.of(context).pop();
         }
       });
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (appState.isPlayerPageOpened == false && _noPoping) {
-        appState.isPlayerPageOpened = true;
+      if (appState.isSongsPlayerPageOpened == false && _noPoping) {
+        appState.isSongsPlayerPageOpened = true;
       }
       if (_return) {
-        appState.disposeSongPlayer();
+        appState.disposeSongsPlayer();
         Navigator.of(context).pop();
       }
-      if ((queue?.isNotEmpty ?? false) &&
-          (currentSong != queue?[currentPlayingSongInQueue!])) {
-        appState.currentSong = queue?[currentPlayingSongInQueue!];
+      if ((songsQueue?.isNotEmpty ?? false) &&
+          (currentSong != songsQueue?[currentPlayingSongInQueue!])) {
+        appState.currentSong = songsQueue?[currentPlayingSongInQueue!];
       }
 
-      if (!_isFirstLoadSongPlayer) {
-        if (player != null && player.playing == true) {
+      if (!_isFirstLoadSongsPlayer) {
+        if (songsPlayer != null && songsPlayer.playing == true) {
           _controller.repeat();
         } else {
           _controller.stop();
         }
       } else {
         Future.delayed(Duration(milliseconds: 200), () {
-          appState.isFirstLoadSongPlayer = false;
+          appState.isFirstLoadSongsPlayer = false;
           // appState.coverRotatingController = _controller;
         });
       }
@@ -171,9 +171,10 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     try {
       if (currentSong != null &&
           (_detailSong == null || prevSong != currentSong)) {
-        _detailSong = isUsingMockData
+        _detailSong = _isUsingMockData!
             ? Future.value(MockData.detailSong)
-            : appState.fetchDetailSong(currentSong, appState.currentPlatform);
+            : appState.fetchDetailSong<BasicSong>(
+                currentSong, _currentPlatform!);
       }
     } on SocketException catch (e) {
       MyToast.showToast('Exception thrown: $e');
@@ -184,7 +185,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     final textTheme = Theme.of(context).textTheme;
     return WillPopScope(
       onWillPop: () async {
-        appState.isPlayerPageOpened = false;
+        appState.isSongsPlayerPageOpened = false;
         _noPoping = false;
         return true; // Allow the navigation to proceed
       },
@@ -192,7 +193,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
         builder: (context, theme, _) => Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: theme.songPlayerPageBg!,
+              colors: theme.playerPageBackground!,
               stops: [0.0, 0.33, 0.67, 1.0],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -240,8 +241,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                           ),
                           onPressed: () {
                             setState(() {
-                              _detailSong = appState.fetchDetailSong(
-                                  currentSong!, appState.currentPlatform);
+                              _detailSong = appState.fetchDetailSong<BasicSong>(
+                                  currentSong!, _currentPlatform!);
                             });
                           },
                         ),
@@ -250,17 +251,17 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                   );
                 } else {
                   dynamic detailSong;
-                  if (isUsingMockData) {
+                  if (_isUsingMockData!) {
                     detailSong = snapshot.data as QQMusicDetailSong;
                   } else {
-                    if (currentPlatform == 0) {
+                    if (_currentPlatform == 0) {
                       throw UnimplementedError(
                           'Not yet implement pms platform');
-                    } else if (currentPlatform == 1) {
+                    } else if (_currentPlatform == 1) {
                       detailSong = snapshot.data as QQMusicDetailSong;
-                    } else if (currentPlatform == 2) {
+                    } else if (_currentPlatform == 2) {
                       detailSong = snapshot.data as NCMDetailSong;
-                    } else if (currentPlatform == 3) {
+                    } else if (_currentPlatform == 3) {
                       throw UnimplementedError(
                           'Not yet implement bilibili platform');
                     } else {
@@ -271,12 +272,12 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                   mainLyrics = detailSong.lyrics.lyric;
                   // mainLyrics = detailSong.lyrics.yrc;
                   if (_lyricModel == null || prevSong != currentSong) {
-                    if (!isUsingMockData) {
-                      if (currentPlatform == 0) {
+                    if (!_isUsingMockData!) {
+                      if (_currentPlatform == 0) {
                         throw UnimplementedError(
                             'Not yet implement pms platform');
                       }
-                      if (currentPlatform == 1) {
+                      if (_currentPlatform == 1) {
                         if (mainLyrics == '[00:00:00]此歌曲为没有填词的纯音乐，请您欣赏') {
                           _hasLyrics = false;
                         } else {
@@ -286,7 +287,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                               .bindLyricToExt(detailSong.lyrics.trans)
                               .getModel();
                         }
-                      } else if (currentPlatform == 2) {
+                      } else if (_currentPlatform == 2) {
                         if (mainLyrics == '[00:00:00]此歌曲为没有填词的纯音乐，请您欣赏') {
                           _hasLyrics = false;
                         } else {
@@ -296,7 +297,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                               .bindLyricToExt(detailSong.lyrics.tLyric)
                               .getModel();
                         }
-                      } else if (currentPlatform == 3) {
+                      } else if (_currentPlatform == 3) {
                         throw UnimplementedError(
                             'Not yet implement bilibili platform');
                       } else {
@@ -337,7 +338,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                 color: Color(0xE5FFFFFF),
                                 icon: Icon(Icons.arrow_back_rounded),
                                 onPressed: () {
-                                  appState.isPlayerPageOpened = false;
+                                  appState.isSongsPlayerPageOpened = false;
                                   _noPoping = false;
                                   Navigator.pop(context);
                                 },
@@ -377,9 +378,9 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                   print(appState);
                                   print('lyrics: $_playProgress');
                                   print(
-                                      'song: ${player!.position.inMilliseconds}');
+                                      'song: ${songsPlayer!.position.inMilliseconds}');
                                   print(
-                                      'diff: ${_playProgress - player.position.inMilliseconds}');
+                                      'diff: ${_playProgress - songsPlayer.position.inMilliseconds}');
                                   setState(() {});
                                   // print(max_value);
                                 },
@@ -418,8 +419,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                             0, 0, rect.width, rect.height));
                                       },
                                       blendMode: BlendMode.dstIn,
-                                      child: player != null && _hasLyrics
-                                          ? buildReaderWidget(player)
+                                      child: songsPlayer != null && _hasLyrics
+                                          ? buildReaderWidget(songsPlayer)
                                           : Center(
                                               child: GestureDetector(
                                                 onTap: () {
@@ -474,7 +475,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                           carouselController:
                                               carouselController,
                                           options: CarouselOptions(
-                                            initialPage: player
+                                            initialPage: songsPlayer
                                                     ?.effectiveIndices!
                                                     .indexOf(
                                                         currentPlayingSongInQueue!) ??
@@ -490,7 +491,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                               if (reason ==
                                                   CarouselPageChangedReason
                                                       .manual) {
-                                                int nextIndex = player!
+                                                int nextIndex = songsPlayer!
                                                     .effectiveIndices![index];
 
                                                 bool isForward = (index >
@@ -498,11 +499,12 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                         index != 0) ||
                                                     (index == 0 &&
                                                         prevCarouselIndex ==
-                                                            queue!.length - 1);
+                                                            songsQueue!.length -
+                                                                1);
                                                 appState.prevCarouselIndex =
                                                     index;
 
-                                                player.seek(Duration.zero,
+                                                songsPlayer.seek(Duration.zero,
                                                     index: nextIndex);
 
                                                 Future.delayed(
@@ -510,10 +512,11 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                     () {
                                                   appState.currentPlayingSongInQueue =
                                                       nextIndex;
-                                                  if (!(player
+                                                  if (!(songsPlayer
                                                       .playerState.playing)) {
-                                                    player.play();
-                                                    appState.isPlaying = true;
+                                                    songsPlayer.play();
+                                                    appState.isSongPlaying =
+                                                        true;
                                                   }
                                                 });
                                               }
@@ -549,11 +552,12 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                     ),
                                                   ],
                                                 ),
-                                                child: (player != null &&
-                                                        (player.effectiveIndices
+                                                child: (songsPlayer != null &&
+                                                        (songsPlayer
+                                                                .effectiveIndices
                                                                 ?.isNotEmpty ??
                                                             false) &&
-                                                        player.effectiveIndices![
+                                                        songsPlayer.effectiveIndices![
                                                                 itemIndex] ==
                                                             currentPlayingSongInQueue)
                                                     ? AnimatedBuilder(
@@ -587,13 +591,13 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                               print(
                                                                   _toggleLyrics);
                                                             },
-                                                            child: isUsingMockData
+                                                            child: _isUsingMockData!
                                                                 ? Image.asset(
                                                                     // (_userPlayingMode ==0)?
                                                                     // songsOfPlaylist[itemIndex].cover
-                                                                    (queue?.isNotEmpty ??
+                                                                    (songsQueue?.isNotEmpty ??
                                                                             false)
-                                                                        ? (queue![player.effectiveIndices![itemIndex]]
+                                                                        ? (songsQueue![songsPlayer.effectiveIndices![itemIndex]]
                                                                             .cover)
                                                                         : 'assets/images/default.jpg',
                                                                     fit: BoxFit
@@ -604,12 +608,12 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                                         230.0,
                                                                   )
                                                                 : CachedNetworkImage(
-                                                                    imageUrl: ((queue?.isNotEmpty ??
+                                                                    imageUrl: ((songsQueue?.isNotEmpty ??
                                                                                 false) &&
-                                                                            queue![player.effectiveIndices![itemIndex]]
+                                                                            songsQueue![songsPlayer.effectiveIndices![itemIndex]]
                                                                                 .cover
                                                                                 .isNotEmpty)
-                                                                        ? (queue[player.effectiveIndices![itemIndex]]
+                                                                        ? (songsQueue[songsPlayer.effectiveIndices![itemIndex]]
                                                                             .cover)
                                                                         : MyAppState
                                                                             .defaultCoverImage,
@@ -626,24 +630,24 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                                             .debian),
                                                                   ),
                                                             // : Image(
-                                                            //     image: CachedNetworkImageProvider(((queue?.isNotEmpty ??
+                                                            //     image: CachedNetworkImageProvider(((songsQueue?.isNotEmpty ??
                                                             //                 false) &&
-                                                            //             queue![player.effectiveIndices![itemIndex]]
+                                                            //             songsQueue![songsPlayer.effectiveIndices![itemIndex]]
                                                             //                 .cover
                                                             //                 .isNotEmpty)
-                                                            //         ? (queue[player.effectiveIndices![
+                                                            //         ? (songsQueue[songsPlayer.effectiveIndices![
                                                             //                 itemIndex]]
                                                             //             .cover)
                                                             //         : MyAppState
                                                             //             .defaultCoverImage),
                                                             //   ),
                                                             // : Image.network(
-                                                            //     ((queue?.isNotEmpty ??
+                                                            //     ((songsQueue?.isNotEmpty ??
                                                             //                 false) &&
-                                                            //             queue![player.effectiveIndices![itemIndex]]
+                                                            //             songsQueue![songsPlayer.effectiveIndices![itemIndex]]
                                                             //                 .cover
                                                             //                 .isNotEmpty)
-                                                            //         ? (queue[player.effectiveIndices![
+                                                            //         ? (songsQueue[songsPlayer.effectiveIndices![
                                                             //                 itemIndex]]
                                                             //             .cover)
                                                             //         : MyAppState
@@ -661,15 +665,16 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                             BorderRadius.all(
                                                                 Radius.circular(
                                                                     150.0)),
-                                                        child: isUsingMockData
+                                                        child: _isUsingMockData!
                                                             ? Image.asset(
                                                                 // (_userPlayingMode ==0)?
                                                                 // songsOfPlaylist[itemIndex].cover
-                                                                (player != null &&
-                                                                        (queue?.isNotEmpty ??
+                                                                (songsPlayer !=
+                                                                            null &&
+                                                                        (songsQueue?.isNotEmpty ??
                                                                             false))
-                                                                    ? queue![player
-                                                                            .effectiveIndices![itemIndex]]
+                                                                    ? songsQueue![
+                                                                            songsPlayer.effectiveIndices![itemIndex]]
                                                                         .cover
                                                                     : 'assets/images/default.jpg',
                                                                 fit: BoxFit
@@ -678,14 +683,14 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                                 width: 230.0,
                                                               )
                                                             : CachedNetworkImage(
-                                                                imageUrl: ((player !=
+                                                                imageUrl: ((songsPlayer !=
                                                                                 null &&
-                                                                            (queue?.isNotEmpty ??
+                                                                            (songsQueue?.isNotEmpty ??
                                                                                 false)) &&
-                                                                        queue![player.effectiveIndices![itemIndex]]
+                                                                        songsQueue![songsPlayer.effectiveIndices![itemIndex]]
                                                                             .cover
                                                                             .isNotEmpty)
-                                                                    ? queue[player.effectiveIndices![
+                                                                    ? songsQueue[songsPlayer.effectiveIndices![
                                                                             itemIndex]]
                                                                         .cover
                                                                     : MyAppState
@@ -703,15 +708,15 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                                         .debian),
                                                               ),
                                                         // : Image(
-                                                        //     image: CachedNetworkImageProvider(((player !=
+                                                        //     image: CachedNetworkImageProvider(((songsPlayer !=
                                                         //                     null &&
-                                                        //                 (queue?.isNotEmpty ??
+                                                        //                 (songsQueue?.isNotEmpty ??
                                                         //                     false)) &&
-                                                        //             queue![player.effectiveIndices![
+                                                        //             songsQueue![songsPlayer.effectiveIndices![
                                                         //                     itemIndex]]
                                                         //                 .cover
                                                         //                 .isNotEmpty)
-                                                        //         ? queue[player
+                                                        //         ? songsQueue[songsPlayer
                                                         //                     .effectiveIndices![
                                                         //                 itemIndex]]
                                                         //             .cover
@@ -719,14 +724,14 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                         //             .defaultCoverImage),
                                                         //   ),
                                                         // : Image.network(
-                                                        //     ((player != null &&
-                                                        //                 (queue?.isNotEmpty ??
+                                                        //     ((songsPlayer != null &&
+                                                        //                 (songsQueue?.isNotEmpty ??
                                                         //                     false)) &&
-                                                        //             queue![player.effectiveIndices![
+                                                        //             songsQueue![songsPlayer.effectiveIndices![
                                                         //                     itemIndex]]
                                                         //                 .cover
                                                         //                 .isNotEmpty)
-                                                        //         ? queue[player
+                                                        //         ? songsQueue[songsPlayer
                                                         //                     .effectiveIndices![
                                                         //                 itemIndex]]
                                                         //             .cover
@@ -741,7 +746,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                               ),
                                             );
                                           },
-                                          itemCount: queue?.length,
+                                          itemCount: songsQueue?.length,
                                         ),
                                       ),
                                     ),
@@ -781,9 +786,11 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                   min: 0.0,
                                                   max: 1.0,
                                                   value: volume!,
-                                                  stream: player!.volumeStream,
+                                                  stream:
+                                                      songsPlayer!.volumeStream,
                                                   onChanged: (volume) {
-                                                    player.setVolume(volume);
+                                                    songsPlayer
+                                                        .setVolume(volume);
                                                     appState.volume = volume;
                                                   },
                                                 );
@@ -805,9 +812,10 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                   min: 0.1,
                                                   max: 10.0,
                                                   value: speed,
-                                                  stream: player!.speedStream,
+                                                  stream:
+                                                      songsPlayer!.speedStream,
                                                   onChanged: (speed) {
-                                                    player.setSpeed(speed);
+                                                    songsPlayer.setSpeed(speed);
                                                     appState.speed = speed;
                                                   },
                                                 );
@@ -827,9 +835,9 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                                   Icon(Icons.download_rounded),
                                               onPressed: () {
                                                 print(appState);
-                                                print(queue);
+                                                print(songsQueue);
                                                 print(carouselController);
-                                                print(player);
+                                                print(songsPlayer);
                                                 setState(() {});
                                               },
                                             ),
@@ -865,14 +873,14 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                     child: SizedBox(
                                       height: 30.0,
                                       child: StreamBuilder<PositionData>(
-                                        stream: positionDataStream,
+                                        stream: songsPlayerPositionDataStream,
                                         builder: (context, snapshot) {
                                           final positionData = snapshot.data;
                                           WidgetsBinding.instance
                                               .addPostFrameCallback((_) {
                                             if (_toggleLyrics) {
                                               setState(() {
-                                                // _playProgress = player.positionStream.
+                                                // _playProgress = songsPlayer.positionStream.
                                                 _playProgress = positionData
                                                         ?.position
                                                         .inMilliseconds ??
@@ -890,7 +898,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                             bufferedPosition: positionData
                                                     ?.bufferedPosition ??
                                                 Duration.zero,
-                                            onChangeEnd: player?.seek,
+                                            onChangeEnd: songsPlayer?.seek,
                                           );
                                         },
                                       ),
@@ -922,11 +930,13 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                           setState(() {
                                             appState.userPlayingMode = 1;
                                           });
-                                          player!.setShuffleModeEnabled(false);
-                                          player.setLoopMode(LoopMode.all);
-                                          carouselController.jumpToPage(player
-                                              .effectiveIndices!
-                                              .indexOf(player.currentIndex!));
+                                          songsPlayer!
+                                              .setShuffleModeEnabled(false);
+                                          songsPlayer.setLoopMode(LoopMode.all);
+                                          carouselController.jumpToPage(
+                                              songsPlayer.effectiveIndices!
+                                                  .indexOf(songsPlayer
+                                                      .currentIndex!));
                                         },
                                       );
                                     } else if (userPlayingMode == 1) {
@@ -937,8 +947,9 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                           setState(() {
                                             appState.userPlayingMode = 2;
                                           });
-                                          player!.setShuffleModeEnabled(false);
-                                          player.setLoopMode(LoopMode.one);
+                                          songsPlayer!
+                                              .setShuffleModeEnabled(false);
+                                          songsPlayer.setLoopMode(LoopMode.one);
                                         },
                                       );
                                     } else if (userPlayingMode == 2) {
@@ -950,12 +961,14 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                           setState(() {
                                             appState.userPlayingMode = 0;
                                           });
-                                          player!.setShuffleModeEnabled(true);
-                                          player.shuffle();
-                                          player.setLoopMode(LoopMode.all);
-                                          carouselController.jumpToPage(player
-                                              .effectiveIndices!
-                                              .indexOf(player.currentIndex!));
+                                          songsPlayer!
+                                              .setShuffleModeEnabled(true);
+                                          songsPlayer.shuffle();
+                                          songsPlayer.setLoopMode(LoopMode.all);
+                                          carouselController.jumpToPage(
+                                              songsPlayer.effectiveIndices!
+                                                  .indexOf(songsPlayer
+                                                      .currentIndex!));
                                         },
                                       );
                                     } else {
@@ -970,22 +983,23 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                 color: Color(0xE5FFFFFF),
                                 onPressed: () async {
                                   int? nextIndex = userPlayingMode == 2
-                                      ? (player!.currentIndex! - 1) %
-                                          (queue?.length ?? 1)
-                                      : player!.previousIndex!;
+                                      ? (songsPlayer!.currentIndex! - 1) %
+                                          (songsQueue?.length ?? 1)
+                                      : songsPlayer!.previousIndex!;
 
-                                  player.seek(Duration.zero, index: nextIndex);
+                                  songsPlayer.seek(Duration.zero,
+                                      index: nextIndex);
 
                                   Future.delayed(Duration(milliseconds: 700),
                                       () {
                                     appState.currentPlayingSongInQueue =
                                         nextIndex;
-                                    if (!(player.playerState.playing)) {
-                                      player.play();
-                                      appState.isPlaying = true;
+                                    if (!(songsPlayer.playerState.playing)) {
+                                      songsPlayer.play();
+                                      appState.isSongPlaying = true;
                                     }
                                   });
-                                  carouselController.animateToPage(player
+                                  carouselController.animateToPage(songsPlayer
                                       .effectiveIndices!
                                       .indexOf(nextIndex));
                                 },
@@ -994,7 +1008,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                 color: Colors.transparent,
                                 child: Center(
                                   child: StreamBuilder<PlayerState>(
-                                    stream: player?.playerStateStream,
+                                    stream: songsPlayer?.playerStateStream,
                                     builder: (context, snapshot) {
                                       final playerState = snapshot.data;
                                       final processingState =
@@ -1019,7 +1033,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                           iconSize: 50.0,
                                           color: Color(0xE5FFFFFF),
                                           onPressed: () {
-                                            player!.play();
+                                            songsPlayer!.play();
                                           },
                                         );
                                       } else if (processingState !=
@@ -1031,8 +1045,8 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                           iconSize: 50.0,
                                           color: Color(0xE5FFFFFF),
                                           onPressed: () {
-                                            player?.pause();
-                                            appState.isPlaying = false;
+                                            songsPlayer?.pause();
+                                            appState.isSongPlaying = false;
                                           },
                                         );
                                       } else {
@@ -1042,7 +1056,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                           iconSize: 40.0,
                                           color: Color(0xE5FFFFFF),
                                           onPressed: () =>
-                                              player?.seek(Duration.zero),
+                                              songsPlayer?.seek(Duration.zero),
                                         );
                                       }
                                     },
@@ -1054,22 +1068,23 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                                 color: Color(0xE5FFFFFF),
                                 onPressed: () async {
                                   int? nextIndex = userPlayingMode == 2
-                                      ? (player!.currentIndex! + 1) %
-                                          (queue?.length ?? 1)
-                                      : player!.nextIndex!;
+                                      ? (songsPlayer!.currentIndex! + 1) %
+                                          (songsQueue?.length ?? 1)
+                                      : songsPlayer!.nextIndex!;
 
-                                  player.seek(Duration.zero, index: nextIndex);
+                                  songsPlayer.seek(Duration.zero,
+                                      index: nextIndex);
 
                                   Future.delayed(Duration(milliseconds: 700),
                                       () {
                                     appState.currentPlayingSongInQueue =
                                         nextIndex;
-                                    if (!(player.playerState.playing)) {
-                                      player.play();
-                                      appState.isPlaying = true;
+                                    if (!(songsPlayer.playerState.playing)) {
+                                      songsPlayer.play();
+                                      appState.isSongPlaying = true;
                                     }
                                   });
-                                  carouselController.animateToPage(player
+                                  carouselController.animateToPage(songsPlayer
                                       .effectiveIndices!
                                       .indexOf(nextIndex));
                                 },
@@ -1097,7 +1112,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
     );
   }
 
-  Stack buildReaderWidget(AudioPlayer? player) {
+  Stack buildReaderWidget(AudioPlayer? songsPlayer) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Stack(
@@ -1127,7 +1142,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                 LyricsLog.logD('Click event');
                 confirm.call();
                 setState(() {
-                  player?.seek(Duration(milliseconds: progress));
+                  songsPlayer?.seek(Duration(milliseconds: progress));
                 });
               },
               onLongPress: () {
@@ -1156,7 +1171,7 @@ class _SongPlayerPageState extends State<SongPlayerPage>
                           LyricsLog.logD('Click event');
                           confirm.call();
                           setState(() {
-                            player?.seek(Duration(milliseconds: progress));
+                            songsPlayer?.seek(Duration(milliseconds: progress));
                           });
                         },
                         icon: Icon(Icons.play_arrow_rounded,

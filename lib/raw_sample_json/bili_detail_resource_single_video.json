@@ -1,0 +1,152 @@
+{
+    "code": 0,
+    "message": "0",
+    "ttl": 1,
+    "data": {
+        "bvid": "BV1GW4y1d7s6",
+        "aid": 956078940,
+        "videos": 1,
+        "tid": 233,
+        "tname": "极客DIY",
+        "copyright": 1,
+        "pic": "http://i0.hdslb.com/bfs/archive/6bf0067486cb095d256815e0b83a88e282a7791e.jpg",
+        "title": "自制打农药机甲",
+        "pubdate": 1689505607,
+        "ctime": 1689504612,
+        "desc": "",
+        "desc_v2": null,
+        "state": 0,
+        "duration": 929,
+        "rights": {
+            "bp": 0,
+            "elec": 0,
+            "download": 1,
+            "movie": 0,
+            "pay": 0,
+            "hd5": 0,
+            "no_reprint": 1,
+            "autoplay": 1,
+            "ugc_pay": 0,
+            "is_cooperation": 0,
+            "ugc_pay_preview": 0,
+            "no_background": 0,
+            "clean_mode": 0,
+            "is_stein_gate": 0,
+            "is_360": 0,
+            "no_share": 0,
+            "arc_pay": 0,
+            "free_watch": 0
+        },
+        "owner": {
+            "mid": 280793434,
+            "name": "手工耿",
+            "face": "http://i1.hdslb.com/bfs/face/b8a75ae7d2a0e2af1d36ca9f1084d850eebb28e3.jpg"
+        },
+        "stat": {
+            "aid": 956078940,
+            "view": 8114045,
+            "danmaku": 70348,
+            "reply": 14826,
+            "favorite": 63509,
+            "coin": 243823,
+            "share": 43997,
+            "now_rank": 0,
+            "his_rank": 2,
+            "like": 623273,
+            "dislike": 0,
+            "evaluation": "",
+            "argue_msg": "",
+            "vt": 0
+        },
+        "dynamic": "",
+        "cid": 1198636459,
+        "dimension": {
+            "width": 1920,
+            "height": 1080,
+            "rotate": 0
+        },
+        "premiere": null,
+        "teenage_mode": 0,
+        "is_chargeable_season": false,
+        "is_story": false,
+        "is_upower_exclusive": false,
+        "is_upower_play": false,
+        "enable_vt": 0,
+        "no_cache": false,
+        "pages": [
+            {
+                "cid": 1198636459,
+                "page": 1,
+                "from": "vupload",
+                "part": "",
+                "duration": 929,
+                "vid": "",
+                "weblink": "",
+                "dimension": {
+                    "width": 1920,
+                    "height": 1080,
+                    "rotate": 0
+                },
+                "first_frame": "http://i1.hdslb.com/bfs/storyff/n230716qnyh8ydm3it1de305nleh9mea_firsti.jpg"
+            }
+        ],
+        "subtitle": {
+            "allow_submit": false,
+            "list": [
+                {
+                    "id": 1269648228064867328,
+                    "lan": "ai-zh",
+                    "lan_doc": "中文（自动生成）",
+                    "is_lock": false,
+                    "subtitle_url": "",
+                    "type": 1,
+                    "id_str": "1269648228064867328",
+                    "ai_type": 0,
+                    "ai_status": 2,
+                    "author": {
+                        "mid": 0,
+                        "name": "",
+                        "sex": "",
+                        "face": "",
+                        "sign": "",
+                        "rank": 0,
+                        "birthday": 0,
+                        "is_fake_account": 0,
+                        "is_deleted": 0,
+                        "in_reg_audit": 0,
+                        "is_senior_member": 0
+                    }
+                }
+            ]
+        },
+        "is_season_display": false,
+        "user_garb": {
+            "url_image_ani_cut": ""
+        },
+        "honor_reply": {
+            "honor": [
+                {
+                    "aid": 956078940,
+                    "type": 2,
+                    "desc": "第226期每周必看",
+                    "weekly_recommend_num": 226
+                },
+                {
+                    "aid": 956078940,
+                    "type": 3,
+                    "desc": "全站排行榜最高第2名",
+                    "weekly_recommend_num": 0
+                },
+                {
+                    "aid": 956078940,
+                    "type": 4,
+                    "desc": "热门",
+                    "weekly_recommend_num": 0
+                }
+            ]
+        },
+        "like_icon": "",
+        "need_jump_bv": false,
+        "disable_show_up_info": false
+    }
+}

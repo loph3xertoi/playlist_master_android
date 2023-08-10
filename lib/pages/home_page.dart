@@ -26,6 +26,10 @@ class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  MyAppState? _appState;
+  int? _currentPlatform;
+  bool? _isUsingMockData;
+
   @override
   void initState() {
     super.initState();
@@ -42,10 +46,11 @@ class _HomePageState extends State<HomePage>
   @override
   Widget build(BuildContext context) {
     print('build homepage');
-    MyAppState appState = context.watch<MyAppState>();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-
+    MyAppState appState = context.watch<MyAppState>();
+    _currentPlatform = appState.currentPlatform;
+    _isUsingMockData = appState.isUsingMockData;
     return Consumer<ThemeNotifier>(
       builder: (context, theme, _) => Scaffold(
         key: _scaffoldKey,
@@ -61,10 +66,15 @@ class _HomePageState extends State<HomePage>
             onTap: () async {
               MyToast.showToast('Switched to pms.');
               MyLogger.logger.i('Switched to pms.');
-              if (appState.currentPlatform != 0 && appState.player != null) {
-                appState.disposeSongPlayer();
+              if (_currentPlatform != 0) {
+                if (appState.songsPlayer != null) {
+                  appState.disposeSongsPlayer();
+                }
+                if (appState.resourcesPlayer != null) {
+                  appState.disposeResourcesPlayer();
+                }
               }
-              appState.currentPlatform = 0;
+              _currentPlatform = 0;
               appState.refreshLibraries!(appState, false);
               showDialog(
                 builder: (BuildContext context) {
@@ -127,13 +137,11 @@ class _HomePageState extends State<HomePage>
                             ),
                           ),
                           onPressed: () async {
+                            MyToast.showToast(
+                                'Searching songs in $_currentPlatform');
                             var res = await appState.fetchSearchedSongs(
-                                '洛天依',
-                                appState.firstPageNo,
-                                appState.pageSize,
-                                appState.currentPlatform);
+                                '洛天依', 1, 10, _currentPlatform!);
                             print(res);
-                            MyToast.showToast('Search songs');
                           },
                           child: Text(
                             'Search songs',
@@ -173,11 +181,15 @@ class _HomePageState extends State<HomePage>
                 onTap: () {
                   MyToast.showToast('Switched to bilibili.');
                   MyLogger.logger.i('Switched to bilibili.');
-                  if (appState.currentPlatform != 3 &&
-                      appState.player != null) {
-                    appState.disposeSongPlayer();
+                  if (_currentPlatform != 3) {
+                    if (appState.songsPlayer != null) {
+                      appState.disposeSongsPlayer();
+                    }
+                    if (appState.resourcesPlayer != null) {
+                      appState.disposeResourcesPlayer();
+                    }
                   }
-                  appState.currentPlatform = 3;
+                  _currentPlatform = 3;
                   appState.refreshLibraries!(appState, false);
                 },
               ),
@@ -186,11 +198,15 @@ class _HomePageState extends State<HomePage>
                 onTap: () {
                   MyToast.showToast('Switched to netease music.');
                   MyLogger.logger.i('Switched to netease music.');
-                  if (appState.currentPlatform != 2 &&
-                      appState.player != null) {
-                    appState.disposeSongPlayer();
+                  if (_currentPlatform != 2) {
+                    if (appState.songsPlayer != null) {
+                      appState.disposeSongsPlayer();
+                    }
+                    if (appState.resourcesPlayer != null) {
+                      appState.disposeResourcesPlayer();
+                    }
                   }
-                  appState.currentPlatform = 2;
+                  _currentPlatform = 2;
                   appState.refreshLibraries!(appState, false);
                 },
               ),
@@ -199,11 +215,15 @@ class _HomePageState extends State<HomePage>
                 onTap: () {
                   MyToast.showToast('Switched to qq music.');
                   MyLogger.logger.i('Switched to qq music.');
-                  if (appState.currentPlatform != 1 &&
-                      appState.player != null) {
-                    appState.disposeSongPlayer();
+                  if (_currentPlatform != 1) {
+                    if (appState.songsPlayer != null) {
+                      appState.disposeSongsPlayer();
+                    }
+                    if (appState.resourcesPlayer != null) {
+                      appState.disposeResourcesPlayer();
+                    }
                   }
-                  appState.currentPlatform = 1;
+                  _currentPlatform = 1;
                   appState.refreshLibraries!(appState, false);
                 },
               ),

@@ -1,10 +1,15 @@
 import 'dart:math';
 
+import 'package:carousel_slider/carousel_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
 
+import '../entities/basic/basic_song.dart';
+import '../entities/bilibili/bili_resource.dart';
 import '../states/app_state.dart';
 import 'confirm_popup.dart';
+import 'resource_item_in_queue.dart';
 import 'song_item_in_queue.dart';
 
 class ShowQueueDialog extends StatefulWidget {
@@ -15,6 +20,10 @@ class ShowQueueDialog extends StatefulWidget {
 class _ShowQueueDialogState extends State<ShowQueueDialog>
     with SingleTickerProviderStateMixin {
   ScrollController _scrollController = ScrollController();
+  late int _currentPlatform;
+  MyAppState? _appState;
+  int? _queueLength;
+  late CarouselController _carouselController;
 
   @override
   void dispose() {
@@ -26,46 +35,78 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
+    _currentPlatform = state.currentPlatform;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      int index = state.currentPlayingSongInQueue!;
-      int realIndex = index <= 2
-          ? 0
-          : index >= (state.queue!.length - 9)
-              ? max(state.queue!.length - 11, 0)
-              : index - 2;
-      _scrollController.jumpTo(realIndex * 40.0);
+      if (_currentPlatform == 3) {
+        int index = state.currentPlayingResourceInQueue!;
+        int realIndex = index <= 2
+            ? 0
+            : index >= (state.resourcesQueue!.length - 9)
+                ? max(state.resourcesQueue!.length - 11, 0)
+                : index - 2;
+        _scrollController.jumpTo(realIndex * 40.0);
+      } else {
+        int index = state.currentPlayingSongInQueue!;
+        int realIndex = index <= 2
+            ? 0
+            : index >= (state.songsQueue!.length - 9)
+                ? max(state.songsQueue!.length - 11, 0)
+                : index - 2;
+        _scrollController.jumpTo(realIndex * 40.0);
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
-    var queue = appState.queue;
-    var queueLength = queue?.length ?? 0;
+    _appState = appState;
+    _carouselController = appState.carouselController;
+    var songsQueue = appState.songsQueue;
+    var resourcesQueue = appState.resourcesQueue;
+    var queue = _currentPlatform == 3 ? resourcesQueue : songsQueue;
+    if (queue == null || queue.isEmpty) {
+      _queueLength = 0;
+    } else {
+      _queueLength = queue.length;
+    }
+
     var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
-    var carouselController = appState.carouselController;
-    var player = appState.player;
-    if (queue!.isEmpty) {
+    var currentPlayingResourceInQueue = appState.currentPlayingResourceInQueue;
+    var player =
+        _currentPlatform == 3 ? appState.resourcesPlayer : appState.songsPlayer;
+    if (_queueLength == 0) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (appState.player != null && mounted) {
-          appState.queue = [];
-          // appState.currentDetailSong = null;
-          appState.currentPlayingSongInQueue = 0;
-          appState.currentSong = null;
-          appState.prevSong = null;
-          appState.isPlaying = false;
-          appState.player!.stop();
-          appState.player!.dispose();
-          appState.player = null;
-          appState.initQueue!.clear();
-          Navigator.of(context).pop();
+        if (player != null && mounted) {
+          if (_currentPlatform == 3) {
+            appState.resourcesQueue = [];
+            appState.currentPlayingResourceInQueue = 0;
+            appState.currentResource = null;
+            appState.prevResource = null;
+            appState.isResourcePlaying = false;
+            player.stop();
+            player.dispose();
+            appState.resourcesPlayer = null;
+            appState.resourcesAudioSource!.clear();
+            Navigator.of(context).pop();
+          } else {
+            appState.songsQueue = [];
+            appState.currentPlayingSongInQueue = 0;
+            appState.currentSong = null;
+            appState.prevSong = null;
+            appState.isSongPlaying = false;
+            player.stop();
+            player.dispose();
+            appState.songsPlayer = null;
+            appState.songsAudioSource!.clear();
+            Navigator.of(context).pop();
+          }
         }
       });
     }
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     return Dialog(
-      // backgroundColor: Colors.black  ,
       insetPadding: EdgeInsets.all(0.0),
       alignment: Alignment.bottomCenter,
       child: Material(
@@ -84,7 +125,7 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                 child: Row(children: [
                   Expanded(
                     child: Text(
-                      'Queue($queueLength)',
+                      'Queue($_queueLength)',
                       style: textTheme.labelMedium!.copyWith(
                         fontSize: 14.0,
                         color: colorScheme.onPrimary,
@@ -100,7 +141,11 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                         builder: (_) => ShowConfirmDialog(
                           title: 'Do you want to empty the queue?',
                           onConfirm: () {
-                            appState.queue = [];
+                            if (_currentPlatform == 3) {
+                              appState.resourcesQueue = [];
+                            } else {
+                              appState.songsQueue = [];
+                            }
                           },
                         ),
                       );
@@ -109,150 +154,96 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                 ]),
               ),
               Expanded(
-                child: (appState.isQueueEmpty)
+                child: _queueLength == 0
                     ? Center(
                         child: Text(
-                        'Empty Queue',
+                        'Empty queue',
                         style: textTheme.labelMedium,
                       ))
                     : ListView.builder(
-                        itemCount: queueLength,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: _queueLength,
                         controller: _scrollController,
                         itemBuilder: (context, index) {
-                          var name = queue[index].name;
-                          var singers = queue[index].singers;
-                          var cover = queue[index].cover;
-                          var payPlayType = queue[index].payPlay;
+                          if (_currentPlatform == 3) {
+                          } else {}
+                          String name = _currentPlatform == 3
+                              ? resourcesQueue![index].title
+                              : songsQueue![index].name;
+                          dynamic singers = _currentPlatform == 3
+                              ? resourcesQueue![index].upperName
+                              : songsQueue![index].singers;
+                          String cover = _currentPlatform == 3
+                              ? resourcesQueue![index].cover
+                              : songsQueue![index].cover;
+                          int payPlayType = _currentPlatform == 3
+                              ? 0
+                              : songsQueue![index].payPlay;
                           return Material(
                             color: Colors.transparent,
                             child: InkWell(
                               onTap: () {
-                                if (currentPlayingSongInQueue == index) {
-                                  return;
-                                }
-                                appState.currentPlayingSongInQueue = index;
-                                // if (!isPlayerPageOpened) {
-                                appState.currentSong = queue[index];
-                                // }
-                                // appState.carouselController.animateToPage(
-                                //     player!.effectiveIndices!.indexOf(index));
-                                WidgetsBinding.instance
-                                    .addPostFrameCallback((_) {
-                                  appState.player!
-                                      .seek(Duration.zero, index: index);
-                                  // Future.delayed(Duration(seconds: 1), () {
-                                  //   if (appState.isPlayerPageOpened) {
-                                  //     carouselController.animateToPage(
-                                  //       player!.effectiveIndices!
-                                  //           .indexOf(index),
-                                  //     );
-                                  //   }
-                                  // });
-                                });
-
-                                if (!player!.playerState.playing) {
-                                  player.play();
-                                  appState.isPlaying = true;
+                                if (_currentPlatform == 3) {
+                                  if (currentPlayingResourceInQueue == index) {
+                                    return;
+                                  }
+                                  appState.currentPlayingResourceInQueue =
+                                      index;
+                                  appState.currentResource =
+                                      resourcesQueue![index];
+                                  WidgetsBinding.instance
+                                      .addPostFrameCallback((_) {
+                                    player!.seek(Duration.zero, index: index);
+                                  });
+                                  if (!player!.playerState.playing) {
+                                    player.play();
+                                    appState.isResourcePlaying = true;
+                                  }
+                                } else {
+                                  if (currentPlayingSongInQueue == index) {
+                                    return;
+                                  }
+                                  appState.currentPlayingSongInQueue = index;
+                                  appState.currentSong = songsQueue![index];
+                                  WidgetsBinding.instance
+                                      .addPostFrameCallback((_) {
+                                    player!.seek(Duration.zero, index: index);
+                                  });
+                                  if (!player!.playerState.playing) {
+                                    player.play();
+                                    appState.isSongPlaying = true;
+                                  }
                                 }
                               },
                               child: Container(
                                 margin:
                                     EdgeInsets.fromLTRB(25.0, 0.0, 12.0, 0.0),
-                                child: SongItemInQueue(
-                                  name: name,
-                                  payPlayType: payPlayType,
-                                  cover: cover,
-                                  singers: singers,
-                                  isPlaying:
-                                      (currentPlayingSongInQueue == index)
-                                          ? true
-                                          : false,
-                                  onClose: () {
-                                    appState.removeSongInQueue(index);
-                                    if (appState.initQueue?.length != 0) {
-                                      appState.initQueue!.removeAt(index);
-                                    }
-                                    appState.isRemovingSongFromQueue = true;
-                                    if (index < currentPlayingSongInQueue!) {
-                                      appState.currentPlayingSongInQueue =
-                                          (currentPlayingSongInQueue! - 1) %
-                                              queue.length;
-                                      currentPlayingSongInQueue =
-                                          appState.currentPlayingSongInQueue;
-                                      // if (!isPlayerPageOpened) {
-                                      appState.currentSong = (queue.isNotEmpty)
-                                          ? queue[
-                                              (currentPlayingSongInQueue! - 1) %
-                                                  queue.length]
-                                          : null;
-                                      // }
-                                      // appState.updateSong = true;
-                                    } else if (index >
-                                        currentPlayingSongInQueue!) {
-                                      // player!.seek(Duration.zero,
-                                      //     index: 0);
-                                      // appState.updateSong = true;
-                                    } else {
-                                      // Set the new playing song to the first if the current
-                                      // removed song is the last and is playing.
-                                      if (currentPlayingSongInQueue ==
-                                          queueLength - 1) {
-                                        appState.currentPlayingSongInQueue = 0;
-                                        currentPlayingSongInQueue = 0;
-                                        // if (!isPlayerPageOpened) {
-                                        appState.currentSong =
-                                            (queue.isNotEmpty)
-                                                ? queue[0]
-                                                : null;
-                                        // }
-                                      }
-                                      WidgetsBinding.instance
-                                          .addPostFrameCallback((_) {
-                                        if (queue.isNotEmpty) {
-                                          appState.player!.seek(Duration.zero,
-                                              index: currentPlayingSongInQueue);
-                                          // if (!isPlayerPageOpened) {
-                                          appState.currentSong = (queue
-                                                  .isNotEmpty)
-                                              ? queue[
-                                                  currentPlayingSongInQueue!]
-                                              : null;
-                                          // }
-                                          appState.currentPlayingSongInQueue =
-                                              currentPlayingSongInQueue;
-                                        }
-                                      });
-
-                                      if (!player!.playerState.playing) {
-                                        player.play();
-                                        appState.isPlaying = true;
-                                      }
-                                    }
-                                    //TODO: fix bug: when the song is removed from the queue
-                                    // is above the current playing song in queue, and the song player
-                                    // is open, the song cover animation will be wired.
-                                    WidgetsBinding.instance
-                                        .addPostFrameCallback((_) {
-                                      if (appState.isPlayerPageOpened) {
-                                        carouselController.jumpToPage(
-                                          player!.effectiveIndices!.indexOf(
-                                              appState
-                                                  .currentPlayingSongInQueue!),
-                                        );
-                                      }
-                                    });
-
-                                    Future.delayed(Duration(milliseconds: 200),
-                                        () {
-                                      appState.isRemovingSongFromQueue = false;
-                                    });
-
-                                    // appState.updateSong = true;
-                                    // TODO: fix bug, seek not working.
-                                    // player.seek(Duration.zero,
-                                    //     index: currentPlayingSongInQueue);
-                                  },
-                                ),
+                                child: _currentPlatform == 3
+                                    ? ResourceItemInQueue(
+                                        name: name,
+                                        cover: cover,
+                                        singers: singers,
+                                        isPlaying:
+                                            currentPlayingResourceInQueue ==
+                                                    index
+                                                ? true
+                                                : false,
+                                        onClose: () {
+                                          onCloseResourceItem(index, appState);
+                                        },
+                                      )
+                                    : SongItemInQueue(
+                                        name: name,
+                                        payPlayType: payPlayType,
+                                        cover: cover,
+                                        singers: singers,
+                                        isPlaying:
+                                            currentPlayingSongInQueue == index
+                                                ? true
+                                                : false,
+                                        onClose: () {
+                                          onCloseSongItem(index, appState);
+                                        }),
                               ),
                             ),
                           );
@@ -264,5 +255,124 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
         ),
       ),
     );
+  }
+
+  void onCloseSongItem(int index, MyAppState appState) {
+    appState.removeSongInQueue(index);
+    int currentPlayingSongInQueue = appState.currentPlayingSongInQueue!;
+    AudioPlayer player = appState.songsPlayer!;
+    List<BasicSong> songsQueue = appState.songsQueue!;
+    if (appState.songsAudioSource?.length != 0) {
+      appState.songsAudioSource!.removeAt(index);
+    }
+    appState.isRemovingSongFromQueue = true;
+    if (index < currentPlayingSongInQueue) {
+      appState.currentPlayingSongInQueue =
+          (currentPlayingSongInQueue - 1) % _queueLength!;
+      currentPlayingSongInQueue = appState.currentPlayingSongInQueue!;
+
+      appState.currentSong = _queueLength != 0
+          ? songsQueue[(currentPlayingSongInQueue - 1) % _queueLength!]
+          : null;
+    } else if (index > currentPlayingSongInQueue) {
+    } else {
+      // Set the new playing song to the first if the current
+      // removed song is the last and is playing.
+      if (currentPlayingSongInQueue == _queueLength! - 1) {
+        appState.currentPlayingSongInQueue = 0;
+        currentPlayingSongInQueue = 0;
+        appState.currentSong = (songsQueue.isNotEmpty) ? songsQueue[0] : null;
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (songsQueue.isNotEmpty) {
+          appState.songsPlayer!
+              .seek(Duration.zero, index: currentPlayingSongInQueue);
+          appState.currentSong = (songsQueue.isNotEmpty)
+              ? songsQueue[currentPlayingSongInQueue]
+              : null;
+          appState.currentPlayingSongInQueue = currentPlayingSongInQueue;
+        }
+      });
+
+      if (!player.playerState.playing) {
+        player.play();
+        appState.isSongPlaying = true;
+      }
+    }
+    //TODO: fix bug: when the song is removed from the queue
+    // is above the current playing song in queue, and the song player
+    // is open, the song cover animation will be wired.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (appState.isSongsPlayerPageOpened) {
+        _carouselController.jumpToPage(
+          player.effectiveIndices!.indexOf(appState.currentPlayingSongInQueue!),
+        );
+      }
+    });
+
+    Future.delayed(Duration(milliseconds: 200), () {
+      appState.isRemovingSongFromQueue = false;
+    });
+  }
+
+  void onCloseResourceItem(int index, MyAppState appState) {
+    appState.removeResourceInQueue(index);
+    int currentPlayingResourceInQueue = appState.currentPlayingResourceInQueue!;
+    AudioPlayer player = appState.resourcesPlayer!;
+    List<BiliResource> resourcesQueue = appState.resourcesQueue!;
+    if (appState.resourcesAudioSource?.length != 0) {
+      appState.resourcesAudioSource!.removeAt(index);
+    }
+    appState.isRemovingResourceFromQueue = true;
+    if (index < currentPlayingResourceInQueue) {
+      appState.currentPlayingResourceInQueue =
+          (currentPlayingResourceInQueue - 1) % _queueLength!;
+      currentPlayingResourceInQueue = appState.currentPlayingResourceInQueue!;
+
+      appState.currentResource = _queueLength != 0
+          ? resourcesQueue[(currentPlayingResourceInQueue - 1) % _queueLength!]
+          : null;
+    } else if (index > currentPlayingResourceInQueue) {
+    } else {
+      // Set the new playing resource to the first if the current
+      // removed resource is the last and is playing.
+      if (currentPlayingResourceInQueue == _queueLength! - 1) {
+        appState.currentPlayingResourceInQueue = 0;
+        currentPlayingResourceInQueue = 0;
+        appState.currentResource =
+            (resourcesQueue.isNotEmpty) ? resourcesQueue[0] : null;
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (resourcesQueue.isNotEmpty) {
+          appState.resourcesPlayer!
+              .seek(Duration.zero, index: currentPlayingResourceInQueue);
+          appState.currentResource = (resourcesQueue.isNotEmpty)
+              ? resourcesQueue[currentPlayingResourceInQueue]
+              : null;
+          appState.currentPlayingResourceInQueue =
+              currentPlayingResourceInQueue;
+        }
+      });
+
+      if (!player.playerState.playing) {
+        player.play();
+        appState.isResourcePlaying = true;
+      }
+    }
+    //TODO: fix bug: when the resource is removed from the queue
+    // is above the current playing resource in queue, and the resource player
+    // is open, the resource cover animation will be wired.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (appState.isResourcesPlayerPageOpened) {
+        _carouselController.jumpToPage(
+          player.effectiveIndices!
+              .indexOf(appState.currentPlayingResourceInQueue!),
+        );
+      }
+    });
+
+    Future.delayed(Duration(milliseconds: 200), () {
+      appState.isRemovingResourceFromQueue = false;
+    });
   }
 }

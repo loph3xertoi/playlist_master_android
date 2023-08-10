@@ -34,9 +34,9 @@ class LibraryItemMenuPopup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    MyAppState appState = context.watch<MyAppState>();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    MyAppState appState = context.watch<MyAppState>();
     return Dialog(
       insetPadding: EdgeInsets.all(0.0),
       alignment: Alignment.bottomCenter,

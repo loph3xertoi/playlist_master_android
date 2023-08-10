@@ -32,7 +32,9 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
   void _addSongsToLibraries(BuildContext context, MyAppState appState) async {
     List<BasicSong> selectedSongs = widget.inSimilarSongsPage
         ? _selectedIndex.map((index) => widget.similarSongs[index]).toList()
-        : _selectedIndex.map((index) => appState.rawQueue![index]).toList();
+        : _selectedIndex
+            .map((index) => appState.rawSongsInLibrary![index])
+            .toList();
     if (mounted) {
       List<Future<Result?>>? list =
           await showFlexibleBottomSheet<List<Future<Result?>>>(
@@ -79,26 +81,28 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
     if (appState.rawOpenedLibrary!.itemCount == 0 && mounted) {
       Navigator.pop(context);
     }
-    Map<int, Object> map = appState.rawQueue!.asMap();
+    Map<int, Object> map = appState.rawSongsInLibrary!.asMap();
     Map<int, Object> modifiableMap = Map.from(map);
-    List<BasicSong> removedSongs =
-        _selectedIndex.map((index) => appState.rawQueue![index]).toList();
+    List<BasicSong> removedSongs = _selectedIndex
+        .map((index) => appState.rawSongsInLibrary![index])
+        .toList();
     modifiableMap
         .removeWhere((index, object) => _selectedIndex.contains(index));
-    appState.rawQueue = modifiableMap.values.toList();
+    appState.rawSongsInLibrary = modifiableMap.values.toList();
     setState(() {
       _selectedIndex.clear();
     });
-    appState.searchedSongs = appState.rawQueue!;
+    appState.searchedSongs = appState.rawSongsInLibrary!;
     await appState.removeSongsFromLibrary(
         removedSongs, appState.openedLibrary!, appState.currentPlatform);
     appState.refreshLibraries!(appState, true);
-    appState.refreshDetailLibraryPage!();
+    appState.refreshDetailLibraryPage!(appState);
   }
 
   void _moveSongsToLibraries(BuildContext context, MyAppState appState) async {
-    List<BasicSong> selectedSongs =
-        _selectedIndex.map((index) => appState.rawQueue![index]).toList();
+    List<BasicSong> selectedSongs = _selectedIndex
+        .map((index) => appState.rawSongsInLibrary![index])
+        .toList();
     List<Future<Result?>>? list =
         await showFlexibleBottomSheet<List<Future<Result?>>>(
       minHeight: 0,
@@ -146,19 +150,19 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
           if (appState.rawOpenedLibrary!.itemCount == 0 && mounted) {
             Navigator.pop(context);
           }
-          Map<int, Object> map = appState.rawQueue!.asMap();
+          Map<int, Object> map = appState.rawSongsInLibrary!.asMap();
           Map<int, Object> modifiableMap = Map.from(map);
           modifiableMap
               .removeWhere((index, object) => _selectedIndex.contains(index));
-          appState.rawQueue = modifiableMap.values.toList();
+          appState.rawSongsInLibrary = modifiableMap.values.toList();
           setState(() {
             _selectedIndex.clear();
           });
-          appState.searchedSongs = appState.rawQueue!;
+          appState.searchedSongs = appState.rawSongsInLibrary!;
           // await appState.removeSongsFromLibrary(
           //     selectedSongs, appState.openedLibrary!, appState.currentPlatform);
           appState.refreshLibraries!(appState, true);
-          appState.refreshDetailLibraryPage!();
+          appState.refreshDetailLibraryPage!(appState);
           break;
         }
       }
@@ -167,13 +171,13 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
     var isUsingMockData = appState.isUsingMockData;
     int songsCount = widget.inSimilarSongsPage
         ? widget.similarSongs.length
         : appState.openedLibrary!.itemCount;
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     var inSimilarSongsPage = widget.inSimilarSongsPage;
     var similarSongs = widget.similarSongs;
     return Dialog(
@@ -254,11 +258,12 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
             ),
             Expanded(
               child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: isUsingMockData
-                    ? min(appState.rawQueue!.length, 10)
+                    ? min(appState.rawSongsInLibrary!.length, 10)
                     : inSimilarSongsPage
                         ? similarSongs.length
-                        : appState.rawQueue!.length,
+                        : appState.rawSongsInLibrary!.length,
                 itemBuilder: (context, index) {
                   return Material(
                     color: Colors.transparent,
@@ -277,7 +282,7 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
                         isSelected: _selectedIndex.contains(index),
                         song: inSimilarSongsPage
                             ? similarSongs[index]
-                            : appState.rawQueue![index],
+                            : appState.rawSongsInLibrary![index],
                       ),
                     ),
                   );

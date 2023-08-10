@@ -33,7 +33,7 @@ class _MultiLibrariesSelectPopupState extends State<MultiLibrariesSelectPopup> {
   // Whether has more libraries.
   bool _hasMore = true;
 
-  late MyAppState _state;
+  MyAppState? _appState;
 
   ScrollController _scrollController = ScrollController();
 
@@ -41,15 +41,15 @@ class _MultiLibrariesSelectPopupState extends State<MultiLibrariesSelectPopup> {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
       if (_hasMore) {
-        _fetchingLibraries();
+        _fetchingLibraries(_appState!);
       } else {
         MyToast.showToast('No more libraries');
       }
     }
   }
 
-  Future<void> _fetchingLibraries() async {
-    int platform = _state.currentPlatform;
+  Future<void> _fetchingLibraries(MyAppState appState) async {
+    int platform = appState.currentPlatform;
     if (!_isLoading) {
       setState(() {
         _isLoading = true;
@@ -57,7 +57,7 @@ class _MultiLibrariesSelectPopupState extends State<MultiLibrariesSelectPopup> {
       _currentPage++;
       List<BasicLibrary>? pageLibraries;
       PagedDataDTO<BasicLibrary>? pagedData =
-          await _state.fetchLibraries(platform, _currentPage.toString());
+          await appState.fetchLibraries(platform, _currentPage.toString());
       setState(() {
         if (pagedData != null) {
           _hasMore = pagedData.hasMore;
@@ -82,7 +82,7 @@ class _MultiLibrariesSelectPopupState extends State<MultiLibrariesSelectPopup> {
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
-    _state = state;
+    _appState = state;
     var isUsingMockData = state.isUsingMockData;
     if (isUsingMockData) {
       var pagedDataDTO = PagedDataDTO<BasicLibrary>(
@@ -106,9 +106,9 @@ class _MultiLibrariesSelectPopupState extends State<MultiLibrariesSelectPopup> {
 
   @override
   Widget build(BuildContext context) {
-    MyAppState appState = context.watch<MyAppState>();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    MyAppState appState = context.watch<MyAppState>();
     return FutureBuilder(
         future: _futurePagedLibraries,
         builder: (context, snapshot) {
@@ -149,6 +149,7 @@ class _MultiLibrariesSelectPopupState extends State<MultiLibrariesSelectPopup> {
                     ),
                     onPressed: () {
                       setState(() {
+                        _currentPage = 1;
                         _futurePagedLibraries =
                             appState.refreshLibraries!(appState, false);
                       });
@@ -201,40 +202,53 @@ class _MultiLibrariesSelectPopupState extends State<MultiLibrariesSelectPopup> {
                     ),
                     Expanded(
                       child: _localLibraries!.isNotEmpty
-                          ? ListView.builder(
-                              controller: _scrollController,
-                              itemCount: _localLibraries!.length + 1,
-                              itemBuilder: (context, index) {
-                                if (index < _localLibraries!.length) {
-                                  return Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          if (_selectedIndex.contains(index)) {
-                                            _selectedIndex.remove(index);
-                                          } else {
-                                            _selectedIndex.add(index);
-                                          }
-                                        });
-                                      },
-                                      child: SelectableLibraryItem(
-                                        library: _localLibraries![index],
-                                        inMultiSelectMode: true,
-                                        isCreateLibraryItem: false,
-                                        selected:
-                                            _selectedIndex.contains(index),
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  return _buildLoadingIndicator(colorScheme);
-                                }
+                          ? RefreshIndicator(
+                              color: colorScheme.onPrimary,
+                              strokeWidth: 2.0,
+                              onRefresh: () async {
+                                setState(() {
+                                  _currentPage = 1;
+                                  _futurePagedLibraries = appState
+                                      .refreshLibraries!(appState, false);
+                                });
                               },
+                              child: ListView.builder(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                controller: _scrollController,
+                                itemCount: _localLibraries!.length + 1,
+                                itemBuilder: (context, index) {
+                                  if (index < _localLibraries!.length) {
+                                    return Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            if (_selectedIndex
+                                                .contains(index)) {
+                                              _selectedIndex.remove(index);
+                                            } else {
+                                              _selectedIndex.add(index);
+                                            }
+                                          });
+                                        },
+                                        child: SelectableLibraryItem(
+                                          library: _localLibraries![index],
+                                          inMultiSelectMode: true,
+                                          isCreateLibraryItem: false,
+                                          selected:
+                                              _selectedIndex.contains(index),
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    return _buildLoadingIndicator(colorScheme);
+                                  }
+                                },
+                              ),
                             )
                           : Center(
                               child: Text(
-                              'Empty Libraries',
+                              'Empty libraries',
                               style: textTheme.labelMedium,
                             )),
                     ),

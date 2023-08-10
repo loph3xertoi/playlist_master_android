@@ -11,9 +11,9 @@ class MyFooter extends StatefulWidget {
 class _MyFooterState extends State<MyFooter> {
   @override
   Widget build(BuildContext context) {
-    MyAppState appState = context.watch<MyAppState>();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    MyAppState appState = context.watch<MyAppState>();
     return Container(
       width: double.infinity,
       height: 70.0,
@@ -24,7 +24,7 @@ class _MyFooterState extends State<MyFooter> {
           color: colorScheme.primary,
         ),
         boxShadow: [
-          appState.isQueueEmpty
+          appState.isSongsQueueEmpty && appState.isResourcesQueueEmpty
               ? BoxShadow(
                   color: Colors.transparent.withOpacity(0.2),
                   spreadRadius: 0.0,

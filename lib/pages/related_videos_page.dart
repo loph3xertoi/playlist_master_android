@@ -22,26 +22,30 @@ class RelatedVideosPage extends StatefulWidget {
 class _RelatedVideosPageState extends State<RelatedVideosPage> {
   late Future<List<BasicVideo>?> _relatedVideos;
 
+  late int _currentPlatform;
+
+  late bool _isUsingMockData;
+
   @override
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
-    var isUsingMockData = state.isUsingMockData;
-    var currentPlatform = state.currentPlatform;
-    if (isUsingMockData) {
+    _isUsingMockData = state.isUsingMockData;
+    _currentPlatform = state.currentPlatform;
+    if (_isUsingMockData) {
       throw UnimplementedError('No mock data for video');
     } else {
-      _relatedVideos = state.fetchRelatedMVs(widget.song, currentPlatform);
+      _relatedVideos = state.fetchRelatedMVs(widget.song, _currentPlatform);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    MyAppState appState = context.watch<MyAppState>();
-    var currentPlatform = appState.currentPlatform;
-    var isUsingMockData = appState.isUsingMockData;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    MyAppState appState = context.watch<MyAppState>();
+    _currentPlatform = appState.currentPlatform;
+    _isUsingMockData = appState.isUsingMockData;
     return Scaffold(
       body: SafeArea(
         child: FutureBuilder(
@@ -87,7 +91,7 @@ class _RelatedVideosPageState extends State<RelatedVideosPage> {
                       onPressed: () {
                         setState(() {
                           _relatedVideos = appState.fetchRelatedMVs(
-                              widget.song, currentPlatform);
+                              widget.song, _currentPlatform);
                         });
                       },
                     ),
@@ -96,16 +100,16 @@ class _RelatedVideosPageState extends State<RelatedVideosPage> {
               );
             } else {
               dynamic relatedVideos;
-              if (isUsingMockData) {
+              if (_isUsingMockData) {
                 relatedVideos = snapshot.data!.cast<QQMusicVideo>().toList();
               } else {
-                if (currentPlatform == 0) {
+                if (_currentPlatform == 0) {
                   throw UnimplementedError('Not yet implement pms platform');
-                } else if (currentPlatform == 1) {
+                } else if (_currentPlatform == 1) {
                   relatedVideos = snapshot.data!.cast<QQMusicVideo>().toList();
-                } else if (currentPlatform == 2) {
+                } else if (_currentPlatform == 2) {
                   relatedVideos = snapshot.data!.cast<NCMVideo>().toList();
-                } else if (currentPlatform == 3) {
+                } else if (_currentPlatform == 3) {
                   throw UnimplementedError(
                       'Not yet implement bilibili platform');
                 } else {
@@ -123,31 +127,42 @@ class _RelatedVideosPageState extends State<RelatedVideosPage> {
                       padding: const EdgeInsets.only(top: 4.0),
                       child: SizedBox(
                         height: MediaQuery.of(context).size.height,
-                        child: ListView.builder(
-                          // padding: EdgeInsets.all(10.0),
-                          itemCount: relatedVideos.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0, vertical: 4.0),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10.0),
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    onTap: () {
-                                      Navigator.pushNamed(
-                                          context, '/video_player_page',
-                                          arguments: relatedVideos[index]);
-                                    },
-                                    child: VideoItem(
-                                      video: relatedVideos[index],
+                        child: RefreshIndicator(
+                          color: colorScheme.onPrimary,
+                          strokeWidth: 2.0,
+                          onRefresh: () async {
+                            setState(() {
+                              _relatedVideos = appState.fetchRelatedMVs(
+                                  widget.song, _currentPlatform);
+                            });
+                          },
+                          child: ListView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            // padding: EdgeInsets.all(10.0),
+                            itemCount: relatedVideos.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0, vertical: 4.0),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        Navigator.pushNamed(
+                                            context, '/video_player_page',
+                                            arguments: relatedVideos[index]);
+                                      },
+                                      child: VideoItem(
+                                        video: relatedVideos[index],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
+                              );
+                            },
+                          ),
                         ),
                       ),
                     );

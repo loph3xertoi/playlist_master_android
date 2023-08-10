@@ -10,9 +10,9 @@ import 'select_library_popup.dart';
 class CreateSongplayerMenuDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    MyAppState appState = context.watch<MyAppState>();
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    MyAppState appState = context.watch<MyAppState>();
     return Dialog(
       // backgroundColor: Colors.white,
       insetPadding: EdgeInsets.all(0.0),
@@ -65,24 +65,24 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
               ),
               onTap: () {
                 print('remove from queue');
-                if (appState.queue!.length == 1) {
+                if (appState.songsQueue!.length == 1) {
                   Navigator.pop(context);
-                  appState.queue = [];
+                  appState.songsQueue = [];
                   appState.currentPlayingSongInQueue = 0;
                   appState.currentSong = null;
                   appState.prevSong = null;
-                  appState.isPlaying = false;
-                  appState.player!.stop();
-                  appState.player!.dispose();
-                  appState.player = null;
-                  appState.initQueue!.clear();
+                  appState.isSongPlaying = false;
+                  appState.songsPlayer!.stop();
+                  appState.songsPlayer!.dispose();
+                  appState.songsPlayer = null;
+                  appState.songsAudioSource!.clear();
                   return;
                 }
                 Navigator.pop(context);
                 appState.isRemovingSongFromQueue = true;
                 appState.removeSongInQueue(appState.currentPlayingSongInQueue!);
-                if (appState.initQueue?.length != 0) {
-                  appState.initQueue!
+                if (appState.songsAudioSource?.length != 0) {
+                  appState.songsAudioSource!
                       .removeAt(appState.currentPlayingSongInQueue!);
                 }
                 Future.delayed(Duration(milliseconds: 200), () {
@@ -91,11 +91,11 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
 
                 appState.currentPlayingSongInQueue =
                     appState.currentPlayingSongInQueue! %
-                        appState.queue!.length;
+                        appState.songsQueue!.length;
                 appState.currentSong =
-                    appState.queue![appState.currentPlayingSongInQueue!];
+                    appState.songsQueue![appState.currentPlayingSongInQueue!];
 
-                appState.player!.seek(Duration.zero,
+                appState.songsPlayer!.seek(Duration.zero,
                     index: appState.currentPlayingSongInQueue);
                 appState.carouselController
                     .jumpToPage(appState.currentPlayingSongInQueue!);
@@ -109,25 +109,25 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                       color: colorScheme.tertiary,
                       onPressed: () {
                         print('remove from queue');
-                        if (appState.queue!.length == 1) {
+                        if (appState.songsQueue!.length == 1) {
                           Navigator.pop(context);
-                          appState.queue = [];
+                          appState.songsQueue = [];
                           appState.currentPlayingSongInQueue = 0;
                           appState.currentSong = null;
                           appState.prevSong = null;
-                          appState.isPlaying = false;
-                          appState.player!.stop();
-                          appState.player!.dispose();
-                          appState.player = null;
-                          appState.initQueue!.clear();
+                          appState.isSongPlaying = false;
+                          appState.songsPlayer!.stop();
+                          appState.songsPlayer!.dispose();
+                          appState.songsPlayer = null;
+                          appState.songsAudioSource!.clear();
                           return;
                         }
                         Navigator.pop(context);
                         appState.isRemovingSongFromQueue = true;
                         appState.removeSongInQueue(
                             appState.currentPlayingSongInQueue!);
-                        if (appState.initQueue?.length != 0) {
-                          appState.initQueue!
+                        if (appState.songsAudioSource?.length != 0) {
+                          appState.songsAudioSource!
                               .removeAt(appState.currentPlayingSongInQueue!);
                         }
                         Future.delayed(Duration(milliseconds: 200), () {
@@ -136,11 +136,11 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
 
                         appState.currentPlayingSongInQueue =
                             appState.currentPlayingSongInQueue! %
-                                appState.queue!.length;
+                                appState.songsQueue!.length;
                         appState.currentSong = appState
-                            .queue![appState.currentPlayingSongInQueue!];
+                            .songsQueue![appState.currentPlayingSongInQueue!];
 
-                        appState.player!.seek(Duration.zero,
+                        appState.songsPlayer!.seek(Duration.zero,
                             index: appState.currentPlayingSongInQueue);
                         appState.carouselController
                             .jumpToPage(appState.currentPlayingSongInQueue!);
@@ -164,7 +164,7 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
               ),
               onTap: () {
                 print('song\'s detail');
-                appState.isPlayerPageOpened = false;
+                appState.isSongsPlayerPageOpened = false;
                 Navigator.popAndPushNamed(context, '/detail_song_page',
                     arguments: appState.currentSong);
               },
@@ -176,7 +176,7 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                       icon: Icon(Icons.description_rounded),
                       color: colorScheme.tertiary,
                       onPressed: () {
-                        appState.isPlayerPageOpened = false;
+                        appState.isSongsPlayerPageOpened = false;
                         Navigator.popAndPushNamed(context, '/detail_song_page',
                             arguments: appState.currentSong);
                       },

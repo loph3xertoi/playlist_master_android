@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 
+import '../entities/bilibili/bili_resource.dart';
 import '../states/app_state.dart';
 import 'queue_popup.dart';
 
@@ -17,11 +18,16 @@ class _BottomPlayerState extends State<BottomPlayer>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _songCoverRotateAnimation;
-  var _isPlaying = true;
+  MyAppState? _appState;
+  late bool _isPlaying;
 
   @override
   void initState() {
     super.initState();
+    final state = Provider.of<MyAppState>(context, listen: false);
+    var currentPlatform = state.currentPlatform;
+    _isPlaying =
+        currentPlatform == 3 ? state.isResourcePlaying : state.isSongPlaying;
     _controller = AnimationController(
       vsync: this,
       duration: Duration(seconds: 20),
@@ -40,43 +46,73 @@ class _BottomPlayerState extends State<BottomPlayer>
   @override
   Widget build(BuildContext context) {
     print('build bottom player');
-    MyAppState appState = context.watch<MyAppState>();
-    var isUsingMockData = appState.isUsingMockData;
-    var currentSong = appState.currentSong;
-    var isPlaying = appState.isPlaying;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (isPlaying == true && _isPlaying == false) {
-        _controller.repeat();
-        _isPlaying = true;
-      } else if (isPlaying == false && _isPlaying == true) {
-        _controller.stop();
-        _isPlaying = false;
-      }
-    });
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    return Container(
-      height: 54.0,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.transparent.withOpacity(0.2),
-            spreadRadius: 0.0,
-            blurRadius: 4.0,
-            offset: Offset(0.0, 0.0), // changes position of shadow
+    MyAppState appState = context.watch<MyAppState>();
+    var currentPlatform = appState.currentPlatform;
+    var isUsingMockData = appState.isUsingMockData;
+    var currentSong = appState.currentSong;
+    var currentResource = appState.currentResource;
+    var isSongPlaying = appState.isSongPlaying;
+    var isResourcePlaying = appState.isResourcePlaying;
+    _isPlaying = currentPlatform == 3 ? isResourcePlaying : isSongPlaying;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isPlaying) {
+        _controller.repeat();
+      } else {
+        _controller.stop();
+      }
+      // if (currentPlatform == 3) {
+      //   if (isResourcePlaying == true && _isPlaying == false) {
+      //     _controller.repeat();
+      //     _isPlaying = true;
+      //   } else if (isResourcePlaying == false && _isPlaying == true) {
+      //     _controller.stop();
+      //     setState(() {
+      //       _isPlaying = false;
+      //     });
+      //   }
+      // } else {
+      //   if (isSongPlaying == true && _isPlaying == false) {
+      //     _controller.repeat();
+      //     setState(() {
+      //       _isPlaying = true;
+      //     });
+      //   } else if (isSongPlaying == false && _isPlaying == true) {
+      //     _controller.stop();
+      //     setState(() {
+      //       _isPlaying = false;
+      //     });
+      //   }
+      // }
+    });
+    return Material(
+      child: InkWell(
+        onTap: () {
+          // appState.isSongsPlayerPageOpened = true;
+          if (currentPlatform == 3) {
+            // appState.canResourcesPlayerPagePop = true;
+            Navigator.pushNamed(context, '/detail_resource_page');
+            // Navigator.pushNamed(context, '/resources_player_page');
+          } else {
+            appState.canSongsPlayerPagePop = true;
+            Navigator.pushNamed(context, '/songs_player_page');
+          }
+        },
+        child: Ink(
+          height: 54.0,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.transparent.withOpacity(0.2),
+                spreadRadius: 0.0,
+                blurRadius: 4.0,
+                offset: Offset(0.0, 0.0), // changes position of shadow
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Material(
-        // color: Colors.white,
-        child: InkWell(
-          onTap: () {
-            // appState.isPlayerPageOpened = true;
-            appState.canSongPlayerPagePop = true;
-            Navigator.pushNamed(context, '/song_player_page');
-          },
           child: Padding(
             padding: EdgeInsets.fromLTRB(10.0, 2.0, 8.0, 2.0),
             child: Row(
@@ -96,13 +132,19 @@ class _BottomPlayerState extends State<BottomPlayer>
                       borderRadius: BorderRadius.all(Radius.circular(50.0)),
                       child: isUsingMockData
                           ? Image.asset(
-                              currentSong!.cover,
+                              currentPlatform == 3
+                                  ? currentResource!.cover
+                                  : currentSong!.cover,
                               fit: BoxFit.fill,
                             )
                           : CachedNetworkImage(
-                              imageUrl: currentSong?.cover.isNotEmpty ?? false
-                                  ? currentSong!.cover
-                                  : MyAppState.defaultCoverImage,
+                              imageUrl: currentPlatform == 3
+                                  ? currentResource?.cover.isNotEmpty ?? false
+                                      ? currentResource!.cover
+                                      : MyAppState.defaultCoverImage
+                                  : currentSong?.cover.isNotEmpty ?? false
+                                      ? currentSong!.cover
+                                      : MyAppState.defaultCoverImage,
                               progressIndicatorBuilder:
                                   (context, url, downloadProgress) =>
                                       CircularProgressIndicator(
@@ -123,7 +165,9 @@ class _BottomPlayerState extends State<BottomPlayer>
                         Flexible(
                           flex: 3,
                           child: Text(
-                            '${currentSong?.name}',
+                            currentPlatform == 3
+                                ? '${currentResource?.title}'
+                                : '${currentSong?.name}',
                             style: textTheme.labelMedium!.copyWith(
                               fontSize: 15.0,
                               color: colorScheme.onSecondary,
@@ -138,7 +182,9 @@ class _BottomPlayerState extends State<BottomPlayer>
                             child: Padding(
                               padding: const EdgeInsets.only(top: 5.0),
                               child: Text(
-                                ' · ${currentSong?.singers.map((e) => e.name).join(', ')}',
+                                currentPlatform == 3
+                                    ? ' · ${currentResource?.upperName}'
+                                    : ' · ${currentSong?.singers.map((e) => e.name).join(', ')}',
                                 style: textTheme.labelMedium!.copyWith(
                                   fontSize: 11.0,
                                   color: colorScheme.onSecondary,
@@ -155,19 +201,31 @@ class _BottomPlayerState extends State<BottomPlayer>
                 ),
                 IconButton(
                   color: colorScheme.tertiary,
-                  icon: isPlaying
+                  icon: _isPlaying
                       ? Icon(Icons.pause_circle_outline_rounded)
                       : Icon(Icons.play_circle_outline_rounded),
                   onPressed: () {
                     setState(() {
-                      if (!isPlaying) {
-                        _controller.repeat();
-                        appState.player!.play();
-                        appState.isPlaying = true;
+                      if (currentPlatform == 3) {
+                        if (!_isPlaying) {
+                          _controller.repeat();
+                          appState.resourcesPlayer!.play();
+                          appState.isResourcePlaying = true;
+                        } else {
+                          _controller.stop();
+                          appState.resourcesPlayer!.pause();
+                          appState.isResourcePlaying = false;
+                        }
                       } else {
-                        _controller.stop();
-                        appState.player!.pause();
-                        appState.isPlaying = false;
+                        if (!_isPlaying) {
+                          _controller.repeat();
+                          appState.songsPlayer!.play();
+                          appState.isSongPlaying = true;
+                        } else {
+                          _controller.stop();
+                          appState.songsPlayer!.pause();
+                          appState.isSongPlaying = false;
+                        }
                       }
                     });
                   },

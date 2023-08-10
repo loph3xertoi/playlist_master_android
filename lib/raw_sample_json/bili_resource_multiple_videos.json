@@ -1,0 +1,35 @@
+{
+    "id": 3380200,
+    "type": 2,
+    "title": "【音乐】带你走进德语歌大坑(65P)",
+    "cover": "http://i0.hdslb.com/bfs/archive/76dc9969bf6d5d1128817e1aeb0db89792966f6f.jpg",
+    "intro": "收编了一些值得听听的德语歌",
+    "page": 65,
+    "duration": 14828,
+    "upper": {
+        "mid": 933537,
+        "name": "Joe_Grey",
+        "face": "https://i0.hdslb.com/bfs/face/a8e5a7597bfde24dc1dfcec5cbdb555f709499c7.jpg"
+    },
+    "attr": 0,
+    "cnt_info": {
+        "collect": 4345,
+        "play": 58953,
+        "danmaku": 318,
+        "vt": 0,
+        "play_switch": 0,
+        "reply": 0,
+        "view_text_1": "5.9万"
+    },
+    "link": "bilibili://video/3380200",
+    "ctime": 1497425353,
+    "pubtime": 1449997143,
+    "fav_time": 1691461356,
+    "bv_id": "BV1Ls411o76k",
+    "bvid": "BV1Ls411o76k",
+    "season": null,
+    "ogv": null,
+    "ugc": {
+        "first_cid": 5351627
+    }
+}

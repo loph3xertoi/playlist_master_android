@@ -52,11 +52,11 @@ class _BasicInfoState extends State<BasicInfo> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
     var isUsingMockData = appState.isUsingMockData;
     var currentPlatform = appState.currentPlatform;
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     return Padding(
       padding: EdgeInsets.fromLTRB(12.0, 76.0, 12.0, 70.0),
       child: ClipRect(
@@ -254,8 +254,8 @@ class _BasicInfoState extends State<BasicInfo> {
                                                       user: user as NCMUser)
                                                   : currentPlatform == 3
                                                       ? BuildBilibiliUser(
-                                                          user: user
-                                                              as BiliUser)
+                                                          user:
+                                                              user as BiliUser)
                                                       : ErrorWidget(
                                                           UnsupportedError(
                                                               'Invalid platform'))),

@@ -55,17 +55,18 @@ class _DetailSongPageState extends State<DetailSongPage> {
     if (isUsingMockData) {
       _detailSong = Future.value(MockData.detailSong);
     } else {
-      _detailSong = state.fetchDetailSong(widget.song, state.currentPlatform);
+      _detailSong =
+          state.fetchDetailSong<BasicSong>(widget.song, state.currentPlatform);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
     var isUsingMockData = appState.isUsingMockData;
     var currentPlatform = appState.currentPlatform;
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     return FutureBuilder(
       future: _detailSong,
       builder: (context, snapshot) {
@@ -106,7 +107,7 @@ class _DetailSongPageState extends State<DetailSongPage> {
                   ),
                   onPressed: () {
                     setState(() {
-                      _detailSong = appState.fetchDetailSong(
+                      _detailSong = appState.fetchDetailSong<BasicSong>(
                           widget.song, appState.currentPlatform);
                     });
                   },

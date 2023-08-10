@@ -42,6 +42,7 @@ dependencies:
   city_picker_china: ^0.1.0
   ip_geolocation_io: ^1.0.1
   humanize_big_int: ^1.0.1
+  lottie: ^2.6.0
   # bottom_sheet:
   #   git:
   #     url: git@github.com:loph3xertoi/flutter-bottom-sheet.git
@@ -80,6 +81,12 @@ flutter:
     - assets/images/qqmusic_listenlv.png
     - assets/images/china_mobile.png
     - assets/images/china_telecom.png
+    - assets/images/video_buffering.webp
+    - assets/images/bili_resource_playing.webp
+    - assets/images/phone.webp
+    - assets/images/idcard.webp
+    - assets/images/bili_empty.webp
+    - assets/images/bili_animation.webp
     - assets/images/bili_lv0.png
     - assets/images/bili_lv1.png
     - assets/images/bili_lv2.png
@@ -94,9 +101,18 @@ flutter:
     - assets/images/bili_lv9.png
     - assets/images/bili_lv9_2.png
     - assets/images/bili_thumbup.png
+    - assets/images/bili_thumbup_outline.png
     - assets/images/bili_danmaku.png
     - assets/images/bili_play_count.png
     - assets/images/bili_page.png
+    - assets/images/bili_loading.webp
+    - assets/images/bili_favorite.png
+    - assets/images/bili_favorite_outline.png
+    - assets/images/bili_coin.png
+    - assets/images/bili_coin_outline.png
+    - assets/images/bili_share.png
+    - assets/images/bili_share_outline.png
+    - assets/images/lottie_wave.json
     - assets/images/up.png
     - assets/images/songs_cover/parrot.jpeg
     - assets/images/songs_cover/tit.jpeg
