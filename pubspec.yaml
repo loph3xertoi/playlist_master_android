@@ -85,6 +85,7 @@ flutter:
     - assets/images/bili_resource_playing.webp
     - assets/images/phone.webp
     - assets/images/idcard.webp
+    - assets/images/video_buffering.webp
     - assets/images/bili_empty.webp
     - assets/images/bili_animation.webp
     - assets/images/bili_lv0.png

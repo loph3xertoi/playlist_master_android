@@ -125,7 +125,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                   MySelectableText(
                     snapshot.hasError ? '${snapshot.error}' : appState.errorMsg,
                     style: _textTheme.labelMedium!.copyWith(
-                      color: _colorScheme.onPrimary,
+                      color: Colors.grey,
                     ),
                   ),
                   TextButton.icon(
@@ -139,12 +139,12 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                     ),
                     icon: Icon(
                       MdiIcons.webRefresh,
-                      color: _colorScheme.onPrimary,
+                      color: Colors.grey,
                     ),
                     label: Text(
                       'Retry',
                       style: _textTheme.labelMedium!.copyWith(
-                        color: _colorScheme.onPrimary,
+                        color: Colors.grey,
                       ),
                     ),
                     onPressed: () {
@@ -173,7 +173,8 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
         Expanded(
           flex: 3,
           child: Container(
-            color: _colorScheme.onPrimary,
+            color: Colors.black,
+            child: _buildVideoPlayer(),
           ),
         ),
         Expanded(
@@ -454,6 +455,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                     setState(() {
                       _subPageNo = index + 1;
                     });
+                    print(1);
                   },
                 );
               },
@@ -1020,5 +1022,100 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
             : Container(),
       ],
     );
+  }
+
+  Widget _buildVideoPlayer() {
+    // print(_currentDetailResource.links);
+    MyAppState appState = context.watch<MyAppState>();
+    String resourceId;
+    if (_currentDetailResource.isSeasonResource) {
+      String bvid = _currentDetailResource.episodes![_subPageNo - 1].bvid;
+      int cid = _currentDetailResource.episodes![_subPageNo - 1].cid;
+      resourceId = '$bvid:$cid';
+    } else {
+      String bvid = _currentDetailResource.bvid;
+      int cid = _currentDetailResource.subpages![_subPageNo - 1].cid;
+      resourceId = '$bvid:$cid';
+    }
+    Map<String, Map<String, String>>? links = _subPageNo == 1
+        ? _currentDetailResource.links!
+        : appState.subResourcesLinks[resourceId];
+    return (_currentDetailResource.page > 1 && _subPageNo != 1 && links == null)
+        ? FutureBuilder(
+            future: appState.fetchSongsLink([resourceId], _currentPlatform),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Scaffold(
+                  backgroundColor: Colors.black,
+                  body: Center(
+                    child: Image.asset(
+                      'assets/images/video_buffering.webp',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                );
+              } else if (snapshot.hasError || snapshot.data == null) {
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      MySelectableText(
+                        snapshot.hasError
+                            ? '${snapshot.error}'
+                            : appState.errorMsg,
+                        style: _textTheme.labelMedium!.copyWith(
+                          color: _colorScheme.onPrimary,
+                        ),
+                      ),
+                      TextButton.icon(
+                        style: ButtonStyle(
+                          shadowColor: MaterialStateProperty.all(
+                            _colorScheme.primary,
+                          ),
+                          overlayColor: MaterialStateProperty.all(
+                            Colors.grey,
+                          ),
+                        ),
+                        icon: Icon(
+                          MdiIcons.webRefresh,
+                          color: _colorScheme.onPrimary,
+                        ),
+                        label: Text(
+                          'Retry',
+                          style: _textTheme.labelMedium!.copyWith(
+                            color: _colorScheme.onPrimary,
+                          ),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            // _futureCurrentDetailResource = _noListenedState
+                            //     .fetchDetailSong<BiliDetailResource>(
+                            //         _currentResource, _currentPlatform)!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                Map<String, dynamic> rawLinks = snapshot.data!;
+                Map<String, Map<String, String>> links = {};
+                rawLinks.forEach((key, value) {
+                  if (value is Map<String, dynamic>) {
+                    links[key] = value.cast<String, String>();
+                  }
+                });
+                appState.subResourcesLinks[resourceId] = links;
+                return _buildVideoPlayerWidget(links);
+              }
+            },
+          )
+        : _buildVideoPlayerWidget(links!);
+  }
+
+  Widget _buildVideoPlayerWidget(Map<String, Map<String, String>> links) {
+    print(links);
+    return Placeholder();
   }
 }

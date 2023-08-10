@@ -279,7 +279,7 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
                                           children: [
                                             Padding(
                                               padding: const EdgeInsets.only(
-                                                  right: 1.0),
+                                                  right: 5.0),
                                               child: Image.asset(
                                                 'assets/images/bili_danmaku.png',
                                                 color: colorScheme.onPrimary

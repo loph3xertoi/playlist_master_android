@@ -47,6 +47,9 @@ import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 
 class MyAppState extends ChangeNotifier {
+  // Store all sub resource's links in detail resource page.
+  Map<String, Map<String, Map<String, String>>> _subResourcesLinks = {};
+
   // Error message by fetch* function.
   String _errorMsg = '';
 
@@ -244,6 +247,9 @@ class MyAppState extends ChangeNotifier {
 
   // Whether the resources player is playing resources.
   bool _isResourcePlaying = false;
+
+  Map<String, Map<String, Map<String, String>>> get subResourcesLinks =>
+      _subResourcesLinks;
 
   String get errorMsg => _errorMsg;
 
