@@ -12,7 +12,6 @@ import '../entities/bilibili/bili_resource.dart';
 import '../entities/bilibili/bili_subpage_of_resource.dart';
 import '../states/app_state.dart';
 import '../widgets/bili_resource_item.dart';
-import '../widgets/bili_subpage_item.dart';
 import '../widgets/my_selectable_text.dart';
 
 class DetailResourcePage extends StatefulWidget {
@@ -43,7 +42,6 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
   ));
   late TabController _tabController;
   int _subPageNo = 1;
-  double _collapseSubpagesListPosition = 0.0;
   // Controller for reset episodes list.
   late ScrollController _episodesScrollController;
   late ScrollController _collapseSubpagesScrollController;
@@ -61,9 +59,6 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
     _episodesScrollController = ScrollController();
     _expandSubpagesScrollController = ScrollController();
     _collapseSubpagesScrollController = ScrollController();
-    _collapseSubpagesScrollController.addListener(() {
-      _collapseSubpagesListPosition = _collapseSubpagesScrollController.offset;
-    });
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       if (_tabController.index == 0 &&
@@ -72,7 +67,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (_collapseSubpagesScrollController.hasClients) {
             _collapseSubpagesScrollController.animateTo(
-              _collapseSubpagesListPosition,
+              (_subPageNo - 1) * 128.0,
               curve: Curves.easeInOut,
               duration: Duration(milliseconds: 300),
             );
@@ -473,7 +468,15 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
   Widget _buildSubPagesList() {
     MyAppState appState = context.watch<MyAppState>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _episodesScrollController.jumpTo(0.0);
+      int rowIndex = (_subPageNo - 1) ~/ 2;
+      int maxRowIndex = _currentDetailResource.page ~/ 2;
+      if (rowIndex <= maxRowIndex - 9) {
+        _expandSubpagesScrollController.animateTo(
+          rowIndex * 60.0,
+          curve: Curves.easeInOut,
+          duration: Duration(milliseconds: 300),
+        );
+      }
     });
     return Scaffold(
       appBar: AppBar(
@@ -486,8 +489,10 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
           padding: const EdgeInsets.all(8.0),
           child: Center(
             child: Text(
-              'Episodes(${_currentDetailResource.page})',
-              style: _textTheme.labelSmall!,
+              'Videos(${_currentDetailResource.page})',
+              style: _textTheme.labelSmall!.copyWith(
+                color: _colorScheme.onPrimary.withOpacity(0.5),
+              ),
             ),
           ),
         ),
@@ -503,207 +508,94 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
           ),
         ],
       ),
-      body: CustomScrollView(
-        controller: _episodesScrollController,
-        slivers: [
-          SliverAppBar(
-            pinned: false, // Makes the app bar stick to the top
-            floating: true, // Hides the app bar when scrolling up
-            snap: true, // Snaps the app bar into view when scrolling down
-            automaticallyImplyLeading: false,
-            // expandedHeight: 200.0,
-            backgroundColor: _colorScheme.primary,
-            surfaceTintColor: _colorScheme.primary,
-            toolbarHeight: 120.0,
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(
-                      left: 4.0, right: 4.0, bottom: 20.0),
-                  child: Text(
-                    _currentDetailResource.title,
-                    style: _textTheme.labelMedium!.copyWith(
-                      color: _colorScheme.onSecondary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: 22.0,
-                            width: 22.0,
-                            child: Image.asset(
-                              'assets/images/bili_play_count.png',
-                              color: _colorScheme.onPrimary.withOpacity(0.5),
-                            ),
-                          ),
-                          Text(
-                            humanizeInt(_currentDetailResource.playCount),
-                            style: _textTheme.labelSmall!.copyWith(
-                              fontSize: 11.0,
-                              color: _colorScheme.onPrimary.withOpacity(0.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: 22.0,
-                            width: 22.0,
-                            child: Image.asset(
-                              'assets/images/bili_danmaku.png',
-                              color: _colorScheme.onPrimary.withOpacity(0.5),
-                            ),
-                          ),
-                          Text(
-                            humanizeInt(_currentDetailResource.danmakuCount),
-                            style: _textTheme.labelSmall!.copyWith(
-                              fontSize: 11.0,
-                              color: _colorScheme.onPrimary.withOpacity(0.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: 22.0,
-                            width: 22.0,
-                            child: Image.asset(
-                              'assets/images/bili_thumbup_outline.png',
-                              color: _colorScheme.onPrimary.withOpacity(0.5),
-                            ),
-                          ),
-                          Text(
-                            humanizeInt(_currentDetailResource.likedCount),
-                            style: _textTheme.labelSmall!.copyWith(
-                              fontSize: 11.0,
-                              color: _colorScheme.onPrimary.withOpacity(0.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: 22.0,
-                            width: 22.0,
-                            child: Image.asset(
-                              'assets/images/bili_coin_outline.png',
-                              color: _colorScheme.onPrimary.withOpacity(0.5),
-                            ),
-                          ),
-                          Text(
-                            humanizeInt(_currentDetailResource.coinsCount),
-                            style: _textTheme.labelSmall!.copyWith(
-                              fontSize: 11.0,
-                              color: _colorScheme.onPrimary.withOpacity(0.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: 22.0,
-                            width: 22.0,
-                            child: Image.asset(
-                              'assets/images/bili_favorite_outline.png',
-                              color: _colorScheme.onPrimary.withOpacity(0.5),
-                            ),
-                          ),
-                          Text(
-                            humanizeInt(_currentDetailResource.collectedCount),
-                            style: _textTheme.labelSmall!.copyWith(
-                              fontSize: 11.0,
-                              color: _colorScheme.onPrimary.withOpacity(0.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: 22.0,
-                            width: 22.0,
-                            child: Image.asset(
-                              'assets/images/bili_share_outline.png',
-                              color: _colorScheme.onPrimary.withOpacity(0.5),
-                            ),
-                          ),
-                          Text(
-                            humanizeInt(_currentDetailResource.sharedCount),
-                            style: _textTheme.labelSmall!.copyWith(
-                              fontSize: 11.0,
-                              color: _colorScheme.onPrimary.withOpacity(0.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Text(
-                    _currentDetailResource.intro,
-                    style: _textTheme.labelSmall!.copyWith(
-                      color: _colorScheme.onPrimary.withOpacity(0.5),
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              _currentDetailResource.isSeasonResource
-                  ? (context, index) {
-                      BiliResource resource =
-                          _currentDetailResource.episodes![index];
-                      return BiliResourceItem(
-                        biliSourceFavListId:
-                            (appState.rawOpenedLibrary as BiliFavList).id,
-                        resource: resource,
-                        isSelected: _subPageNo == index + 1,
-                        onTap: () {
-                          setState(() {
-                            _subPageNo = index + 1;
-                          });
-                        },
-                      );
-                    }
-                  : (context, index) {
-                      BiliSubpageOfResource subpage =
-                          _currentDetailResource.subpages![index];
-                      return BiliSubpageOfResourceItem(
-                          // biliSourceFavListId:
-                          //     (appState.rawOpenedLibrary as BiliFavList).id,
-                          // resource: subpage,
-                          // onTap: () {
-                          //   print('Subpage item tapped');
-                          // },
-                          );
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        child: CustomScrollView(
+          controller: _expandSubpagesScrollController,
+          slivers: [
+            SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                mainAxisExtent: 50,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  BiliSubpageOfResource subpage =
+                      _currentDetailResource.subpages![index];
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(4.0),
+                    onTap: () {
+                      setState(() {
+                        _subPageNo = index + 1;
+                      });
                     },
-              childCount: _currentDetailResource.page,
+                    child: Ink(
+                      decoration: BoxDecoration(
+                        color: _colorScheme.secondary,
+                        borderRadius: BorderRadius.circular(4.0),
+                      ),
+                      child: Center(
+                        child: Container(
+                          margin: EdgeInsets.all(10.0),
+                          child: RichText(
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            text: TextSpan(
+                              style: _subPageNo == index + 1
+                                  ? _textTheme.labelSmall!.copyWith(
+                                      height: 1.0,
+                                      color: Color(0xFFFB6A9D),
+                                    )
+                                  : _textTheme.labelSmall!.copyWith(
+                                      height: 1.0,
+                                      color: _colorScheme.onPrimary
+                                          .withOpacity(0.5),
+                                    ),
+                              children: [
+                                _subPageNo == index + 1
+                                    ? WidgetSpan(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                              bottom: 4.0, right: 4.0),
+                                          child: Lottie.asset(
+                                            'assets/images/lottie_wave.json',
+                                            height: 10.0,
+                                            width: 10.0,
+                                          ),
+                                        ),
+                                      )
+                                    : TextSpan(),
+                                TextSpan(text: subpage.partName),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                childCount: _currentDetailResource.page,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _detailResourceWidget() {
+    if (_currentDetailResource.page > 1 &&
+        !_currentDetailResource.isSeasonResource) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _collapseSubpagesScrollController.animateTo(
+          (_subPageNo - 1) * 128.0,
+          curve: Curves.easeInOut,
+          duration: Duration(milliseconds: 300),
+        );
+      });
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1044,7 +936,11 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                                                         )
                                                       : _textTheme.labelSmall!
                                                           .copyWith(
-                                                              height: 1.0),
+                                                          height: 1.0,
+                                                          color: _colorScheme
+                                                              .onPrimary
+                                                              .withOpacity(0.5),
+                                                        ),
                                                   children: [
                                                     _subPageNo == index + 1
                                                         ? WidgetSpan(
