@@ -2,8 +2,10 @@ class API {
   /// Your uid in playlist master server.
   static const uid = '0';
 
+  static const demoMpd = 'http://$host/mpd/c.mpd';
+
   /// Host of playlist server.
-  static const host = '192.168.12.189:8080';
+  static const host = '192.168.167.6:8080';
   // static const host = '192.168.8.171:8080';
   // static const host = '192.168.0.114:8080';
 

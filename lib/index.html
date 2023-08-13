@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Dash.js Rocks</title>
+  <style>
+    video {
+      width: 640px;
+      height: 360px;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <video id="videoPlayer" controls></video>
+  </div>
+  <script src="http://cdn.dashjs.org/v4.7.1/dash.all.min.js"></script>
+  <!-- <script src="http://cdn.dashjs.org/v4.7.1/dash.httprequestheaders.js"></script> -->
+
+  <script>
+    function init() {
+      var video,
+        player,
+        url = "http://localhost:8080/mpd/BV1V14y1t7zn_809201197.mpd";
+
+      video = document.querySelector("video");
+      player = dashjs.MediaPlayer().create();
+
+      // Extend RequestModifier class and implement our own behaviour
+      player.extend("RequestModifier", function () {
+        return {
+          modifyRequestHeader: function (xhr) {
+            // Add custom header. Requires to set up Access-Control-Allow-Headers in your
+            // response header in the server side. Reference: https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/setRequestHeader
+            xhr.setRequestHeader('Referer', 'https://www.bilibili.com');
+            return xhr;
+          },
+          modifyRequestURL: function (url) {
+            // Modify url adding a custom query string parameter
+            return url + '';
+          }
+        };
+      });
+      player.initialize(video, url, true);
+    }
+    init();
+  </script>
+</body>
+
+</html>

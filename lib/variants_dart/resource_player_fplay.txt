@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -5,6 +6,8 @@ import 'package:fplayer/fplayer.dart';
 import 'package:humanize_big_int/humanize_big_int.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:playlistmaster/entities/bilibili/bili_detail_resource.dart';
+import 'package:playlistmaster/entities/bilibili/bili_subpage_of_resource.dart';
 import 'package:provider/provider.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 
@@ -17,21 +20,26 @@ import '../utils/my_logger.dart';
 import '../widgets/my_selectable_text.dart';
 import '../widgets/show_video_player_sidebar.dart';
 
-/// FPlayer for video player, but the resolution list and playing button state and the
+/// FPlayer for resource player, but the resolution list and playing button state and the
 /// fullscreen switching still have some bugs.
-class VideoPlayerPage extends StatefulWidget {
-  const VideoPlayerPage({super.key, required this.video});
-
-  final BasicVideo video;
+class ResourcePlayer extends StatefulWidget {
+  final BiliLinksDTO links;
+  final dynamic resource;
+  const ResourcePlayer({
+    Key? key,
+    required this.links,
+    required this.resource,
+  }) : super(key: key);
 
   @override
-  State<VideoPlayerPage> createState() => _VideoPlayerPageState();
+  State<ResourcePlayer> createState() => _ResourcePlayerPageState();
 }
 
-class _VideoPlayerPageState extends State<VideoPlayerPage> {
-  final FPlayer _songsPlayer = FPlayer();
-  late Future<BasicVideo?> _detailVideo;
-  late int platform;
+class _ResourcePlayerPageState extends State<ResourcePlayer> {
+  final FPlayer _player = FPlayer();
+  // late Future<BasicVideo?> _detailVideo;
+  late int _currentPlatform;
+  late bool _isUsingMockData;
   String? _resolutionKey;
   // Speed list.
   Map<String, double> _speedList = {
@@ -41,13 +49,16 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     '0.5': 0.5,
   };
 
+  Map<String, String>? _videoLinks;
+  Map<String, String>? _audioLinks;
+
   // Resolution list.
   late Future<Map<String, ResolutionItem>> _resolutionList;
 
   @override
   void deactivate() {
     final state = Provider.of<MyAppState>(context, listen: false);
-    state.videoSeekTime = _songsPlayer.currentPos.inMilliseconds;
+    state.videoSeekTime = _player.currentPos.inMilliseconds;
     super.deactivate();
   }
 
@@ -55,15 +66,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
-    var isUsingMockData = state.isUsingMockData;
-    var currentPlatform = state.currentPlatform;
-    platform = currentPlatform;
-    if (isUsingMockData) {
+    _isUsingMockData = state.isUsingMockData;
+    _currentPlatform = state.currentPlatform;
+    if (_isUsingMockData) {
       throw UnimplementedError('No mock data for video');
-    } else {
-      _detailVideo = state.fetchDetailMV(widget.video, currentPlatform);
     }
-    _resolutionList = _getResolutionList(_detailVideo, currentPlatform);
+    _resolutionList = _getResolutionList();
     _startPlay();
   }
 
@@ -76,40 +84,39 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       print(e);
       throw 'Failed to reset brightness';
     }
-    // _songsPlayer.removeListener(_preparedListener);
-    _songsPlayer.release();
+    // _player.removeListener(_preparedListener);
+    _player.release();
   }
 
   void _startPlay() async {
     var resolutionList = await _resolutionList;
-    await _songsPlayer.setOption(FOption.hostCategory, 'request-screen-on', 1);
-    await _songsPlayer.setOption(
-        FOption.hostCategory, 'request-audio-focus', 1);
-    await _songsPlayer.setOption(FOption.playerCategory, 'reconnect', 20);
-    await _songsPlayer.setOption(FOption.playerCategory, 'framedrop', 20);
-    await _songsPlayer.setOption(
-        FOption.playerCategory, 'enable-accurate-seek', 1);
-    await _songsPlayer.setOption(FOption.playerCategory, 'mediacodec', 1);
-    await _songsPlayer.setOption(FOption.playerCategory, 'packet-buffering', 0);
-    await _songsPlayer.setOption(FOption.playerCategory, 'soundtouch', 1);
+    await _player.setOption(FOption.hostCategory, 'request-screen-on', 1);
+    await _player.setOption(FOption.hostCategory, 'request-audio-focus', 1);
+    await _player.setOption(FOption.playerCategory, 'reconnect', 20);
+    await _player.setOption(FOption.playerCategory, 'framedrop', 20);
+    await _player.setOption(FOption.playerCategory, 'enable-accurate-seek', 1);
+    await _player.setOption(FOption.playerCategory, 'mediacodec', 1);
+    await _player.setOption(FOption.playerCategory, 'packet-buffering', 0);
+    await _player.setOption(FOption.playerCategory, 'soundtouch', 1);
 
-    await _songsPlayer.setLoop(0);
+    await _player.setLoop(0);
 
-    // _songsPlayer.addListener(_preparedListener);
+    // _player.addListener(_preparedListener);
 
     // Play video of 360p by default.
     _setVideoUrl(resolutionList.values.toList().first.url);
   }
 
-  // Cache the video with the url.
-  Future<String> _getVideoUrlIfCached(String rawUrl) async {
+  // Get cached url of mixed video if exists, the key is bvid:cid:resolution:_currentPlatform,
+  // value is local mixed video path.
+  Future<String>? _getCachedResourceUrl(String rawKey) async {
     CacheManager cacheManager = MyHttp.videoCacheManager;
-    dynamic result = await cacheManager.getFileFromMemory(rawUrl);
+    dynamic result = await cacheManager.getFileFromMemory(rawKey);
     if (result == null || !(result as FileInfo).file.existsSync()) {
-      result = await cacheManager.getFileFromCache(rawUrl);
+      result = await cacheManager.getFileFromCache(rawKey);
       if (result == null || !(result as FileInfo).file.existsSync()) {
         MyLogger.logger.d('This video is not in cache.');
-        result = rawUrl;
+        result = null;
       } else {
         MyLogger.logger.d('Loading video from cache...');
       }
@@ -125,81 +132,53 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   }
 
   // void _preparedListener() {
-  //   FValue value = _songsPlayer.value;
+  //   FValue value = _player.value;
   //   print('Resolution: ${value.size}');
   //   if (value.prepared) {
   //     print('prepared');
   //   }
   // }
 
-  // Determine the resolution URLs based on the length of videoLinks
-  Future<Map<String, ResolutionItem>> _getResolutionList(
-      Future<BasicVideo?> video, int platform) async {
+  // Resolve links to resolution list.
+  Future<Map<String, ResolutionItem>> _getResolutionList() async {
     Map<String, ResolutionItem> resolutionList = {};
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
-      List<String> videoLinks;
-      QQMusicDetailVideo qqMusicDetailVideo =
-          (await video) as QQMusicDetailVideo;
-      videoLinks = qqMusicDetailVideo.links;
-      if (videoLinks.isNotEmpty) {
-        String finalUrl = await _getVideoUrlIfCached(videoLinks[0]);
-        resolutionList['360p'] = ResolutionItem(value: 360, url: finalUrl);
-      }
-      if (videoLinks.length >= 2) {
-        String finalUrl = await _getVideoUrlIfCached(videoLinks[1]);
-        resolutionList['480p'] = ResolutionItem(value: 480, url: finalUrl);
-      }
-      if (videoLinks.length >= 3) {
-        String finalUrl = await _getVideoUrlIfCached(videoLinks[2]);
-        resolutionList['720p'] = ResolutionItem(value: 720, url: finalUrl);
-      }
-      if (videoLinks.length >= 4) {
-        String finalUrl = await _getVideoUrlIfCached(videoLinks[3]);
-        resolutionList['1080p'] = ResolutionItem(value: 1080, url: finalUrl);
-      }
-      if (videoLinks.length >= 5) {
-        for (int i = 4; i < videoLinks.length; i++) {
-          String finalUrl = await _getVideoUrlIfCached(videoLinks[i]);
-          String resolutionName = '1080p${i - 3}';
-          resolutionList[resolutionName] =
-              ResolutionItem(value: 1080, url: finalUrl);
-        }
-      }
-    } else if (platform == 2) {
-      NCMDetailVideo ncmDetailVideo = (await video) as NCMDetailVideo;
-      Map<String, String> videoLinks = ncmDetailVideo.links;
-
-      await Future.forEach(videoLinks.entries,
-          (MapEntry<String, String> entry) async {
-        String newUrl = await _getVideoUrlIfCached(entry.value);
-        ResolutionItem newValue =
-            ResolutionItem(value: int.parse(entry.key), url: newUrl);
-        resolutionList['${entry.key}p'] = newValue;
-      });
-    } else if (platform == 3) {
-      throw UnimplementedError(
-        'Not yet implement bilibili platform',
-      );
+    _videoLinks = widget.links['video']!;
+    _audioLinks = widget.links['audio']!;
+    dynamic resource = widget.resource;
+    String bvid;
+    int cid;
+    if (resource is BiliDetailResource) {
+      bvid = resource.bvid;
+      cid = resource.cid;
+    } else if (resource is Map) {
+      bvid = resource['bvid'];
+      cid = (resource['resource'] as BiliSubpageOfResource).cid;
     } else {
-      throw UnsupportedError('Invalid platform');
+      throw Exception('Invalid resource type');
     }
+    await Future.forEach(_videoLinks!.entries,
+        (MapEntry<String, String> entry) async {
+      String? mixedUrl = await _getCachedResourceUrl(entry.value);
+      ResolutionItem newValue =
+          ResolutionItem(value: int.parse(entry.key), url: mixedUrl);
+      resolutionList['${entry.key}p'] = newValue;
+    });
+
     return resolutionList;
   }
 
   Future<void> _setVideoUrl(String url) async {
     try {
-      await _songsPlayer.setDataSource(url, autoPlay: true, showCover: true);
+      await _player.setDataSource(url, autoPlay: true, showCover: true);
     } catch (error) {
       throw Exception('Exception: $error');
     }
   }
 
   void _updateResolutionList() async {
-    _resolutionList = _getResolutionList(_detailVideo, platform);
+    _resolutionList = _getResolutionList(_detailVideo, _currentplatform);
     Map<String, ResolutionItem> resolutionList = await _resolutionList;
-    await _songsPlayer.reset();
+    await _player.reset();
     await _setVideoUrl(resolutionList[_resolutionKey]!.url);
     setState(() {});
   }
@@ -214,7 +193,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     Size size = mediaQueryData.size;
     // double videoHeight = size.width * 7 / 16;
     return FutureBuilder(
-      future: Future.wait([_detailVideo, _resolutionList]),
+      future: Future.wait(_resolutionList),
       // future: Future.wait(
       //     [_detailVideo, _getResolutionList(_detailVideo, currentPlatform)]),
       builder: (context, snapshot) {
@@ -266,15 +245,16 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         } else {
           dynamic detailVideo;
           if (currentPlatform == 0) {
-            throw UnimplementedError('Not yet implement pms platform');
+            throw UnimplementedError('Not yet implement pms _currentplatform');
           } else if (currentPlatform == 1) {
             detailVideo = snapshot.data![0] as QQMusicDetailVideo;
           } else if (currentPlatform == 2) {
             detailVideo = snapshot.data![0] as NCMDetailVideo;
           } else if (currentPlatform == 3) {
-            throw UnimplementedError('Not yet implement bilibili platform');
+            throw UnimplementedError(
+                'Not yet implement bilibili _currentplatform');
           } else {
-            throw UnsupportedError('Invalid platform');
+            throw UnsupportedError('Invalid _currentplatform');
           }
           Map<String, ResolutionItem> resolutionList =
               snapshot.data![1] as Map<String, ResolutionItem>;
@@ -288,7 +268,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 50.0),
                       child: FView(
-                        player: _songsPlayer,
+                        player: _player,
                         // width: double.infinity,
                         // height: videoHeight,
                         color: Colors.black,
@@ -300,13 +280,13 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           isResolution: true,
                           resolutionList: resolutionList,
                           settingFun: () async {
-                            print(_songsPlayer);
-                            print(_songsPlayer.value.size!.height);
+                            print(_player);
+                            print(_player.value.size!.height);
                             // String key =
-                            //     '${_songsPlayer.value.size!.height.toInt()}p';
+                            //     '${_player.value.size!.height.toInt()}p';
                             // String videoLink = resolutionList[key]!.url;
 
-                            String videoLink = _songsPlayer.dataSource!;
+                            String videoLink = _player.dataSource!;
                             _resolutionKey = resolutionList.keys.firstWhere(
                                 (key) => resolutionList[key]!.url == videoLink,
                                 orElse: () => '');
@@ -319,7 +299,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                             );
                           },
                           onError: () async {
-                            await _songsPlayer.reset();
+                            await _player.reset();
                             String originalUrl;
                             if (currentPlatform == 1) {
                               originalUrl = detailVideo.links[0];
@@ -327,18 +307,18 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                               originalUrl = detailVideo.links.values[0];
                             } else {
                               throw UnimplementedError(
-                                  'Not yet implement other platform');
+                                  'Not yet implement other _currentplatform');
                             }
                             _setVideoUrl(originalUrl);
                           },
                           onVideoEnd: () async {
-                            // await _songsPlayer.reset();
+                            // await _player.reset();
                             // _setVideoUrl(detailVideo.videoLinks[0]);
                           },
                           onVideoTimeChange: () {
                             // 视频时间变动则触发一次，可以保存视频播放历史
                             appState.videoSeekTime =
-                                _songsPlayer.currentPos.inMilliseconds;
+                                _player.currentPos.inMilliseconds;
                           },
                           onVideoPrepared: () async {
                             // 视频初始化完毕，如有历史记录时间段则可以触发快进
@@ -350,14 +330,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                               videoId = detailVideo.id;
                             } else {
                               throw UnimplementedError(
-                                  'Not yet implement other platform');
+                                  'Not yet implement other _currentplatform');
                             }
                             try {
                               if (seekTime >= 1 &&
                                   videoId == appState.lastVideoVid) {
                                 /// seekTo必须在FState.prepared
                                 print('seekTo');
-                                await _songsPlayer.seekTo(seekTime);
+                                await _player.seekTo(seekTime);
                                 int seconds = (seekTime / 1000).truncate();
                                 int minutes = (seconds / 60).truncate();
                                 seconds %= 60;

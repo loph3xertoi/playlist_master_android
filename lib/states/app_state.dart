@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:better_player/better_player.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,6 +24,7 @@ import '../entities/bilibili/bili_detail_resource.dart';
 import '../entities/bilibili/bili_fav_list.dart';
 import '../entities/bilibili/bili_resource.dart';
 import '../entities/bilibili/bili_user.dart';
+import '../entities/dto/bili_links_dto.dart';
 import '../entities/dto/paged_data.dart';
 import '../entities/dto/result.dart';
 import '../entities/netease_cloud_music/ncm_detail_playlist.dart';
@@ -47,8 +49,11 @@ import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 
 class MyAppState extends ChangeNotifier {
-  // Store all sub resource's links in detail resource page.
-  Map<String, Map<String, Map<String, String>>> _subResourcesLinks = {};
+  // Controller for better player.
+  BetterPlayerController? _betterPlayerController;
+
+  // Store all sub resource's links dto in detail resource page.
+  Map<String, BiliLinksDTO> _subResourcesLinks = {};
 
   // Error message by fetch* function.
   String _errorMsg = '';
@@ -248,8 +253,9 @@ class MyAppState extends ChangeNotifier {
   // Whether the resources player is playing resources.
   bool _isResourcePlaying = false;
 
-  Map<String, Map<String, Map<String, String>>> get subResourcesLinks =>
-      _subResourcesLinks;
+  Map<String, BiliLinksDTO> get subResourcesLinks => _subResourcesLinks;
+
+  BetterPlayerController? get betterPlayerController => _betterPlayerController;
 
   String get errorMsg => _errorMsg;
 
@@ -361,6 +367,11 @@ class MyAppState extends ChangeNotifier {
   //   _totalSearchedSongs = value;
   //   notifyListeners();
   // }
+
+  set betterPlayerController(BetterPlayerController? betterPlayerController) {
+    _betterPlayerController = betterPlayerController;
+    notifyListeners();
+  }
 
   set hasMore(bool? hasMore) {
     _hasMore = hasMore;
@@ -1172,9 +1183,8 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  /// Not usedbug.
-  Future<Map<String, dynamic>?> fetchSongsLink(
-      List<String> songIds, int platform) async {
+  /// Only used in bilibili now.
+  Future<dynamic> fetchSongsLink(List<String> songIds, int platform) async {
     if (platform == 0) {
       throw UnimplementedError('Not yet implement pms platform');
     } else if (platform == 1) {
@@ -1203,9 +1213,14 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           var songsLink = decodedResponse['data']!;
-          Map<String, dynamic>? songsMap = songsLink;
-          // .map((key, value) => MapEntry<String, dynamic>(key, value));
-          return Future.value(songsMap);
+          if (platform != 3) {
+            Map<String, dynamic>? songsMap = songsLink;
+            // .map((key, value) => MapEntry<String, dynamic>(key, value));
+            return Future.value(songsMap);
+          } else {
+            BiliLinksDTO biliLinksDTO = BiliLinksDTO.fromJson(songsLink);
+            return Future.value(biliLinksDTO);
+          }
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);

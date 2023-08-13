@@ -23,7 +23,6 @@ dependencies:
   animations: ^2.0.7
   just_audio_background: ^0.0.1-beta.10
   path_provider: ^2.0.15
-  dio: ^5.2.1+1
   fluttertoast: ^8.2.2
   flutter_cache_manager: ^3.3.0
   logger: ^1.4.0
@@ -35,6 +34,10 @@ dependencies:
   fplayer:
     git:
       url: https://github.com/loph3xertoi/fplayer.git
+      ref: master
+  better_player:
+    git:
+      url: https://github.com/loph3xertoi/betterplayer.git
       ref: master
   screen_brightness: ^0.2.2
   intl: ^0.18.1
@@ -81,11 +84,10 @@ flutter:
     - assets/images/qqmusic_listenlv.png
     - assets/images/china_mobile.png
     - assets/images/china_telecom.png
-    - assets/images/video_buffering.webp
+    - assets/images/video_buffering.json
     - assets/images/bili_resource_playing.webp
     - assets/images/phone.webp
     - assets/images/idcard.webp
-    - assets/images/video_buffering.webp
     - assets/images/bili_empty.webp
     - assets/images/bili_animation.webp
     - assets/images/bili_lv0.png

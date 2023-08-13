@@ -3,6 +3,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:playlistmaster/entities/bilibili/bili_resource.dart';
 
+import '../dto/bili_links_dto.dart';
 import 'bili_subpage_of_resource.dart';
 
 /// Detail resource for bilibili, such as video, audio and so on.
@@ -85,10 +86,8 @@ class BiliDetailResource extends BiliResource {
   /// The episodes of this resource.
   final List<BiliDetailResource>? episodes;
 
-  /// The links of this video, the key is "video" for video without sound and "audio" for audio only,
-  /// The value is a map that the key is resource code and the value is the real link of
-  /// corresponding audio or video, specific code see [video code](https://socialsisteryi.github.io/bilibili-API-collect/docs/bangumi/videostream_url.html#qn%E8%A7%86%E9%A2%91%E6%B8%85%E6%99%B0%E5%BA%A6%E6%A0%87%E8%AF%86).
-  final Map<String, Map<String, String>>? links;
+  /// The links of this resource.
+  final BiliLinksDTO? links;
 
   factory BiliDetailResource.fromJson(Map<String, dynamic> json) {
     List<dynamic>? subpagesJson = json['subpages'];
@@ -103,13 +102,12 @@ class BiliDetailResource extends BiliResource {
       episodes =
           episodesJson.map((e) => BiliDetailResource.fromJson(e)).toList();
     }
-    Map<String, Map<String, String>> links = {};
+
     Map<String, dynamic>? linksJsonMap = json['links'];
     // This resource isn't single episode.
+    BiliLinksDTO? linksDTO;
     if (linksJsonMap != null) {
-      linksJsonMap.forEach((key, value) {
-        links[key] = Map<String, String>.from(value);
-      });
+      linksDTO = BiliLinksDTO.fromJson(linksJsonMap);
     }
     return BiliDetailResource(
       json['id'],
@@ -138,7 +136,7 @@ class BiliDetailResource extends BiliResource {
       json['dynamicLabels'],
       subpages,
       episodes,
-      links,
+      linksDTO,
     );
   }
 

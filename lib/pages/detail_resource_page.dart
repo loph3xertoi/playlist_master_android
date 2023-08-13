@@ -4,6 +4,7 @@ import 'package:humanize_big_int/humanize_big_int.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:playlistmaster/entities/dto/bili_links_dto.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/bilibili/bili_detail_resource.dart';
@@ -13,6 +14,7 @@ import '../entities/bilibili/bili_subpage_of_resource.dart';
 import '../states/app_state.dart';
 import '../widgets/bili_resource_item.dart';
 import '../widgets/my_selectable_text.dart';
+import '../widgets/resource_player.dart';
 
 class DetailResourcePage extends StatefulWidget {
   @override
@@ -1037,7 +1039,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
       int cid = _currentDetailResource.subpages![_subPageNo - 1].cid;
       resourceId = '$bvid:$cid';
     }
-    Map<String, Map<String, String>>? links = _subPageNo == 1
+    BiliLinksDTO? links = _subPageNo == 1
         ? _currentDetailResource.links!
         : appState.subResourcesLinks[resourceId];
     return (_currentDetailResource.page > 1 && _subPageNo != 1 && links == null)
@@ -1048,8 +1050,8 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                 return Scaffold(
                   backgroundColor: Colors.black,
                   body: Center(
-                    child: Image.asset(
-                      'assets/images/video_buffering.webp',
+                    child: Lottie.asset(
+                      'assets/images/video_buffering.json',
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -1099,13 +1101,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                   ),
                 );
               } else {
-                Map<String, dynamic> rawLinks = snapshot.data!;
-                Map<String, Map<String, String>> links = {};
-                rawLinks.forEach((key, value) {
-                  if (value is Map<String, dynamic>) {
-                    links[key] = value.cast<String, String>();
-                  }
-                });
+                BiliLinksDTO links = snapshot.data;
                 appState.subResourcesLinks[resourceId] = links;
                 return _buildVideoPlayerWidget(links);
               }
@@ -1114,8 +1110,22 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
         : _buildVideoPlayerWidget(links!);
   }
 
-  Widget _buildVideoPlayerWidget(Map<String, Map<String, String>> links) {
+  Widget _buildVideoPlayerWidget(BiliLinksDTO links) {
     print(links);
-    return Placeholder();
+    dynamic resource;
+    if (_currentDetailResource.page == 1) {
+      resource = _currentDetailResource;
+    } else if (_currentDetailResource.isSeasonResource) {
+      resource = _currentDetailResource.episodes![_subPageNo - 1];
+    } else {
+      resource = _currentDetailResource.subpages![_subPageNo - 1];
+    }
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   print('Navigate to resource player.');
+    //   Navigator.pushNamed(context, '/test_resource_player',
+    //       arguments: {'links': links, 'reosurce': resource});
+    // });
+    // return Container();
+    return ResourcePlayer(links: links, resource: resource);
   }
 }
