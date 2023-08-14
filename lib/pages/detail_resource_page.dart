@@ -4,7 +4,6 @@ import 'package:humanize_big_int/humanize_big_int.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/entities/dto/bili_links_dto.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/bilibili/bili_detail_resource.dart';
@@ -23,8 +22,12 @@ class DetailResourcePage extends StatefulWidget {
 
 class _ResourceSubPagesPageState extends State<DetailResourcePage>
     with TickerProviderStateMixin {
+  late MyAppState state;
   late BiliResource _currentResource;
   late BiliDetailResource _currentDetailResource;
+  // Resource type, 0 for single resource, 1 for resource has multiple sub resources, 2 for episodes.
+  late int _resourceType;
+  dynamic _currentPlayingSubResource;
   late Future<BiliDetailResource?> _futureCurrentDetailResource;
   late int _currentPlatform;
   late MyAppState _noListenedState;
@@ -43,7 +46,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
     curve: Curves.easeIn,
   ));
   late TabController _tabController;
-  int _subPageNo = 1;
+  late int _subPageNo;
   // Controller for reset episodes list.
   late ScrollController _episodesScrollController;
   late ScrollController _collapseSubpagesScrollController;
@@ -52,7 +55,8 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
   @override
   void initState() {
     super.initState();
-    final state = Provider.of<MyAppState>(context, listen: false);
+    state = Provider.of<MyAppState>(context, listen: false);
+    _subPageNo = state.subPageNo;
     _noListenedState = state;
     _currentResource = state.currentResource!;
     _currentPlatform = state.currentPlatform;
@@ -86,6 +90,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
     _collapseSubpagesScrollController.dispose();
     _expandSubpagesScrollController.dispose();
     _tabController.dispose();
+    state.resetSubPageNo();
     super.dispose();
   }
 
@@ -104,6 +109,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
+    _subPageNo = appState.subPageNo;
     _currentPlatform = appState.currentPlatform;
     return SafeArea(
       child: FutureBuilder(
@@ -162,42 +168,69 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
             );
           } else {
             _currentDetailResource = snapshot.data!;
-            return _buildDetailResourcePage();
+            if (_currentDetailResource.isSeasonResource) {
+              _currentPlayingSubResource =
+                  _currentDetailResource.episodes![_subPageNo - 1];
+              _resourceType = 2;
+            } else if (_currentDetailResource.page > 1) {
+              _currentPlayingSubResource =
+                  _currentDetailResource.subpages![_subPageNo - 1];
+              _resourceType = 1;
+            } else if (_currentDetailResource.page == 1) {
+              _currentPlayingSubResource = _currentDetailResource;
+              _resourceType = 0;
+            } else {
+              throw Exception('Invalid resource type');
+            }
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (appState.currentDetailResource != _currentDetailResource) {
+                appState.currentDetailResource = _currentDetailResource;
+              }
+              if (appState.currentPlayingSubResource !=
+                  _currentPlayingSubResource) {
+                appState.currentPlayingSubResource = _currentPlayingSubResource;
+              }
+            });
+            return _buildDetailResourcePage(appState);
           }
         },
       ),
     );
   }
 
-  Widget _buildDetailResourcePage() {
+  Widget _buildDetailResourcePage(MyAppState appState) {
+    var isFullScreen = appState.isFullScreen;
     return Column(
       children: [
         Expanded(
           flex: 3,
           child: Container(
             color: Colors.black,
-            child: _buildVideoPlayer(),
+            child: ResourcePlayer(detailResource: _currentDetailResource),
           ),
         ),
-        Expanded(
-          flex: 8,
-          child: Stack(
-            children: [
-              _buildResourceIntroPage(),
-              SlideTransition(
-                position: _offsetAnimation,
-                child: _currentDetailResource.isSeasonResource
-                    ? _buildEpisodesList()
-                    : _buildSubPagesList(),
+        isFullScreen
+            ? Container()
+            : Expanded(
+                flex: 8,
+                child: Stack(
+                  children: [
+                    _buildResourceIntroPage(appState),
+                    SlideTransition(
+                      position: _offsetAnimation,
+                      child: _currentDetailResource.isSeasonResource
+                          ? _buildEpisodesList()
+                          : _buildSubPagesList(),
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
       ],
     );
   }
 
-  Widget _buildResourceIntroPage() {
+  Widget _buildResourceIntroPage(MyAppState appState) {
     return Container(
       color: _colorScheme.primary,
       child: DefaultTabController(
@@ -219,7 +252,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                   Tab(text: 'Introduction', height: 40.0),
                   Tab(
                       text:
-                          'Comments ${humanizeInt(_currentDetailResource.commentCount)}',
+                          'Comments ${humanizeInt(_currentDetailResource.isSeasonResource ? _currentPlayingSubResource.commentCount : _currentDetailResource.commentCount)}',
                       height: 40.0),
                 ],
               ),
@@ -228,7 +261,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                   controller: _tabController,
                   children: [
                     Center(
-                      child: _detailResourceWidget(),
+                      child: _detailResourceWidget(appState),
                     ),
                     Center(
                       child: Text('Todo', style: _textTheme.labelLarge),
@@ -456,6 +489,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                   onTap: () {
                     setState(() {
                       _subPageNo = index + 1;
+                      appState.subPageNo = _subPageNo;
                     });
                     print(1);
                   },
@@ -533,6 +567,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                     onTap: () {
                       setState(() {
                         _subPageNo = index + 1;
+                        appState.subPageNo = _subPageNo;
                       });
                     },
                     child: Ink(
@@ -589,7 +624,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
     );
   }
 
-  Widget _detailResourceWidget() {
+  Widget _detailResourceWidget(MyAppState appState) {
     if (_currentDetailResource.page > 1 &&
         !_currentDetailResource.isSeasonResource) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -642,7 +677,9 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
         Padding(
           padding: const EdgeInsets.only(left: 20.0, bottom: 2.0),
           child: Text(
-            _currentDetailResource.title,
+            _currentDetailResource.isSeasonResource
+                ? _currentPlayingSubResource.title
+                : _currentDetailResource.title,
             style: _textTheme.labelMedium,
           ),
         ),
@@ -660,7 +697,9 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                   ),
                 ),
                 Text(
-                  humanizeInt(_currentDetailResource.playCount),
+                  humanizeInt(_currentDetailResource.isSeasonResource
+                      ? _currentPlayingSubResource.playCount
+                      : _currentDetailResource.playCount),
                   style: _textTheme.labelSmall!.copyWith(
                     fontSize: 11.0,
                     color: _colorScheme.onPrimary.withOpacity(0.5),
@@ -681,7 +720,9 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                   ),
                 ),
                 Text(
-                  humanizeInt(_currentDetailResource.danmakuCount),
+                  humanizeInt(_currentDetailResource.isSeasonResource
+                      ? _currentPlayingSubResource.danmakuCount
+                      : _currentDetailResource.danmakuCount),
                   style: _textTheme.labelSmall!.copyWith(
                     fontSize: 11.0,
                     color: _colorScheme.onPrimary.withOpacity(0.5),
@@ -694,7 +735,9 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
             Text(
               DateFormat('yyyy-MM-dd HH:mm:ss').format(
                 DateTime.fromMillisecondsSinceEpoch(
-                    _currentDetailResource.publishedTime * 1000),
+                    _currentDetailResource.isSeasonResource
+                        ? _currentPlayingSubResource.publishedTime * 1000
+                        : _currentDetailResource.publishedTime * 1000),
               ),
               style: _textTheme.labelSmall!.copyWith(
                 fontSize: 11.0,
@@ -707,37 +750,65 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
         Padding(
           padding: const EdgeInsets.only(left: 20.0, bottom: 10.0),
           child: Text(
-            _currentDetailResource.bvid,
+            _currentDetailResource.isSeasonResource
+                ? _currentPlayingSubResource.bvid
+                : _currentDetailResource.bvid,
             style: _textTheme.labelSmall!.copyWith(
               fontSize: 11.0,
               color: _colorScheme.onPrimary.withOpacity(0.5),
             ),
           ),
         ),
-        _currentDetailResource.dynamicLabels.isNotEmpty
-            ? Padding(
-                padding: const EdgeInsets.only(left: 20.0, bottom: 10.0),
-                child: Text(
-                  _currentDetailResource.dynamicLabels,
-                  style: _textTheme.labelSmall!.copyWith(
-                    fontSize: 11.0,
-                    color: _colorScheme.onPrimary.withOpacity(0.5),
-                  ),
-                ),
-              )
-            : Container(),
-        _currentDetailResource.intro.isNotEmpty
-            ? Padding(
-                padding: const EdgeInsets.only(left: 20.0, bottom: 10.0),
-                child: Text(
-                  _currentDetailResource.intro,
-                  style: _textTheme.labelSmall!.copyWith(
-                    fontSize: 11.0,
-                    color: _colorScheme.onPrimary.withOpacity(0.5),
-                  ),
-                ),
-              )
-            : Container(),
+        _currentDetailResource.isSeasonResource
+            ? _currentPlayingSubResource.dynamicLabels.isNotEmpty
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 20.0, bottom: 10.0),
+                    child: Text(
+                      _currentPlayingSubResource.dynamicLabels,
+                      style: _textTheme.labelSmall!.copyWith(
+                        fontSize: 11.0,
+                        color: _colorScheme.onPrimary.withOpacity(0.5),
+                      ),
+                    ),
+                  )
+                : Container()
+            : _currentDetailResource.dynamicLabels.isNotEmpty
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 20.0, bottom: 10.0),
+                    child: Text(
+                      _currentDetailResource.dynamicLabels,
+                      style: _textTheme.labelSmall!.copyWith(
+                        fontSize: 11.0,
+                        color: _colorScheme.onPrimary.withOpacity(0.5),
+                      ),
+                    ),
+                  )
+                : Container(),
+        _currentDetailResource.isSeasonResource
+            ? _currentPlayingSubResource.intro.isNotEmpty
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 20.0, bottom: 10.0),
+                    child: Text(
+                      _currentPlayingSubResource.intro,
+                      style: _textTheme.labelSmall!.copyWith(
+                        fontSize: 11.0,
+                        color: _colorScheme.onPrimary.withOpacity(0.5),
+                      ),
+                    ),
+                  )
+                : Container()
+            : _currentDetailResource.intro.isNotEmpty
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 20.0, bottom: 10.0),
+                    child: Text(
+                      _currentDetailResource.intro,
+                      style: _textTheme.labelSmall!.copyWith(
+                        fontSize: 11.0,
+                        color: _colorScheme.onPrimary.withOpacity(0.5),
+                      ),
+                    ),
+                  )
+                : Container(),
         Padding(
           padding: const EdgeInsets.only(left: 20.0, bottom: 10.0),
           child: Row(
@@ -754,7 +825,9 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                     ),
                   ),
                   Text(
-                    humanizeInt(_currentDetailResource.likedCount),
+                    humanizeInt(_currentDetailResource.isSeasonResource
+                        ? _currentPlayingSubResource.likedCount
+                        : _currentDetailResource.likedCount),
                     style: _textTheme.labelSmall!.copyWith(
                       fontSize: 11.0,
                       color: _colorScheme.onPrimary.withOpacity(0.5),
@@ -773,7 +846,9 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                     ),
                   ),
                   Text(
-                    humanizeInt(_currentDetailResource.coinsCount),
+                    humanizeInt(_currentDetailResource.isSeasonResource
+                        ? _currentPlayingSubResource.coinsCount
+                        : _currentDetailResource.coinsCount),
                     style: _textTheme.labelSmall!.copyWith(
                       fontSize: 11.0,
                       color: _colorScheme.onPrimary.withOpacity(0.5),
@@ -792,7 +867,9 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                     ),
                   ),
                   Text(
-                    humanizeInt(_currentDetailResource.collectedCount),
+                    humanizeInt(_currentDetailResource.isSeasonResource
+                        ? _currentPlayingSubResource.collectedCount
+                        : _currentDetailResource.collectedCount),
                     style: _textTheme.labelSmall!.copyWith(
                       fontSize: 11.0,
                       color: _colorScheme.onPrimary.withOpacity(0.5),
@@ -811,7 +888,9 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                     ),
                   ),
                   Text(
-                    humanizeInt(_currentDetailResource.sharedCount),
+                    humanizeInt(_currentDetailResource.isSeasonResource
+                        ? _currentPlayingSubResource.sharedCount
+                        : _currentDetailResource.sharedCount),
                     style: _textTheme.labelSmall!.copyWith(
                       fontSize: 11.0,
                       color: _colorScheme.onPrimary.withOpacity(0.5),
@@ -903,6 +982,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                                         onTap: () {
                                           setState(() {
                                             _subPageNo = index + 1;
+                                            appState.subPageNo = _subPageNo;
                                           });
                                           WidgetsBinding.instance
                                               .addPostFrameCallback((_) {
@@ -1026,106 +1106,90 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
     );
   }
 
-  Widget _buildVideoPlayer() {
-    // print(_currentDetailResource.links);
-    MyAppState appState = context.watch<MyAppState>();
-    String resourceId;
-    if (_currentDetailResource.isSeasonResource) {
-      String bvid = _currentDetailResource.episodes![_subPageNo - 1].bvid;
-      int cid = _currentDetailResource.episodes![_subPageNo - 1].cid;
-      resourceId = '$bvid:$cid';
-    } else {
-      String bvid = _currentDetailResource.bvid;
-      int cid = _currentDetailResource.subpages![_subPageNo - 1].cid;
-      resourceId = '$bvid:$cid';
-    }
-    BiliLinksDTO? links = _subPageNo == 1
-        ? _currentDetailResource.links!
-        : appState.subResourcesLinks[resourceId];
-    return (_currentDetailResource.page > 1 && _subPageNo != 1 && links == null)
-        ? FutureBuilder(
-            future: appState.fetchSongsLink([resourceId], _currentPlatform),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Scaffold(
-                  backgroundColor: Colors.black,
-                  body: Center(
-                    child: Lottie.asset(
-                      'assets/images/video_buffering.json',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                );
-              } else if (snapshot.hasError || snapshot.data == null) {
-                return Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      MySelectableText(
-                        snapshot.hasError
-                            ? '${snapshot.error}'
-                            : appState.errorMsg,
-                        style: _textTheme.labelMedium!.copyWith(
-                          color: _colorScheme.onPrimary,
-                        ),
-                      ),
-                      TextButton.icon(
-                        style: ButtonStyle(
-                          shadowColor: MaterialStateProperty.all(
-                            _colorScheme.primary,
-                          ),
-                          overlayColor: MaterialStateProperty.all(
-                            Colors.grey,
-                          ),
-                        ),
-                        icon: Icon(
-                          MdiIcons.webRefresh,
-                          color: _colorScheme.onPrimary,
-                        ),
-                        label: Text(
-                          'Retry',
-                          style: _textTheme.labelMedium!.copyWith(
-                            color: _colorScheme.onPrimary,
-                          ),
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            // _futureCurrentDetailResource = _noListenedState
-                            //     .fetchDetailSong<BiliDetailResource>(
-                            //         _currentResource, _currentPlatform)!;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              } else {
-                BiliLinksDTO links = snapshot.data;
-                appState.subResourcesLinks[resourceId] = links;
-                return _buildVideoPlayerWidget(links);
-              }
-            },
-          )
-        : _buildVideoPlayerWidget(links!);
-  }
+  // Widget _buildVideoPlayer() {
+  //   MyAppState appState = context.watch<MyAppState>();
 
-  Widget _buildVideoPlayerWidget(BiliLinksDTO links) {
-    print(links);
-    dynamic resource;
-    if (_currentDetailResource.page == 1) {
-      resource = _currentDetailResource;
-    } else if (_currentDetailResource.isSeasonResource) {
-      resource = _currentDetailResource.episodes![_subPageNo - 1];
-    } else {
-      resource = _currentDetailResource.subpages![_subPageNo - 1];
-    }
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   print('Navigate to resource player.');
-    //   Navigator.pushNamed(context, '/test_resource_player',
-    //       arguments: {'links': links, 'reosurce': resource});
-    // });
-    // return Container();
-    return ResourcePlayer(links: links, resource: resource);
-  }
+  //   BiliLinksDTO? links = _subPageNo == 1
+  //       ? _currentDetailResource.links!
+  //       : appState.subResourcesLinks[resourceId];
+  //   return (_currentDetailResource.page > 1 && _subPageNo != 1 && links == null)
+  //       ? FutureBuilder(
+  //           future: appState.fetchSongsLink([resourceId], _currentPlatform),
+  //           builder: (context, snapshot) {
+  //             if (snapshot.connectionState == ConnectionState.waiting) {
+  //               return Scaffold(
+  //                 backgroundColor: Colors.black,
+  //                 body: Center(
+  //                   child: Lottie.asset(
+  //                     'assets/images/video_buffering.json',
+  //                     fit: BoxFit.cover,
+  //                   ),
+  //                 ),
+  //               );
+  //             } else if (snapshot.hasError || snapshot.data == null) {
+  //               return Center(
+  //                 child: Column(
+  //                   mainAxisSize: MainAxisSize.min,
+  //                   crossAxisAlignment: CrossAxisAlignment.center,
+  //                   children: [
+  //                     MySelectableText(
+  //                       snapshot.hasError
+  //                           ? '${snapshot.error}'
+  //                           : appState.errorMsg,
+  //                       style: _textTheme.labelMedium!.copyWith(
+  //                         color: _colorScheme.onPrimary,
+  //                       ),
+  //                     ),
+  //                     TextButton.icon(
+  //                       style: ButtonStyle(
+  //                         shadowColor: MaterialStateProperty.all(
+  //                           _colorScheme.primary,
+  //                         ),
+  //                         overlayColor: MaterialStateProperty.all(
+  //                           Colors.grey,
+  //                         ),
+  //                       ),
+  //                       icon: Icon(
+  //                         MdiIcons.webRefresh,
+  //                         color: _colorScheme.onPrimary,
+  //                       ),
+  //                       label: Text(
+  //                         'Retry',
+  //                         style: _textTheme.labelMedium!.copyWith(
+  //                           color: _colorScheme.onPrimary,
+  //                         ),
+  //                       ),
+  //                       onPressed: () {
+  //                         setState(() {
+  //                           // _futureCurrentDetailResource = _noListenedState
+  //                           //     .fetchDetailSong<BiliDetailResource>(
+  //                           //         _currentResource, _currentPlatform)!;
+  //                         });
+  //                       },
+  //                     ),
+  //                   ],
+  //                 ),
+  //               );
+  //             } else {
+  //               BiliLinksDTO links = snapshot.data;
+  //               appState.subResourcesLinks[resourceId] = links;
+  //               return _buildVideoPlayerWidget(links);
+  //             }
+  //           },
+  //         )
+  //       : _buildVideoPlayerWidget(links!);
+  // }
+
+  // Widget _buildVideoPlayerWidget(BiliLinksDTO links) {
+  //   print(links);
+  //   dynamic resource;
+
+  //   // WidgetsBinding.instance.addPostFrameCallback((_) {
+  //   //   print('Navigate to resource player.');
+  //   //   Navigator.pushNamed(context, '/test_resource_player',
+  //   //       arguments: {'links': links, 'reosurce': resource});
+  //   // });
+  //   // return Container();
+  //   return
+  // }
 }

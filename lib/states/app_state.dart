@@ -49,26 +49,39 @@ import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 
 class MyAppState extends ChangeNotifier {
-  // Controller for better player.
+  /// Whether resource player is locked.
+  bool _isResourcePlayerLocked = false;
+
+  /// Whether resource player is full screen.
+  bool _isFullScreen = false;
+
+  /// Current playing sub resource in bilibili, can be BiliDetailResource or BiliSubPageOfResource.
+  dynamic _currentPlayingSubResource;
+
+  /// Subpage No of bili detail resource, represents the index of sub resource
+  /// or episode in detail resource of bilibili.
+  int _subPageNo = 1;
+
+  /// Controller for better player.
   BetterPlayerController? _betterPlayerController;
 
-  // Store all sub resource's links dto in detail resource page.
+  /// Store all sub resource's links dto in detail resource page.
   Map<String, BiliLinksDTO> _subResourcesLinks = {};
 
-  // Error message by fetch* function.
+  /// Error message by fetch* function.
   String _errorMsg = '';
 
-  // Refresh detail library page.
+  /// Refresh detail library page.
   void Function(MyAppState appState)? refreshDetailLibraryPage;
 
-  // Refresh detail fav list page.
+  /// Refresh detail fav list page.
   void Function(MyAppState appState)? refreshDetailFavListPage;
 
-  // Refresh home page's libraries.
+  /// Refresh home page's libraries.
   Future<PagedDataDTO<BasicLibrary>?> Function(MyAppState, bool)?
       refreshLibraries;
 
-  // Whether there has more searched results.
+  /// Whether there has more searched results.
   bool? _hasMore;
 
   // // Current page.
@@ -83,31 +96,31 @@ class MyAppState extends ChangeNotifier {
   // // Total searched songs count.
   // int _totalSearchedSongs = 0;
 
-  // Searched resources, for bilibili.
+  /// Searched resources, for bilibili.
   List<BiliResource> _searchedResources = [];
 
-  // Searched songs, for pms, qqmusic and ncm.
+  /// Searched songs, for pms, qqmusic and ncm.
   List<BasicSong> _searchedSongs = [];
 
-  // Searching keyword.
+  /// Searching keyword.
   String? _keyword;
 
-  // Last video's vid.
+  /// Last video's vid.
   String lastVideoVid = '';
 
-  // The time when quit video.
+  /// The time when quit video.
   int videoSeekTime = 0;
 
-  // Dark mode.
+  /// Dark mode.
   bool? _isDarkMode;
 
-  // Using mock data.
+  /// Using mock data.
   bool _isUsingMockData = false;
 
-  /// The current platform, 0 for pm server, 1 for qq music, 2 for netease music, 3 for bilibili.
+  //// The current platform, 0 for pm server, 1 for qq music, 2 for netease music, 3 for bilibili.
   int _currentPlatform = 3;
 
-  // Default image for cover.
+  /// Default image for cover.
   static const String defaultCoverImage =
       'https://img0.baidu.com/it/u=819122015,412168181&fm=253&fmt=auto&app=138&f=JPEG?w=320&h=320';
   // static const String defaultCoverImage =
@@ -116,76 +129,76 @@ class MyAppState extends ChangeNotifier {
   static const String defaultLibraryCover =
       'http://y.gtimg.cn/mediastyle/global/img/cover_playlist.png?max_age=31536000';
 
-  // Set true when init songs player for cover animation forward.
+  /// Set true when init songs player for cover animation forward.
   bool _isFirstLoadSongsPlayer = false;
 
-  // Set true when init resources player for cover animation forward.
+  /// Set true when init resources player for cover animation forward.
   bool _isFirstLoadResourcesPlayer = false;
 
-  // Current basic playing song.
+  /// Current basic playing song.
   BasicSong? _currentSong;
 
-  // Current basic playing resource.
+  /// Current basic playing resource.
   BiliResource? _currentResource;
 
-  // Previous basic playing song.
+  /// Previous basic playing song.
   BasicSong? _prevSong;
 
-  // Previous basic playing resource.
+  /// Previous basic playing resource.
   BiliResource? _prevResource;
 
-  // Current detail playing song.
+  /// Current detail playing song.
   BasicSong? _currentDetailSong;
 
-  // Current detail playing resource.
+  /// Current detail playing resource.
   BiliDetailResource? _currentDetailResource;
 
-  // Is removing song from queue?
+  /// Is removing song from queue?
   bool _isRemovingSongFromQueue = false;
 
-  // Is removing resource from queue?
+  /// Is removing resource from queue?
   bool _isRemovingResourceFromQueue = false;
 
-  // Whether the songs player page is opened.
+  /// Whether the songs player page is opened.
   bool _isSongsPlayerPageOpened = false;
 
-  // Whether the resources player page is opened.
+  /// Whether the resources player page is opened.
   bool _isResourcesPlayerPageOpened = false;
 
-  // Make sure songs player page pop once.
+  /// Make sure songs player page pop once.
   bool _canSongsPlayerPagePop = false;
 
-  // Make sure resources player page pop once.
+  /// Make sure resources player page pop once.
   bool _canResourcesPlayerPagePop = false;
 
-  // Whether removing song in queue, this should be true for updating the current song.
+  /// Whether removing song in queue, this should be true for updating the current song.
   bool _updatingSong = false;
 
-  // Whether removing resource in queue, this should be true for updating the current resource.
+  /// Whether removing resource in queue, this should be true for updating the current resource.
   bool _updatingResource = false;
 
-  // Current songs player.
+  /// Current songs player.
   AudioPlayer? _songsPlayer;
 
-  // Current resources player.
+  /// Current resources player.
   AudioPlayer? _resourcesPlayer;
 
-  // Current songs queue.
+  /// Current songs queue.
   List<BasicSong>? _songsQueue;
 
-  // Current bilibili resources queue.
+  /// Current bilibili resources queue.
   List<BiliResource>? _resourcesQueue;
 
-  // Raw songs of the library.
+  /// Raw songs of the library.
   List<BasicSong>? _rawSongsInLibrary;
 
-  // Raw resources of the fav list.
+  /// Raw resources of the fav list.
   List<BiliResource>? _rawResourcesInFavList;
 
-  // Define the songs audio source.
+  /// Define the songs audio source.
   ConcatenatingAudioSource? _songsAudioSource;
 
-  // Define the bilibili resources audio source.
+  /// Define the bilibili resources audio source.
   ConcatenatingAudioSource? _resourcesAudioSource;
 
   /// Collects the data useful for displaying in a seek bar, using a handy
@@ -218,40 +231,49 @@ class MyAppState extends ChangeNotifier {
             PositionData(position, bufferedPosition, duration ?? Duration.zero),
       );
 
-  // Volume of both players.
+  /// Volume of both players.
   double? _volume = 1.0;
 
-  // Speed of both players.
+  /// Speed of both players.
   double? _speed = 1.0;
 
-  // User playing mode, 0 for shuffle, 1 for repeat, 2 for repeat one.
+  /// User playing mode, 0 for shuffle, 1 for repeat, 2 for repeat one.
   int _userPlayingMode = 1;
 
-  // Current playing song in queue.
+  /// Bilibili video playing mode.
+  /// 0: stop when current episode or sub resource finishes,
+  /// 1: stop when all episodes or sub resource of current detail resource finishes,
+  /// 2: repeat current episode or sub resource,
+  /// 3: repeat current detail resource's list.
+  int _biliResourcePlayingMode = 0;
+
+  /// Current playing song in queue.
   int _currentPlayingSongInQueue = 0;
 
-  // Current playing resource in queue.
+  /// Current playing resource in queue.
   int _currentPlayingResourceInQueue = 0;
 
-  // Cover rotating controller.
+  /// Cover rotating controller.
   AnimationController? _coverRotatingController;
 
   CarouselController _carouselController = CarouselController();
 
-  // Previous carousel index.
+  /// Previous carousel index.
   int _prevCarouselIndex = 0;
 
-  // Current opened library, will change when navigate to similar song page.
+  /// Current opened library, will change when navigate to similar song page.
   BasicLibrary? _openedLibrary;
 
-  // Raw opened library.
+  /// Raw opened library.
   BasicLibrary? _rawOpenedLibrary;
 
-  // Whether the songs player is playing songs.
+  /// Whether the songs player is playing songs.
   bool _isSongPlaying = false;
 
-  // Whether the resources player is playing resources.
+  /// Whether the resources player is playing resources.
   bool _isResourcePlaying = false;
+
+  dynamic get currentPlayingSubResource => _currentPlayingSubResource;
 
   Map<String, BiliLinksDTO> get subResourcesLinks => _subResourcesLinks;
 
@@ -268,6 +290,12 @@ class MyAppState extends ChangeNotifier {
   // int get pageSize => _pageSize;
 
   // int get totalSearchedSongs => _totalSearchedSongs;
+
+  int get subPageNo => _subPageNo;
+
+  bool get isResourcePlayerLocked => _isResourcePlayerLocked;
+
+  bool get isFullScreen => _isFullScreen;
 
   List<BiliResource> get searchedResources => _searchedResources;
 
@@ -334,6 +362,8 @@ class MyAppState extends ChangeNotifier {
 
   int get userPlayingMode => _userPlayingMode;
 
+  int get biliResourcePlayingMode => _biliResourcePlayingMode;
+
   BasicLibrary? get openedLibrary => _openedLibrary;
 
   BasicLibrary? get rawOpenedLibrary => _rawOpenedLibrary;
@@ -367,6 +397,30 @@ class MyAppState extends ChangeNotifier {
   //   _totalSearchedSongs = value;
   //   notifyListeners();
   // }
+
+  set isResourcePlayerLocked(bool value) {
+    _isResourcePlayerLocked = value;
+    notifyListeners();
+  }
+
+  set isFullScreen(bool value) {
+    _isFullScreen = value;
+    notifyListeners();
+  }
+
+  set currentPlayingSubResource(dynamic value) {
+    _currentPlayingSubResource = value;
+    notifyListeners();
+  }
+
+  set subPageNo(int value) {
+    _subPageNo = value;
+    notifyListeners();
+  }
+
+  void resetSubPageNo() {
+    _subPageNo = 1;
+  }
 
   set betterPlayerController(BetterPlayerController? betterPlayerController) {
     _betterPlayerController = betterPlayerController;
@@ -544,6 +598,11 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  set biliResourcePlayingMode(mode) {
+    _biliResourcePlayingMode = mode;
+    notifyListeners();
+  }
+
   set openedLibrary(BasicLibrary? library) {
     _openedLibrary = library;
     notifyListeners();
@@ -622,9 +681,10 @@ class MyAppState extends ChangeNotifier {
         throw UnsupportedError('Invalid playing mode');
       }
 
-      // Set the volume.
+      /// Set the volume.
       await _songsPlayer!.setVolume(_volume!);
-      // Set the speed.
+
+      /// Set the speed.
       await _songsPlayer!.setSpeed(_speed!);
 
       // TODO: fix bug: when remove song in library, this function will also be called.
