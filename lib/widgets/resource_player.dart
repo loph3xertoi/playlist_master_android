@@ -40,8 +40,6 @@ class _DashPageState extends State<ResourcePlayer> {
   // or BiliSubPageOfResource(sub resource).
   late dynamic _currentPlayingSubResource;
 
-  int _subPageNo = 1;
-
   bool _isDisposing = false;
 
   bool _isLocked = false;
@@ -52,6 +50,8 @@ class _DashPageState extends State<ResourcePlayer> {
   late int _resourceType;
 
   VideoPlayerValue? _latestValue;
+
+  bool _hasSkipedToNext = false;
 
   List<String> _playingModeNames = [
     'Current once',
@@ -246,6 +246,19 @@ class _DashPageState extends State<ResourcePlayer> {
     _betterPlayerController.setupDataSource(dataSource);
     _betterPlayerController.setBetterPlayerGlobalKey(_betterPlayerKey);
     _betterPlayerController.enablePictureInPicture(_betterPlayerKey);
+    _betterPlayerController.addEventsListener((event) {
+      if (event.betterPlayerEventType == BetterPlayerEventType.play) {
+        _hasSkipedToNext = false;
+      }
+      if (event.betterPlayerEventType == BetterPlayerEventType.finished) {
+        if (!_hasSkipedToNext &&
+            (_appState!.biliResourcePlayingMode == 2 ||
+                _appState!.biliResourcePlayingMode == 3)) {
+          _skipToNextSubResource();
+          _hasSkipedToNext = true;
+        }
+      }
+    });
     _controller = _betterPlayerController.videoPlayerController;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       state.betterPlayerController = _betterPlayerController;
@@ -282,65 +295,84 @@ class _DashPageState extends State<ResourcePlayer> {
             child: BetterPlayerMultipleGestureDetector(
                 onDoubleTap: _onPlayPause,
                 child: BetterPlayer(controller: _betterPlayerController)),
-            // onLongPress: () async {
-            //   dynamic currentPlayingSubResource =
-            //       appState.currentPlayingSubResource;
-            //   print(appState);
-            //   final String? title;
-            //   final String? author;
-            //   final String? imageUrl;
-            //   final String? cacheKey;
-            //   final String? resourceId;
-
-            //   if (_resourceType == 1) {
-            //     title = currentPlayingSubResource.partName;
-            //     author = _detailResource.upperName;
-            //     imageUrl = _detailResource.cover;
-            //     cacheKey =
-            //         '${currentPlayingSubResource.bvid}:${currentPlayingSubResource.cid}';
-            //     resourceId =
-            //         '${currentPlayingSubResource.bvid}:${currentPlayingSubResource.cid}';
-            //   } else {
-            //     title = currentPlayingSubResource.title;
-            //     author = currentPlayingSubResource.upperName;
-            //     imageUrl = currentPlayingSubResource.cover;
-            //     cacheKey =
-            //         '${currentPlayingSubResource.bvid}:${currentPlayingSubResource.cid}';
-            //     resourceId =
-            //         '${currentPlayingSubResource.bvid}:${currentPlayingSubResource.cid}';
-            //   }
-            //   var links = await appState.fetchSongsLink([resourceId], 3);
-            //   final url = 'http://${API.host}${links.mpd}';
-            //   BetterPlayerDataSource dataSource = BetterPlayerDataSource(
-            //     BetterPlayerDataSourceType.network,
-            //     url,
-            //     useAsmsSubtitles: true,
-            //     useAsmsTracks: true,
-            //     useAsmsAudioTracks: false,
-            //     headers: _header,
-            //     videoFormat: BetterPlayerVideoFormat.dash,
-            //     cacheConfiguration: BetterPlayerCacheConfiguration(
-            //       useCache: true,
-            //       key: cacheKey,
-            //     ),
-            //     notificationConfiguration:
-            //         BetterPlayerNotificationConfiguration(
-            //       showNotification: true,
-            //       title: title,
-            //       author: author,
-            //       imageUrl: imageUrl,
-            //       activityName:
-            //           'com.ryanheise.audioservice.AudioServiceActivity',
-            //     ),
-            //   );
-            //   _betterPlayerController.setupDataSource(dataSource);
-            //   // _betterPlayerController.stop
-            //   print(_betterPlayerController);
-            // },
           ),
         ),
       ),
     );
+  }
+
+  void _skipToNextSubResource() async {
+    dynamic nextSubResource;
+    int subPageNo = _appState!.subPageNo;
+    int playingMode = _appState!.biliResourcePlayingMode;
+    if (_resourceType == 1) {
+      if (playingMode == 2) {
+        if (subPageNo < _detailResource.subpages!.length) {
+          subPageNo = ++_appState!.subPageNo;
+        } else {
+          return;
+        }
+      } else {
+        _appState!.subPageNo =
+            subPageNo = subPageNo % _detailResource.subpages!.length + 1;
+      }
+      nextSubResource = _detailResource.subpages![subPageNo - 1];
+    } else {
+      if (playingMode == 2) {
+        if (subPageNo < _detailResource.episodes!.length) {
+          subPageNo = ++_appState!.subPageNo;
+        } else {
+          return;
+        }
+      } else {
+        _appState!.subPageNo =
+            subPageNo = subPageNo % _detailResource.episodes!.length + 1;
+      }
+      nextSubResource = _detailResource.episodes![subPageNo - 1];
+    }
+    print(_appState);
+    final String? title;
+    final String? author;
+    final String? imageUrl;
+    final String? cacheKey;
+    final String? resourceId;
+    cacheKey = resourceId = '${nextSubResource.bvid}:${nextSubResource.cid}';
+
+    if (_resourceType == 1) {
+      title = nextSubResource.partName;
+      author = _detailResource.upperName;
+      imageUrl = _detailResource.cover;
+    } else {
+      title = nextSubResource.title;
+      author = nextSubResource.upperName;
+      imageUrl = nextSubResource.cover;
+    }
+    var links = await _appState!
+        .fetchSongsLink([resourceId], _appState!.currentPlatform);
+    final url = 'http://${API.host}${links.mpd}';
+    BetterPlayerDataSource dataSource = BetterPlayerDataSource(
+      BetterPlayerDataSourceType.network,
+      url,
+      useAsmsSubtitles: true,
+      useAsmsTracks: true,
+      useAsmsAudioTracks: false,
+      headers: _header,
+      videoFormat: BetterPlayerVideoFormat.dash,
+      cacheConfiguration: BetterPlayerCacheConfiguration(
+        useCache: true,
+        key: cacheKey,
+      ),
+      notificationConfiguration: BetterPlayerNotificationConfiguration(
+        showNotification: true,
+        title: title,
+        author: author,
+        imageUrl: imageUrl,
+        activityName: 'com.ryanheise.audioservice.AudioServiceActivity',
+      ),
+    );
+    _betterPlayerController.setupDataSource(dataSource);
+    _hideTimer?.cancel();
+    _startHideTimer();
   }
 
   void _startHideTimer() {
@@ -400,11 +432,15 @@ class _DashPageState extends State<ResourcePlayer> {
       } else if (playingMode == 2) {
         if (_resourceType == 0) {
           _betterPlayerController.setLooping(false);
-        } else {}
+        } else {
+          _betterPlayerController.setLooping(false);
+        }
       } else if (playingMode == 3) {
         if (_resourceType == 0) {
           _betterPlayerController.setLooping(true);
-        } else {}
+        } else {
+          _betterPlayerController.setLooping(false);
+        }
       } else {
         throw Exception('Invalid playing mode');
       }
