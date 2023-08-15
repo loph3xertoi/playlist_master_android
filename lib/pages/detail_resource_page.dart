@@ -1,3 +1,4 @@
+import 'package:better_player/better_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:humanize_big_int/humanize_big_int.dart';
@@ -10,6 +11,7 @@ import '../entities/bilibili/bili_detail_resource.dart';
 import '../entities/bilibili/bili_fav_list.dart';
 import '../entities/bilibili/bili_resource.dart';
 import '../entities/bilibili/bili_subpage_of_resource.dart';
+import '../http/api.dart';
 import '../states/app_state.dart';
 import '../widgets/bili_resource_item.dart';
 import '../widgets/my_selectable_text.dart';
@@ -51,6 +53,12 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
   late ScrollController _episodesScrollController;
   late ScrollController _collapseSubpagesScrollController;
   late ScrollController _expandSubpagesScrollController;
+
+  Map<String, String> _header = {
+    'Referer': 'https://www.bilibili.com',
+    'User-Agent':
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+  };
 
   @override
   void initState() {
@@ -488,8 +496,12 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                   isSelected: _subPageNo == index + 1,
                   onTap: () {
                     setState(() {
-                      _subPageNo = index + 1;
-                      appState.subPageNo = _subPageNo;
+                      int newPageNo = index + 1;
+                      if (newPageNo != _subPageNo) {
+                        _subPageNo = newPageNo;
+                        appState.subPageNo = newPageNo;
+                        _skipToSpecificSubResource();
+                      }
                     });
                     print(1);
                   },
@@ -566,8 +578,12 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                     borderRadius: BorderRadius.circular(4.0),
                     onTap: () {
                       setState(() {
-                        _subPageNo = index + 1;
-                        appState.subPageNo = _subPageNo;
+                        int newPageNo = index + 1;
+                        if (newPageNo != _subPageNo) {
+                          _subPageNo = newPageNo;
+                          appState.subPageNo = newPageNo;
+                          _skipToSpecificSubResource();
+                        }
                       });
                     },
                     child: Ink(
@@ -981,8 +997,12 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                                       child: InkWell(
                                         onTap: () {
                                           setState(() {
-                                            _subPageNo = index + 1;
-                                            appState.subPageNo = _subPageNo;
+                                            int newPageNo = index + 1;
+                                            if (newPageNo != _subPageNo) {
+                                              _subPageNo = newPageNo;
+                                              appState.subPageNo = newPageNo;
+                                              _skipToSpecificSubResource();
+                                            }
                                           });
                                           WidgetsBinding.instance
                                               .addPostFrameCallback((_) {
@@ -1106,90 +1126,54 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
     );
   }
 
-  // Widget _buildVideoPlayer() {
-  //   MyAppState appState = context.watch<MyAppState>();
+  void _skipToSpecificSubResource() async {
+    dynamic nextSubResource;
+    if (_resourceType == 1) {
+      nextSubResource = _currentDetailResource.subpages![_subPageNo - 1];
+    } else {
+      nextSubResource = _currentDetailResource.episodes![_subPageNo - 1];
+    }
 
-  //   BiliLinksDTO? links = _subPageNo == 1
-  //       ? _currentDetailResource.links!
-  //       : appState.subResourcesLinks[resourceId];
-  //   return (_currentDetailResource.page > 1 && _subPageNo != 1 && links == null)
-  //       ? FutureBuilder(
-  //           future: appState.fetchSongsLink([resourceId], _currentPlatform),
-  //           builder: (context, snapshot) {
-  //             if (snapshot.connectionState == ConnectionState.waiting) {
-  //               return Scaffold(
-  //                 backgroundColor: Colors.black,
-  //                 body: Center(
-  //                   child: Lottie.asset(
-  //                     'assets/images/video_buffering.json',
-  //                     fit: BoxFit.cover,
-  //                   ),
-  //                 ),
-  //               );
-  //             } else if (snapshot.hasError || snapshot.data == null) {
-  //               return Center(
-  //                 child: Column(
-  //                   mainAxisSize: MainAxisSize.min,
-  //                   crossAxisAlignment: CrossAxisAlignment.center,
-  //                   children: [
-  //                     MySelectableText(
-  //                       snapshot.hasError
-  //                           ? '${snapshot.error}'
-  //                           : appState.errorMsg,
-  //                       style: _textTheme.labelMedium!.copyWith(
-  //                         color: _colorScheme.onPrimary,
-  //                       ),
-  //                     ),
-  //                     TextButton.icon(
-  //                       style: ButtonStyle(
-  //                         shadowColor: MaterialStateProperty.all(
-  //                           _colorScheme.primary,
-  //                         ),
-  //                         overlayColor: MaterialStateProperty.all(
-  //                           Colors.grey,
-  //                         ),
-  //                       ),
-  //                       icon: Icon(
-  //                         MdiIcons.webRefresh,
-  //                         color: _colorScheme.onPrimary,
-  //                       ),
-  //                       label: Text(
-  //                         'Retry',
-  //                         style: _textTheme.labelMedium!.copyWith(
-  //                           color: _colorScheme.onPrimary,
-  //                         ),
-  //                       ),
-  //                       onPressed: () {
-  //                         setState(() {
-  //                           // _futureCurrentDetailResource = _noListenedState
-  //                           //     .fetchDetailSong<BiliDetailResource>(
-  //                           //         _currentResource, _currentPlatform)!;
-  //                         });
-  //                       },
-  //                     ),
-  //                   ],
-  //                 ),
-  //               );
-  //             } else {
-  //               BiliLinksDTO links = snapshot.data;
-  //               appState.subResourcesLinks[resourceId] = links;
-  //               return _buildVideoPlayerWidget(links);
-  //             }
-  //           },
-  //         )
-  //       : _buildVideoPlayerWidget(links!);
-  // }
+    print(_noListenedState);
+    final String? title;
+    final String? author;
+    final String? imageUrl;
+    final String? cacheKey;
+    final String? resourceId;
+    cacheKey = resourceId = '${nextSubResource.bvid}:${nextSubResource.cid}';
 
-  // Widget _buildVideoPlayerWidget(BiliLinksDTO links) {
-  //   print(links);
-  //   dynamic resource;
-
-  //   // WidgetsBinding.instance.addPostFrameCallback((_) {
-  //   //   print('Navigate to resource player.');
-  //   //   Navigator.pushNamed(context, '/test_resource_player',
-  //   //       arguments: {'links': links, 'reosurce': resource});
-  //   // });
-  //   // return Container();
-  //   return
-  // }
+    if (_resourceType == 1) {
+      title = nextSubResource.partName;
+      author = _currentDetailResource.upperName;
+      imageUrl = _currentDetailResource.cover;
+    } else {
+      title = nextSubResource.title;
+      author = nextSubResource.upperName;
+      imageUrl = nextSubResource.cover;
+    }
+    var links =
+        await _noListenedState.fetchSongsLink([resourceId], _currentPlatform);
+    final url = 'http://${API.host}${links.mpd}';
+    BetterPlayerDataSource dataSource = BetterPlayerDataSource(
+      BetterPlayerDataSourceType.network,
+      url,
+      useAsmsSubtitles: true,
+      useAsmsTracks: true,
+      useAsmsAudioTracks: false,
+      headers: _header,
+      videoFormat: BetterPlayerVideoFormat.dash,
+      cacheConfiguration: BetterPlayerCacheConfiguration(
+        useCache: true,
+        key: cacheKey,
+      ),
+      notificationConfiguration: BetterPlayerNotificationConfiguration(
+        showNotification: true,
+        title: title,
+        author: author,
+        imageUrl: imageUrl,
+        activityName: 'com.ryanheise.audioservice.AudioServiceActivity',
+      ),
+    );
+    _noListenedState.betterPlayerController!.setupDataSource(dataSource);
+  }
 }

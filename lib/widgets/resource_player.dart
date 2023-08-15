@@ -11,6 +11,7 @@ import 'package:playlistmaster/entities/bilibili/bili_subpage_of_resource.dart';
 import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:provider/provider.dart';
 
+import '../http/api.dart';
 import '../states/app_state.dart';
 import 'custom_controller_widget_better_player.dart';
 
@@ -58,6 +59,12 @@ class _DashPageState extends State<ResourcePlayer> {
     'Playlists once',
     'Playlists repeat',
   ];
+
+  Map<String, String> _header = {
+    'Referer': 'https://www.bilibili.com',
+    'User-Agent':
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+  };
 
   List<IconData> _playingModeIcons = [
     Icons.repeat_one_rounded,
@@ -183,14 +190,10 @@ class _DashPageState extends State<ResourcePlayer> {
     // String url = 'https://bitmovin-a.akamaihd.net/content/sintel/sintel.mpd';
     // String url = 'https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd';
     // String url = 'http://${API.host}${widget.links.mpd}';
-    String url =
-        'https://baikevideo.cdn.bcebos.com/media/mda-OxWC3meZEwxyMv5u/a4d544933fd90ff496d7a72bf521cbed.mp4';
-    Map<String, String> header = {
-      'Referer': 'https://www.bilibili.com',
-      'User-Agent':
-          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-    };
-
+    // String url =
+    //     'https://baikevideo.cdn.bcebos.com/media/mda-OxWC3meZEwxyMv5u/a4d544933fd90ff496d7a72bf521cbed.mp4';
+    String uri = _detailResource.links!.mpd;
+    String url = 'http://${API.host}$uri';
     if (_detailResource.isSeasonResource) {
       _resourceType = 2;
     } else if (_detailResource.page > 1) {
@@ -225,8 +228,8 @@ class _DashPageState extends State<ResourcePlayer> {
       useAsmsSubtitles: true,
       useAsmsTracks: true,
       useAsmsAudioTracks: false,
-      // headers: header,
-      // videoFormat: BetterPlayerVideoFormat.dash,
+      headers: _header,
+      videoFormat: BetterPlayerVideoFormat.dash,
       cacheConfiguration: BetterPlayerCacheConfiguration(
         useCache: true,
         key: cacheKey,
@@ -279,6 +282,61 @@ class _DashPageState extends State<ResourcePlayer> {
             child: BetterPlayerMultipleGestureDetector(
                 onDoubleTap: _onPlayPause,
                 child: BetterPlayer(controller: _betterPlayerController)),
+            // onLongPress: () async {
+            //   dynamic currentPlayingSubResource =
+            //       appState.currentPlayingSubResource;
+            //   print(appState);
+            //   final String? title;
+            //   final String? author;
+            //   final String? imageUrl;
+            //   final String? cacheKey;
+            //   final String? resourceId;
+
+            //   if (_resourceType == 1) {
+            //     title = currentPlayingSubResource.partName;
+            //     author = _detailResource.upperName;
+            //     imageUrl = _detailResource.cover;
+            //     cacheKey =
+            //         '${currentPlayingSubResource.bvid}:${currentPlayingSubResource.cid}';
+            //     resourceId =
+            //         '${currentPlayingSubResource.bvid}:${currentPlayingSubResource.cid}';
+            //   } else {
+            //     title = currentPlayingSubResource.title;
+            //     author = currentPlayingSubResource.upperName;
+            //     imageUrl = currentPlayingSubResource.cover;
+            //     cacheKey =
+            //         '${currentPlayingSubResource.bvid}:${currentPlayingSubResource.cid}';
+            //     resourceId =
+            //         '${currentPlayingSubResource.bvid}:${currentPlayingSubResource.cid}';
+            //   }
+            //   var links = await appState.fetchSongsLink([resourceId], 3);
+            //   final url = 'http://${API.host}${links.mpd}';
+            //   BetterPlayerDataSource dataSource = BetterPlayerDataSource(
+            //     BetterPlayerDataSourceType.network,
+            //     url,
+            //     useAsmsSubtitles: true,
+            //     useAsmsTracks: true,
+            //     useAsmsAudioTracks: false,
+            //     headers: _header,
+            //     videoFormat: BetterPlayerVideoFormat.dash,
+            //     cacheConfiguration: BetterPlayerCacheConfiguration(
+            //       useCache: true,
+            //       key: cacheKey,
+            //     ),
+            //     notificationConfiguration:
+            //         BetterPlayerNotificationConfiguration(
+            //       showNotification: true,
+            //       title: title,
+            //       author: author,
+            //       imageUrl: imageUrl,
+            //       activityName:
+            //           'com.ryanheise.audioservice.AudioServiceActivity',
+            //     ),
+            //   );
+            //   _betterPlayerController.setupDataSource(dataSource);
+            //   // _betterPlayerController.stop
+            //   print(_betterPlayerController);
+            // },
           ),
         ),
       ),
