@@ -2,11 +2,13 @@
 import 'dart:async';
 
 import 'package:better_player/better_player.dart';
+import 'package:better_player/src/controls/better_player_clickable_widget.dart';
 import 'package:better_player/src/video_player/video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:playlistmaster/entities/bilibili/bili_detail_resource.dart';
 import 'package:playlistmaster/entities/bilibili/bili_subpage_of_resource.dart';
+import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:provider/provider.dart';
 
 import '../states/app_state.dart';
@@ -24,6 +26,8 @@ class ResourcePlayer extends StatefulWidget {
 
 class _DashPageState extends State<ResourcePlayer> {
   GlobalKey _betterPlayerKey = GlobalKey();
+
+  MyAppState? _appState;
 
   late BetterPlayerController _betterPlayerController;
 
@@ -48,6 +52,20 @@ class _DashPageState extends State<ResourcePlayer> {
 
   VideoPlayerValue? _latestValue;
 
+  List<String> _playingModeNames = [
+    'Current once',
+    'Current repeat',
+    'Playlists once',
+    'Playlists repeat',
+  ];
+
+  List<IconData> _playingModeIcons = [
+    Icons.repeat_one_rounded,
+    Icons.repeat_one_on_rounded,
+    Icons.repeat_rounded,
+    Icons.repeat_on_rounded,
+  ];
+
   VideoPlayerValue? get latestValue => _latestValue;
 
   @override
@@ -68,6 +86,7 @@ class _DashPageState extends State<ResourcePlayer> {
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
+    _appState = state;
     _detailResource = widget.detailResource;
     BetterPlayerConfiguration betterPlayerConfiguration =
         BetterPlayerConfiguration(
@@ -131,6 +150,12 @@ class _DashPageState extends State<ResourcePlayer> {
             onControlsVisibilityChanged: onPlayerVisibilityChanged,
           );
         },
+        overflowMenuCustomItems: [
+          BetterPlayerOverflowMenuItem(Icons.repeat_rounded, 'Playing mode',
+              () {
+            _buildPlayingModeList();
+          }),
+        ],
         controlBarColor: Colors.transparent,
         loadingWidget: Lottie.asset(
           'assets/images/video_buffering.json',
@@ -244,6 +269,7 @@ class _DashPageState extends State<ResourcePlayer> {
   @override
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
+    _appState = appState;
     _isLocked = appState.isResourcePlayerLocked;
     return Scaffold(
       body: Center(
@@ -301,5 +327,105 @@ class _DashPageState extends State<ResourcePlayer> {
         _betterPlayerController.cancelNextVideoTimer();
       }
     }
+  }
+
+  // TODO
+  void setPlayingMode(int playingMode) {
+    setState(() {
+      _appState!.biliResourcePlayingMode = playingMode;
+      MyToast.showToast(
+          'Change to playing mode: ${_playingModeNames[playingMode]}');
+      if (playingMode == 0) {
+        _betterPlayerController.setLooping(false);
+      } else if (playingMode == 1) {
+        _betterPlayerController.setLooping(true);
+      } else if (playingMode == 2) {
+        if (_resourceType == 0) {
+          _betterPlayerController.setLooping(false);
+        } else {}
+      } else if (playingMode == 3) {
+        if (_resourceType == 0) {
+          _betterPlayerController.setLooping(true);
+        } else {}
+      } else {
+        throw Exception('Invalid playing mode');
+      }
+    });
+  }
+
+  Widget _buildPlayingModeRow(int playingMode) {
+    final bool isSelected = playingMode == _appState!.biliResourcePlayingMode;
+    return BetterPlayerMaterialClickableWidget(
+      onTap: () {
+        Navigator.of(context).pop();
+        setPlayingMode(playingMode);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        child: Row(
+          children: [
+            SizedBox(width: isSelected ? 8 : 16),
+            Visibility(
+                visible: isSelected,
+                child: Icon(
+                  Icons.check_outlined,
+                  color: Colors.black,
+                )),
+            const SizedBox(width: 16),
+            Text(
+              _playingModeNames[playingMode],
+              style: _getOverflowMenuElementTextStyle(isSelected),
+            ),
+            const SizedBox(width: 16),
+            Icon(_playingModeIcons[playingMode]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  TextStyle _getOverflowMenuElementTextStyle(bool isSelected) {
+    return TextStyle(
+      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      color: isSelected ? Colors.black : Colors.black.withOpacity(0.7),
+    );
+  }
+
+  void _buildPlayingModeList() {
+    final List<Widget> children = [];
+    for (var index = 0; index < 4; index++) {
+      children.add(_buildPlayingModeRow(index));
+    }
+    _showMaterialBottomSheet(children);
+  }
+
+  void _showMaterialBottomSheet(List<Widget> children) {
+    showModalBottomSheet<void>(
+      backgroundColor: Colors.transparent,
+      context: context,
+      useRootNavigator:
+          _betterPlayerController.betterPlayerConfiguration.useRootNavigator,
+      builder: (context) {
+        return SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              decoration: BoxDecoration(
+                color: _betterPlayerController
+                    .betterPlayerControlsConfiguration.overflowModalColor,
+                borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24.0),
+                    topRight: Radius.circular(24.0)),
+              ),
+              child: Column(
+                children: children,
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }

@@ -242,8 +242,8 @@ class MyAppState extends ChangeNotifier {
 
   /// Bilibili video playing mode.
   /// 0: stop when current episode or sub resource finishes,
-  /// 1: stop when all episodes or sub resource of current detail resource finishes,
-  /// 2: repeat current episode or sub resource,
+  /// 1: repeat current episode or sub resource,
+  /// 2: stop when all episodes or sub resource of current detail resource finishes,
   /// 3: repeat current detail resource's list.
   int _biliResourcePlayingMode = 0;
 
