@@ -19,109 +19,92 @@ class LibraryItem extends StatelessWidget {
     var isUsingMockData = appState.isUsingMockData;
     return Material(
       color: Colors.transparent,
-      child: GestureDetector(
-        onTap: () {},
-        child: Stack(
-          children: [
-            SizedBox(
-              height: 60.0,
-              width: double.infinity,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(13.0, 7.0, 0.0, 7.0),
-                child: Row(
-                  children: <Widget>[
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(5.0),
-                      child: SizedBox(
-                        width: 46.0,
-                        height: 46.0,
-                        child: isUsingMockData
-                            ? Image.asset(library.cover)
-                            : CachedNetworkImage(
-                                imageUrl: library.cover.isNotEmpty
-                                    ? library.cover
-                                    : MyAppState.defaultLibraryCover,
-                                progressIndicatorBuilder:
-                                    (context, url, downloadProgress) =>
-                                        CircularProgressIndicator(
-                                            value: downloadProgress.progress),
-                                errorWidget: (context, url, error) =>
-                                    Icon(MdiIcons.debian),
-                              ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 7.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Flexible(
-                              child: Text(
-                                library.name,
-                                style: textTheme.labelSmall!
-                                    .copyWith(fontSize: 13.0),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            Text(
-                              '${library.itemCount} songs',
-                              style: textTheme.labelSmall!
-                                  .copyWith(fontSize: 11.0),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (_) => LibraryItemMenuPopup(
-                              library: library,
-                              isInDetailLibraryPage: false,
-                            ),
-                          );
-                        },
-                        color: colorScheme.tertiary,
-                        tooltip: 'Edit library',
-                        icon: Icon(
-                          Icons.more_vert_rounded,
-                        )),
-                  ],
-                ),
-              ),
-            ),
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  appState.rawOpenedLibrary = library;
-                  appState.openedLibrary = library;
-                  appState.rawSongsInLibrary = [];
-                  if (appState.currentPlatform != 3) {
-                    Navigator.pushNamed(
-                      context,
-                      '/detail_library_page',
-                    );
-                  } else {
-                    Navigator.pushNamed(
-                      context,
-                      '/detail_favlist_page',
-                    );
-                  }
-                },
-                child: Container(
-                  height: 60.0,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.rectangle,
+      child: InkWell(
+        onTap: () {
+          appState.rawOpenedLibrary = library;
+          appState.openedLibrary = library;
+          appState.rawSongsInLibrary = [];
+          if (appState.currentPlatform != 3) {
+            Navigator.pushNamed(
+              context,
+              '/detail_library_page',
+            );
+          } else {
+            Navigator.pushNamed(
+              context,
+              '/detail_favlist_page',
+            );
+          }
+        },
+        child: SizedBox(
+          height: 60.0,
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(13.0, 7.0, 0.0, 7.0),
+            child: Row(
+              children: <Widget>[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(5.0),
+                  child: SizedBox(
+                    width: 46.0,
+                    height: 46.0,
+                    child: isUsingMockData
+                        ? Image.asset(library.cover)
+                        : CachedNetworkImage(
+                            imageUrl: library.cover.isNotEmpty
+                                ? library.cover
+                                : MyAppState.defaultLibraryCover,
+                            progressIndicatorBuilder:
+                                (context, url, downloadProgress) =>
+                                    CircularProgressIndicator(
+                                        value: downloadProgress.progress),
+                            errorWidget: (context, url, error) =>
+                                Icon(MdiIcons.debian),
+                          ),
                   ),
                 ),
-              ),
-            )
-          ],
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 7.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Flexible(
+                          child: Text(
+                            library.name,
+                            style:
+                                textTheme.labelSmall!.copyWith(fontSize: 13.0),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          '${library.itemCount} songs',
+                          style: textTheme.labelSmall!.copyWith(fontSize: 11.0),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                IconButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => LibraryItemMenuPopup(
+                          library: library,
+                          isInDetailLibraryPage: false,
+                        ),
+                      );
+                    },
+                    color: colorScheme.tertiary,
+                    tooltip: 'Edit library',
+                    icon: Icon(
+                      Icons.more_vert_rounded,
+                    )),
+              ],
+            ),
+          ),
         ),
       ),
     );

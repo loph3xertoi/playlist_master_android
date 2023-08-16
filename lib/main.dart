@@ -23,8 +23,9 @@ import 'utils/theme_manager.dart';
 Future<void> main() async {
   await JustAudioBackground.init(
     androidNotificationChannelId: 'com.daw.playlistmaster.channel',
-    androidNotificationChannelName: 'Audio playback',
+    // androidNotificationChannelName: 'Audio playback',
     androidNotificationOngoing: true,
+    androidShowNotificationBadge: true,
   );
   runApp(ChangeNotifierProvider<ThemeNotifier>(
     create: (_) => ThemeNotifier(),

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 
-import '../entities/bilibili/bili_resource.dart';
 import '../states/app_state.dart';
 import 'queue_popup.dart';
 
@@ -25,9 +24,7 @@ class _BottomPlayerState extends State<BottomPlayer>
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
-    var currentPlatform = state.currentPlatform;
-    _isPlaying =
-        currentPlatform == 3 ? state.isResourcePlaying : state.isSongPlaying;
+    _isPlaying = state.isSongPlaying;
     _controller = AnimationController(
       vsync: this,
       duration: Duration(seconds: 20),
@@ -54,50 +51,19 @@ class _BottomPlayerState extends State<BottomPlayer>
     var currentSong = appState.currentSong;
     var currentResource = appState.currentResource;
     var isSongPlaying = appState.isSongPlaying;
-    var isResourcePlaying = appState.isResourcePlaying;
-    _isPlaying = currentPlatform == 3 ? isResourcePlaying : isSongPlaying;
+    _isPlaying = isSongPlaying;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_isPlaying) {
         _controller.repeat();
       } else {
         _controller.stop();
       }
-      // if (currentPlatform == 3) {
-      //   if (isResourcePlaying == true && _isPlaying == false) {
-      //     _controller.repeat();
-      //     _isPlaying = true;
-      //   } else if (isResourcePlaying == false && _isPlaying == true) {
-      //     _controller.stop();
-      //     setState(() {
-      //       _isPlaying = false;
-      //     });
-      //   }
-      // } else {
-      //   if (isSongPlaying == true && _isPlaying == false) {
-      //     _controller.repeat();
-      //     setState(() {
-      //       _isPlaying = true;
-      //     });
-      //   } else if (isSongPlaying == false && _isPlaying == true) {
-      //     _controller.stop();
-      //     setState(() {
-      //       _isPlaying = false;
-      //     });
-      //   }
-      // }
     });
     return Material(
       child: InkWell(
         onTap: () {
-          // appState.isSongsPlayerPageOpened = true;
-          if (currentPlatform == 3) {
-            // appState.canResourcesPlayerPagePop = true;
-            Navigator.pushNamed(context, '/detail_resource_page');
-            // Navigator.pushNamed(context, '/resources_player_page');
-          } else {
-            appState.canSongsPlayerPagePop = true;
-            Navigator.pushNamed(context, '/songs_player_page');
-          }
+          appState.canSongsPlayerPagePop = true;
+          Navigator.pushNamed(context, '/songs_player_page');
         },
         child: Ink(
           height: 54.0,
@@ -132,19 +98,13 @@ class _BottomPlayerState extends State<BottomPlayer>
                       borderRadius: BorderRadius.all(Radius.circular(50.0)),
                       child: isUsingMockData
                           ? Image.asset(
-                              currentPlatform == 3
-                                  ? currentResource!.cover
-                                  : currentSong!.cover,
+                              currentSong!.cover,
                               fit: BoxFit.fill,
                             )
                           : CachedNetworkImage(
-                              imageUrl: currentPlatform == 3
-                                  ? currentResource?.cover.isNotEmpty ?? false
-                                      ? currentResource!.cover
-                                      : MyAppState.defaultCoverImage
-                                  : currentSong?.cover.isNotEmpty ?? false
-                                      ? currentSong!.cover
-                                      : MyAppState.defaultCoverImage,
+                              imageUrl: currentSong?.cover.isNotEmpty ?? false
+                                  ? currentSong!.cover
+                                  : MyAppState.defaultCoverImage,
                               progressIndicatorBuilder:
                                   (context, url, downloadProgress) =>
                                       CircularProgressIndicator(
@@ -165,9 +125,7 @@ class _BottomPlayerState extends State<BottomPlayer>
                         Flexible(
                           flex: 3,
                           child: Text(
-                            currentPlatform == 3
-                                ? '${currentResource?.title}'
-                                : '${currentSong?.name}',
+                            '${currentSong?.name}',
                             style: textTheme.labelMedium!.copyWith(
                               fontSize: 15.0,
                               color: colorScheme.onSecondary,
@@ -182,9 +140,7 @@ class _BottomPlayerState extends State<BottomPlayer>
                             child: Padding(
                               padding: const EdgeInsets.only(top: 5.0),
                               child: Text(
-                                currentPlatform == 3
-                                    ? ' · ${currentResource?.upperName}'
-                                    : ' · ${currentSong?.singers.map((e) => e.name).join(', ')}',
+                                ' · ${currentSong?.singers.map((e) => e.name).join(', ')}',
                                 style: textTheme.labelMedium!.copyWith(
                                   fontSize: 11.0,
                                   color: colorScheme.onSecondary,
@@ -206,26 +162,14 @@ class _BottomPlayerState extends State<BottomPlayer>
                       : Icon(Icons.play_circle_outline_rounded),
                   onPressed: () {
                     setState(() {
-                      if (currentPlatform == 3) {
-                        if (!_isPlaying) {
-                          _controller.repeat();
-                          appState.resourcesPlayer!.play();
-                          appState.isResourcePlaying = true;
-                        } else {
-                          _controller.stop();
-                          appState.resourcesPlayer!.pause();
-                          appState.isResourcePlaying = false;
-                        }
+                      if (!_isPlaying) {
+                        _controller.repeat();
+                        appState.songsPlayer!.play();
+                        appState.isSongPlaying = true;
                       } else {
-                        if (!_isPlaying) {
-                          _controller.repeat();
-                          appState.songsPlayer!.play();
-                          appState.isSongPlaying = true;
-                        } else {
-                          _controller.stop();
-                          appState.songsPlayer!.pause();
-                          appState.isSongPlaying = false;
-                        }
+                        _controller.stop();
+                        appState.songsPlayer!.pause();
+                        appState.isSongPlaying = false;
                       }
                     });
                   },

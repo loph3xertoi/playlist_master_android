@@ -97,9 +97,13 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
     MyAppState appState = context.watch<MyAppState>();
     _currentPlatform = appState.currentPlatform;
     _isUsingMockData = appState.isUsingMockData;
-    return Stack(
-      children: [
-        Padding(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          widget.onTap();
+        },
+        child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: SizedBox(
             height: 80.0,
@@ -375,21 +379,7 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
             ),
           ),
         ),
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              widget.onTap();
-            },
-            child: Container(
-              height: 104.0,
-              decoration: BoxDecoration(
-                shape: BoxShape.rectangle,
-              ),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 

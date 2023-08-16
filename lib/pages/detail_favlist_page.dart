@@ -781,9 +781,6 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                   }),
                             ),
                           ),
-                          appState.currentResource == null
-                              ? Container()
-                              : BottomPlayer(),
                         ],
                       ),
                     ),
