@@ -33,7 +33,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
   late Future<PagedDataDTO<BasicLibrary>?> _libraries;
 
   // All libraries fetched.
-  List<BasicLibrary>? _localLibraries;
+  List<BasicLibrary> _localLibraries = [];
 
   // Selected libraries.
   List<int> _selectedIndex = [];

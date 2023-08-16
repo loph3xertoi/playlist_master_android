@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:humanize_big_int/humanize_big_int.dart';
+import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +18,7 @@ import '../utils/theme_manager.dart';
 import '../widgets/bili_resource_item.dart';
 import '../widgets/bottom_player.dart';
 import '../widgets/library_item_menu_popup.dart';
+import '../widgets/multi_resources_select_popup.dart';
 import '../widgets/multi_songs_select_popup.dart';
 import '../widgets/my_searchbar.dart';
 import '../widgets/my_selectable_text.dart';
@@ -182,65 +184,14 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
   }
 
   void onResourceTap(int index, MyAppState appState) async {
-    // var resourcesPlayer = appState.resourcesPlayer;
-
-    // if (resourcesPlayer == null) {
-    //   appState.resourcesQueue =
-    //       _inSearchMode ? _searchedResources : _originalResources;
-    //   try {
-    //     await appState.initResourcesPlayer();
-    //   } catch (e) {
-    //     MyToast.showToast('Exception: $e');
-    //     MyLogger.logger.e('Exception: $e');
-    //     appState.disposeResourcesPlayer();
-    //     return;
-    //   }
-    //   appState.canResourcesPlayerPagePop = true;
-    //   appState.currentPlayingResourceInQueue = index;
-    //   appState.currentResource = appState.resourcesQueue![index];
-    //   appState.prevResource = appState.currentResource;
-    //   appState.currentDetailResource = null;
-    //   appState.isFirstLoadResourcesPlayer = true;
-    //   appState.resourcesPlayer!.play();
-    // } else if ((!_inSearchMode &&
-    //         appState.currentResource == _originalResources[index]) ||
-    //     (_inSearchMode &&
-    //         appState.currentResource == _searchedResources[index])) {
-    //   if (!resourcesPlayer.playerState.playing) {
-    //     resourcesPlayer.play();
-    //   }
-    // } else {
-    //   appState.resourcesQueue =
-    //       _inSearchMode ? _searchedResources : _originalResources;
-    //   appState.canResourcesPlayerPagePop = true;
-    //   appState.resourcesPlayer!.stop();
-    //   appState.resourcesPlayer!.dispose();
-    //   appState.resourcesPlayer = null;
-    //   appState.resourcesAudioSource!.clear();
-    //   try {
-    //     await appState.initResourcesPlayer();
-    //   } catch (e) {
-    //     MyToast.showToast('Exception: $e');
-    //     MyLogger.logger.e('Exception: $e');
-    //     appState.disposeResourcesPlayer();
-    //     return;
-    //   }
-    //   appState.currentPlayingResourceInQueue = index;
-    //   appState.currentResource = appState.resourcesQueue![index];
-    //   appState.currentDetailResource = null;
-    //   appState.prevResource = appState.currentResource;
-    //   appState.isFirstLoadResourcesPlayer = true;
-    //   appState.resourcesPlayer!.play();
-    // }
-    // appState.isResourcesPlayerPageOpened = true;
     if (context.mounted) {
       if (_inSearchMode) {
         appState.currentResource = _searchedResources[index];
       } else {
         appState.currentResource = _originalResources[index];
+        appState.biliResourcePlayingMode = 2;
       }
       Navigator.pushNamed(context, '/detail_resource_page');
-      // Navigator.pushNamed(context, '/resources_player_page');
     }
   }
 
@@ -253,545 +204,550 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
     _appState = appState;
     _isUsingMockData = appState.isUsingMockData;
     _currentPlatform = appState.currentPlatform;
-    _currentBiliFavList = appState.rawOpenedLibrary!;
-    return Consumer<ThemeNotifier>(
-      builder: (context, theme, _) => Material(
-        child: Scaffold(
-          key: _scaffoldKey,
-          body: SafeArea(
-            child: ChangeNotifierProvider(
-              create: (context) => MySearchState(),
-              child: Column(
-                children: [
-                  Container(
-                    color: colorScheme.primary,
-                    child: MySearchBar(
-                      myScaffoldKey: _scaffoldKey,
-                      notInHomepage: true,
-                      inDetailLibraryPage: true,
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: theme.detailLibraryPageBg!,
-                          stops: [0.0, 0.33, 0.67, 1.0],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
+    if (appState.rawOpenedLibrary == null) {
+      return Container();
+    } else {
+      _currentBiliFavList = appState.rawOpenedLibrary!;
+      return Consumer<ThemeNotifier>(
+        builder: (context, theme, _) => Material(
+          child: Scaffold(
+            key: _scaffoldKey,
+            body: SafeArea(
+              child: ChangeNotifierProvider(
+                create: (context) => MySearchState(),
+                child: Column(
+                  children: [
+                    Container(
+                      color: colorScheme.primary,
+                      child: MySearchBar(
+                        myScaffoldKey: _scaffoldKey,
+                        notInHomepage: true,
+                        inDetailLibraryPage: true,
                       ),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              margin:
-                                  EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
-                              child: FutureBuilder(
-                                  future: _firstFutureDetailFavList,
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return Center(
-                                        child: CircularProgressIndicator(),
-                                      );
-                                    } else if (snapshot.hasError ||
-                                        snapshot.data == null) {
-                                      return Center(
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            MySelectableText(
-                                              snapshot.hasError
-                                                  ? '${snapshot.error}'
-                                                  : appState.errorMsg,
-                                              style: textTheme.labelMedium!
-                                                  .copyWith(
-                                                color: colorScheme.onPrimary,
-                                              ),
-                                            ),
-                                            TextButton.icon(
-                                              style: ButtonStyle(
-                                                shadowColor:
-                                                    MaterialStateProperty.all(
-                                                  colorScheme.primary,
-                                                ),
-                                                overlayColor:
-                                                    MaterialStateProperty.all(
-                                                  Colors.grey,
-                                                ),
-                                              ),
-                                              icon: Icon(
-                                                MdiIcons.webRefresh,
-                                                color: colorScheme.onPrimary,
-                                              ),
-                                              label: Text(
-                                                'Retry',
+                    ),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: theme.detailLibraryPageBg!,
+                            stops: [0.0, 0.33, 0.67, 1.0],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                margin:
+                                    EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
+                                child: FutureBuilder(
+                                    future: _firstFutureDetailFavList,
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      } else if (snapshot.hasError ||
+                                          snapshot.data == null) {
+                                        return Center(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              MySelectableText(
+                                                snapshot.hasError
+                                                    ? '${snapshot.error}'
+                                                    : appState.errorMsg,
                                                 style: textTheme.labelMedium!
                                                     .copyWith(
                                                   color: colorScheme.onPrimary,
                                                 ),
                                               ),
-                                              onPressed: () {
-                                                setState(() {
-                                                  _firstFutureDetailFavList =
-                                                      appState.fetchDetailLibrary(
-                                                          _currentBiliFavList,
-                                                          _currentPlatform,
-                                                          pn: '1');
-                                                  if (_inSearchMode) {
-                                                    _currentPageNumberInSearchedResources =
-                                                        1;
-                                                    _searchedResources = [];
-                                                  } else {
-                                                    _currentPageNumberInOriginalResources =
-                                                        1;
-                                                    _originalResources = [];
-                                                  }
-                                                });
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    } else {
-                                      BiliDetailFavList? detailFavList;
-                                      if (_isUsingMockData) {
-                                        // detailFavList = snapshot.data == null
-                                        //     ? null
-                                        //     : snapshot.data
-                                        //         as QQMusicDetailPlaylist;
-                                        throw UnimplementedError(
-                                            'Not yet implement mock data in bilibili');
+                                              TextButton.icon(
+                                                style: ButtonStyle(
+                                                  shadowColor:
+                                                      MaterialStateProperty.all(
+                                                    colorScheme.primary,
+                                                  ),
+                                                  overlayColor:
+                                                      MaterialStateProperty.all(
+                                                    Colors.grey,
+                                                  ),
+                                                ),
+                                                icon: Icon(
+                                                  MdiIcons.webRefresh,
+                                                  color: colorScheme.onPrimary,
+                                                ),
+                                                label: Text(
+                                                  'Retry',
+                                                  style: textTheme.labelMedium!
+                                                      .copyWith(
+                                                    color:
+                                                        colorScheme.onPrimary,
+                                                  ),
+                                                ),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    _firstFutureDetailFavList =
+                                                        appState.fetchDetailLibrary(
+                                                            _currentBiliFavList,
+                                                            _currentPlatform,
+                                                            pn: '1');
+                                                    if (_inSearchMode) {
+                                                      _currentPageNumberInSearchedResources =
+                                                          1;
+                                                      _searchedResources = [];
+                                                    } else {
+                                                      _currentPageNumberInOriginalResources =
+                                                          1;
+                                                      _originalResources = [];
+                                                    }
+                                                  });
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        );
                                       } else {
-                                        detailFavList = snapshot.data == null
-                                            ? null
-                                            : snapshot.data
-                                                as BiliDetailFavList;
-                                        List<BiliResource>? libraries =
-                                            detailFavList!.resources;
-                                        if (!_inSearchMode &&
-                                            _currentPageNumberInOriginalResources ==
-                                                1 &&
-                                            _originalResources.isEmpty) {
-                                          _hasMoreOriginalResources =
-                                              detailFavList.hasMore;
-                                          _originalResources.addAll(libraries);
+                                        BiliDetailFavList? detailFavList;
+                                        if (_isUsingMockData) {
+                                          // detailFavList = snapshot.data == null
+                                          //     ? null
+                                          //     : snapshot.data
+                                          //         as QQMusicDetailPlaylist;
+                                          throw UnimplementedError(
+                                              'Not yet implement mock data in bilibili');
+                                        } else {
+                                          detailFavList = snapshot.data == null
+                                              ? null
+                                              : snapshot.data
+                                                  as BiliDetailFavList;
+                                          List<BiliResource>? libraries =
+                                              detailFavList!.resources;
+                                          if (!_inSearchMode &&
+                                              _currentPageNumberInOriginalResources ==
+                                                  1 &&
+                                              _originalResources.isEmpty) {
+                                            _hasMoreOriginalResources =
+                                                detailFavList.hasMore;
+                                            _originalResources
+                                                .addAll(libraries);
+                                          }
+                                          // TODO: handle search mode.
+                                          if (_inSearchMode &&
+                                              _currentPageNumberInSearchedResources ==
+                                                  1 &&
+                                              _searchedResources.isEmpty) {
+                                            _hasMoreSearchedResources =
+                                                detailFavList.hasMore;
+                                            _searchedResources
+                                                .addAll(libraries);
+                                          }
                                         }
-                                        // TODO: handle search mode.
-                                        if (_inSearchMode &&
-                                            _currentPageNumberInSearchedResources ==
-                                                1 &&
-                                            _searchedResources.isEmpty) {
-                                          _hasMoreSearchedResources =
-                                              detailFavList.hasMore;
-                                          _searchedResources.addAll(libraries);
-                                        }
-                                      }
-                                      WidgetsBinding.instance
-                                          .addPostFrameCallback((_) {
-                                        if (_changeRawQueue) {
-                                          appState.rawResourcesInFavList =
-                                              _originalResources;
-                                          appState.searchedResources =
-                                              _searchedResources;
-                                          _changeRawQueue = false;
-                                        }
-                                      });
-                                      return Container(
-                                        decoration: BoxDecoration(
-                                          color: colorScheme.primary,
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                        ),
-                                        child: Column(
-                                          children: [
-                                            SizedBox(
-                                              height: 130.0,
-                                              width: MediaQuery.of(context)
-                                                  .size
-                                                  .width,
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(15.0),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.max,
-                                                  children: [
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                        right: 12.0,
-                                                      ),
-                                                      child: Container(
-                                                        // width: 100.0,
-                                                        height: 100.0,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                            4.0,
-                                                          ),
+                                        WidgetsBinding.instance
+                                            .addPostFrameCallback((_) {
+                                          if (_changeRawQueue) {
+                                            appState.rawResourcesInFavList =
+                                                _originalResources;
+                                            appState.searchedResources =
+                                                _searchedResources;
+                                            _changeRawQueue = false;
+                                          }
+                                        });
+                                        return Container(
+                                          decoration: BoxDecoration(
+                                            color: colorScheme.primary,
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 130.0,
+                                                width: MediaQuery.of(context)
+                                                    .size
+                                                    .width,
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      15.0),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.max,
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                          right: 12.0,
                                                         ),
-                                                        child: GestureDetector(
-                                                          onTap: () {
-                                                            print(appState);
-                                                            print(
-                                                                detailFavList);
-                                                            print(
-                                                                _searchedResources);
-                                                            setState(() {});
-                                                          },
-                                                          child: ClipRRect(
+                                                        child: Container(
+                                                          // width: 100.0,
+                                                          height: 100.0,
+                                                          decoration:
+                                                              BoxDecoration(
                                                             borderRadius:
                                                                 BorderRadius
                                                                     .circular(
-                                                                        4.0),
-                                                            child: _isUsingMockData
-                                                                ? Image.asset(
-                                                                    detailFavList
-                                                                        .cover,
-                                                                    fit: BoxFit
-                                                                        .cover,
-                                                                  )
-                                                                : CachedNetworkImage(
-                                                                    imageUrl: detailFavList
-                                                                            .cover
-                                                                            .isNotEmpty
-                                                                        ? detailFavList
-                                                                            .cover
-                                                                        : MyAppState
-                                                                            .defaultCoverImage,
-                                                                    progressIndicatorBuilder: (context,
-                                                                            url,
-                                                                            downloadProgress) =>
-                                                                        CircularProgressIndicator(
-                                                                            value:
-                                                                                downloadProgress.progress),
-                                                                    errorWidget: (context,
-                                                                            url,
-                                                                            error) =>
-                                                                        Icon(MdiIcons
-                                                                            .debian),
-                                                                    fit: BoxFit
-                                                                        .cover,
-                                                                  ),
+                                                              4.0,
+                                                            ),
+                                                          ),
+                                                          child:
+                                                              GestureDetector(
+                                                            onTap: () {
+                                                              print(appState);
+                                                              print(
+                                                                  detailFavList);
+                                                              print(
+                                                                  _searchedResources);
+                                                              setState(() {});
+                                                            },
+                                                            child: ClipRRect(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          4.0),
+                                                              child: _isUsingMockData
+                                                                  ? Image.asset(
+                                                                      detailFavList
+                                                                          .cover,
+                                                                      fit: BoxFit
+                                                                          .cover,
+                                                                    )
+                                                                  : CachedNetworkImage(
+                                                                      imageUrl: detailFavList
+                                                                              .cover
+                                                                              .isNotEmpty
+                                                                          ? detailFavList
+                                                                              .cover
+                                                                          : MyAppState
+                                                                              .defaultCoverImage,
+                                                                      progressIndicatorBuilder: (context,
+                                                                              url,
+                                                                              downloadProgress) =>
+                                                                          CircularProgressIndicator(
+                                                                              value: downloadProgress.progress),
+                                                                      errorWidget: (context,
+                                                                              url,
+                                                                              error) =>
+                                                                          Icon(MdiIcons
+                                                                              .debian),
+                                                                      fit: BoxFit
+                                                                          .cover,
+                                                                    ),
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
-                                                    ),
-                                                    Expanded(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          MySelectableText(
-                                                            detailFavList.name,
-                                                            style: textTheme
-                                                                .labelLarge!
-                                                                .copyWith(
-                                                              fontSize: 20.0,
+                                                      Expanded(
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Text(
+                                                              detailFavList
+                                                                  .name,
+                                                              style: textTheme
+                                                                  .labelMedium!
+                                                                  .copyWith(
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                              maxLines: 2,
+                                                            ),
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  '${detailFavList.itemCount} resources',
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .start,
+                                                                  style: textTheme
+                                                                      .titleSmall,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                ),
+                                                                SizedBox(
+                                                                  width: 10.0,
+                                                                  child: Text(
+                                                                    '|',
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .center,
+                                                                    style:
+                                                                        TextStyle(
+                                                                      color: colorScheme
+                                                                          .onSecondary,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                Text(
+                                                                  '${humanizeInt(detailFavList.viewCount)} views',
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .start,
+                                                                  style: textTheme
+                                                                      .titleSmall,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            detailFavList.intro
+                                                                    .isEmpty
+                                                                ? Container()
+                                                                : Text(
+                                                                    'intro: ${detailFavList.intro}',
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .start,
+                                                                    style: textTheme
+                                                                        .titleSmall,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                  ),
+                                                            Text(
+                                                              'UP: ${detailFavList.upperName}',
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .start,
+                                                              style: textTheme
+                                                                  .titleSmall,
                                                               overflow:
                                                                   TextOverflow
                                                                       .ellipsis,
                                                             ),
-                                                          ),
-                                                          Row(
-                                                            children: [
-                                                              Text(
-                                                                '${detailFavList.itemCount} resources',
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .start,
-                                                                style: textTheme
-                                                                    .titleSmall,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                              ),
-                                                              SizedBox(
-                                                                width: 10.0,
-                                                                child: Text(
-                                                                  '|',
-                                                                  textAlign:
-                                                                      TextAlign
-                                                                          .center,
-                                                                  style:
-                                                                      TextStyle(
-                                                                    color: colorScheme
-                                                                        .onSecondary,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              Text(
-                                                                '${humanizeInt(detailFavList.viewCount)} views',
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .start,
-                                                                style: textTheme
-                                                                    .titleSmall,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          Text(
-                                                            'type: ${detailFavList.type}',
-                                                            textAlign:
-                                                                TextAlign.start,
-                                                            style: textTheme
-                                                                .titleSmall,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                          ),
-                                                          Text(
-                                                            'upper: ${detailFavList.upperName}',
-                                                            textAlign:
-                                                                TextAlign.start,
-                                                            style: textTheme
-                                                                .titleSmall,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                          ),
-                                                          Expanded(
-                                                            child: Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                          .only(
-                                                                      top:
-                                                                          12.0),
-                                                              child: Text(
-                                                                detailFavList
-                                                                    .intro,
-                                                                style: textTheme
-                                                                    .labelLarge!
-                                                                    .copyWith(
-                                                                        fontSize:
-                                                                            10.0),
-                                                                maxLines: 3,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                              ),
+                                                            Text(
+                                                              'Modified: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.fromMillisecondsSinceEpoch(detailFavList.modifiedTime * 1000))}',
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .start,
+                                                              style: textTheme
+                                                                  .titleSmall,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
                                                             ),
-                                                          ),
-                                                        ],
+                                                          ],
+                                                        ),
                                                       ),
-                                                    ),
-                                                  ],
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            Expanded(
-                                              child: detailFavList.itemCount !=
-                                                      0
-                                                  ? (_inSearchMode &&
-                                                              _searchedResources
-                                                                  .isNotEmpty) ||
-                                                          (!_inSearchMode &&
-                                                              _originalResources
-                                                                  .isNotEmpty)
-                                                      ? Column(
-                                                          children: [
-                                                            SizedBox(
-                                                              height: 40.0,
-                                                              child: Row(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .end,
-                                                                children: [
-                                                                  IconButton(
-                                                                    onPressed:
-                                                                        () {
-                                                                      onResourceTap(
-                                                                          0,
-                                                                          appState);
-                                                                    },
-                                                                    icon: Icon(
-                                                                      Icons
-                                                                          .playlist_play_rounded,
+                                              Expanded(
+                                                child: detailFavList
+                                                            .itemCount !=
+                                                        0
+                                                    ? (_inSearchMode &&
+                                                                _searchedResources
+                                                                    .isNotEmpty) ||
+                                                            (!_inSearchMode &&
+                                                                _originalResources
+                                                                    .isNotEmpty)
+                                                        ? Column(
+                                                            children: [
+                                                              SizedBox(
+                                                                height: 40.0,
+                                                                child: Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .end,
+                                                                  children: [
+                                                                    IconButton(
+                                                                      onPressed:
+                                                                          () {
+                                                                        onResourceTap(
+                                                                            0,
+                                                                            appState);
+                                                                      },
+                                                                      icon:
+                                                                          Icon(
+                                                                        Icons
+                                                                            .playlist_play_rounded,
+                                                                      ),
+                                                                      color: colorScheme
+                                                                          .tertiary,
+                                                                      tooltip:
+                                                                          'Play all',
                                                                     ),
-                                                                    color: colorScheme
-                                                                        .tertiary,
-                                                                    tooltip:
-                                                                        'Play all',
-                                                                  ),
-                                                                  IconButton(
-                                                                    onPressed:
-                                                                        () {
-                                                                      showDialog(
+                                                                    IconButton(
+                                                                      onPressed:
+                                                                          () {
+                                                                        showDialog(
+                                                                            context:
+                                                                                context,
+                                                                            builder: (_) =>
+                                                                                MultiResourcesSelectPopup());
+                                                                      },
+                                                                      icon:
+                                                                          Icon(
+                                                                        Icons
+                                                                            .checklist_rounded,
+                                                                      ),
+                                                                      color: colorScheme
+                                                                          .tertiary,
+                                                                      tooltip:
+                                                                          'Multi select',
+                                                                    ),
+                                                                    IconButton(
+                                                                      onPressed:
+                                                                          () {
+                                                                        showDialog(
                                                                           context:
                                                                               context,
                                                                           builder: (_) =>
-                                                                              MultiSongsSelectPopup());
-                                                                    },
-                                                                    icon: Icon(
-                                                                      Icons
-                                                                          .checklist_rounded,
+                                                                              LibraryItemMenuPopup(
+                                                                            library:
+                                                                                detailFavList!,
+                                                                            isInDetailLibraryPage:
+                                                                                true,
+                                                                          ),
+                                                                        );
+                                                                      },
+                                                                      icon:
+                                                                          Icon(
+                                                                        Icons
+                                                                            .more_vert_rounded,
+                                                                      ),
+                                                                      color: colorScheme
+                                                                          .tertiary,
+                                                                      tooltip:
+                                                                          'Edit favlists',
                                                                     ),
-                                                                    color: colorScheme
-                                                                        .tertiary,
-                                                                    tooltip:
-                                                                        'Multi select',
-                                                                  ),
-                                                                  IconButton(
-                                                                    onPressed:
-                                                                        () {
-                                                                      showDialog(
-                                                                        context:
-                                                                            context,
-                                                                        builder:
-                                                                            (_) =>
-                                                                                LibraryItemMenuPopup(
-                                                                          library:
-                                                                              detailFavList!,
-                                                                          isInDetailLibraryPage:
-                                                                              true,
-                                                                        ),
-                                                                      );
-                                                                    },
-                                                                    icon: Icon(
-                                                                      Icons
-                                                                          .more_vert_rounded,
-                                                                    ),
-                                                                    color: colorScheme
-                                                                        .tertiary,
-                                                                    tooltip:
-                                                                        'Edit library',
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            Expanded(
-                                                              child:
-                                                                  RefreshIndicator(
-                                                                color: Color(
-                                                                    0xFB6A9D),
-                                                                strokeWidth:
-                                                                    2.0,
-                                                                onRefresh:
-                                                                    () async {
-                                                                  setState(() {
-                                                                    _firstFutureDetailFavList = appState.fetchDetailLibrary(
-                                                                        _currentBiliFavList,
-                                                                        _currentPlatform,
-                                                                        pn: '1');
-                                                                    if (_inSearchMode) {
-                                                                      _currentPageNumberInSearchedResources =
-                                                                          1;
-                                                                      _searchedResources =
-                                                                          [];
-                                                                    } else {
-                                                                      _currentPageNumberInOriginalResources =
-                                                                          1;
-                                                                      _originalResources =
-                                                                          [];
-                                                                    }
-                                                                  });
-                                                                },
-                                                                child: ListView
-                                                                    .builder(
-                                                                  physics:
-                                                                      const AlwaysScrollableScrollPhysics(),
-                                                                  controller:
-                                                                      _scrollController,
-                                                                  itemCount: _isUsingMockData
-                                                                      ? min(detailFavList.itemCount, 10)
-                                                                      : _inSearchMode
-                                                                          ? _searchedResources.length
-                                                                          : _originalResources.length,
-                                                                  itemBuilder:
-                                                                      (context,
-                                                                          index) {
-                                                                    if (index <
-                                                                        (_inSearchMode
-                                                                            ? _searchedResources.length +
-                                                                                1
-                                                                            : _originalResources.length +
-                                                                                1)) {
-                                                                      return BiliResourceItem(
-                                                                        biliSourceFavListId:
-                                                                            (_currentBiliFavList as BiliFavList).id,
-                                                                        resource: _inSearchMode
-                                                                            ? _searchedResources[index]
-                                                                            : _originalResources[index],
-                                                                        isSelected:
-                                                                            false,
-                                                                        onTap:
-                                                                            () {
-                                                                          onResourceTap(
-                                                                              index,
-                                                                              appState);
-                                                                        },
-                                                                      );
-                                                                    } else {
-                                                                      return _buildLoadingIndicator(
-                                                                          colorScheme);
-                                                                    }
-                                                                  },
+                                                                  ],
                                                                 ),
                                                               ),
-                                                            )
-                                                          ],
-                                                        )
-                                                      : Center(
+                                                              Expanded(
+                                                                child:
+                                                                    RefreshIndicator(
+                                                                  color: Color(
+                                                                      0xFB6A9D),
+                                                                  strokeWidth:
+                                                                      2.0,
+                                                                  onRefresh:
+                                                                      () async {
+                                                                    setState(
+                                                                        () {
+                                                                      _firstFutureDetailFavList = appState.fetchDetailLibrary(
+                                                                          _currentBiliFavList,
+                                                                          _currentPlatform,
+                                                                          pn: '1');
+                                                                      if (_inSearchMode) {
+                                                                        _currentPageNumberInSearchedResources =
+                                                                            1;
+                                                                        _searchedResources =
+                                                                            [];
+                                                                      } else {
+                                                                        _currentPageNumberInOriginalResources =
+                                                                            1;
+                                                                        _originalResources =
+                                                                            [];
+                                                                      }
+                                                                    });
+                                                                  },
+                                                                  child: ListView
+                                                                      .builder(
+                                                                    physics:
+                                                                        const AlwaysScrollableScrollPhysics(),
+                                                                    controller:
+                                                                        _scrollController,
+                                                                    itemCount: _isUsingMockData
+                                                                        ? min(detailFavList.itemCount, 10)
+                                                                        : _inSearchMode
+                                                                            ? _searchedResources.length
+                                                                            : _originalResources.length,
+                                                                    itemBuilder:
+                                                                        (context,
+                                                                            index) {
+                                                                      if (index <
+                                                                          (_inSearchMode
+                                                                              ? _searchedResources.length + 1
+                                                                              : _originalResources.length + 1)) {
+                                                                        return BiliResourceItem(
+                                                                          biliSourceFavListId:
+                                                                              (_currentBiliFavList as BiliFavList).id,
+                                                                          resource: _inSearchMode
+                                                                              ? _searchedResources[index]
+                                                                              : _originalResources[index],
+                                                                          isSelected:
+                                                                              false,
+                                                                          onTap:
+                                                                              () {
+                                                                            onResourceTap(index,
+                                                                                appState);
+                                                                          },
+                                                                        );
+                                                                      } else {
+                                                                        return _buildLoadingIndicator(
+                                                                            colorScheme);
+                                                                      }
+                                                                    },
+                                                                  ),
+                                                                ),
+                                                              )
+                                                            ],
+                                                          )
+                                                        : Center(
+                                                            child: Text(
+                                                              'Not found',
+                                                              style: textTheme
+                                                                  .labelMedium,
+                                                            ),
+                                                          )
+                                                    : Center(
+                                                        child: TextButton(
+                                                          onPressed: () {
+                                                            MyToast.showToast(
+                                                                'To be implement');
+                                                          },
+                                                          style: ButtonStyle(
+                                                            shadowColor:
+                                                                MaterialStateProperty
+                                                                    .all(
+                                                              colorScheme
+                                                                  .primary,
+                                                            ),
+                                                            overlayColor:
+                                                                MaterialStateProperty
+                                                                    .all(
+                                                              Colors.grey,
+                                                            ),
+                                                          ),
                                                           child: Text(
-                                                            'Not found',
+                                                            'Add resources',
                                                             style: textTheme
                                                                 .labelMedium,
                                                           ),
-                                                        )
-                                                  : Center(
-                                                      child: TextButton(
-                                                        onPressed: () {
-                                                          MyToast.showToast(
-                                                              'To be implement');
-                                                        },
-                                                        style: ButtonStyle(
-                                                          shadowColor:
-                                                              MaterialStateProperty
-                                                                  .all(
-                                                            colorScheme.primary,
-                                                          ),
-                                                          overlayColor:
-                                                              MaterialStateProperty
-                                                                  .all(
-                                                            Colors.grey,
-                                                          ),
-                                                        ),
-                                                        child: Text(
-                                                          'Add resources',
-                                                          style: textTheme
-                                                              .labelMedium,
                                                         ),
                                                       ),
-                                                    ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }
-                                  }),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }
+                                    }),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   Widget _buildLoadingIndicator(ColorScheme colorScheme) {

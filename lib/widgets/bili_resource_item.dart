@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +47,7 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
     _isUsingMockData = state.isUsingMockData;
   }
 
-  void _addResourceToLibrary(BuildContext context, MyAppState appState) async {
+  void _addResourceToFavlist(BuildContext context, MyAppState appState) async {
     if (mounted) {
       List<Future<Result?>>? list =
           await showFlexibleBottomSheet<List<Future<Result?>>>(
@@ -79,8 +81,10 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
         List<Result?> results = await Future.wait<Result?>(list);
         for (Result? result in results) {
           if (result != null && result.success) {
-            appState.refreshLibraries!(appState, true);
-            appState.refreshDetailLibraryPage!(appState);
+            Timer(Duration(milliseconds: 1500), () {
+              appState.refreshDetailFavListPage!(appState);
+              appState.refreshLibraries!(appState, true);
+            });
             MyToast.showToast('Add resources successfully');
             break;
           }
@@ -104,7 +108,8 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
           widget.onTap();
         },
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.only(
+              left: 12.0, top: 12.0, right: 4.0, bottom: 12.0),
           child: SizedBox(
             height: 80.0,
             child: Row(
@@ -217,41 +222,40 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
                         ),
                         Expanded(
                           flex: 6,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Row(
                             children: [
-                              resource.upperName.isNotEmpty
-                                  ? Row(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                              left: 1.0, right: 5.0),
-                                          child: Image.asset(
-                                            'assets/images/up.png',
-                                            height: 12.0,
-                                          ),
-                                        ),
-                                        Text(
-                                          resource.upperName,
-                                          style: textTheme.labelSmall!.copyWith(
-                                            fontSize: 12.0,
-                                            color: colorScheme.onPrimary
-                                                .withOpacity(0.5),
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    )
-                                  : Container(),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  Expanded(
-                                    flex: 2,
-                                    child: Row(
+                              Flexible(
+                                flex: 5,
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    resource.upperName.isNotEmpty
+                                        ? Row(
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 1.0, right: 5.0),
+                                                child: Image.asset(
+                                                  'assets/images/up.png',
+                                                  height: 12.0,
+                                                ),
+                                              ),
+                                              Text(
+                                                resource.upperName,
+                                                style: textTheme.labelSmall!
+                                                    .copyWith(
+                                                  fontSize: 12.0,
+                                                  color: colorScheme.onPrimary
+                                                      .withOpacity(0.5),
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          )
+                                        : Container(),
+                                    Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
@@ -330,43 +334,43 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
                                         )
                                       ],
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        SizedBox(
-                                          height: 16.0,
-                                          width: 16.0,
-                                          child: IconButton(
-                                              padding: EdgeInsets.zero,
-                                              onPressed: () async {
-                                                var data = await showDialog(
-                                                  context: context,
-                                                  builder: (context) =>
-                                                      CreateResourceItemMenuDialog(
-                                                          resource:
-                                                              widget.resource),
-                                                );
-                                                if (data == 'Add to library' &&
-                                                    mounted) {
-                                                  _addResourceToLibrary(
-                                                      context, appState);
-                                                }
-                                              },
-                                              color: colorScheme.onPrimary
-                                                  .withOpacity(0.5),
-                                              tooltip: 'Edit resource',
-                                              icon: Icon(
-                                                Icons.more_vert_rounded,
-                                                size: 16.0,
-                                              )),
-                                        ),
-                                      ],
+                                  ],
+                                ),
+                              ),
+                              Flexible(
+                                flex: 2,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    SizedBox(
+                                      height: 30.0,
+                                      width: 30.0,
+                                      child: IconButton(
+                                          padding: EdgeInsets.zero,
+                                          onPressed: () async {
+                                            var data = await showDialog(
+                                              context: context,
+                                              builder: (context) =>
+                                                  CreateResourceItemMenuDialog(
+                                                      resource:
+                                                          widget.resource),
+                                            );
+                                            if (data == 'Add to favlist' &&
+                                                mounted) {
+                                              _addResourceToFavlist(
+                                                  context, appState);
+                                            }
+                                          },
+                                          color: colorScheme.onPrimary
+                                              .withOpacity(0.5),
+                                          tooltip: 'Edit resource',
+                                          icon: Icon(
+                                            Icons.more_vert_rounded,
+                                            size: 16.0,
+                                          )),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ],
                           ),

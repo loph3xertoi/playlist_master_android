@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../entities/bilibili/bili_resource.dart';
 import '../states/app_state.dart';
+import '../utils/my_toast.dart';
 import 'confirm_popup.dart';
 
 class CreateResourceItemMenuDialog extends StatefulWidget {
@@ -25,8 +28,10 @@ class _CreateResourceItemMenuDialogState
     appState.searchedResources.remove(widget.resource);
     await appState.removeResourcesFromFavList(
         [widget.resource], appState.openedLibrary!, appState.currentPlatform);
-    appState.refreshLibraries!(appState, true);
-    appState.refreshDetailLibraryPage!(appState);
+    Timer(Duration(milliseconds: 1500), () {
+      appState.refreshDetailFavListPage!(appState);
+      appState.refreshLibraries!(appState, true);
+    });
   }
 
   @override
@@ -52,7 +57,7 @@ class _CreateResourceItemMenuDialogState
                 Radius.circular(10.0),
               ),
               onTap: () {
-                Navigator.pop(context, 'Add to library');
+                Navigator.pop(context, 'Add to favlist');
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -62,12 +67,12 @@ class _CreateResourceItemMenuDialogState
                       icon: Icon(Icons.playlist_add_rounded),
                       color: colorScheme.tertiary,
                       onPressed: () {
-                        Navigator.pop(context, 'Add to library');
+                        Navigator.pop(context, 'Add to favlist');
                       },
                     ),
                     Expanded(
                       child: Text(
-                        'Add to library',
+                        'Add to favlist',
                         style: textTheme.labelMedium!.copyWith(
                           color: colorScheme.onSecondary,
                         ),
@@ -87,9 +92,9 @@ class _CreateResourceItemMenuDialogState
                         context: context,
                         builder: (_) => ShowConfirmDialog(
                           title:
-                              'Do you want to remove this resource from library?',
+                              'Do you want to remove this resource from favlist?',
                           onConfirm: () {
-                            print('Remove from library.');
+                            print('Remove from favlist.');
                             _removeResourceFromLibrary(context, appState);
                             Navigator.pop(context);
                           },
@@ -108,9 +113,9 @@ class _CreateResourceItemMenuDialogState
                                 context: context,
                                 builder: (_) => ShowConfirmDialog(
                                   title:
-                                      'Do you want to remove this resource from library?',
+                                      'Do you want to remove this resource from favlist?',
                                   onConfirm: () {
-                                    print('Remove from library.');
+                                    print('Remove from favlist.');
                                     _removeResourceFromLibrary(
                                         context, appState);
                                     Navigator.pop(context);
@@ -121,7 +126,7 @@ class _CreateResourceItemMenuDialogState
                           ),
                           Expanded(
                             child: Text(
-                              'Remove from library',
+                              'Remove from favlist',
                               style: textTheme.labelMedium!.copyWith(
                                 color: colorScheme.onSecondary,
                               ),
@@ -137,49 +142,18 @@ class _CreateResourceItemMenuDialogState
                 Radius.circular(10.0),
               ),
               onTap: () {
-                Navigator.popAndPushNamed(context, '/related_videos_page',
-                    arguments: widget.resource);
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.ondemand_video_rounded),
-                      color: colorScheme.tertiary,
-                      onPressed: () {
-                        Navigator.popAndPushNamed(
-                            context, '/related_videos_page',
-                            arguments: widget.resource);
-                      },
-                    ),
-                    Expanded(
-                      child: Text(
-                        'Play video',
-                        style: textTheme.labelMedium!.copyWith(
-                          color: colorScheme.onSecondary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            InkWell(
-              borderRadius: BorderRadius.all(
-                Radius.circular(10.0),
-              ),
-              onTap: () {
-                appState.isResourcesPlayerPageOpened = false;
-                BasicLibrary originLibrary = appState.openedLibrary!;
-                appState.openedLibrary = BasicLibrary(
-                  name: 'similar resource',
-                  cover: '',
-                  itemCount: -1,
-                );
-                Navigator.popAndPushNamed(context, '/similar_resources_page',
-                        arguments: widget.resource)
-                    .then((_) => appState.openedLibrary = originLibrary);
+                MyToast.showToast('To be implement');
+                throw UnimplementedError('To be implement');
+                // appState.isResourcesPlayerPageOpened = false;
+                // BasicLibrary originLibrary = appState.openedLibrary!;
+                // appState.openedLibrary = BasicLibrary(
+                //   name: 'similar resource',
+                //   cover: '',
+                //   itemCount: -1,
+                // );
+                // Navigator.popAndPushNamed(context, '/similar_resources_page',
+                //         arguments: widget.resource)
+                //     .then((_) => appState.openedLibrary = originLibrary);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -206,40 +180,6 @@ class _CreateResourceItemMenuDialogState
                     Expanded(
                       child: Text(
                         'Similar resources',
-                        style: textTheme.labelMedium!.copyWith(
-                          color: colorScheme.onSecondary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            InkWell(
-              borderRadius: BorderRadius.all(
-                Radius.circular(10.0),
-              ),
-              onTap: () {
-                print('resource\'s detail');
-                appState.isResourcesPlayerPageOpened = false;
-                Navigator.popAndPushNamed(context, '/detail_resource_page');
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.description_rounded),
-                      color: colorScheme.tertiary,
-                      onPressed: () {
-                        appState.isResourcesPlayerPageOpened = false;
-                        Navigator.popAndPushNamed(
-                            context, '/detail_resource_page');
-                      },
-                    ),
-                    Expanded(
-                      child: Text(
-                        'Resource\'s detail',
                         style: textTheme.labelMedium!.copyWith(
                           color: colorScheme.onSecondary,
                         ),

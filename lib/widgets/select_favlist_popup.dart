@@ -10,6 +10,7 @@ import '../entities/dto/result.dart';
 import '../entities/netease_cloud_music/ncm_playlist.dart';
 import '../entities/qq_music/qqmusic_playlist.dart';
 import '../states/app_state.dart';
+import '../utils/my_toast.dart';
 import 'create_library_popup.dart';
 import 'my_selectable_text.dart';
 import 'selectable_library_item.dart';
@@ -23,35 +24,51 @@ class SelectFavListPopup extends StatefulWidget {
     required this.action,
   });
 
-  final ScrollController scrollController;
   final int biliSourceFavListId;
   final List<BiliResource> resources;
   final String action;
+  final ScrollController scrollController;
 
   @override
   State<SelectFavListPopup> createState() => _SelectFavListPopupState();
 }
 
 class _SelectFavListPopupState extends State<SelectFavListPopup> {
-  late Future<PagedDataDTO<BasicLibrary>?> _libraries;
+  late Future<PagedDataDTO<BasicLibrary>?> _favlists;
 
-  // All libraries fetched.
-  List<BasicLibrary>? _localLibraries;
+  // Current page number, only for bilibili.
+  int _currentPage = 1;
 
-  // Selected libraries.
+  // All favlists fetched.
+  List<BasicLibrary> _localFavLists = [];
+
+  bool _isLoading = false;
+
+  // Whether has more favlist.
+  bool _hasMore = true;
+
+  // Selected favlists.
   List<int> _selectedIndex = [];
 
   bool _inMultiSelectMode = false;
 
   MyAppState? _appState;
+
   late int _currentPlatform;
+
+  @override
+  void dispose() {
+    widget.scrollController.removeListener(_scrollListener);
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
-    _libraries = state.refreshLibraries!(state, true);
+    _favlists = state.refreshLibraries!(state, true);
     _currentPlatform = state.currentPlatform;
+    widget.scrollController.addListener(_scrollListener);
   }
 
   @override
@@ -66,7 +83,7 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
         topRight: Radius.circular(30.0),
       ),
       child: FutureBuilder(
-        future: _libraries,
+        future: _favlists,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
@@ -105,8 +122,9 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
                     ),
                     onPressed: () {
                       setState(() {
-                        _libraries = appState.refreshLibraries!(appState, true);
-                        _localLibraries?.clear();
+                        _currentPage = 1;
+                        _favlists = appState.refreshLibraries!(appState, true);
+                        _localFavLists.clear();
                       });
                     },
                   ),
@@ -116,9 +134,10 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
           } else {
             PagedDataDTO<BasicLibrary>? pagedDataDTO = snapshot.data!;
             var totalCount = pagedDataDTO.count;
-            if (totalCount != 0) {
+            if (totalCount != 0 && _currentPage == 1) {
               List<BasicLibrary>? libraries = pagedDataDTO.list;
-              _localLibraries!.addAll(libraries!);
+              _hasMore = pagedDataDTO.hasMore;
+              _localFavLists.addAll(libraries!);
             }
             return Material(
               child: Column(
@@ -145,7 +164,7 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
                                   });
                                   if (_selectedIndex.isNotEmpty) {
                                     _addResourcesToFavLists(
-                                        _localLibraries!, appState);
+                                        _localFavLists, appState);
                                   }
                                 },
                                 style: ButtonStyle(
@@ -175,9 +194,9 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
                       strokeWidth: 2.0,
                       onRefresh: () async {
                         setState(() {
-                          _libraries =
+                          _favlists =
                               appState.refreshLibraries!(appState, true);
-                          _localLibraries?.clear();
+                          _localFavLists.clear();
                         });
                       },
                       child: ListView(
@@ -226,8 +245,14 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
                                         : _moveResourcesToFavList(
                                             library, appState);
                                   } else if (_currentPlatform == 3) {
-                                    throw UnimplementedError(
-                                        'Not yet implement bilibili _currentPlatform');
+                                    BiliFavList favList = BiliFavList(
+                                        result.data as int, 0, 0, '', 0, 0,
+                                        name: '', cover: '', itemCount: 1);
+                                    widget.action == 'add'
+                                        ? _addResourcesToFavList(
+                                            favList, appState)
+                                        : _moveResourcesToFavList(
+                                            favList, appState);
                                   } else {
                                     throw UnsupportedError(
                                         'Invalid _currentPlatform');
@@ -242,7 +267,7 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
                               ),
                             ),
                           ),
-                          for (int i = 0; i < _localLibraries!.length; i++)
+                          for (int i = 0; i < _localFavLists.length; i++)
                             Material(
                               color: Colors.transparent,
                               child: InkWell(
@@ -258,19 +283,20 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
                                   } else {
                                     widget.action == 'add'
                                         ? _addResourcesToFavList(
-                                            _localLibraries![i], appState)
+                                            _localFavLists[i], appState)
                                         : _moveResourcesToFavList(
-                                            _localLibraries![i], appState);
+                                            _localFavLists[i], appState);
                                   }
                                 },
                                 child: SelectableLibraryItem(
-                                  library: _localLibraries![i],
+                                  library: _localFavLists[i],
                                   isCreateLibraryItem: false,
                                   inMultiSelectMode: _inMultiSelectMode,
                                   selected: _selectedIndex.contains(i),
                                 ),
                               ),
                             ),
+                          _buildLoadingIndicator(colorScheme),
                         ],
                       ),
                     ),
@@ -282,6 +308,34 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
         },
       ),
     );
+  }
+
+  void _scrollListener() {
+    if (widget.scrollController.position.pixels ==
+        widget.scrollController.position.maxScrollExtent) {
+      if (_hasMore) {
+        _fetchingLibraries(_appState!);
+      } else {
+        MyToast.showToast('No more favlists');
+      }
+    }
+  }
+
+  Widget _buildLoadingIndicator(ColorScheme colorScheme) {
+    return _isLoading
+        ? Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: SizedBox(
+                  height: 10.0,
+                  width: 10.0,
+                  child: CircularProgressIndicator(
+                    color: colorScheme.onPrimary,
+                    strokeWidth: 2.0,
+                  )),
+            ),
+          )
+        : Container();
   }
 
   void _addResourcesToFavList(BasicLibrary favList, MyAppState appState) async {
@@ -322,6 +376,29 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
     }
   }
 
+  Future<void> _fetchingLibraries(MyAppState appState) async {
+    int platform = appState.currentPlatform;
+    if (!_isLoading) {
+      setState(() {
+        _isLoading = true;
+      });
+      _currentPage++;
+      List<BasicLibrary>? pageLibraries;
+      PagedDataDTO<BasicLibrary>? pagedData =
+          await appState.fetchLibraries(platform, _currentPage.toString());
+      setState(() {
+        if (pagedData != null) {
+          _hasMore = pagedData.hasMore;
+          pageLibraries = pagedData.list;
+          if (pageLibraries != null && pageLibraries!.isNotEmpty) {
+            _localFavLists.addAll(pageLibraries!);
+          }
+        }
+        _isLoading = false;
+      });
+    }
+  }
+
   void _addResourcesToFavLists(
       List<BasicLibrary> favLists, MyAppState appState) async {
     List<Future<Result?>> results = [];
@@ -349,8 +426,7 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
         ));
       }
     }
-
-    appState.refreshLibraries!(appState, true);
+    // appState.refreshLibraries!(appState, true);
     if (mounted) {
       Navigator.pop(context, results);
     }
