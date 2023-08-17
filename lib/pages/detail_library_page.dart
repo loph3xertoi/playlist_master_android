@@ -152,7 +152,9 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
         state.openedLibrary = state.rawOpenedLibrary;
       });
     } else {
-      state.refreshDetailLibraryPage = _refreshDetailLibraryPage;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        state.refreshDetailLibraryPage = _refreshDetailLibraryPage;
+      });
       _detailLibrary =
           state.fetchDetailLibrary(_currentLibrary, _currentPlatform);
     }

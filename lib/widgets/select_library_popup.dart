@@ -99,7 +99,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                     onPressed: () {
                       setState(() {
                         _libraries = appState.refreshLibraries!(appState, true);
-                        _localLibraries?.clear();
+                        _localLibraries.clear();
                       });
                     },
                   ),
@@ -111,7 +111,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
             var totalCount = pagedDataDTO.count;
             if (totalCount != 0) {
               List<BasicLibrary>? libraries = pagedDataDTO.list;
-              _localLibraries!.addAll(libraries!);
+              _localLibraries.addAll(libraries!);
             }
 
             // List<BasicLibrary> libraries;
@@ -151,7 +151,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                                   });
                                   if (_selectedIndex.isNotEmpty) {
                                     _addSongsToLibraries(
-                                        appState, _localLibraries!);
+                                        appState, _localLibraries);
                                   }
                                 },
                                 style: ButtonStyle(
@@ -183,7 +183,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                         setState(() {
                           _libraries =
                               appState.refreshLibraries!(appState, true);
-                          _localLibraries?.clear();
+                          _localLibraries.clear();
                         });
                       },
                       child: ListView(
@@ -245,7 +245,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                               ),
                             ),
                           ),
-                          for (int i = 0; i < _localLibraries!.length; i++)
+                          for (int i = 0; i < _localLibraries.length; i++)
                             Material(
                               color: Colors.transparent,
                               child: InkWell(
@@ -261,13 +261,13 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                                   } else {
                                     widget.action == 'add'
                                         ? _addSongsToLibrary(
-                                            appState, _localLibraries![i])
+                                            appState, _localLibraries[i])
                                         : _moveSongsToLibrary(
-                                            appState, _localLibraries![i]);
+                                            appState, _localLibraries[i]);
                                   }
                                 },
                                 child: SelectableLibraryItem(
-                                  library: _localLibraries![i],
+                                  library: _localLibraries[i],
                                   isCreateLibraryItem: false,
                                   inMultiSelectMode: _inMultiSelectMode,
                                   selected: _selectedIndex.contains(i),

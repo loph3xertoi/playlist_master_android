@@ -79,5 +79,8 @@ class API {
 
   /// Get bilibili splash screen images.
   static const getBiliSplashScreenImage =
-      'app.bilibili.com/x/v2/splash/brand/list';
+      '/x/v2/splash/brand/list';
+
+  /// Get search suggestions in bilibili.
+  static const getSearchSuggestions = '/main/suggest';
 }

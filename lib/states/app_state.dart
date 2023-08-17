@@ -49,6 +49,18 @@ import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 
 class MyAppState extends ChangeNotifier {
+  /// Whether is waiting searched result.
+  bool _isSearching = false;
+
+  /// The function to call when the keyword in search bar is submitted.
+  void Function(String keyword)? onSearchBarSubmit;
+
+  /// The controller of text field in search bar.
+  TextEditingController? _searchTextEditingController;
+
+  /// Search suggestions for bilibili.
+  List<String> _searchSuggestions = [];
+
   /// Whether resource player is locked.
   bool _isResourcePlayerLocked = false;
 
@@ -72,17 +84,20 @@ class MyAppState extends ChangeNotifier {
   String _errorMsg = '';
 
   /// Refresh detail library page.
-  void Function(MyAppState appState)? refreshDetailLibraryPage;
+  void Function(MyAppState appState)? _refreshDetailLibraryPage;
 
   /// Refresh detail fav list page.
-  void Function(MyAppState appState)? refreshDetailFavListPage;
+  void Function(MyAppState appState)? _refreshDetailFavListPage;
 
   /// Refresh home page's libraries.
   Future<PagedDataDTO<BasicLibrary>?> Function(MyAppState, bool)?
       refreshLibraries;
 
   /// Whether there has more searched results.
-  bool? _hasMore;
+  bool _hasMore = true;
+
+  /// Total count of searched items.
+  int _searchedCount = 0;
 
   // // Current page.
   // int _currentPage = 2;
@@ -180,9 +195,6 @@ class MyAppState extends ChangeNotifier {
   /// Current songs player.
   AudioPlayer? _songsPlayer;
 
-  /// Current resources player.
-  AudioPlayer? _resourcesPlayer;
-
   /// Current songs queue.
   List<BasicSong>? _songsQueue;
 
@@ -212,21 +224,6 @@ class MyAppState extends ChangeNotifier {
             Stream.empty(),
         _songsPlayer?.bufferedPositionStream ?? Stream.empty(),
         _songsPlayer?.durationStream ?? Stream.empty(),
-        (position, bufferedPosition, duration) =>
-            PositionData(position, bufferedPosition, duration ?? Duration.zero),
-      );
-
-  /// Collects the data useful for displaying in a seek bar, using a handy
-  /// feature of rx_dart to combine the 3 streams of interest into one.
-  Stream<PositionData> get resourcesPlayerPositionDataStream =>
-      Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
-        _resourcesPlayer?.createPositionStream(
-              minPeriod: Duration(milliseconds: 1),
-              maxPeriod: Duration(milliseconds: 1),
-            ) ??
-            Stream.empty(),
-        _resourcesPlayer?.bufferedPositionStream ?? Stream.empty(),
-        _resourcesPlayer?.durationStream ?? Stream.empty(),
         (position, bufferedPosition, duration) =>
             PositionData(position, bufferedPosition, duration ?? Duration.zero),
       );
@@ -273,6 +270,19 @@ class MyAppState extends ChangeNotifier {
   /// Whether the resources player is playing resources.
   bool _isResourcePlaying = false;
 
+  void Function(MyAppState appState)? get refreshDetailLibraryPage =>
+      _refreshDetailLibraryPage;
+
+  void Function(MyAppState appState)? get refreshDetailFavListPage =>
+      _refreshDetailFavListPage;
+
+  bool get isSearching => _isSearching;
+
+  TextEditingController? get searchTextEditingController =>
+      _searchTextEditingController;
+
+  List<String> get searchSuggestions => _searchSuggestions;
+
   dynamic get currentPlayingSubResource => _currentPlayingSubResource;
 
   Map<String, BiliLinksDTO> get subResourcesLinks => _subResourcesLinks;
@@ -281,7 +291,9 @@ class MyAppState extends ChangeNotifier {
 
   String get errorMsg => _errorMsg;
 
-  bool? get hasMore => _hasMore;
+  bool get hasMore => _hasMore;
+
+  int get searchedCount => _searchedCount;
 
   // int get currentPage => _currentPage;
 
@@ -350,8 +362,6 @@ class MyAppState extends ChangeNotifier {
 
   AudioPlayer? get songsPlayer => _songsPlayer;
 
-  AudioPlayer? get resourcesPlayer => _resourcesPlayer;
-
   bool get isSongPlaying => _isSongPlaying;
 
   bool get isResourcePlaying => _isResourcePlaying;
@@ -398,6 +408,35 @@ class MyAppState extends ChangeNotifier {
   //   notifyListeners();
   // }
 
+  set refreshDetailLibraryPage(func) {
+    _refreshDetailLibraryPage = func;
+    notifyListeners();
+  }
+
+  set refreshDetailFavListPage(func) {
+    _refreshDetailFavListPage = func;
+    notifyListeners();
+  }
+
+  set isSearching(value) {
+    _isSearching = value;
+    notifyListeners();
+  }
+
+  void resetSearchTextEditingController() {
+    _searchTextEditingController = null;
+  }
+
+  set searchTextEditingController(controller) {
+    _searchTextEditingController = controller;
+    // notifyListeners();
+  }
+
+  set searchSuggestions(suggestions) {
+    _searchSuggestions = List.from(suggestions);
+    notifyListeners();
+  }
+
   set isResourcePlayerLocked(bool value) {
     _isResourcePlayerLocked = value;
     notifyListeners();
@@ -427,8 +466,13 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  set hasMore(bool? hasMore) {
+  set hasMore(bool hasMore) {
     _hasMore = hasMore;
+    notifyListeners();
+  }
+
+  set searchedCount(int count) {
+    _searchedCount = count;
     notifyListeners();
   }
 
@@ -565,11 +609,6 @@ class MyAppState extends ChangeNotifier {
 
   set songsPlayer(AudioPlayer? songsPlayer) {
     _songsPlayer = songsPlayer;
-    notifyListeners();
-  }
-
-  set resourcesPlayer(AudioPlayer? resourcesPlayer) {
-    _resourcesPlayer = resourcesPlayer;
     notifyListeners();
   }
 
@@ -756,160 +795,6 @@ class MyAppState extends ChangeNotifier {
     }
 
     queueList = await Future.wait(songs);
-
-    return ConcatenatingAudioSource(
-      // Start loading next item just before reaching it
-      useLazyPreparation: true,
-      // Customise the shuffle algorithm
-      shuffleOrder: DefaultShuffleOrder(),
-      // Specify the queue items
-      children: queueList,
-    );
-  }
-
-  void disposeResourcesPlayer() {
-    _resourcesQueue = [];
-    _currentDetailResource = null;
-    _currentPlayingResourceInQueue = 0;
-    _currentResource = null;
-    _prevResource = null;
-    _isResourcePlaying = false;
-    _resourcesPlayer!.stop();
-    _resourcesPlayer!.dispose();
-    _resourcesPlayer = null;
-    _resourcesAudioSource!.clear();
-    _isResourcesPlayerPageOpened = false;
-    _canResourcesPlayerPagePop = false;
-  }
-
-  Future<void> initResourcesPlayer() async {
-    _resourcesPlayer = AudioPlayer();
-
-    // Try to load audio from a source and catch any errors.
-    try {
-      _resourcesAudioSource = await initResourcesAudioSource();
-
-      // Listen to errors during playback.
-      _resourcesPlayer!.playbackEventStream.listen(
-        (event) {},
-        onError: (Object e, StackTrace stackTrace) {
-          print('A stream error occurred: $e');
-        },
-      );
-
-      await _resourcesPlayer!.setAudioSource(_resourcesAudioSource!,
-          initialIndex: _currentPlayingResourceInQueue,
-          initialPosition: Duration.zero);
-
-      // Set the playing mode of the player.
-      if (_userPlayingMode == 0) {
-        await _resourcesPlayer!.setShuffleModeEnabled(true);
-        await _resourcesPlayer!.setLoopMode(LoopMode.all);
-      } else if (_userPlayingMode == 1) {
-        await _resourcesPlayer!.setShuffleModeEnabled(false);
-        await _resourcesPlayer!.setLoopMode(LoopMode.all);
-      } else if (_userPlayingMode == 2) {
-        await _resourcesPlayer!.setShuffleModeEnabled(false);
-        await _resourcesPlayer!.setLoopMode(LoopMode.one);
-      } else {
-        throw UnsupportedError('Invalid playing mode');
-      }
-
-      // Set the volume.
-      await _resourcesPlayer!.setVolume(_volume!);
-      // Set the speed.
-      await _resourcesPlayer!.setSpeed(_speed!);
-
-      // TODO: fix bug: when remove resource in fav list, this function will also be called.
-      _resourcesPlayer!.positionDiscontinuityStream.listen((discontinuity) {
-        // _coverRotatingController!.value = 0;
-        if (discontinuity.reason == PositionDiscontinuityReason.autoAdvance &&
-            !_updatingResource &&
-            !_isRemovingResourceFromQueue) {
-          if (_userPlayingMode == 0) {
-            currentPlayingResourceInQueue = discontinuity.event.currentIndex;
-            currentResource = _resourcesQueue![currentPlayingResourceInQueue!];
-            prevCarouselIndex = currentPlayingResourceInQueue!;
-          } else if (_userPlayingMode == 1) {
-            currentPlayingResourceInQueue = discontinuity.event.currentIndex ??
-                _currentPlayingResourceInQueue;
-            currentResource = _resourcesQueue![currentPlayingResourceInQueue!];
-            prevCarouselIndex = currentPlayingResourceInQueue!;
-            // _carouselController.animateToPage(_currentPlayingResourceInQueue!);
-          } else {
-            return;
-          }
-        }
-      });
-      _resourcesPlayer!.playingStream.listen((playing) {
-        isResourcePlaying = playing;
-      });
-    } catch (e) {
-      print('Error init resources player: $e');
-      throw Exception('Error init resources player: $e');
-    }
-  }
-
-  Future<ConcatenatingAudioSource?> initResourcesAudioSource() async {
-    List<AudioSource> queueList;
-    List<Future<AudioSource>> resources = [];
-    if (isUsingMockData) {
-      // resources = _resourcesQueue!
-      //     .map((e) async => AudioSource.asset(
-      //           e.songLink,
-      //           tag: MediaItem(
-      //             // Specify a unique ID for each media item:
-      //             id: Uuid().v1(),
-      //             // Metadata to display in the notification:
-      //             album: 'Album name',
-      //             artist: e.singers.map((e) => e.name).join(', '),
-      //             title: e.name,
-      //             artUri: await getImageFileFromAssets(
-      //                 e.cover, _songsQueue!.indexOf(e)),
-      //           ),
-      //         ))
-      //     .toList();
-      throw UnimplementedError(
-          'Not yet implemenet mock data for bilibili resources player');
-    } else {
-      // Fetch the resource links.
-      // 1. Fetch detail resources.
-      BiliResource resource = _resourcesQueue![_currentPlayingResourceInQueue];
-      BiliDetailResource? detailResource =
-          await fetchDetailSong<BiliDetailResource>(resource, _currentPlatform);
-      // 2. Fetch links.
-      Map<String, dynamic>? linksMap = await fetchSongsLink(
-          ['${detailResource!.bvid}:${detailResource.cid}'], _currentPlatform);
-      Map<String, String> audios = (linksMap?['audio'] as Map<String, dynamic>)
-          .map((key, value) => MapEntry(key, value.toString()));
-      String link = audios['30251'] ??
-          audios['30250'] ??
-          audios['30280'] ??
-          audios['30232'] ??
-          audios['30216']!;
-
-      // TODO: change the key of the cached audio to reuse the audio, as the url may be changed.
-      LockCachingAudioSource resourceAudioSource = LockCachingAudioSource(
-        Uri.parse(link),
-        headers: {
-          'Referer': 'https://www.bilibili.com',
-          'User-Agent':
-              'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-        },
-        tag: MediaItem(
-          // Specify a unique ID for each media item:
-          id: Uuid().v1(),
-          // Metadata to display in the notification:
-          album: detailResource.title,
-          artist: detailResource.upperName,
-          title: detailResource.subpages![0].partName,
-          artUri: Uri.parse(detailResource.cover),
-          genre: detailResource.dynamicLabels,
-          duration: Duration(seconds: detailResource.duration),
-        ),
-      );
-      queueList = [resourceAudioSource];
-    }
 
     return ConcatenatingAudioSource(
       // Start loading next item just before reaching it
@@ -1385,20 +1270,18 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  Future<PagedDataDTO?> fetchSearchedSongs(
+  Future<PagedDataDTO<T>?> fetchSearchedSongs<T>(
       String keyword, int pageNo, int pageSize, int platform) async {
-    PagedDataDTO Function(Map<String, dynamic>) resolveJson;
+    PagedDataDTO<T> Function(Map<String, dynamic>) resolveJson;
     if (platform == 0) {
       throw UnimplementedError('Not yet implement pms platform');
     } else if (platform == 1) {
-      resolveJson = PagedDataDTO<QQMusicSong>.fromJson;
     } else if (platform == 2) {
-      resolveJson = PagedDataDTO<NCMSong>.fromJson;
     } else if (platform == 3) {
-      resolveJson = PagedDataDTO<BiliResource>.fromJson;
     } else {
       throw UnsupportedError('Invalid platform');
     }
+    resolveJson = PagedDataDTO<T>.fromJson;
 
     final Uri url = Uri.http(API.host, '${API.searchSong}/$keyword', {
       'pageNo': pageNo.toString(),
@@ -1408,14 +1291,14 @@ class MyAppState extends ChangeNotifier {
     final client = RetryClient(http.Client());
 
     try {
-      MyLogger.logger.i('Searching songs from network...');
+      MyLogger.logger.i('Searching items from network...');
       final response = await client.get(url);
       final decodedResponse =
           jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
-          PagedDataDTO data = resolveJson(decodedResponse['data']);
+          PagedDataDTO<T> data = resolveJson(decodedResponse['data']);
           return Future.value(data);
         } else {
           _errorMsg = result.message!;
@@ -2045,7 +1928,12 @@ class MyAppState extends ChangeNotifier {
       //   'tid': tid,
       // };
     } else if (platform == 3) {
-      String resourcesIds = resources.map((e) => '${e.id}:${e.type}').join(',');
+      String resourcesIds;
+      if (isFavoriteSearchedResource == 'true') {
+        resourcesIds = resources.map((e) => '${e.id}').join(',');
+      } else {
+        resourcesIds = resources.map((e) => '${e.id}:${e.type}').join(',');
+      }
       requestBody = {
         'libraryId': favListsIds,
         'songsId': resourcesIds,
@@ -2300,7 +2188,8 @@ class MyAppState extends ChangeNotifier {
   }
 
   Future<String> getBiliSplashScreenImage() async {
-    final Uri url = Uri.https('app.bilibili.com', '/x/v2/splash/brand/list', {
+    final Uri url =
+        Uri.https('app.bilibili.com', API.getBiliSplashScreenImage, {
       'appkey': '1d8b6e7d45233436',
       'ts': '0',
       'sign': '78a89e153cd6231a4a4d55013aa063ce',
@@ -2332,6 +2221,55 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return '';
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<List<String>> getSearchSuggestions(String keyword) async {
+    final Uri url =
+        Uri.https('s.search.bilibili.com', API.getSearchSuggestions, {
+      'term': keyword,
+      'main_ver': 'v1',
+      'highlight': '',
+    });
+    final client = RetryClient(http.Client());
+
+    try {
+      MyLogger.logger
+          .i('Fetching search suggestions for $keyword in bilibili...');
+      final response = await client.get(url);
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        int resultCode = decodedResponse['code'];
+        var resultJson = decodedResponse['result'];
+        if (resultCode == 0 && resultJson.isNotEmpty) {
+          List<dynamic> tagsList = decodedResponse['result']['tag'];
+          List<String> tags = tagsList.map<String>((e) => e['name']).toList();
+          return tags;
+        } else {
+          if (resultCode != 0) {
+            _errorMsg = decodedResponse['message'] ??
+                'Failed to fetch suggestions for $keyword in bilibili.';
+            MyToast.showToast(_errorMsg);
+          } else {
+            _errorMsg = 'No suggestions for $keyword in bilibili.';
+          }
+
+          MyLogger.logger.e(_errorMsg);
+          return [];
+        }
+      } else {
+        _errorMsg = 'Response error: $decodedResponse';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return [];
       }
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');

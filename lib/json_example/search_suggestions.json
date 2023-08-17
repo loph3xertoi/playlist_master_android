@@ -1,0 +1,92 @@
+{
+  "exp_str": "#5506#6608#7701",
+  "code": 0,
+  "cost": {
+    "about": {
+      "params_check": "0.000470",
+      "total": "0.039943",
+      "main_handler": "0.039373"
+    }
+  },
+  "result": {
+    "tag": [
+      {
+        "value": "\u96f7\u96e8",
+        "term": "\u96f7\u96e8",
+        "ref": 0,
+        "name": "\u96f7\u96e8",
+        "spid": 5
+      },
+      {
+        "value": "\u96f7\u519b",
+        "term": "\u96f7\u519b",
+        "ref": 0,
+        "name": "\u96f7\u519b",
+        "spid": 5
+      },
+      {
+        "value": "\u96f7\u519b2023\u5e74\u5ea6\u6f14\u8bb2",
+        "term": "\u96f7\u519b2023\u5e74\u5ea6\u6f14\u8bb2",
+        "ref": 0,
+        "name": "\u96f7\u519b2023\u5e74\u5ea6\u6f14\u8bb2",
+        "spid": 5
+      },
+      {
+        "value": "\u96f7\u519b\u5e74\u5ea6\u6f14\u8bb2",
+        "term": "\u96f7\u519b\u5e74\u5ea6\u6f14\u8bb2",
+        "ref": 0,
+        "name": "\u96f7\u519b\u5e74\u5ea6\u6f14\u8bb2",
+        "spid": 5
+      },
+      {
+        "value": "\u96f7\u96e8lyy",
+        "term": "\u96f7\u96e8lyy",
+        "ref": 0,
+        "name": "\u96f7\u96e8<em class=\"suggest_high_light\">l<\/em>yy",
+        "spid": 5
+      },
+      {
+        "value": "klei",
+        "term": "klei",
+        "ref": 0,
+        "name": "k<em class=\"suggest_high_light\">lei<\/em>",
+        "spid": 5
+      },
+      {
+        "value": "\u96f7\u795e",
+        "term": "\u96f7\u795e",
+        "ref": 0,
+        "name": "\u96f7\u795e",
+        "spid": 5
+      },
+      {
+        "value": "\u857e\u59c6",
+        "term": "\u857e\u59c6",
+        "ref": 0,
+        "name": "\u857e\u59c6",
+        "spid": 5
+      },
+      {
+        "value": "\u5192\u9669\u96f7\u63a2\u957f",
+        "term": "\u5192\u9669\u96f7\u63a2\u957f",
+        "ref": 0,
+        "name": "\u5192\u9669\u96f7\u63a2\u957f",
+        "spid": 5
+      },
+      {
+        "value": "\u96f7\u6b27\u5965\u7279\u66fc",
+        "term": "\u96f7\u6b27\u5965\u7279\u66fc",
+        "ref": 0,
+        "name": "\u96f7\u6b27\u5965\u7279\u66fc",
+        "spid": 5
+      }
+    ]
+  },
+  "page caches": {
+    "save cache": "no"
+  },
+  "sengine": {
+    "usage": 0
+  },
+  "stoken": "4481071209352575472"
+}

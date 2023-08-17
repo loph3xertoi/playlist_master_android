@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:humanize_big_int/humanize_big_int.dart';
 import 'package:lottie/lottie.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -82,9 +83,21 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
         for (Result? result in results) {
           if (result != null && result.success) {
             Timer(Duration(milliseconds: 1500), () {
-              appState.refreshDetailFavListPage!(appState);
-              appState.refreshLibraries!(appState, true);
+              // if (mounted) {
+              if (appState.searchedCount == 0) {
+                appState.refreshDetailFavListPage != null
+                    ? appState.refreshDetailFavListPage!(appState)
+                    : null;
+              }
+              appState.refreshLibraries != null
+                  ? appState.refreshLibraries!(appState, true)
+                  : null;
+              // }
             });
+            // Future.delayed(Duration(milliseconds: 1500), () {
+            //   appState.refreshDetailFavListPage!(appState);
+            //   appState.refreshLibraries!(appState, true);
+            // });
             MyToast.showToast('Add resources successfully');
             break;
           }
@@ -102,7 +115,6 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
     _currentPlatform = appState.currentPlatform;
     _isUsingMockData = appState.isUsingMockData;
     return Material(
-      color: Colors.transparent,
       child: InkWell(
         onTap: () {
           widget.onTap();
@@ -142,7 +154,9 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
                               children: [
                                 CachedNetworkImage(
                                   imageUrl: resource.cover.isNotEmpty
-                                      ? resource.cover
+                                      ? resource.cover.substring(0, 4) == 'http'
+                                          ? resource.cover
+                                          : 'https:${resource.cover}'
                                       : MyAppState.defaultCoverImage,
                                   progressIndicatorBuilder:
                                       (context, url, downloadProgress) =>
@@ -212,8 +226,26 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
                                           ),
                                         )
                                       : TextSpan(),
-                                  TextSpan(
-                                    text: resource.title,
+                                  WidgetSpan(
+                                    child: Html(
+                                      data:
+                                          '<header>${resource.title}</header>',
+                                      style: {
+                                        'em': Style(
+                                          color: Color(0xFFFB6A9D),
+                                          fontStyle: FontStyle.normal,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        'header': Style(
+                                          fontStyle: FontStyle.normal,
+                                          maxLines: 2,
+                                          textOverflow: TextOverflow.ellipsis,
+                                          fontWeight: FontWeight.bold,
+                                          color: colorScheme.onPrimary
+                                              .withOpacity(0.6),
+                                        ),
+                                      },
+                                    ),
                                   ),
                                 ],
                               ),

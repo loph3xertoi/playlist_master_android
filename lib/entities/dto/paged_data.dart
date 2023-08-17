@@ -21,14 +21,14 @@ class PagedDataDTO<T> {
   factory PagedDataDTO.fromJson(Map<String, dynamic> json) {
     List<dynamic> resourcesJson = json['list'];
     dynamic resources;
-    if (T is QQMusicSong) {
+    if (T == QQMusicSong) {
       resources = resourcesJson
           .map<QQMusicSong>((e) => QQMusicSong.fromJson(e))
           .toList();
-    } else if (T is NCMSong) {
+    } else if (T == NCMSong) {
       resources =
           resourcesJson.map<NCMSong>((e) => NCMSong.fromJson(e)).toList();
-    } else if (T is BiliResource) {
+    } else if (T == BiliResource) {
       resources = resourcesJson
           .map<BiliResource>((e) => BiliResource.fromJson(e))
           .toList();

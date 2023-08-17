@@ -149,7 +149,6 @@ class _DashPageState extends State<ResourcePlayer> {
         );
       },
       controlsConfiguration: BetterPlayerControlsConfiguration(
-        // TODO: implement custom controls widget, include kid lock and so on.
         playerTheme: BetterPlayerTheme.custom,
         customControlsBuilder: (controller, onPlayerVisibilityChanged) {
           return CustomControlsWidget(

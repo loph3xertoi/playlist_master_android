@@ -16,10 +16,8 @@ import '../states/my_search_state.dart';
 import '../utils/my_toast.dart';
 import '../utils/theme_manager.dart';
 import '../widgets/bili_resource_item.dart';
-import '../widgets/bottom_player.dart';
 import '../widgets/library_item_menu_popup.dart';
 import '../widgets/multi_resources_select_popup.dart';
-import '../widgets/multi_songs_select_popup.dart';
 import '../widgets/my_searchbar.dart';
 import '../widgets/my_selectable_text.dart';
 
@@ -162,7 +160,9 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
       // });
       throw UnimplementedError('Not yet implement mock data for bilibili');
     } else {
-      state.refreshDetailFavListPage = _refreshDetailFavListPage;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        state.refreshDetailFavListPage = _refreshDetailFavListPage;
+      });
       _firstFutureDetailFavList = state
           .fetchDetailLibrary(_currentBiliFavList, _currentPlatform, pn: '1');
     }
@@ -447,7 +447,7 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                                               CrossAxisAlignment
                                                                   .start,
                                                           children: [
-                                                            Text(
+                                                            SelectableText(
                                                               detailFavList
                                                                   .name,
                                                               style: textTheme

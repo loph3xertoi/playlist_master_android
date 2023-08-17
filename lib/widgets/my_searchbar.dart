@@ -1,3 +1,5 @@
+import 'dart:ui' as ui show BoxHeightStyle;
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -30,25 +32,31 @@ class _MySearchBarState extends State<MySearchBar>
   late AnimationController _animationController;
   late TextEditingController _textEditingController;
   late FocusNode _focusNode;
+  bool _searchBarFocused = false;
   late int _currentPlatform;
   late bool _isUsingMockData;
   late List<BasicSong?> _searchedSongs;
   late List<BiliResource?> _searchedResources;
-  MyAppState? _appState;
+  late MyAppState _appState;
 
   @override
   void initState() {
     super.initState();
+    final state = Provider.of<MyAppState>(context, listen: false);
+    _appState = state;
+    state.onSearchBarSubmit = _onSubmitted;
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
     _textEditingController = TextEditingController();
+    state.searchTextEditingController = _textEditingController;
     _focusNode = FocusNode();
   }
 
   @override
   void dispose() {
+    _appState.resetSearchTextEditingController();
     _animationController.dispose();
     _textEditingController.dispose();
     _focusNode.dispose();
@@ -57,7 +65,7 @@ class _MySearchBarState extends State<MySearchBar>
 
   void _onSearchIconPressed(MyAppState appState) async {
     if (widget.notInHomepage) {
-      _onSubmitted(_textEditingController.text, appState);
+      _onSubmitted(_textEditingController.text);
       _focusNode.unfocus();
     } else {
       Navigator.pushNamed(context, '/search_page');
@@ -69,29 +77,64 @@ class _MySearchBarState extends State<MySearchBar>
     } else {
       Navigator.pushNamed(context, '/search_page');
     }
+    _searchBarFocused = true;
+    _appState.keyword = null;
+    _searchedSongs = [];
+    _appState.searchedSongs = [];
+    _searchedResources = [];
+    _appState.searchedResources = [];
+    _appState.searchedCount = 0;
+    if (_appState.searchSuggestions.isEmpty) {
+      if (_currentPlatform == 3 &&
+          widget.notInHomepage &&
+          !widget.inDetailLibraryPage) {
+        _getSearchSuggestion(_textEditingController.text);
+      }
+    }
   }
 
-  void _onSubmitted(String searchString, MyAppState appState) async {
-    searchString = searchString.trim();
-    print(searchString);
+  void _onSubmitted(String keyword) async {
+    _appState.isSearching = true;
+    _focusNode.unfocus();
+    _searchBarFocused = false;
+    keyword = keyword.trim();
+    print(keyword);
     if (widget.notInHomepage && !widget.inDetailLibraryPage) {
       // Only search once per keyword, more resources of this keyword should be fetched by drag down the list in search page.
-      if (searchString != '' && appState.keyword != searchString) {
-        appState.keyword = searchString;
-        var pagedDataDTO = await appState.fetchSearchedSongs(
-            searchString, 1, 20, _currentPlatform);
+      if (keyword != '' && _appState.keyword != keyword) {
+        _appState.keyword = keyword;
+        dynamic pagedDataDTO;
+        if (_currentPlatform == 0) {
+          throw UnimplementedError('Not yet implement pms platform');
+        } else if (_currentPlatform == 1) {
+          pagedDataDTO = await _appState.fetchSearchedSongs<QQMusicSong>(
+              keyword, 1, 20, _currentPlatform);
+        } else if (_currentPlatform == 2) {
+          pagedDataDTO = await _appState.fetchSearchedSongs<NCMSong>(
+              keyword, 1, 20, _currentPlatform);
+        } else if (_currentPlatform == 3) {
+          pagedDataDTO = await _appState.fetchSearchedSongs<BiliResource>(
+              keyword, 1, 20, _currentPlatform);
+        } else {
+          throw UnsupportedError('Invalid platform');
+        }
+
         if (pagedDataDTO != null) {
           setState(() {
-            appState.hasMore = pagedDataDTO.hasMore;
+            _appState.hasMore = pagedDataDTO.hasMore;
+            _appState.searchedCount = pagedDataDTO.count;
             var list = pagedDataDTO.list;
             if (_currentPlatform == 0) {
               throw UnimplementedError('Not yet implement pms platform');
             } else if (_currentPlatform == 1) {
-              _searchedSongs = list as List<QQMusicSong>;
+              _searchedSongs.clear();
+              _searchedSongs.addAll(list);
             } else if (_currentPlatform == 2) {
-              _searchedSongs = list as List<NCMSong>;
+              _searchedSongs.clear();
+              _searchedSongs.addAll(list);
             } else if (_currentPlatform == 3) {
-              _searchedResources = list as List<BiliResource>;
+              _searchedResources.clear();
+              _searchedResources.addAll(list);
             } else {
               throw UnsupportedError('Invalid platform');
             }
@@ -99,31 +142,36 @@ class _MySearchBarState extends State<MySearchBar>
         }
       }
     } else if (widget.inDetailLibraryPage) {
-      if (searchString != '') {
-        appState.keyword = searchString;
+      if (keyword != '') {
+        _appState.keyword = keyword;
         if (_currentPlatform == 0) {
           throw UnimplementedError('Not yet implement pms platform');
         } else if (_currentPlatform == 1) {
-          appState.searchedSongs = appState.rawSongsInLibrary!
+          _appState.searchedSongs = _appState.rawSongsInLibrary!
               .where((e) =>
-                  (e as QQMusicSong).name.contains(searchString) ||
-                  e.singers.any((singer) => singer.name.contains(searchString)))
+                  (e as QQMusicSong).name.contains(keyword) ||
+                  e.singers.any((singer) => singer.name.contains(keyword)))
               .toList();
         } else if (_currentPlatform == 2) {
-          appState.searchedSongs = appState.rawSongsInLibrary!
+          _appState.searchedSongs = _appState.rawSongsInLibrary!
               .where((e) =>
-                  (e as NCMSong).name.contains(searchString) ||
-                  e.singers.any((singer) => singer.name.contains(searchString)))
+                  (e as NCMSong).name.contains(keyword) ||
+                  e.singers.any((singer) => singer.name.contains(keyword)))
               .toList();
         } else if (_currentPlatform == 3) {
-          throw UnimplementedError('Not yet implement bilibili platform');
+          _appState.searchedResources = _appState.rawResourcesInFavList!
+              .where((e) =>
+                  e.title.contains(keyword) || e.upperName.contains(keyword))
+              .toList();
         } else {
           throw UnsupportedError('Invalid platform');
         }
       } else {
-        appState.searchedSongs = appState.rawSongsInLibrary!;
+        _appState.searchedSongs = _appState.rawSongsInLibrary!;
+        _appState.searchedResources = _appState.rawResourcesInFavList!;
       }
     }
+    _appState.isSearching = false;
   }
 
   void _onMenuIconPressed() {
@@ -131,7 +179,13 @@ class _MySearchBarState extends State<MySearchBar>
   }
 
   void _onBackIconPressed() {
-    _searchedSongs.clear();
+    _appState.keyword = null;
+    _searchedSongs = [];
+    _appState.searchedSongs = [];
+    _searchedResources = [];
+    _appState.searchedResources = [];
+    _appState.searchedCount = 0;
+    _appState.searchSuggestions = [];
     Navigator.pop(context);
   }
 
@@ -139,11 +193,25 @@ class _MySearchBarState extends State<MySearchBar>
     showDialog(context: context, builder: (context) => BasicInfo());
   }
 
+  void _getSearchSuggestion(String keyword) async {
+    if (keyword == '') {
+      _appState.searchSuggestions = [];
+      _appState.searchedResources = [];
+      _appState.searchedResources = [];
+      _appState.searchedCount = 0;
+      _appState.keyword = null;
+      return;
+    }
+    var suggestions = await _appState.getSearchSuggestions(keyword);
+    _appState.searchSuggestions = suggestions;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
+    _appState = appState;
     _currentPlatform = appState.currentPlatform;
     _isUsingMockData = appState.isUsingMockData;
     _searchedSongs = appState.searchedSongs;
@@ -157,6 +225,26 @@ class _MySearchBarState extends State<MySearchBar>
       ),
       child: TextField(
         controller: _textEditingController,
+        focusNode: _focusNode,
+        textAlignVertical: TextAlignVertical.top,
+        enabled: true,
+        readOnly: widget.notInHomepage ? false : true,
+        style: textTheme.titleMedium!.copyWith(
+          color: colorScheme.onSecondary,
+        ),
+        selectionHeightStyle: ui.BoxHeightStyle.max,
+        onTap: _onSearchAreaPressed,
+        enableInteractiveSelection: _searchBarFocused,
+        onSubmitted: (value) {
+          _onSubmitted(value);
+        },
+        onChanged: _currentPlatform == 3 &&
+                widget.notInHomepage &&
+                !widget.inDetailLibraryPage
+            ? (value) {
+                _getSearchSuggestion(value);
+              }
+            : null,
         contextMenuBuilder: (context, editableTextState) {
           final List<ContextMenuButtonItem> buttonItems =
               editableTextState.contextMenuButtonItems;
@@ -185,19 +273,16 @@ class _MySearchBarState extends State<MySearchBar>
             ],
           );
         },
-        focusNode: _focusNode,
-        textAlignVertical: TextAlignVertical.top,
-        enabled: true,
-        cursorColor: colorScheme.onPrimary,
-        readOnly: widget.notInHomepage ? false : true,
-        style: textTheme.titleMedium!.copyWith(
-          color: colorScheme.onSecondary,
-        ),
         decoration: InputDecoration(
           alignLabelWithHint: true,
           floatingLabelAlignment: FloatingLabelAlignment.center,
-          hintText:
-              widget.inDetailLibraryPage ? 'Search Playlist' : 'Search Music',
+          hintText: _currentPlatform != 3
+              ? widget.inDetailLibraryPage
+                  ? 'Search Playlists'
+                  : 'Search Musics'
+              : widget.inDetailLibraryPage
+                  ? 'Search Favlists'
+                  : 'Search Resources',
           hintStyle: textTheme.titleMedium,
           prefixIcon: GestureDetector(
             child: Ink(
@@ -216,7 +301,8 @@ class _MySearchBarState extends State<MySearchBar>
                 // ),
                 onPressed: widget.notInHomepage
                     ? () {
-                        appState.searchedSongs.clear();
+                        appState.searchedSongs = [];
+                        appState.searchedResources = [];
                         // appState.totalSearchedSongs = 0;
                         // appState.currentPage = 2;
                         _onBackIconPressed();
@@ -273,10 +359,6 @@ class _MySearchBarState extends State<MySearchBar>
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(vertical: 12.0),
         ),
-        onTap: _onSearchAreaPressed,
-        onSubmitted: (value) {
-          _onSubmitted(value, appState);
-        },
       ),
     );
   }

@@ -1,4 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:ui' as ui show BoxHeightStyle;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -142,10 +144,10 @@ class _CreateLibraryDialogState extends State<CreateLibraryDialog> {
                   controller: _textEditingController,
                   autofocus: true,
                   textAlignVertical: TextAlignVertical.center,
-                  cursorColor: colorScheme.onPrimary,
                   style: textTheme.titleMedium!.copyWith(
                     color: colorScheme.onSecondary,
                   ),
+                  selectionHeightStyle: ui.BoxHeightStyle.max,
                   decoration: InputDecoration(
                     alignLabelWithHint: true,
                     floatingLabelAlignment: FloatingLabelAlignment.center,

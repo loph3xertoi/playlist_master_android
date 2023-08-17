@@ -29,8 +29,16 @@ class _CreateResourceItemMenuDialogState
     await appState.removeResourcesFromFavList(
         [widget.resource], appState.openedLibrary!, appState.currentPlatform);
     Timer(Duration(milliseconds: 1500), () {
-      appState.refreshDetailFavListPage!(appState);
-      appState.refreshLibraries!(appState, true);
+      // if (mounted) {
+      if (appState.searchedCount == 0) {
+        appState.refreshDetailFavListPage != null
+            ? appState.refreshDetailFavListPage!(appState)
+            : null;
+      }
+      appState.refreshLibraries != null
+          ? appState.refreshLibraries!(appState, true)
+          : null;
+      // }
     });
   }
 

@@ -4,6 +4,9 @@ import 'package:fplayer/fplayer.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
 
+import '../entities/bilibili/bili_resource.dart';
+import '../entities/netease_cloud_music/ncm_song.dart';
+import '../entities/qq_music/qqmusic_song.dart';
 import '../http/my_http.dart';
 import '../states/app_state.dart';
 import '../utils/my_logger.dart';
@@ -70,9 +73,6 @@ class _HomePageState extends State<HomePage>
                 if (appState.songsPlayer != null) {
                   appState.disposeSongsPlayer();
                 }
-                if (appState.resourcesPlayer != null) {
-                  appState.disposeResourcesPlayer();
-                }
               }
               _currentPlatform = 0;
               appState.refreshLibraries!(appState, false);
@@ -137,14 +137,34 @@ class _HomePageState extends State<HomePage>
                             ),
                           ),
                           onPressed: () async {
-                            MyToast.showToast(
-                                'Searching songs in $_currentPlatform');
-                            var res = await appState.fetchSearchedSongs(
-                                '洛天依', 1, 10, _currentPlatform!);
+                            String platformName;
+                            dynamic searchMethod;
+                            if (_currentPlatform == 0) {
+                              platformName = 'PMS';
+                            } else if (_currentPlatform == 1) {
+                              platformName = 'QQ Music';
+                              searchMethod =
+                                  appState.fetchSearchedSongs<QQMusicSong>(
+                                      '洛天依', 1, 10, _currentPlatform!);
+                            } else if (_currentPlatform == 2) {
+                              platformName = 'Netease Music';
+                              searchMethod =
+                                  appState.fetchSearchedSongs<NCMSong>(
+                                      '洛天依', 1, 10, _currentPlatform!);
+                            } else if (_currentPlatform == 3) {
+                              platformName = 'BiliBili';
+                              searchMethod =
+                                  appState.fetchSearchedSongs<BiliResource>(
+                                      '洛天依', 1, 10, _currentPlatform!);
+                            } else {
+                              throw Exception('Invalid platform');
+                            }
+                            MyToast.showToast('Searching in $platformName');
+                            var res = await searchMethod;
                             print(res);
                           },
                           child: Text(
-                            'Search songs',
+                            'Test searching',
                             style: textTheme.labelMedium,
                           ),
                         ),
@@ -185,9 +205,6 @@ class _HomePageState extends State<HomePage>
                     if (appState.songsPlayer != null) {
                       appState.disposeSongsPlayer();
                     }
-                    if (appState.resourcesPlayer != null) {
-                      appState.disposeResourcesPlayer();
-                    }
                   }
                   _currentPlatform = 3;
                   appState.refreshLibraries!(appState, false);
@@ -202,9 +219,6 @@ class _HomePageState extends State<HomePage>
                     if (appState.songsPlayer != null) {
                       appState.disposeSongsPlayer();
                     }
-                    if (appState.resourcesPlayer != null) {
-                      appState.disposeResourcesPlayer();
-                    }
                   }
                   _currentPlatform = 2;
                   appState.refreshLibraries!(appState, false);
@@ -218,9 +232,6 @@ class _HomePageState extends State<HomePage>
                   if (_currentPlatform != 1) {
                     if (appState.songsPlayer != null) {
                       appState.disposeSongsPlayer();
-                    }
-                    if (appState.resourcesPlayer != null) {
-                      appState.disposeResourcesPlayer();
                     }
                   }
                   _currentPlatform = 1;

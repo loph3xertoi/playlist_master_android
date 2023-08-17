@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../entities/basic/basic_song.dart';
 import '../entities/bilibili/bili_resource.dart';
-import '../entities/dto/paged_data.dart';
 import '../entities/netease_cloud_music/ncm_song.dart';
 import '../entities/qq_music/qqmusic_song.dart';
 import '../states/app_state.dart';
 import '../states/my_search_state.dart';
 import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
+import '../utils/string_utils.dart';
 import '../utils/theme_manager.dart';
 import '../widgets/bili_resource_item.dart';
 import '../widgets/bottom_player.dart';
@@ -25,10 +26,11 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  List<String> _suggestions = [];
 
-  List<BasicSong> _searchedSongs = [];
+  late List<BasicSong> _searchedSongs;
 
-  List<BiliResource> _searchedResources = [];
+  late List<BiliResource> _searchedResources;
 
   bool _isLoading = false;
   // First page is 1 not 0, and first page is loaded in search bar, so this is 2 page.
@@ -43,6 +45,8 @@ class _SearchPageState extends State<SearchPage> {
   late bool _hasMore;
   late int _count;
   AudioPlayer? _player;
+  // Whether is waiting searched result.
+  bool _isSearching = false;
 
   @override
   void dispose() {
@@ -55,14 +59,14 @@ class _SearchPageState extends State<SearchPage> {
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
+    _searchedSongs = state.searchedSongs;
+    _searchedResources = state.searchedResources;
     _keyword = state.keyword;
     _currentPlatform = state.currentPlatform;
     _isUsingMockData = state.isUsingMockData;
-    _hasMore = state.hasMore!;
-    _player = _currentPlatform == 3 ? state.resourcesPlayer : state.songsPlayer;
-    _count = _currentPlatform == 3
-        ? state.searchedResources.length
-        : state.searchedSongs.length;
+    _hasMore = state.hasMore;
+    _player = state.songsPlayer;
+    _count = state.searchedCount;
     _scrollController.addListener(_scrollListener);
   }
 
@@ -70,37 +74,44 @@ class _SearchPageState extends State<SearchPage> {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
       if (_hasMore) {
-        searchingSong(_appState!);
+        _searchingSong(_appState!);
       } else {
         MyToast.showToast('No more results');
       }
     }
   }
 
-  Future<void> searchingSong(MyAppState appState) async {
+  Future<void> _searchingSong(MyAppState appState) async {
     if (!_isLoading) {
       setState(() {
         _isLoading = true;
       });
 
-      PagedDataDTO<dynamic>? pagedDataDTO = await appState.fetchSearchedSongs(
-          _keyword!, ++_pageNo, _pageSize, _currentPlatform);
+      dynamic pagedDataDTO;
+      if (_currentPlatform == 0) {
+        throw UnimplementedError('Not yet implement pms platform');
+      } else if (_currentPlatform == 1) {
+        pagedDataDTO = await appState.fetchSearchedSongs<QQMusicSong>(
+            _keyword!, ++_pageNo, _pageSize, _currentPlatform);
+      } else if (_currentPlatform == 2) {
+        pagedDataDTO = await appState.fetchSearchedSongs<NCMSong>(
+            _keyword!, ++_pageNo, _pageSize, _currentPlatform);
+      } else if (_currentPlatform == 3) {
+        pagedDataDTO = await appState.fetchSearchedSongs<BiliResource>(
+            _keyword!, ++_pageNo, _pageSize, _currentPlatform);
+      } else {
+        throw UnsupportedError('Invalid platform');
+      }
 
       if (pagedDataDTO != null) {
         setState(() {
-          _count = pagedDataDTO.count;
-          _hasMore = pagedDataDTO.hasMore;
           var list = pagedDataDTO.list;
-          if (_currentPlatform == 0) {
-            throw UnimplementedError('Not yet implement pms platform');
-          } else if (_currentPlatform == 1) {
-            _searchedSongs.addAll(list as List<QQMusicSong>);
-          } else if (_currentPlatform == 2) {
-            _searchedSongs.addAll(list as List<NCMSong>);
-          } else if (_currentPlatform == 3) {
-            _searchedResources.addAll(list as List<BiliResource>);
+          appState.searchedCount = pagedDataDTO.count;
+          _hasMore = pagedDataDTO.hasMore;
+          if (_currentPlatform == 3) {
+            _searchedResources.addAll(list!);
           } else {
-            throw UnsupportedError('Invalid platform');
+            _searchedResources.addAll(list!);
           }
           _isLoading = false;
         });
@@ -113,10 +124,16 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
+  void _onSearchedResourceTapped(int index, MyAppState appState) async {
+    if (context.mounted) {
+      appState.currentResource = _searchedResources[index];
+      Navigator.pushNamed(context, '/detail_resource_page');
+    }
+  }
+
   void _onSearchedItemTapped(int index, MyAppState appState) async {
-    var isTakenDown =
-        _currentPlatform == 3 ? false : _searchedSongs[index].isTakenDown;
-    var payPlayType = _currentPlatform == 3 ? 0 : _searchedSongs[index].payPlay;
+    var isTakenDown = _searchedSongs[index].isTakenDown;
+    var payPlayType = _searchedSongs[index].payPlay;
 
     if (_currentPlatform == 1 && payPlayType == 1) {
       MyToast.showToast('This song need vip to play');
@@ -140,78 +157,43 @@ class _SearchPageState extends State<SearchPage> {
       } else if (_currentPlatform == 2) {
         appState.songsQueue =
             _searchedSongs.where((song) => !song.isTakenDown).toList();
-      } else if (_currentPlatform == 3) {
-        appState.resourcesQueue = _searchedResources;
       } else {
         throw UnsupportedError('Invalid platform');
       }
 
       // Real index in queue, not in raw queue as some songs may be taken down.
-      int realIndex = _currentPlatform == 3
-          ? index
-          : appState.songsQueue!.indexOf(appState.rawSongsInLibrary![index]);
+      int realIndex =
+          appState.songsQueue!.indexOf(appState.rawSongsInLibrary![index]);
 
-      if (_currentPlatform == 3) {
-        appState.currentPlayingResourceInQueue = realIndex;
-      } else {
-        appState.currentPlayingSongInQueue = realIndex;
-      }
+      appState.currentPlayingSongInQueue = realIndex;
 
       try {
-        if (_currentPlatform == 3) {
-          await appState.initResourcesPlayer();
-        } else {
-          await appState.initSongsPlayer();
-        }
+        await appState.initSongsPlayer();
       } catch (e) {
         MyToast.showToast('Exception: $e');
         MyLogger.logger.e('Exception: $e');
         appState.songsQueue = [];
-        appState.resourcesQueue = [];
         appState.currentPlayingSongInQueue = 0;
-        appState.currentPlayingResourceInQueue = 0;
         appState.currentDetailSong = null;
-        appState.currentDetailResource = null;
         appState.currentSong = null;
-        appState.currentResource = null;
         appState.prevSong = null;
-        appState.prevResource = null;
         appState.isSongPlaying = false;
-        appState.isResourcePlaying = false;
         appState.songsPlayer!.stop();
         appState.songsPlayer!.dispose();
         appState.songsPlayer = null;
-        appState.resourcesPlayer!.stop();
-        appState.resourcesPlayer!.dispose();
-        appState.resourcesPlayer = null;
         appState.songsAudioSource!.clear();
-        appState.resourcesAudioSource!.clear();
         appState.isSongsPlayerPageOpened = false;
         appState.canSongsPlayerPagePop = false;
-        appState.isResourcesPlayerPageOpened = false;
-        appState.canResourcesPlayerPagePop = false;
         return;
       }
-      if (_currentPlatform == 3) {
-        appState.canResourcesPlayerPagePop = true;
-        appState.currentResource = appState.resourcesQueue![realIndex];
-        appState.prevResource = appState.currentResource;
-        appState.currentDetailResource = null;
-        appState.isFirstLoadResourcesPlayer = true;
-        appState.resourcesPlayer!.play();
-      } else {
-        appState.canSongsPlayerPagePop = true;
-        appState.currentSong = appState.songsQueue![realIndex];
-        appState.prevSong = appState.currentSong;
-        appState.currentDetailSong = null;
-        appState.isFirstLoadSongsPlayer = true;
-        appState.songsPlayer!.play();
-      }
-    } else if ((_currentPlatform != 3 &&
-            appState.currentSong == appState.rawSongsInLibrary![index]) ||
-        (_currentPlatform == 3 &&
-            appState.currentResource ==
-                appState.rawResourcesInFavList![index])) {
+
+      appState.canSongsPlayerPagePop = true;
+      appState.currentSong = appState.songsQueue![realIndex];
+      appState.prevSong = appState.currentSong;
+      appState.currentDetailSong = null;
+      appState.isFirstLoadSongsPlayer = true;
+      appState.songsPlayer!.play();
+    } else if (appState.currentSong == appState.rawSongsInLibrary![index]) {
       if (!_player!.playerState.playing) {
         _player!.play();
       }
@@ -225,93 +207,52 @@ class _SearchPageState extends State<SearchPage> {
       } else if (_currentPlatform == 2) {
         appState.songsQueue =
             _searchedSongs.where((song) => !song.isTakenDown).toList();
-      } else if (_currentPlatform == 3) {
-        appState.resourcesQueue = _searchedResources;
       } else {
         throw UnsupportedError('Invalid platform');
       }
 
       // Real index in queue, not in raw queue as some songs may be taken down.
-      int realIndex = _currentPlatform == 3
-          ? index
-          : appState.songsQueue!.indexOf(appState.rawSongsInLibrary![index]);
-
-      if (_currentPlatform == 3) {
-        appState.canResourcesPlayerPagePop = true;
-        appState.resourcesPlayer!.stop();
-        appState.resourcesPlayer!.dispose();
-        appState.resourcesPlayer = null;
-        appState.resourcesAudioSource!.clear();
-        appState.currentPlayingResourceInQueue = realIndex;
-        try {
-          await appState.initResourcesPlayer();
-        } catch (e) {
-          MyToast.showToast('Exception: $e');
-          MyLogger.logger.e('Exception: $e');
-          appState.resourcesQueue = [];
-          appState.currentPlayingResourceInQueue = 0;
-          appState.currentDetailResource = null;
-          appState.currentResource = null;
-          appState.prevResource = null;
-          appState.isResourcePlaying = false;
-          appState.resourcesPlayer!.stop();
-          appState.resourcesPlayer!.dispose();
-          appState.resourcesPlayer = null;
-          appState.resourcesAudioSource!.clear();
-          appState.isResourcesPlayerPageOpened = false;
-          appState.canResourcesPlayerPagePop = false;
-          return;
-        }
-        appState.currentResource = appState.resourcesQueue![realIndex];
-        appState.currentDetailResource = null;
-        appState.prevResource = appState.currentResource;
-        appState.isFirstLoadResourcesPlayer = true;
-        appState.resourcesPlayer!.play();
-      } else {
-        appState.canSongsPlayerPagePop = true;
+      int realIndex =
+          appState.songsQueue!.indexOf(appState.rawSongsInLibrary![index]);
+      appState.canSongsPlayerPagePop = true;
+      appState.songsPlayer!.stop();
+      appState.songsPlayer!.dispose();
+      appState.songsPlayer = null;
+      appState.songsAudioSource!.clear();
+      appState.currentPlayingSongInQueue = realIndex;
+      try {
+        await appState.initSongsPlayer();
+      } catch (e) {
+        MyToast.showToast('Exception: $e');
+        MyLogger.logger.e('Exception: $e');
+        appState.songsQueue = [];
+        appState.currentPlayingSongInQueue = 0;
+        appState.currentDetailSong = null;
+        appState.currentSong = null;
+        appState.prevSong = null;
+        appState.isSongPlaying = false;
         appState.songsPlayer!.stop();
         appState.songsPlayer!.dispose();
         appState.songsPlayer = null;
         appState.songsAudioSource!.clear();
-        appState.currentPlayingSongInQueue = realIndex;
-        try {
-          await appState.initSongsPlayer();
-        } catch (e) {
-          MyToast.showToast('Exception: $e');
-          MyLogger.logger.e('Exception: $e');
-          appState.songsQueue = [];
-          appState.currentPlayingSongInQueue = 0;
-          appState.currentDetailSong = null;
-          appState.currentSong = null;
-          appState.prevSong = null;
-          appState.isSongPlaying = false;
-          appState.songsPlayer!.stop();
-          appState.songsPlayer!.dispose();
-          appState.songsPlayer = null;
-          appState.songsAudioSource!.clear();
-          appState.isSongsPlayerPageOpened = false;
-          appState.canSongsPlayerPagePop = false;
-          return;
-        }
-        appState.currentSong = appState.songsQueue![realIndex];
-        appState.currentDetailSong = null;
-        appState.prevSong = appState.currentSong;
-        appState.isFirstLoadSongsPlayer = true;
-        appState.songsPlayer!.play();
+        appState.isSongsPlayerPageOpened = false;
+        appState.canSongsPlayerPagePop = false;
+        return;
       }
+      appState.currentSong = appState.songsQueue![realIndex];
+      appState.currentDetailSong = null;
+      appState.prevSong = appState.currentSong;
+      appState.isFirstLoadSongsPlayer = true;
+      appState.songsPlayer!.play();
     }
-    if (_currentPlatform == 3 && context.mounted) {
-      // appState.isResourcesPlayerPageOpened = true;
-      appState.currentResource = _searchedResources[index];
-      Navigator.pushNamed(context, '/detail_resource_page');
-    } else {
+    if (mounted) {
       appState.isSongsPlayerPageOpened = true;
       Navigator.pushNamed(context, '/songs_player_page');
     }
   }
 
-  Widget _buildLoadingIndicator(ColorScheme colorScheme) {
-    return _isLoading
+  Widget _buildLoadingIndicator(ColorScheme colorScheme, bool isLoading) {
+    return isLoading
         ? Padding(
             padding: const EdgeInsets.all(8.0),
             child: Center(
@@ -319,12 +260,31 @@ class _SearchPageState extends State<SearchPage> {
                   height: 10.0,
                   width: 10.0,
                   child: CircularProgressIndicator(
-                    color: colorScheme.onPrimary,
+                    color: _currentPlatform != 3
+                        ? colorScheme.onPrimary
+                        : Color(0xFFFB6A9D),
                     strokeWidth: 2.0,
                   )),
             ),
           )
         : Container();
+  }
+
+  Widget _buildFetchingSearchResultLoadingIndicator(ColorScheme colorScheme) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Center(
+        child: SizedBox(
+            height: 20.0,
+            width: 20.0,
+            child: CircularProgressIndicator(
+              color: _currentPlatform != 3
+                  ? colorScheme.onPrimary
+                  : Color(0xFFFB6A9D),
+              strokeWidth: 2.0,
+            )),
+      ),
+    );
   }
 
   @override
@@ -333,16 +293,17 @@ class _SearchPageState extends State<SearchPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
+    _isSearching = appState.isSearching;
+    _suggestions = appState.searchSuggestions;
+    _searchedSongs = appState.searchedSongs;
+    _searchedResources = appState.searchedResources;
     _appState = appState;
     _keyword = appState.keyword;
     _currentPlatform = appState.currentPlatform;
     _isUsingMockData = appState.isUsingMockData;
-    _hasMore = appState.hasMore!;
-    _player =
-        _currentPlatform == 3 ? appState.resourcesPlayer : appState.songsPlayer;
-    _count = _currentPlatform == 3
-        ? appState.searchedResources.length
-        : appState.searchedSongs.length;
+    _hasMore = appState.hasMore;
+    _player = appState.songsPlayer;
+    _count = appState.searchedCount;
     var openedLibrary = appState.openedLibrary;
     // _rawItem = _currentPlatform == 3
     //     ? appState.rawResourcesInFavList
@@ -368,8 +329,10 @@ class _SearchPageState extends State<SearchPage> {
 
     return WillPopScope(
       onWillPop: () async {
-        appState.searchedSongs.clear();
-        appState.searchedResources.clear();
+        appState.searchedSongs = [];
+        appState.searchedResources = [];
+        appState.searchedCount = 0;
+        appState.searchSuggestions = [];
         return true; // Allow the navigation to proceed
       },
       child: Consumer<ThemeNotifier>(
@@ -414,17 +377,22 @@ class _SearchPageState extends State<SearchPage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              left: 20.0,
-                                              top: 10.0,
-                                              bottom: 10.0,
-                                            ),
-                                            child: Text(
-                                              'Searched results: $_count',
-                                              textAlign: TextAlign.start,
-                                              style: textTheme.titleSmall,
-                                              overflow: TextOverflow.ellipsis,
+                                          InkWell(
+                                            onTap: () {
+                                              print(appState);
+                                            },
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                left: 20.0,
+                                                top: 10.0,
+                                                bottom: 10.0,
+                                              ),
+                                              child: Text(
+                                                'Searched results: $_count',
+                                                textAlign: TextAlign.start,
+                                                style: textTheme.titleSmall,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
                                             ),
                                           ),
                                           Expanded(
@@ -449,7 +417,7 @@ class _SearchPageState extends State<SearchPage> {
                                                               index],
                                                       isSelected: false,
                                                       onTap: () {
-                                                        _onSearchedItemTapped(
+                                                        _onSearchedResourceTapped(
                                                             index, appState);
                                                       },
                                                     );
@@ -471,14 +439,17 @@ class _SearchPageState extends State<SearchPage> {
                                                   }
                                                 } else {
                                                   return _buildLoadingIndicator(
-                                                      colorScheme);
+                                                      colorScheme, _isLoading);
                                                 }
                                               },
                                             ),
                                           ),
                                         ],
                                       )
-                                    : Container(),
+                                    : _isSearching
+                                        ? _buildFetchingSearchResultLoadingIndicator(
+                                            colorScheme)
+                                        : _searchSuggestion(colorScheme),
                               ),
                             ),
                           ),
@@ -495,6 +466,66 @@ class _SearchPageState extends State<SearchPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _searchSuggestion(ColorScheme colorScheme) {
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      itemCount: (_appState!.searchTextEditingController == null ||
+              _appState!.searchTextEditingController!.text.isEmpty)
+          ? 0
+          : _suggestions.length,
+      itemBuilder: (BuildContext context, int index) {
+        var suggestion = Html(
+          data: '<header>${_suggestions[index]}</header>',
+          style: {
+            'em': Style(
+              color: Color(0xFFFB6A9D),
+              fontStyle: FontStyle.normal,
+              fontWeight: FontWeight.bold,
+            ),
+            'header': Style(
+              fontStyle: FontStyle.normal,
+              maxLines: 1,
+              textOverflow: TextOverflow.ellipsis,
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onPrimary.withOpacity(0.6),
+            ),
+          },
+        );
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              print(_suggestions[index]);
+              var finalKeyword =
+                  StringUtils.extractWholeName(_suggestions[index]);
+              _suggestions.clear;
+              _appState!.searchSuggestions = [];
+              print(finalKeyword);
+              _keyword = finalKeyword;
+              _appState!.searchTextEditingController!.text = finalKeyword;
+              _appState!.onSearchBarSubmit!(finalKeyword);
+            },
+            borderRadius: index == 0
+                ? BorderRadius.only(
+                    topLeft: Radius.circular(10.0),
+                    topRight: Radius.circular(10.0),
+                  )
+                : null,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: SizedBox(
+                height: 44.0,
+                child: Center(
+                  child: suggestion,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

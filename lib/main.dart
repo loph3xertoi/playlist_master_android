@@ -52,7 +52,15 @@ class MyApp extends StatelessWidget {
       child: Consumer<ThemeNotifier>(
         builder: (context, theme, _) => MaterialApp(
           // themeMode: ThemeMode.system,
-          theme: theme.getTheme(),
+          theme: MyAppState().currentPlatform != 3
+              ? theme.getTheme()
+              : theme.getTheme()?.copyWith(
+                    textSelectionTheme: TextSelectionThemeData(
+                      cursorColor: Color(0xFFBB5A7D),
+                      selectionColor: Color(0xFFB75674),
+                      selectionHandleColor: Color(0xFFEC6F92),
+                    ),
+                  ),
           title: 'Playlist Master',
           // theme: ThemeData(
           //   useMaterial3: true,

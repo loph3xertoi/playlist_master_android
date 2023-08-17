@@ -6,10 +6,8 @@ import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_song.dart';
-import '../entities/bilibili/bili_resource.dart';
 import '../states/app_state.dart';
 import 'confirm_popup.dart';
-import 'resource_item_in_queue.dart';
 import 'song_item_in_queue.dart';
 
 class ShowQueueDialog extends StatefulWidget {
@@ -75,34 +73,20 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
 
     var currentPlayingSongInQueue = appState.currentPlayingSongInQueue;
     var currentPlayingResourceInQueue = appState.currentPlayingResourceInQueue;
-    var player =
-        _currentPlatform == 3 ? appState.resourcesPlayer : appState.songsPlayer;
+    var player = appState.songsPlayer;
     if (_queueLength == 0) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (player != null && mounted) {
-          if (_currentPlatform == 3) {
-            appState.resourcesQueue = [];
-            appState.currentPlayingResourceInQueue = 0;
-            appState.currentResource = null;
-            appState.prevResource = null;
-            appState.isResourcePlaying = false;
-            player.stop();
-            player.dispose();
-            appState.resourcesPlayer = null;
-            appState.resourcesAudioSource!.clear();
-            Navigator.of(context).pop();
-          } else {
-            appState.songsQueue = [];
-            appState.currentPlayingSongInQueue = 0;
-            appState.currentSong = null;
-            appState.prevSong = null;
-            appState.isSongPlaying = false;
-            player.stop();
-            player.dispose();
-            appState.songsPlayer = null;
-            appState.songsAudioSource!.clear();
-            Navigator.of(context).pop();
-          }
+          appState.songsQueue = [];
+          appState.currentPlayingSongInQueue = 0;
+          appState.currentSong = null;
+          appState.prevSong = null;
+          appState.isSongPlaying = false;
+          player.stop();
+          player.dispose();
+          appState.songsPlayer = null;
+          appState.songsAudioSource!.clear();
+          Navigator.of(context).pop();
         }
       });
     }
@@ -218,32 +202,18 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                               child: Container(
                                 margin:
                                     EdgeInsets.fromLTRB(25.0, 0.0, 12.0, 0.0),
-                                child: _currentPlatform == 3
-                                    ? ResourceItemInQueue(
-                                        name: name,
-                                        cover: cover,
-                                        singers: singers,
-                                        isPlaying:
-                                            currentPlayingResourceInQueue ==
-                                                    index
-                                                ? true
-                                                : false,
-                                        onClose: () {
-                                          onCloseResourceItem(index, appState);
-                                        },
-                                      )
-                                    : SongItemInQueue(
-                                        name: name,
-                                        payPlayType: payPlayType,
-                                        cover: cover,
-                                        singers: singers,
-                                        isPlaying:
-                                            currentPlayingSongInQueue == index
-                                                ? true
-                                                : false,
-                                        onClose: () {
-                                          onCloseSongItem(index, appState);
-                                        }),
+                                child: SongItemInQueue(
+                                    name: name,
+                                    payPlayType: payPlayType,
+                                    cover: cover,
+                                    singers: singers,
+                                    isPlaying:
+                                        currentPlayingSongInQueue == index
+                                            ? true
+                                            : false,
+                                    onClose: () {
+                                      onCloseSongItem(index, appState);
+                                    }),
                               ),
                             ),
                           );
@@ -312,67 +282,6 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
 
     Future.delayed(Duration(milliseconds: 200), () {
       appState.isRemovingSongFromQueue = false;
-    });
-  }
-
-  void onCloseResourceItem(int index, MyAppState appState) {
-    appState.removeResourceInQueue(index);
-    int currentPlayingResourceInQueue = appState.currentPlayingResourceInQueue!;
-    AudioPlayer player = appState.resourcesPlayer!;
-    List<BiliResource> resourcesQueue = appState.resourcesQueue!;
-    if (appState.resourcesAudioSource?.length != 0) {
-      appState.resourcesAudioSource!.removeAt(index);
-    }
-    appState.isRemovingResourceFromQueue = true;
-    if (index < currentPlayingResourceInQueue) {
-      appState.currentPlayingResourceInQueue =
-          (currentPlayingResourceInQueue - 1) % _queueLength!;
-      currentPlayingResourceInQueue = appState.currentPlayingResourceInQueue!;
-
-      appState.currentResource = _queueLength != 0
-          ? resourcesQueue[(currentPlayingResourceInQueue - 1) % _queueLength!]
-          : null;
-    } else if (index > currentPlayingResourceInQueue) {
-    } else {
-      // Set the new playing resource to the first if the current
-      // removed resource is the last and is playing.
-      if (currentPlayingResourceInQueue == _queueLength! - 1) {
-        appState.currentPlayingResourceInQueue = 0;
-        currentPlayingResourceInQueue = 0;
-        appState.currentResource =
-            (resourcesQueue.isNotEmpty) ? resourcesQueue[0] : null;
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (resourcesQueue.isNotEmpty) {
-          appState.resourcesPlayer!
-              .seek(Duration.zero, index: currentPlayingResourceInQueue);
-          appState.currentResource = (resourcesQueue.isNotEmpty)
-              ? resourcesQueue[currentPlayingResourceInQueue]
-              : null;
-          appState.currentPlayingResourceInQueue =
-              currentPlayingResourceInQueue;
-        }
-      });
-
-      if (!player.playerState.playing) {
-        player.play();
-        appState.isResourcePlaying = true;
-      }
-    }
-    //TODO: fix bug: when the resource is removed from the queue
-    // is above the current playing resource in queue, and the resource player
-    // is open, the resource cover animation will be wired.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (appState.isResourcesPlayerPageOpened) {
-        _carouselController.jumpToPage(
-          player.effectiveIndices!
-              .indexOf(appState.currentPlayingResourceInQueue!),
-        );
-      }
-    });
-
-    Future.delayed(Duration(milliseconds: 200), () {
-      appState.isRemovingResourceFromQueue = false;
     });
   }
 }

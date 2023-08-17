@@ -73,8 +73,9 @@ class ThemeNotifier with ChangeNotifier {
       onPrimaryContainer: Color(0xFFF7F6F9),
     ),
     textSelectionTheme: TextSelectionThemeData(
-      selectionHandleColor: Color(0xFF212121),
+      cursorColor: Color(0x42000000),
       selectionColor: Colors.black26,
+      selectionHandleColor: Color(0xFF212121),
     ),
     textTheme: TextTheme(
       titleMedium: TextStyle(
@@ -152,8 +153,9 @@ class ThemeNotifier with ChangeNotifier {
       onPrimaryContainer: Colors.black26,
     ),
     textSelectionTheme: TextSelectionThemeData(
-      selectionHandleColor: Colors.amber,
+      cursorColor: Colors.white,
       selectionColor: Colors.amber.withOpacity(0.5),
+      selectionHandleColor: Colors.amber,
     ),
     textTheme: TextTheme(
       titleMedium: TextStyle(

@@ -73,8 +73,17 @@ class _MultiResourcesSelectPopupState extends State<MultiResourcesSelectPopup> {
         for (Result? result in results) {
           if (result != null && result.success) {
             Timer(Duration(milliseconds: 1500), () {
-              appState.refreshDetailFavListPage!(appState);
-              appState.refreshLibraries!(appState, true);
+              // if (mounted) {
+              // Not in searched page.
+              if (appState.searchedCount == 0) {
+                appState.refreshDetailFavListPage != null
+                    ? appState.refreshDetailFavListPage!(appState)
+                    : null;
+              }
+              appState.refreshLibraries != null
+                  ? appState.refreshLibraries!(appState, true)
+                  : null;
+              // }
             });
             MyToast.showToast('Add resources successfully');
             break;
@@ -104,8 +113,16 @@ class _MultiResourcesSelectPopupState extends State<MultiResourcesSelectPopup> {
     await appState.removeResourcesFromFavList(
         removedResources, appState.openedLibrary!, appState.currentPlatform);
     Timer(Duration(milliseconds: 1500), () {
-      appState.refreshDetailFavListPage!(appState);
-      appState.refreshLibraries!(appState, true);
+      // if (mounted) {
+      if (appState.searchedCount == 0) {
+        appState.refreshDetailFavListPage != null
+            ? appState.refreshDetailFavListPage!(appState)
+            : null;
+      }
+      appState.refreshLibraries != null
+          ? appState.refreshLibraries!(appState, true)
+          : null;
+      // }
     });
   }
 
@@ -161,8 +178,16 @@ class _MultiResourcesSelectPopupState extends State<MultiResourcesSelectPopup> {
           });
           appState.searchedResources = appState.rawResourcesInFavList!;
           Timer(Duration(milliseconds: 1500), () {
-            appState.refreshDetailFavListPage!(appState);
-            appState.refreshLibraries!(appState, true);
+            // if (mounted) {
+            if (appState.searchedCount == 0) {
+              appState.refreshDetailFavListPage != null
+                  ? appState.refreshDetailFavListPage!(appState)
+                  : null;
+            }
+            appState.refreshLibraries != null
+                ? appState.refreshLibraries!(appState, true)
+                : null;
+            // }
           });
           break;
         }

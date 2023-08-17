@@ -1,3 +1,5 @@
+import 'dart:ui' as ui show BoxHeightStyle;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -20,6 +22,7 @@ class MySelectableText extends StatelessWidget {
     return SelectableText(
       text,
       textAlign: textAlign,
+      selectionHeightStyle: ui.BoxHeightStyle.max,
       contextMenuBuilder: (context, editableTextState) {
         final List<ContextMenuButtonItem> buttonItems =
             editableTextState.contextMenuButtonItems;
