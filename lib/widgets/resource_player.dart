@@ -472,8 +472,9 @@ class _DashPageState extends State<ResourcePlayer> {
         activityName: 'com.ryanheise.audioservice.AudioServiceActivity',
       ),
     );
+    _controller!.refresh();
+    _controller!.seekTo(Duration.zero);
     _betterPlayerController.setupDataSource(dataSource);
-    // _controller = _betterPlayerController.videoPlayerController;
     _hideTimer?.cancel();
     _startHideTimer();
   }
