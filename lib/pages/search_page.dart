@@ -111,7 +111,7 @@ class _SearchPageState extends State<SearchPage> {
           if (_currentPlatform == 3) {
             _searchedResources.addAll(list!);
           } else {
-            _searchedResources.addAll(list!);
+            _searchedSongs.addAll(list!);
           }
           _isLoading = false;
         });

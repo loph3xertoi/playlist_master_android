@@ -73,6 +73,7 @@ class _CreateLibraryDialogState extends State<CreateLibraryDialog> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
+    var currentPlatform = appState.currentPlatform;
     return Dialog(
       // backgroundColor: Colors.white,
       insetPadding: EdgeInsets.all(0.0),
@@ -140,32 +141,43 @@ class _CreateLibraryDialogState extends State<CreateLibraryDialog> {
                   borderRadius: BorderRadius.circular(8.0),
                   color: colorScheme.secondary,
                 ),
-                child: TextField(
-                  controller: _textEditingController,
-                  autofocus: true,
-                  textAlignVertical: TextAlignVertical.center,
-                  style: textTheme.titleMedium!.copyWith(
-                    color: colorScheme.onSecondary,
+                child: Theme(
+                  data: currentPlatform == 3
+                      ? Theme.of(context).copyWith(
+                          textSelectionTheme: TextSelectionThemeData(
+                            cursorColor: Color(0xFFBB5A7D),
+                            selectionColor: Color(0xFFB75674),
+                            selectionHandleColor: Color(0xFFEC6F92),
+                          ),
+                        )
+                      : Theme.of(context),
+                  child: TextField(
+                    controller: _textEditingController,
+                    autofocus: true,
+                    textAlignVertical: TextAlignVertical.center,
+                    style: textTheme.titleMedium!.copyWith(
+                      color: colorScheme.onSecondary,
+                    ),
+                    selectionHeightStyle: ui.BoxHeightStyle.max,
+                    decoration: InputDecoration(
+                      alignLabelWithHint: true,
+                      floatingLabelAlignment: FloatingLabelAlignment.center,
+                      hintText: 'New Library',
+                      hintStyle: textTheme.titleMedium,
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 12.0, horizontal: 10.0),
+                      suffixIcon: _showSuffixIcon
+                          ? GestureDetector(
+                              onTap: () => _textEditingController.clear(),
+                              child: Icon(Icons.cancel_rounded))
+                          : null,
+                      suffixIconColor: colorScheme.tertiary,
+                      border: InputBorder.none,
+                    ),
+                    onSubmitted: (value) {
+                      _onSubmitted(context, value, appState);
+                    },
                   ),
-                  selectionHeightStyle: ui.BoxHeightStyle.max,
-                  decoration: InputDecoration(
-                    alignLabelWithHint: true,
-                    floatingLabelAlignment: FloatingLabelAlignment.center,
-                    hintText: 'New Library',
-                    hintStyle: textTheme.titleMedium,
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
-                    suffixIcon: _showSuffixIcon
-                        ? GestureDetector(
-                            onTap: () => _textEditingController.clear(),
-                            child: Icon(Icons.cancel_rounded))
-                        : null,
-                    suffixIconColor: colorScheme.tertiary,
-                    border: InputBorder.none,
-                  ),
-                  onSubmitted: (value) {
-                    _onSubmitted(context, value, appState);
-                  },
                 ),
               ),
             ),

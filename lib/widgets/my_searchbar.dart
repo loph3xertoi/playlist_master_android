@@ -228,142 +228,151 @@ class _MySearchBarState extends State<MySearchBar>
         borderRadius: BorderRadius.circular(28.0),
         color: colorScheme.secondary,
       ),
-      child: TextField(
-        controller: _textEditingController,
-        focusNode: _focusNode,
-        textAlignVertical: TextAlignVertical.top,
-        enabled: true,
-        readOnly: widget.notInHomepage ? false : true,
-        style: textTheme.titleMedium!.copyWith(
-          color: colorScheme.onSecondary,
-        ),
-        selectionHeightStyle: ui.BoxHeightStyle.max,
-        onTap: _onSearchAreaPressed,
-        enableInteractiveSelection:
-            _searchBarFocused || widget.inDetailLibraryPage,
-        onSubmitted: (value) {
-          _onSubmitted(value);
-        },
-        onChanged: _currentPlatform == 3 &&
-                widget.notInHomepage &&
-                !widget.inDetailLibraryPage
-            ? (value) {
-                _getSearchSuggestion(value);
-              }
-            : null,
-        contextMenuBuilder: (context, editableTextState) {
-          final List<ContextMenuButtonItem> buttonItems =
-              editableTextState.contextMenuButtonItems;
-          return AdaptiveTextSelectionToolbar(
-            anchors: editableTextState.contextMenuAnchors,
-            children: [
-              ...buttonItems.map<Widget>((buttonItem) {
-                return Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: buttonItem.onPressed,
-                    child: Ink(
-                      padding: EdgeInsets.all(8.0),
-                      color: colorScheme.primary,
-                      child: Text(
-                        CupertinoTextSelectionToolbarButton.getButtonLabel(
-                            context, buttonItem),
-                        style: textTheme.labelSmall!.copyWith(
-                          color: colorScheme.onSecondary,
+      child: Theme(
+        data: _currentPlatform == 3
+            ? Theme.of(context).copyWith(
+                textSelectionTheme: TextSelectionThemeData(
+                  cursorColor: Color(0xFFBB5A7D),
+                  selectionColor: Color(0xFFB75674),
+                  selectionHandleColor: Color(0xFFEC6F92),
+                ),
+              )
+            : Theme.of(context),
+        child: TextField(
+          controller: _textEditingController,
+          focusNode: _focusNode,
+          textAlignVertical: TextAlignVertical.top,
+          enabled: true,
+          readOnly: widget.notInHomepage ? false : true,
+          style: textTheme.titleMedium!.copyWith(
+            color: colorScheme.onSecondary,
+          ),
+          selectionHeightStyle: ui.BoxHeightStyle.max,
+          onTap: _onSearchAreaPressed,
+          enableInteractiveSelection: _searchBarFocused ||
+              widget.inDetailLibraryPage ||
+              _currentPlatform != 3,
+          onSubmitted: (value) {
+            _onSubmitted(value);
+          },
+          onChanged: _currentPlatform == 3 &&
+                  widget.notInHomepage &&
+                  !widget.inDetailLibraryPage
+              ? (value) {
+                  _getSearchSuggestion(value);
+                }
+              : null,
+          contextMenuBuilder: (context, editableTextState) {
+            final List<ContextMenuButtonItem> buttonItems =
+                editableTextState.contextMenuButtonItems;
+            return AdaptiveTextSelectionToolbar(
+              anchors: editableTextState.contextMenuAnchors,
+              children: [
+                ...buttonItems.map<Widget>((buttonItem) {
+                  return Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: buttonItem.onPressed,
+                      child: Ink(
+                        padding: EdgeInsets.all(8.0),
+                        color: colorScheme.primary,
+                        child: Text(
+                          CupertinoTextSelectionToolbarButton.getButtonLabel(
+                              context, buttonItem),
+                          style: textTheme.labelSmall!.copyWith(
+                            color: colorScheme.onSecondary,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              }).toList()
-            ],
-          );
-        },
-        decoration: InputDecoration(
-          alignLabelWithHint: true,
-          floatingLabelAlignment: FloatingLabelAlignment.center,
-          hintText: _currentPlatform != 3
-              ? widget.inDetailLibraryPage
-                  ? 'Search Playlists'
-                  : 'Search Musics'
-              : widget.inDetailLibraryPage
-                  ? 'Search Favlists'
-                  : 'Search Resources',
-          hintStyle: textTheme.titleMedium,
-          prefixIcon: GestureDetector(
-            child: Ink(
-              decoration: ShapeDecoration(
-                color: Colors.transparent,
-                shape: CircleBorder(),
-              ),
-              child: IconButton(
-                color: colorScheme.tertiary,
-                icon: widget.notInHomepage
-                    ? Icon(Icons.arrow_back_rounded)
-                    : Icon(Icons.menu_rounded),
-                // icon: AnimatedIcon(
-                //   icon: AnimatedIcons.menu_arrow,
-                //   progress: _animationController,
-                // ),
-                onPressed: widget.notInHomepage
-                    ? () {
-                        appState.searchedSongs = [];
-                        appState.searchedResources = [];
-                        // appState.totalSearchedSongs = 0;
-                        // appState.currentPage = 2;
-                        _onBackIconPressed();
-                      }
-                    : _onMenuIconPressed,
-              ),
-            ),
-          ),
-          suffixIcon: GestureDetector(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Ink(
-                  decoration: ShapeDecoration(
-                    color: Colors.transparent,
-                    shape: CircleBorder(),
-                  ),
-                  child: IconButton(
-                    color: colorScheme.tertiary,
-                    icon: Icon(Icons.search_rounded),
-                    onPressed: () {
-                      _onSearchIconPressed(appState);
-                    },
-                  ),
-                ),
-                !widget.notInHomepage
-                    ? Ink(
-                        decoration: ShapeDecoration(
-                          color: Colors.transparent,
-                          shape: CircleBorder(),
-                        ),
-                        child: IconButton(
-                          // No padding.
-                          padding: EdgeInsets.zero,
-                          icon: CircleAvatar(
-                            radius: 15.0,
-                            backgroundImage: _isUsingMockData
-                                ? Image.asset('assets/images/avatar.png').image
-                                : CachedNetworkImageProvider(
-                                    MyAppState.defaultCoverImage,
-                                  ),
-                            // : Image.network(MyAppState.defaultCoverImage)
-                            //     .image,
-                          ),
-                          onPressed: _onAvatarPressed,
-                        ),
-                      )
-                    : Container(),
+                  );
+                }).toList()
               ],
+            );
+          },
+          decoration: InputDecoration(
+            alignLabelWithHint: true,
+            floatingLabelAlignment: FloatingLabelAlignment.center,
+            hintText: _currentPlatform != 3
+                ? widget.inDetailLibraryPage
+                    ? 'Search Playlists'
+                    : 'Search Musics'
+                : widget.inDetailLibraryPage
+                    ? 'Search Favlists'
+                    : 'Search Resources',
+            hintStyle: textTheme.titleMedium,
+            prefixIcon: GestureDetector(
+              child: Ink(
+                decoration: ShapeDecoration(
+                  color: Colors.transparent,
+                  shape: CircleBorder(),
+                ),
+                child: IconButton(
+                  color: colorScheme.tertiary,
+                  icon: widget.notInHomepage
+                      ? Icon(Icons.arrow_back_rounded)
+                      : Icon(Icons.menu_rounded),
+                  onPressed: widget.notInHomepage
+                      ? () {
+                          appState.searchedSongs = [];
+                          appState.searchedResources = [];
+                          // appState.totalSearchedSongs = 0;
+                          // appState.currentPage = 2;
+                          _onBackIconPressed();
+                        }
+                      : _onMenuIconPressed,
+                ),
+              ),
             ),
+            suffixIcon: GestureDetector(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Ink(
+                    decoration: ShapeDecoration(
+                      color: Colors.transparent,
+                      shape: CircleBorder(),
+                    ),
+                    child: IconButton(
+                      color: colorScheme.tertiary,
+                      icon: Icon(Icons.search_rounded),
+                      onPressed: () {
+                        _onSearchIconPressed(appState);
+                      },
+                    ),
+                  ),
+                  !widget.notInHomepage
+                      ? Ink(
+                          decoration: ShapeDecoration(
+                            color: Colors.transparent,
+                            shape: CircleBorder(),
+                          ),
+                          child: IconButton(
+                            // No padding.
+                            padding: EdgeInsets.zero,
+                            icon: CircleAvatar(
+                              radius: 15.0,
+                              backgroundImage: _isUsingMockData
+                                  ? Image.asset('assets/images/avatar.png')
+                                      .image
+                                  : CachedNetworkImageProvider(
+                                      MyAppState.defaultCoverImage,
+                                    ),
+                              // : Image.network(MyAppState.defaultCoverImage)
+                              //     .image,
+                            ),
+                            onPressed: _onAvatarPressed,
+                          ),
+                        )
+                      : Container(),
+                ],
+              ),
+            ),
+            // Set the border width to 0.
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.symmetric(vertical: 12.0),
           ),
-          // Set the border width to 0.
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 12.0),
         ),
       ),
     );

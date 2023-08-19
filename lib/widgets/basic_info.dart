@@ -443,9 +443,13 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
     super.initState();
     const apiKey = '7e6e5a2ec2404fc8b3e846d45c5abb76';
     final geolocation = IpGeoLocationIO(apiKey);
-    geolocation.getUserLocation().then((value) => setState(() {
+    geolocation.getUserLocation().then((value) {
+      if (mounted) {
+        setState(() {
           area = '${value.city}, ${value.stateProv}, ${value.countryName}';
-        }));
+        });
+      }
+    });
     resolvePostCode(widget.user.province.toString())
         .then((value) => setState(() {
               province = value!.province;

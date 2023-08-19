@@ -60,6 +60,7 @@ class _BottomPlayerState extends State<BottomPlayer>
       }
     });
     return Material(
+      // color: colorScheme.primary,
       child: InkWell(
         onTap: () {
           appState.canSongsPlayerPagePop = true;
@@ -69,7 +70,8 @@ class _BottomPlayerState extends State<BottomPlayer>
           height: 54.0,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Colors.transparent,
+            color: colorScheme.primary,
+            // color: Colors.transparent,
             boxShadow: [
               BoxShadow(
                 color: Colors.transparent.withOpacity(0.2),
