@@ -799,6 +799,7 @@ class _CustomControlsWidgetState
     if (_betterPlayerController!.isFullScreen) {
       _onExpandCollapse();
     } else {
+      _appState!.inDetailFavlistPage = false;
       Navigator.pop(context);
     }
   }

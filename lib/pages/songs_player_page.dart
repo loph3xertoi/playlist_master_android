@@ -973,7 +973,7 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
                                       );
                                     } else {
                                       throw UnsupportedError(
-                                          'Invalid playing mode.');
+                                          'Invalid playing mode: $userPlayingMode');
                                     }
                                   },
                                 ),

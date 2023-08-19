@@ -11,6 +11,7 @@ import 'package:playlistmaster/entities/bilibili/bili_subpage_of_resource.dart';
 import 'package:playlistmaster/utils/my_toast.dart';
 import 'package:provider/provider.dart';
 
+import '../entities/bilibili/bili_resource.dart';
 import '../http/api.dart';
 import '../states/app_state.dart';
 import 'custom_controller_widget_better_player.dart';
@@ -36,11 +37,11 @@ class _DashPageState extends State<ResourcePlayer> {
 
   late BiliDetailResource _detailResource;
 
-  // The sub resource or episode currently playing, may be BiliDetailResource(episode)
-  // or BiliSubPageOfResource(sub resource).
-  late dynamic _currentPlayingSubResource;
+  // Original resources in this opened favlist.
+  List<BiliResource>? _originalResourcesOfFavList;
 
-  bool _isDisposing = false;
+  // Whether playing the whole favlist.
+  bool _isPlayingFavList = false;
 
   bool _isLocked = false;
 
@@ -53,25 +54,20 @@ class _DashPageState extends State<ResourcePlayer> {
 
   bool _hasSkipedToNext = false;
 
-  List<String> _playingModeNames = [
-    'Current once',
-    'Current repeat',
-    'Playlists once',
-    'Playlists repeat',
-  ];
+  // Whether in detail favlist page.
+  bool _inDetailFavlistPage = true;
+
+  int? _currentResourceIndexInFavList;
+
+  late List<String> _playingModeNames;
+
+  late List<IconData> _playingModeIcons;
 
   Map<String, String> _header = {
     'Referer': 'https://www.bilibili.com',
     'User-Agent':
         'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
   };
-
-  List<IconData> _playingModeIcons = [
-    Icons.repeat_one_rounded,
-    Icons.repeat_one_on_rounded,
-    Icons.repeat_rounded,
-    Icons.repeat_on_rounded,
-  ];
 
   VideoPlayerValue? get latestValue => _latestValue;
 
@@ -83,8 +79,9 @@ class _DashPageState extends State<ResourcePlayer> {
 
   @override
   void dispose() {
-    _isDisposing = true;
-    // _controller!.dispose();
+    // if (!_inDetailFavlistPage) {
+    _controller!.dispose();
+    // }
     _betterPlayerController.dispose();
     super.dispose();
   }
@@ -94,9 +91,14 @@ class _DashPageState extends State<ResourcePlayer> {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
     _appState = state;
+    _playingModeNames = state.playingModeNames;
+    _playingModeIcons = state.playingModeIcons;
     _detailResource = widget.detailResource;
+    _originalResourcesOfFavList = state.rawResourcesInFavList;
+    _currentResourceIndexInFavList = state.currentResourceIndexInFavList;
     BetterPlayerConfiguration betterPlayerConfiguration =
         BetterPlayerConfiguration(
+      autoDispose: false,
       autoPlay: true,
       aspectRatio: 16 / 9,
       autoDetectFullscreenAspectRatio: true,
@@ -162,7 +164,7 @@ class _DashPageState extends State<ResourcePlayer> {
             _buildPlayingModeList();
           }),
         ],
-        controlBarColor: Colors.transparent,
+        controlBarColor: Colors.black12,
         loadingWidget: Lottie.asset(
           'assets/images/video_buffering.json',
           fit: BoxFit.scaleDown,
@@ -251,8 +253,8 @@ class _DashPageState extends State<ResourcePlayer> {
       }
       if (event.betterPlayerEventType == BetterPlayerEventType.finished) {
         if (!_hasSkipedToNext &&
-            (_appState!.biliResourcePlayingMode == 2 ||
-                _appState!.biliResourcePlayingMode == 3)) {
+            _appState!.biliResourcePlayingMode != 0 &&
+            _appState!.biliResourcePlayingMode != 1) {
           _skipToNextSubResource();
           _hasSkipedToNext = true;
         }
@@ -285,7 +287,10 @@ class _DashPageState extends State<ResourcePlayer> {
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
     _appState = appState;
+    _inDetailFavlistPage = appState.inDetailFavlistPage;
     _isLocked = appState.isResourcePlayerLocked;
+    _originalResourcesOfFavList = appState.rawResourcesInFavList;
+    _currentResourceIndexInFavList = appState.currentResourceIndexInFavList;
     return Scaffold(
       body: Center(
         child: SizedBox.expand(
@@ -304,31 +309,129 @@ class _DashPageState extends State<ResourcePlayer> {
     dynamic nextSubResource;
     int subPageNo = _appState!.subPageNo;
     int playingMode = _appState!.biliResourcePlayingMode;
-    if (_resourceType == 1) {
-      if (playingMode == 2) {
-        if (subPageNo < _detailResource.subpages!.length) {
-          subPageNo = ++_appState!.subPageNo;
+    if (playingMode == 2 || playingMode == 4 || playingMode == 5) {
+      if (playingMode != 2) {
+        if (_resourceType == 0) {
+          nextSubResource = await _seekToNextResource();
+          if (nextSubResource == null) {
+            _hideTimer?.cancel();
+            _startHideTimer();
+            return;
+          }
+        } else if (_resourceType == 1) {
+          if (subPageNo < _detailResource.subpages!.length) {
+            subPageNo = ++_appState!.subPageNo;
+            nextSubResource = _detailResource.subpages![subPageNo - 1];
+          } else {
+            nextSubResource = await _seekToNextResource();
+            if (nextSubResource == null) {
+              _hideTimer?.cancel();
+              _startHideTimer();
+              return;
+            }
+          }
+        } else if (_resourceType == 2) {
+          if (playingMode == 4) {
+            // Don't traverse episodes.
+            nextSubResource = await _seekToNextResource();
+            if (nextSubResource == null) {
+              _hideTimer?.cancel();
+              _startHideTimer();
+              return;
+            }
+          } else {
+            // Traverse episodes.
+            if (subPageNo < _detailResource.episodes!.length) {
+              subPageNo = ++_appState!.subPageNo;
+              nextSubResource = _detailResource.episodes![subPageNo - 1];
+            } else {
+              nextSubResource = await _seekToNextResource();
+              if (nextSubResource == null) {
+                _hideTimer?.cancel();
+                _startHideTimer();
+                return;
+              }
+            }
+          }
         } else {
-          return;
+          throw Exception('Invalid resource type');
         }
       } else {
-        _appState!.subPageNo =
-            subPageNo = subPageNo % _detailResource.subpages!.length + 1;
+        if (_resourceType == 0) {
+          _hideTimer?.cancel();
+          _startHideTimer();
+          return;
+        } else if (_resourceType == 1) {
+          if (subPageNo < _detailResource.subpages!.length) {
+            subPageNo = ++_appState!.subPageNo;
+            nextSubResource = _detailResource.subpages![subPageNo - 1];
+          } else {
+            _hideTimer?.cancel();
+            _startHideTimer();
+            return;
+          }
+        } else if (_resourceType == 2) {
+          if (subPageNo < _detailResource.episodes!.length) {
+            subPageNo = ++_appState!.subPageNo;
+            nextSubResource = _detailResource.episodes![subPageNo - 1];
+          } else {
+            _hideTimer?.cancel();
+            _startHideTimer();
+            return;
+          }
+        } else {
+          throw Exception('Invalid resource type');
+        }
       }
-      nextSubResource = _detailResource.subpages![subPageNo - 1];
+    } else if (playingMode == 3 || playingMode == 6 || playingMode == 7) {
+      if (playingMode != 3) {
+        if (_resourceType == 0) {
+          nextSubResource = await _seekToNextResource();
+        } else if (_resourceType == 1) {
+          if (subPageNo < _detailResource.subpages!.length) {
+            subPageNo = ++_appState!.subPageNo;
+            nextSubResource = _detailResource.subpages![subPageNo - 1];
+          } else {
+            nextSubResource = await _seekToNextResource();
+          }
+        } else if (_resourceType == 2) {
+          if (playingMode == 6) {
+            // Don't traverse episodes.
+            nextSubResource = await _seekToNextResource();
+          } else {
+            // Traverse episodes.
+            if (subPageNo < _detailResource.episodes!.length) {
+              subPageNo = ++_appState!.subPageNo;
+              nextSubResource = _detailResource.episodes![subPageNo - 1];
+            } else {
+              nextSubResource = await _seekToNextResource();
+            }
+          }
+        } else {
+          throw Exception('Invalid resource type');
+        }
+      } else {
+        if (_resourceType == 0) {
+          _hideTimer?.cancel();
+          _startHideTimer();
+          return;
+        } else if (_resourceType == 1) {
+          _appState!.subPageNo =
+              subPageNo = subPageNo % _detailResource.subpages!.length + 1;
+          nextSubResource = _detailResource.subpages![subPageNo - 1];
+        } else if (_resourceType == 2) {
+          // Traverse episodes.
+          _appState!.subPageNo =
+              subPageNo = subPageNo % _detailResource.episodes!.length + 1;
+          nextSubResource = _detailResource.episodes![subPageNo - 1];
+        } else {
+          throw Exception('Invalid resource type');
+        }
+      }
     } else {
-      if (playingMode == 2) {
-        if (subPageNo < _detailResource.episodes!.length) {
-          subPageNo = ++_appState!.subPageNo;
-        } else {
-          return;
-        }
-      } else {
-        _appState!.subPageNo =
-            subPageNo = subPageNo % _detailResource.episodes!.length + 1;
-      }
-      nextSubResource = _detailResource.episodes![subPageNo - 1];
+      throw Exception('Invalid playing mode: $playingMode');
     }
+
     print(_appState);
     final String? title;
     final String? author;
@@ -370,8 +473,70 @@ class _DashPageState extends State<ResourcePlayer> {
       ),
     );
     _betterPlayerController.setupDataSource(dataSource);
+    // _controller = _betterPlayerController.videoPlayerController;
     _hideTimer?.cancel();
     _startHideTimer();
+  }
+
+  dynamic _seekToNextResource() async {
+    dynamic nextSubResource;
+    BiliDetailResource? nextResource;
+    int playingMode = _appState!.biliResourcePlayingMode;
+    bool hasNext = _currentResourceIndexInFavList! <
+        _originalResourcesOfFavList!.length - 1;
+    int nextResourceIndex = hasNext ? _currentResourceIndexInFavList! + 1 : 0;
+    if (hasNext || playingMode == 6 || playingMode == 7) {
+      nextResource = await _appState!.fetchDetailSong<BiliDetailResource>(
+          _originalResourcesOfFavList![nextResourceIndex],
+          _appState!.currentPlatform);
+      if (nextResource == null) {
+        throw Exception(
+            'Failed to fetch detail resource ${nextResourceIndex + 1}: ${_appState!.errorMsg}');
+      }
+      _appState!.currentResourceIndexInFavList = nextResourceIndex;
+      setState(() {
+        _detailResource = nextResource!;
+      });
+      _appState!.currentResource =
+          _originalResourcesOfFavList![nextResourceIndex];
+      _appState!.currentDetailResource = nextResource;
+      _appState!.subPageNo = 1;
+      if (_detailResource.isSeasonResource) {
+        int subPageNo;
+        if (playingMode == 4 || playingMode == 6) {
+          var currentBvid = _detailResource.bvid;
+          var episodesBvids =
+              _detailResource.episodes!.map((e) => e.bvid).toList();
+          subPageNo = episodesBvids.indexOf(currentBvid) + 1;
+          // _appState!.setSubPageNoWithoutNotify(subPageNo);
+          _appState!.subPageNo = subPageNo;
+        } else if (playingMode == 5 || playingMode == 7) {
+          _appState!.subPageNo = subPageNo = 1;
+        } else {
+          throw Exception('Invalid playing mode: $playingMode');
+        }
+        _resourceType = 2;
+        nextSubResource = _detailResource.episodes![subPageNo - 1];
+      } else if (_detailResource.page > 1) {
+        _resourceType = 1;
+        nextSubResource = _detailResource.subpages![0];
+      } else if (_detailResource.page == 1) {
+        _resourceType = 0;
+        nextSubResource = _detailResource;
+      } else {
+        throw Exception('Invalid resource type');
+      }
+      return nextSubResource;
+    } else if (playingMode == 0 ||
+        playingMode == 1 ||
+        playingMode == 2 ||
+        playingMode == 3 ||
+        playingMode == 4 ||
+        playingMode == 5) {
+      return null;
+    } else {
+      throw Exception('Invalid playing mode: $playingMode');
+    }
   }
 
   void _startHideTimer() {
@@ -418,7 +583,6 @@ class _DashPageState extends State<ResourcePlayer> {
     }
   }
 
-  // TODO
   void setPlayingMode(int playingMode) {
     setState(() {
       _appState!.biliResourcePlayingMode = playingMode;
@@ -436,12 +600,36 @@ class _DashPageState extends State<ResourcePlayer> {
         }
       } else if (playingMode == 3) {
         if (_resourceType == 0) {
-          _betterPlayerController.setLooping(true);
+          _betterPlayerController.setLooping(false);
+        } else {
+          _betterPlayerController.setLooping(false);
+        }
+      } else if (playingMode == 4) {
+        if (_resourceType == 0) {
+          _betterPlayerController.setLooping(false);
+        } else {
+          _betterPlayerController.setLooping(false);
+        }
+      } else if (playingMode == 5) {
+        if (_resourceType == 0) {
+          _betterPlayerController.setLooping(false);
+        } else {
+          _betterPlayerController.setLooping(false);
+        }
+      } else if (playingMode == 6) {
+        if (_resourceType == 0) {
+          _betterPlayerController.setLooping(false);
+        } else {
+          _betterPlayerController.setLooping(false);
+        }
+      } else if (playingMode == 7) {
+        if (_resourceType == 0) {
+          _betterPlayerController.setLooping(false);
         } else {
           _betterPlayerController.setLooping(false);
         }
       } else {
-        throw Exception('Invalid playing mode');
+        throw Exception('Invalid playing mode: $playingMode');
       }
     });
   }
@@ -457,7 +645,16 @@ class _DashPageState extends State<ResourcePlayer> {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         child: Row(
           children: [
-            SizedBox(width: isSelected ? 8 : 16),
+            SizedBox(width: isSelected ? 16 : 8),
+            Icon(_playingModeIcons[playingMode]),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _playingModeNames[playingMode],
+                style: _getOverflowMenuElementTextStyle(isSelected),
+              ),
+            ),
+            const SizedBox(width: 16),
             Visibility(
                 visible: isSelected,
                 child: Icon(
@@ -465,12 +662,6 @@ class _DashPageState extends State<ResourcePlayer> {
                   color: Colors.black,
                 )),
             const SizedBox(width: 16),
-            Text(
-              _playingModeNames[playingMode],
-              style: _getOverflowMenuElementTextStyle(isSelected),
-            ),
-            const SizedBox(width: 16),
-            Icon(_playingModeIcons[playingMode]),
           ],
         ),
       ),
@@ -486,7 +677,7 @@ class _DashPageState extends State<ResourcePlayer> {
 
   void _buildPlayingModeList() {
     final List<Widget> children = [];
-    for (var index = 0; index < 4; index++) {
+    for (var index = 0; index < _playingModeNames.length; index++) {
       children.add(_buildPlayingModeRow(index));
     }
     _showMaterialBottomSheet(children);

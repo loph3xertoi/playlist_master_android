@@ -18,10 +18,16 @@ import 'select_favlist_popup.dart';
 
 class BiliResourceItem extends StatefulWidget {
   final BiliResource resource;
+
   // Whether this episode is selected.
   final bool isSelected;
+
   // The source fav list id that the resource belongs to, 0 means in search mode.
   final int biliSourceFavListId;
+
+  // Whether disable overflow icon.
+  final bool disableOverFlowIcon;
+
   final Function onTap;
 
   const BiliResourceItem({
@@ -29,6 +35,7 @@ class BiliResourceItem extends StatefulWidget {
     required this.biliSourceFavListId,
     required this.resource,
     required this.isSelected,
+    this.disableOverFlowIcon = false,
     required this.onTap,
   });
 
@@ -226,27 +233,31 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
                                           ),
                                         )
                                       : TextSpan(),
-                                  WidgetSpan(
-                                    child: Html(
-                                      data:
-                                          '<header>${resource.title}</header>',
-                                      style: {
-                                        'em': Style(
-                                          color: Color(0xFFFB6A9D),
-                                          fontStyle: FontStyle.normal,
-                                          fontWeight: FontWeight.bold,
+                                  // This item isn't searched item.
+                                  appState.searchSuggestions.isEmpty
+                                      ? TextSpan(text: resource.title)
+                                      : WidgetSpan(
+                                          child: Html(
+                                            data:
+                                                '<header>${resource.title}</header>',
+                                            style: {
+                                              'em': Style(
+                                                color: Color(0xFFFB6A9D),
+                                                fontStyle: FontStyle.normal,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              'header': Style(
+                                                fontStyle: FontStyle.normal,
+                                                maxLines: 2,
+                                                textOverflow:
+                                                    TextOverflow.ellipsis,
+                                                fontWeight: FontWeight.bold,
+                                                color: colorScheme.onPrimary
+                                                    .withOpacity(0.6),
+                                              ),
+                                            },
+                                          ),
                                         ),
-                                        'header': Style(
-                                          fontStyle: FontStyle.normal,
-                                          maxLines: 2,
-                                          textOverflow: TextOverflow.ellipsis,
-                                          fontWeight: FontWeight.bold,
-                                          color: colorScheme.onPrimary
-                                              .withOpacity(0.6),
-                                        ),
-                                      },
-                                    ),
-                                  ),
                                 ],
                               ),
                             ),
@@ -377,29 +388,31 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
                                     SizedBox(
                                       height: 30.0,
                                       width: 30.0,
-                                      child: IconButton(
-                                          padding: EdgeInsets.zero,
-                                          onPressed: () async {
-                                            var data = await showDialog(
-                                              context: context,
-                                              builder: (context) =>
-                                                  CreateResourceItemMenuDialog(
-                                                      resource:
-                                                          widget.resource),
-                                            );
-                                            if (data == 'Add to favlist' &&
-                                                mounted) {
-                                              _addResourceToFavlist(
-                                                  context, appState);
-                                            }
-                                          },
-                                          color: colorScheme.onPrimary
-                                              .withOpacity(0.5),
-                                          tooltip: 'Edit resource',
-                                          icon: Icon(
-                                            Icons.more_vert_rounded,
-                                            size: 16.0,
-                                          )),
+                                      child: widget.disableOverFlowIcon
+                                          ? null
+                                          : IconButton(
+                                              padding: EdgeInsets.zero,
+                                              onPressed: () async {
+                                                var data = await showDialog(
+                                                  context: context,
+                                                  builder: (context) =>
+                                                      CreateResourceItemMenuDialog(
+                                                          resource:
+                                                              widget.resource),
+                                                );
+                                                if (data == 'Add to favlist' &&
+                                                    mounted) {
+                                                  _addResourceToFavlist(
+                                                      context, appState);
+                                                }
+                                              },
+                                              color: colorScheme.onPrimary
+                                                  .withOpacity(0.5),
+                                              tooltip: 'Edit resource',
+                                              icon: Icon(
+                                                Icons.more_vert_rounded,
+                                                size: 16.0,
+                                              )),
                                     ),
                                   ],
                                 ),

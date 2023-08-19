@@ -150,6 +150,7 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
     _isUsingMockData = state.isUsingMockData;
     _currentPlatform = state.currentPlatform;
     _currentBiliFavList = state.rawOpenedLibrary!;
+    _inSearchMode = state.isDetailFavListPageInSearchMode;
     // _state = state;
     if (_isUsingMockData) {
       // _firstFutureDetailFavList = Future.value(MockData.detailLibrary);
@@ -162,6 +163,7 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         state.refreshDetailFavListPage = _refreshDetailFavListPage;
+        state.isDetailFavListPageInSearchMode = false;
       });
       _firstFutureDetailFavList = state
           .fetchDetailLibrary(_currentBiliFavList, _currentPlatform, pn: '1');
@@ -189,8 +191,9 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
         appState.currentResource = _searchedResources[index];
       } else {
         appState.currentResource = _originalResources[index];
-        appState.biliResourcePlayingMode = 2;
       }
+      appState.currentResourceIndexInFavList = index;
+      appState.inDetailFavlistPage = true;
       Navigator.pushNamed(context, '/detail_resource_page');
     }
   }
@@ -203,6 +206,8 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
     MyAppState appState = context.watch<MyAppState>();
     _appState = appState;
     _isUsingMockData = appState.isUsingMockData;
+    _inSearchMode = appState.isDetailFavListPageInSearchMode;
+    _searchedResources = appState.searchedResources;
     _currentPlatform = appState.currentPlatform;
     if (appState.rawOpenedLibrary == null) {
       return Container();
@@ -564,6 +569,12 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                                                     IconButton(
                                                                       onPressed:
                                                                           () {
+                                                                        appState
+                                                                            .currentResourceIndexInFavList = 0;
+                                                                        appState
+                                                                            .biliResourcePlayingMode = 4;
+                                                                        appState
+                                                                            .subPageNo = 1;
                                                                         onResourceTap(
                                                                             0,
                                                                             appState);
@@ -629,7 +640,7 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                                                 child:
                                                                     RefreshIndicator(
                                                                   color: Color(
-                                                                      0xFB6A9D),
+                                                                      0x00FB6A9D),
                                                                   strokeWidth:
                                                                       2.0,
                                                                   onRefresh:
@@ -681,6 +692,8 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                                                               false,
                                                                           onTap:
                                                                               () {
+                                                                            appState.biliResourcePlayingMode =
+                                                                                2;
                                                                             onResourceTap(index,
                                                                                 appState);
                                                                           },

@@ -77,6 +77,9 @@ class _MySearchBarState extends State<MySearchBar>
     } else {
       Navigator.pushNamed(context, '/search_page');
     }
+    if (_appState.isDetailFavListPageInSearchMode) {
+      return;
+    }
     _searchBarFocused = true;
     _appState.keyword = null;
     _searchedSongs = [];
@@ -163,12 +166,14 @@ class _MySearchBarState extends State<MySearchBar>
               .where((e) =>
                   e.title.contains(keyword) || e.upperName.contains(keyword))
               .toList();
+          _appState.isDetailFavListPageInSearchMode = true;
         } else {
           throw UnsupportedError('Invalid platform');
         }
       } else {
         _appState.searchedSongs = _appState.rawSongsInLibrary!;
         _appState.searchedResources = _appState.rawResourcesInFavList!;
+        _appState.isDetailFavListPageInSearchMode = false;
       }
     }
     _appState.isSearching = false;
@@ -234,7 +239,8 @@ class _MySearchBarState extends State<MySearchBar>
         ),
         selectionHeightStyle: ui.BoxHeightStyle.max,
         onTap: _onSearchAreaPressed,
-        enableInteractiveSelection: _searchBarFocused,
+        enableInteractiveSelection:
+            _searchBarFocused || widget.inDetailLibraryPage,
         onSubmitted: (value) {
           _onSubmitted(value);
         },

@@ -49,6 +49,15 @@ import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 
 class MyAppState extends ChangeNotifier {
+  /// Whether in detail favlist page.
+  bool _inDetailFavlistPage = false;
+
+  /// Index of current opened resource in favlist.
+  int? _currentResourceIndexInFavList;
+
+  /// Whether the detail fav list is in search mode.
+  bool _isDetailFavListPageInSearchMode = false;
+
   /// Whether is waiting searched result.
   bool _isSearching = false;
 
@@ -238,11 +247,41 @@ class MyAppState extends ChangeNotifier {
   int _userPlayingMode = 1;
 
   /// Bilibili video playing mode.
-  /// 0: stop when current episode or sub resource finishes,
-  /// 1: repeat current episode or sub resource,
-  /// 2: stop when all episodes or sub resource of current detail resource finishes,
-  /// 3: repeat current detail resource's list.
+  /// 0(Sub-Resource once): play current episode or sub resource once and then stop.
+  /// 1(Sub-Resource repeat): play current episode or sub resource and then repeat.
+  /// 2(Resource once): play all episodes or sub resources in this resource once and then stop.
+  /// 3(Resource repeat): play all episodes or sub resources in this resource and then repeat.
+  /// 4(Favlist once): play all resources in favlist once and then stop.
+  /// 5(Favlist once (traverse episodes resource)): play all resources in favlist once and then stop,
+  ///   traverse the episodes if current playing resource exists.
+  /// 6(Favlist repeat): play all resources in favlist and then repeat.
+  /// 7(Favlist repeat (traverse episodes resource)): play all resources in favlist and then repeat,
+  ///   traverse the episodes if current playing resource exists.
   int _biliResourcePlayingMode = 0;
+
+  /// Playing mode name for resource player in bilibili.
+  List<String> _playingModeNames = [
+    'Sub-Resource once',
+    'Sub-Resource repeat',
+    'Resource once',
+    'Resource repeat',
+    'Favlist once',
+    'Favlist once (traverse episodes resource)',
+    'Favlist repeat',
+    'Favlist repeat (traverse episodes resource)',
+  ];
+
+  /// All icons corresponding to the playing mode.
+  List<IconData> _playingModeIcons = [
+    Icons.repeat_one_rounded,
+    Icons.repeat_one_on_rounded,
+    Icons.repeat_rounded,
+    Icons.repeat_on_rounded,
+    Icons.library_music_outlined,
+    Icons.library_music_rounded,
+    Icons.library_music_outlined,
+    Icons.library_music_rounded,
+  ];
 
   /// Current playing song in queue.
   int _currentPlayingSongInQueue = 0;
@@ -276,7 +315,17 @@ class MyAppState extends ChangeNotifier {
   void Function(MyAppState appState)? get refreshDetailFavListPage =>
       _refreshDetailFavListPage;
 
+  List<String> get playingModeNames => _playingModeNames;
+
+  List<IconData> get playingModeIcons => _playingModeIcons;
+
+  bool get inDetailFavlistPage => _inDetailFavlistPage;
+
+  int? get currentResourceIndexInFavList => _currentResourceIndexInFavList;
+
   bool get isSearching => _isSearching;
+
+  bool get isDetailFavListPageInSearchMode => _isDetailFavListPageInSearchMode;
 
   TextEditingController? get searchTextEditingController =>
       _searchTextEditingController;
@@ -408,6 +457,16 @@ class MyAppState extends ChangeNotifier {
   //   notifyListeners();
   // }
 
+  set inDetailFavlistPage(value) {
+    _inDetailFavlistPage = value;
+    notifyListeners();
+  }
+
+  set currentResourceIndexInFavList(index) {
+    _currentResourceIndexInFavList = index;
+    notifyListeners();
+  }
+
   set refreshDetailLibraryPage(func) {
     _refreshDetailLibraryPage = func;
     notifyListeners();
@@ -420,6 +479,11 @@ class MyAppState extends ChangeNotifier {
 
   set isSearching(value) {
     _isSearching = value;
+    notifyListeners();
+  }
+
+  set isDetailFavListPageInSearchMode(value) {
+    _isDetailFavListPageInSearchMode = value;
     notifyListeners();
   }
 
@@ -459,6 +523,10 @@ class MyAppState extends ChangeNotifier {
 
   void resetSubPageNo() {
     _subPageNo = 1;
+  }
+
+  void setSubPageNoWithoutNotify(value) {
+    _subPageNo = value;
   }
 
   set betterPlayerController(BetterPlayerController? betterPlayerController) {
@@ -717,7 +785,7 @@ class MyAppState extends ChangeNotifier {
         await _songsPlayer!.setShuffleModeEnabled(false);
         await _songsPlayer!.setLoopMode(LoopMode.one);
       } else {
-        throw UnsupportedError('Invalid playing mode');
+        throw UnsupportedError('Invalid playing mode: $_userPlayingMode');
       }
 
       /// Set the volume.
