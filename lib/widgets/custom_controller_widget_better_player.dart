@@ -451,10 +451,13 @@ class _CustomControlsWidgetState
   }
 
   Widget _buildHitAreaClickableButton(
-      {Widget? icon, required void Function() onClicked}) {
+      {Widget? icon,
+      double width = 40.0,
+      double height = 40.0,
+      required void Function() onClicked}) {
     return SizedBox(
-      width: 40.0,
-      height: 40.0,
+      width: width,
+      height: height,
       child: BetterPlayerMaterialClickableWidget(
         onTap: onClicked,
         child: Align(
@@ -516,7 +519,7 @@ class _CustomControlsWidgetState
       icon: isFinished
           ? Icon(
               Icons.replay,
-              size: 42,
+              size: 45,
               color:
                   betterPlayerControlsConfiguration.iconsColor.withOpacity(0.7),
             )
@@ -524,10 +527,12 @@ class _CustomControlsWidgetState
               controller.value.isPlaying
                   ? betterPlayerControlsConfiguration.pauseIcon
                   : betterPlayerControlsConfiguration.playIcon,
-              size: 42,
+              size: 45,
               color:
                   betterPlayerControlsConfiguration.iconsColor.withOpacity(0.7),
             ),
+      width: 60.0,
+      height: 60.0,
       onClicked: () {
         if (isFinished) {
           if (_latestValue != null && _latestValue!.isPlaying) {

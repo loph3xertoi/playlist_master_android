@@ -74,7 +74,7 @@ class _HomePageState extends State<HomePage>
                   appState.disposeSongsPlayer();
                 }
               }
-              _currentPlatform = 0;
+              appState.currentPlatform = 0;
               appState.refreshLibraries!(appState, false);
               showDialog(
                 builder: (BuildContext context) {
@@ -206,7 +206,7 @@ class _HomePageState extends State<HomePage>
                       appState.disposeSongsPlayer();
                     }
                   }
-                  _currentPlatform = 3;
+                  appState.currentPlatform = 3;
                   appState.refreshLibraries!(appState, false);
                 },
               ),
@@ -220,7 +220,7 @@ class _HomePageState extends State<HomePage>
                       appState.disposeSongsPlayer();
                     }
                   }
-                  _currentPlatform = 2;
+                  appState.currentPlatform = 2;
                   appState.refreshLibraries!(appState, false);
                 },
               ),
@@ -234,7 +234,7 @@ class _HomePageState extends State<HomePage>
                       appState.disposeSongsPlayer();
                     }
                   }
-                  _currentPlatform = 1;
+                  appState.currentPlatform = 1;
                   appState.refreshLibraries!(appState, false);
                 },
               ),
