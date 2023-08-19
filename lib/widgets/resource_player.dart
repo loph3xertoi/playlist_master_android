@@ -486,13 +486,20 @@ class _DashPageState extends State<ResourcePlayer> {
         _originalResourcesOfFavList!.length - 1;
     int nextResourceIndex = hasNext ? _currentResourceIndexInFavList! + 1 : 0;
     if (hasNext || playingMode == 6 || playingMode == 7) {
-      nextResource = await _appState!.fetchDetailSong<BiliDetailResource>(
-          _originalResourcesOfFavList![nextResourceIndex],
-          _appState!.currentPlatform);
-      if (nextResource == null) {
-        throw Exception(
-            'Failed to fetch detail resource ${nextResourceIndex + 1}: ${_appState!.errorMsg}');
-      }
+      do {
+        if (hasNext || playingMode == 6 || playingMode == 7) {
+          nextResource = await _appState!.fetchDetailSong<BiliDetailResource>(
+              _originalResourcesOfFavList![nextResourceIndex],
+              _appState!.currentPlatform);
+          if (nextResource == null) {
+            MyToast.showToast(
+                'Failed to fetch detail resource ${nextResourceIndex + 1}: ${_appState!.errorMsg}');
+            hasNext =
+                nextResourceIndex < _originalResourcesOfFavList!.length - 1;
+            nextResourceIndex = hasNext ? nextResourceIndex + 1 : 0;
+          }
+        }
+      } while (nextResource == null);
       _appState!.currentResourceIndexInFavList = nextResourceIndex;
       setState(() {
         _detailResource = nextResource!;

@@ -36,6 +36,8 @@ class _FoldableTextWidgetState extends State<FoldableResourceIntroWidget> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: GestureDetector(
+                    // TODO: fix bug: the shadow box of sub resources bar will shift
+                    // when expand the detail resource intro.
                     onTap: () {
                       if (!widget.isExpanded) {
                         setState(() {
