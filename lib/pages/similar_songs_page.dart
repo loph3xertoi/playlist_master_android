@@ -30,7 +30,6 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
   bool _changeRawQueue = true;
   late int _currentPlatform;
   late bool _isUsingMockData;
-  MyAppState? _appState;
   late AudioPlayer? _player;
   late List<BasicSong>? _rawSongsInLibrary;
 
@@ -56,7 +55,6 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
-    _appState = appState;
     _currentPlatform = appState.currentPlatform;
     _isUsingMockData = appState.isUsingMockData;
     _player = appState.songsPlayer;

@@ -12,7 +12,6 @@ class _MyFooterState extends State<MyFooter> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
     return Container(
       width: double.infinity,

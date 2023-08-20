@@ -19,7 +19,6 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
     with SingleTickerProviderStateMixin {
   ScrollController _scrollController = ScrollController();
   late int _currentPlatform;
-  MyAppState? _appState;
   int? _queueLength;
   late CarouselController _carouselController;
 
@@ -60,7 +59,6 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
-    _appState = appState;
     _carouselController = appState.carouselController;
     var songsQueue = appState.songsQueue;
     var resourcesQueue = appState.resourcesQueue;

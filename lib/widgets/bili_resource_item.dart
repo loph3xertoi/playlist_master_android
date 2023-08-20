@@ -44,14 +44,11 @@ class BiliResourceItem extends StatefulWidget {
 }
 
 class _BiliResourceItemState extends State<BiliResourceItem> {
-  MyAppState? _appState;
-  late int _currentPlatform;
   late bool _isUsingMockData;
   @override
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
-    _currentPlatform = state.currentPlatform;
     _isUsingMockData = state.isUsingMockData;
   }
 
@@ -119,7 +116,6 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
     final textTheme = Theme.of(context).textTheme;
     var resource = widget.resource;
     MyAppState appState = context.watch<MyAppState>();
-    _currentPlatform = appState.currentPlatform;
     _isUsingMockData = appState.isUsingMockData;
     return Material(
       child: InkWell(

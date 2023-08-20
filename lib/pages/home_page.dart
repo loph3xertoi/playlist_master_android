@@ -29,9 +29,7 @@ class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  MyAppState? _appState;
   int? _currentPlatform;
-  bool? _isUsingMockData;
 
   @override
   void initState() {
@@ -53,13 +51,13 @@ class _HomePageState extends State<HomePage>
     final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
     _currentPlatform = appState.currentPlatform;
-    _isUsingMockData = appState.isUsingMockData;
+    var screenSize = MediaQuery.of(context).size;
     return Consumer<ThemeNotifier>(
       builder: (context, theme, _) => Scaffold(
         key: _scaffoldKey,
         drawer: Drawer(
           backgroundColor: Colors.transparent,
-          width: MediaQuery.of(context).size.width * 0.75,
+          width: screenSize.width * 0.75,
           child: NightBackground(),
         ),
         body: SafeArea(

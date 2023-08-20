@@ -467,7 +467,6 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
   @override
   Widget build(BuildContext context) {
     final NCMUser user = widget.user;
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Column(
       children: [

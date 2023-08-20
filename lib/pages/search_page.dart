@@ -37,11 +37,9 @@ class _SearchPageState extends State<SearchPage> {
   int _pageNo = 1;
   int _pageSize = 20;
   late int _currentPlatform;
-  late bool _isUsingMockData;
   MyAppState? _appState;
   late String? _keyword;
   ScrollController _scrollController = ScrollController();
-  bool _changeRawQueue = true;
   late bool _hasMore;
   late int _count;
   AudioPlayer? _player;
@@ -63,7 +61,6 @@ class _SearchPageState extends State<SearchPage> {
     _searchedResources = state.searchedResources;
     _keyword = state.keyword;
     _currentPlatform = state.currentPlatform;
-    _isUsingMockData = state.isUsingMockData;
     _hasMore = state.hasMore;
     _player = state.songsPlayer;
     _count = state.searchedCount;
@@ -162,8 +159,7 @@ class _SearchPageState extends State<SearchPage> {
       }
 
       // Real index in queue, not in raw queue as some songs may be taken down.
-      int realIndex =
-          appState.songsQueue!.indexOf(_searchedSongs[index]);
+      int realIndex = appState.songsQueue!.indexOf(_searchedSongs[index]);
 
       appState.currentPlayingSongInQueue = realIndex;
 
@@ -212,8 +208,7 @@ class _SearchPageState extends State<SearchPage> {
       }
 
       // Real index in queue, not in raw queue as some songs may be taken down.
-      int realIndex =
-          appState.songsQueue!.indexOf(_searchedSongs[index]);
+      int realIndex = appState.songsQueue!.indexOf(_searchedSongs[index]);
       appState.canSongsPlayerPagePop = true;
       appState.songsPlayer!.stop();
       appState.songsPlayer!.dispose();
@@ -300,7 +295,6 @@ class _SearchPageState extends State<SearchPage> {
     _appState = appState;
     _keyword = appState.keyword;
     _currentPlatform = appState.currentPlatform;
-    _isUsingMockData = appState.isUsingMockData;
     _hasMore = appState.hasMore;
     _player = appState.songsPlayer;
     _count = appState.searchedCount;

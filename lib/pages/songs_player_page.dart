@@ -52,7 +52,6 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
   var _lyricPadding = 40.0;
   LyricsReaderModel? _lyricModel;
 
-  double _sliderProgress = 0.0;
   int _playProgress = 0;
 
   Future<BasicSong?>? _detailSong;
@@ -494,13 +493,6 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
                                                 int nextIndex = songsPlayer!
                                                     .effectiveIndices![index];
 
-                                                bool isForward = (index >
-                                                            prevCarouselIndex &&
-                                                        index != 0) ||
-                                                    (index == 0 &&
-                                                        prevCarouselIndex ==
-                                                            songsQueue!.length -
-                                                                1);
                                                 appState.prevCarouselIndex =
                                                     index;
 
@@ -885,8 +877,6 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
                                                         ?.position
                                                         .inMilliseconds ??
                                                     0;
-                                                _sliderProgress =
-                                                    _playProgress.toDouble();
                                               });
                                             }
                                           });
@@ -1113,8 +1103,6 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
   }
 
   Stack buildReaderWidget(AudioPlayer? songsPlayer) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     return Stack(
       children: [
         LyricsReader(

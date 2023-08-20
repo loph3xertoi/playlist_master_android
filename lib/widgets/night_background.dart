@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:playlistmaster/utils/storage_manager.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../states/app_state.dart';
 import '../third_lib_change/day_night_switch.dart';

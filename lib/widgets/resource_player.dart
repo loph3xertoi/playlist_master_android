@@ -40,9 +40,6 @@ class _DashPageState extends State<ResourcePlayer> {
   // Original resources in this opened favlist.
   List<BiliResource>? _originalResourcesOfFavList;
 
-  // Whether playing the whole favlist.
-  bool _isPlayingFavList = false;
-
   bool _isLocked = false;
 
   Timer? _hideTimer;
@@ -53,9 +50,6 @@ class _DashPageState extends State<ResourcePlayer> {
   VideoPlayerValue? _latestValue;
 
   bool _hasSkipedToNext = false;
-
-  // Whether in detail favlist page.
-  bool _inDetailFavlistPage = true;
 
   int? _currentResourceIndexInFavList;
 
@@ -287,7 +281,6 @@ class _DashPageState extends State<ResourcePlayer> {
   Widget build(BuildContext context) {
     MyAppState appState = context.watch<MyAppState>();
     _appState = appState;
-    _inDetailFavlistPage = appState.inDetailFavlistPage;
     _isLocked = appState.isResourcePlayerLocked;
     _originalResourcesOfFavList = appState.rawResourcesInFavList;
     _currentResourceIndexInFavList = appState.currentResourceIndexInFavList;

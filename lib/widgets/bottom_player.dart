@@ -17,7 +17,6 @@ class _BottomPlayerState extends State<BottomPlayer>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _songCoverRotateAnimation;
-  MyAppState? _appState;
   late bool _isPlaying;
 
   @override
@@ -46,10 +45,8 @@ class _BottomPlayerState extends State<BottomPlayer>
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
-    var currentPlatform = appState.currentPlatform;
     var isUsingMockData = appState.isUsingMockData;
     var currentSong = appState.currentSong;
-    var currentResource = appState.currentResource;
     var isSongPlaying = appState.isSongPlaying;
     _isPlaying = isSongPlaying;
     WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -133,8 +133,6 @@ class SeekBarState extends State<SeekBar> {
       ],
     );
   }
-
-  Duration get _remaining => widget.duration - widget.position;
 }
 
 class HiddenThumbComponentShape extends SliderComponentShape {

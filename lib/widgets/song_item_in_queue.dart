@@ -38,7 +38,6 @@ class _SongItemInQueueState extends State<SongItemInQueue> {
     final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
     var currentPlatform = appState.currentPlatform;
-    var isUsingMockData = appState.isUsingMockData;
     return SizedBox(
       height: 40.0,
       child: Row(

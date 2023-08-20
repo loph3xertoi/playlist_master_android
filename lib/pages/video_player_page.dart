@@ -358,11 +358,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                 /// seekTo必须在FState.prepared
                                 print('seekTo');
                                 await _songsPlayer.seekTo(seekTime);
-                                int seconds = (seekTime / 1000).truncate();
-                                int minutes = (seconds / 60).truncate();
-                                seconds %= 60;
-                                String formattedTime =
-                                    '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
                                 // MyToast.showToast('Seek to $formattedTime');
                                 appState.videoSeekTime = 0;
                               } else {

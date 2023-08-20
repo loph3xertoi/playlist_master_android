@@ -14,7 +14,6 @@ class ShowVideoPlayerSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
     var size = MediaQuery.of(context).size;

@@ -35,8 +35,6 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
   // Current fav list.
   late BasicLibrary _currentLibrary;
 
-  MyAppState? _appState;
-
   bool _changeRawQueue = true;
 
   // Current platform.
@@ -443,7 +441,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                             child: Padding(
                                                               padding:
                                                                   const EdgeInsets
-                                                                          .only(
+                                                                      .only(
                                                                       top:
                                                                           12.0),
                                                               child: Text(
