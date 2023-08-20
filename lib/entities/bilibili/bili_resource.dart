@@ -1,9 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-
-import 'package:flutter/foundation.dart';
-
 /// Resource for bilibili, such as video, audio and so on.
-@immutable
 class BiliResource {
   BiliResource(this.id, this.bvid, this.type, this.title, this.cover, this.page,
       this.duration, this.upperName, this.playCount, this.danmakuCount);
@@ -24,7 +20,7 @@ class BiliResource {
   final String cover;
 
   /// The page of this resource, has multiple resources if greater than 1.
-  final int page;
+  int page;
 
   /// The duration of this resource.
   final int duration;

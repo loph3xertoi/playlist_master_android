@@ -1,13 +1,11 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
-import 'package:flutter/foundation.dart';
 import 'package:playlistmaster/entities/bilibili/bili_resource.dart';
 
 import '../dto/bili_links_dto.dart';
 import 'bili_subpage_of_resource.dart';
 
 /// Detail resource for bilibili, such as video, audio and so on.
-@immutable
 class BiliDetailResource extends BiliResource {
   BiliDetailResource(
       super.id,
@@ -45,7 +43,7 @@ class BiliDetailResource extends BiliResource {
   final int cid;
 
   /// Whether this resource has episodes.
-  final bool isSeasonResource;
+  bool isSeasonResource;
 
   /// The upper's mid of this resource.
   final int upperMid;
@@ -81,7 +79,7 @@ class BiliDetailResource extends BiliResource {
   final String dynamicLabels;
 
   /// The subpages of this resource.
-  final List<BiliSubpageOfResource>? subpages;
+  List<BiliSubpageOfResource>? subpages;
 
   /// The episodes of this resource.
   final List<BiliDetailResource>? episodes;

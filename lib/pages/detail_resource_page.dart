@@ -263,13 +263,35 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                   var episodesBvids = _currentDetailResource.episodes!
                       .map((e) => e.bvid)
                       .toList();
-                  _subPageNo = episodesBvids.indexOf(currentBvid) + 1;
+                  var episodeIndex = episodesBvids.indexOf(currentBvid);
+                  // Some episode resources's bvid may not in episodes.
+                  // TODO: handle other subpages of this special resource.
+                  if (episodeIndex == -1) {
+                    // See this resource as one common video with resource type: 0.
+                    _subPageNo = 1;
+                    _resourceType = 0;
+                    _currentDetailResource.isSeasonResource = false;
+                    _currentDetailResource.page = 1;
+                    BiliSubpageOfResource subpageOfResource =
+                        BiliSubpageOfResource(
+                      currentBvid,
+                      _currentDetailResource.cid,
+                      1,
+                      _currentDetailResource.title,
+                      _currentDetailResource.duration,
+                      0,
+                      0,
+                    );
+                    _currentDetailResource.subpages = [subpageOfResource];
+                  } else {
+                    _subPageNo = episodeIndex + 1;
+                    _resourceType = 2;
+                  }
                   appState.setSubPageNoWithoutNotify(_subPageNo);
                   _isFirstLoading = false;
                 }
                 _currentPlayingSubResource =
                     _currentDetailResource.episodes![_subPageNo - 1];
-                _resourceType = 2;
               } else if (_currentDetailResource.page > 1) {
                 _currentPlayingSubResource =
                     _currentDetailResource.subpages![_subPageNo - 1];
@@ -326,10 +348,12 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                           ? _buildEpisodesList()
                           : _buildSubPagesList(),
                     ),
-                    SlideTransition(
-                      position: _togglePlayingResourcesOffsetAnimation,
-                      child: _buildPlayingResourcesList(),
-                    ),
+                    appState.inDetailFavlistPage
+                        ? SlideTransition(
+                            position: _togglePlayingResourcesOffsetAnimation,
+                            child: _buildPlayingResourcesList(),
+                          )
+                        : Container(),
                   ],
                 ),
               ),

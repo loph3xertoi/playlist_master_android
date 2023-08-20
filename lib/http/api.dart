@@ -5,7 +5,7 @@ class API {
   static const demoMpd = 'http://$host/mpd/c.mpd';
 
   /// Host of playlist server.
-  static const host = '192.168.21.225:8080';
+  static const host = '192.168.71.26:8080';
   // static const host = '192.168.8.171:8080';
   // static const host = '192.168.0.114:8080';
 
@@ -31,6 +31,7 @@ class API {
 
   /// Get all songs' link according to [SongIds] in [platform].
   /// api: GET /songsLink/[SongIds]?platform=[platform]
+  /// TODO: api need to update for handle flv in bilibili for some resources.
   static const songsLink = '/songsLink';
 
   /// Get all MVs' links according to [vids] in [platform].
@@ -78,8 +79,7 @@ class API {
   static const removeSongsFromLibrary = '/removeSongsFromLibrary';
 
   /// Get bilibili splash screen images.
-  static const getBiliSplashScreenImage =
-      '/x/v2/splash/brand/list';
+  static const getBiliSplashScreenImage = '/x/v2/splash/brand/list';
 
   /// Get search suggestions in bilibili.
   static const getSearchSuggestions = '/main/suggest';

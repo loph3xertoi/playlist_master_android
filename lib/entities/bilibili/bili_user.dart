@@ -43,7 +43,7 @@ class BiliUser extends BasicUser {
       this.ip,
       this.country,
       this.province,
-      this.city,
+      // this.city,
       this.isp,
       this.latitude,
       this.longitude,
@@ -160,8 +160,8 @@ class BiliUser extends BasicUser {
   /// Your province.
   final String province;
 
-  /// Your city.
-  final String city;
+  // /// Your city.
+  // final String city;
 
   /// Your ISP, 0 represents china mobile, 1 represents china telecom.
   final int isp;
@@ -213,7 +213,7 @@ class BiliUser extends BasicUser {
       json['ip'],
       json['country'],
       json['province'],
-      json['city'],
+      // json['city'],
       json['isp'],
       json['latitude'],
       json['longitude'],
@@ -265,7 +265,7 @@ class BiliUser extends BasicUser {
       'ip': ip,
       'country': country,
       'province': province,
-      'city': city,
+      // 'city': city,
       'isp': isp,
       'latitude': latitude,
       'longitude': longitude,
@@ -275,6 +275,6 @@ class BiliUser extends BasicUser {
 
   @override
   String toString() {
-    return 'BilibiliUser{name: $name, headPic: $headPic, bgPic: $bgPic, mid: $mid, gender: $gender, sign: $sign, level: $level, currentLevelExp: $currentLevelExp, nextLevelExp: $nextLevelExp, coins: $coins, bcoin: $bcoin, following: $following, follower: $follower, dynamicCount: $dynamicCount, moral: $moral, bindEmail: $bindEmail, bindPhone: $bindPhone, vipType: $vipType, vipActive: $vipActive, vipExpireTime: $vipExpireTime, vipIcon: $vipIcon, pendantName: $pendantName, pendantExpireTime: $pendantExpireTime, pendantImage: $pendantImage, dynamicPendantImage: $dynamicPendantImage, nameplateName: $nameplateName, nameplateImage: $nameplateImage, smallNameplateImage: $smallNameplateImage, nameplateCondition: $nameplateCondition, birthday: $birthday, wearingFansBadge: $wearingFansBadge, fansBadgeLevel: $fansBadgeLevel, fansBadgeText: $fansBadgeText, fansBadgeStartColor: $fansBadgeStartColor, fansBadgeEndColor: $fansBadgeEndColor, fansBadgeBorderColor: $fansBadgeBorderColor, ip: $ip, country: $country, province: $province, city: $city, isp: $isp, latitude: $latitude, longitude: $longitude, countryCode: $countryCode}';
+    return 'BilibiliUser{name: $name, headPic: $headPic, bgPic: $bgPic, mid: $mid, gender: $gender, sign: $sign, level: $level, currentLevelExp: $currentLevelExp, nextLevelExp: $nextLevelExp, coins: $coins, bcoin: $bcoin, following: $following, follower: $follower, dynamicCount: $dynamicCount, moral: $moral, bindEmail: $bindEmail, bindPhone: $bindPhone, vipType: $vipType, vipActive: $vipActive, vipExpireTime: $vipExpireTime, vipIcon: $vipIcon, pendantName: $pendantName, pendantExpireTime: $pendantExpireTime, pendantImage: $pendantImage, dynamicPendantImage: $dynamicPendantImage, nameplateName: $nameplateName, nameplateImage: $nameplateImage, smallNameplateImage: $smallNameplateImage, nameplateCondition: $nameplateCondition, birthday: $birthday, wearingFansBadge: $wearingFansBadge, fansBadgeLevel: $fansBadgeLevel, fansBadgeText: $fansBadgeText, fansBadgeStartColor: $fansBadgeStartColor, fansBadgeEndColor: $fansBadgeEndColor, fansBadgeBorderColor: $fansBadgeBorderColor, ip: $ip, country: $country, province: $province, isp: $isp, latitude: $latitude, longitude: $longitude, countryCode: $countryCode}';
   }
 }
