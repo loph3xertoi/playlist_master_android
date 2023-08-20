@@ -163,7 +163,7 @@ class _SearchPageState extends State<SearchPage> {
 
       // Real index in queue, not in raw queue as some songs may be taken down.
       int realIndex =
-          appState.songsQueue!.indexOf(appState.rawSongsInLibrary![index]);
+          appState.songsQueue!.indexOf(_searchedSongs[index]);
 
       appState.currentPlayingSongInQueue = realIndex;
 
@@ -193,7 +193,7 @@ class _SearchPageState extends State<SearchPage> {
       appState.currentDetailSong = null;
       appState.isFirstLoadSongsPlayer = true;
       appState.songsPlayer!.play();
-    } else if (appState.currentSong == appState.rawSongsInLibrary![index]) {
+    } else if (appState.currentSong == _searchedSongs[index]) {
       if (!_player!.playerState.playing) {
         _player!.play();
       }
@@ -213,7 +213,7 @@ class _SearchPageState extends State<SearchPage> {
 
       // Real index in queue, not in raw queue as some songs may be taken down.
       int realIndex =
-          appState.songsQueue!.indexOf(appState.rawSongsInLibrary![index]);
+          appState.songsQueue!.indexOf(_searchedSongs[index]);
       appState.canSongsPlayerPagePop = true;
       appState.songsPlayer!.stop();
       appState.songsPlayer!.dispose();

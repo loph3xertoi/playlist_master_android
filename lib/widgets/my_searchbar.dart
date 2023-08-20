@@ -11,6 +11,7 @@ import '../entities/netease_cloud_music/ncm_song.dart';
 import '../entities/qq_music/qqmusic_song.dart';
 import '../states/app_state.dart';
 import 'basic_info.dart';
+import 'custom_selection_handler.dart';
 
 class MySearchBar extends StatefulWidget {
   final GlobalKey<ScaffoldState> myScaffoldKey;
@@ -230,8 +231,8 @@ class _MySearchBarState extends State<MySearchBar>
       ),
       child: Theme(
         data: _currentPlatform == 3
-            ? Theme.of(context).copyWith(
-                textSelectionTheme: TextSelectionThemeData(
+            ? ThemeData(
+                textSelectionTheme: const TextSelectionThemeData(
                   cursorColor: Color(0xFFBB5A7D),
                   selectionColor: Color(0xFFB75674),
                   selectionHandleColor: Color(0xFFEC6F92),
@@ -239,6 +240,9 @@ class _MySearchBarState extends State<MySearchBar>
               )
             : Theme.of(context),
         child: TextField(
+          selectionControls: _currentPlatform == 3
+              ? CustomColorSelectionHandle(Color(0xFFEC6F92))
+              : null,
           controller: _textEditingController,
           focusNode: _focusNode,
           textAlignVertical: TextAlignVertical.top,

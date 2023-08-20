@@ -1053,10 +1053,11 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                         ),
                       ),
                     ),
-                    _playingMode == 4 ||
-                            _playingMode == 5 ||
-                            _playingMode == 6 ||
-                            _playingMode == 7
+                    appState.inDetailFavlistPage &&
+                            (_playingMode == 4 ||
+                                _playingMode == 5 ||
+                                _playingMode == 6 ||
+                                _playingMode == 7)
                         ? Material(
                             color: Colors.transparent,
                             child: InkWell(

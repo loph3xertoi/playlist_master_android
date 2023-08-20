@@ -2,6 +2,7 @@
 import 'dart:ui' as ui show BoxHeightStyle;
 
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/widgets/custom_selection_handler.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/dto/result.dart';
@@ -152,6 +153,9 @@ class _CreateLibraryDialogState extends State<CreateLibraryDialog> {
                         )
                       : Theme.of(context),
                   child: TextField(
+                    selectionControls: currentPlatform == 3
+                        ? CustomColorSelectionHandle(Color(0xFFEC6F92))
+                        : null,
                     controller: _textEditingController,
                     autofocus: true,
                     textAlignVertical: TextAlignVertical.center,
