@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:humanize_big_int/humanize_big_int.dart';
@@ -11,7 +12,9 @@ import 'package:provider/provider.dart';
 
 import '../entities/bilibili/bili_resource.dart';
 import '../entities/dto/result.dart';
+import '../http/api.dart';
 import '../states/app_state.dart';
+import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 import 'resource_item_menu_popup.dart';
 import 'select_favlist_popup.dart';
@@ -120,6 +123,11 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
     return Material(
       child: InkWell(
         onTap: () {
+          if (kIsWeb) {
+            MyToast.showToast('Not yet implement web for better player');
+            MyLogger.logger.e('Not yet implement web for better player');
+            return;
+          }
           widget.onTap();
         },
         child: Padding(
@@ -158,8 +166,14 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
                                 CachedNetworkImage(
                                   imageUrl: resource.cover.isNotEmpty
                                       ? resource.cover.substring(0, 4) == 'http'
-                                          ? resource.cover
-                                          : 'https:${resource.cover}'
+                                          ? kIsWeb
+                                              ? API.convertImageUrl(
+                                                  resource.cover)
+                                              : resource.cover
+                                          : kIsWeb
+                                              ? API.convertImageUrl(
+                                                  'https:${resource.cover}')
+                                              : 'https:${resource.cover}'
                                       : MyAppState.defaultCoverImage,
                                   progressIndicatorBuilder:
                                       (context, url, downloadProgress) =>
@@ -230,7 +244,7 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
                                         )
                                       : TextSpan(),
                                   // This item isn't searched item.
-                                  appState.searchSuggestions.isEmpty
+                                  appState.inDetailFavlistPage
                                       ? TextSpan(text: resource.title)
                                       : WidgetSpan(
                                           child: Html(

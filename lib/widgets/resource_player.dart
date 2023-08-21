@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:better_player/better_player.dart';
 import 'package:better_player/src/controls/better_player_clickable_widget.dart';
 import 'package:better_player/src/video_player/video_player.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:playlistmaster/entities/bilibili/bili_detail_resource.dart';
@@ -240,7 +241,9 @@ class _DashPageState extends State<ResourcePlayer> {
     _betterPlayerController = BetterPlayerController(betterPlayerConfiguration);
     _betterPlayerController.setupDataSource(dataSource);
     _betterPlayerController.setBetterPlayerGlobalKey(_betterPlayerKey);
-    _betterPlayerController.enablePictureInPicture(_betterPlayerKey);
+    if (!kIsWeb) {
+      _betterPlayerController.enablePictureInPicture(_betterPlayerKey);
+    }
     _betterPlayerController.addEventsListener((event) {
       if (event.betterPlayerEventType == BetterPlayerEventType.play) {
         _hasSkipedToNext = false;

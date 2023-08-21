@@ -1,8 +1,10 @@
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:playlistmaster/http/api.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
@@ -361,7 +363,9 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                     : CachedNetworkImage(
                                                                         imageUrl: detailLibrary != null &&
                                                                                 detailLibrary.cover.isNotEmpty
-                                                                            ? detailLibrary.cover
+                                                                            ? kIsWeb
+                                                                                ? API.convertImageUrl(detailLibrary.cover)
+                                                                                : detailLibrary.cover
                                                                             : MyAppState.defaultCoverImage,
                                                                         progressIndicatorBuilder: (context,
                                                                                 url,

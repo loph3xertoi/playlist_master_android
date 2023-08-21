@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:humanize_big_int/humanize_big_int.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../entities/basic/basic_video.dart';
 import '../entities/netease_cloud_music/ncm_video.dart';
 import '../entities/qq_music/qqmusic_video.dart';
+import '../http/api.dart';
 import '../states/app_state.dart';
 
 class VideoItem extends StatefulWidget {
@@ -75,7 +77,7 @@ class QQMusicVideoItem extends StatelessWidget {
               children: [
                 Ink.image(
                   image: CachedNetworkImageProvider(
-                    _video.cover,
+                    kIsWeb ? API.convertImageUrl(_video.cover) : _video.cover,
                   ),
                   height: 100.0,
                   width: 160.0,
@@ -172,7 +174,7 @@ class NCMVideoItem extends StatelessWidget {
               children: [
                 Ink.image(
                   image: CachedNetworkImageProvider(
-                    _video.cover,
+                    kIsWeb ? API.convertImageUrl(_video.cover) : _video.cover,
                   ),
                   height: 100.0,
                   width: 160.0,

@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_network/image_network.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 
+import '../http/api.dart';
 import '../states/app_state.dart';
 import '../utils/storage_manager.dart';
 import '../widgets/my_selectable_text.dart';
@@ -50,6 +53,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
+    var screenSize = MediaQuery.of(context).size;
     return FutureBuilder(
         future: Future.wait([currentPlatformFuture, splashImageFuture]),
         builder: (context, snapshot) {
@@ -125,14 +129,27 @@ class _SplashScreenState extends State<SplashScreen> {
                 body: SizedBox(
                   width: double.infinity,
                   height: double.infinity,
-                  child: CachedNetworkImage(
-                    imageUrl: splashImage,
-                    progressIndicatorBuilder:
-                        (context, url, downloadProgress) =>
-                            CircularProgressIndicator(
-                                value: downloadProgress.progress),
-                    errorWidget: (context, url, error) => Icon(MdiIcons.debian),
-                  ),
+                  child: kIsWeb
+                      ? ImageNetwork(
+                          image: API.convertImageUrl(splashImage),
+                          height: screenSize.height,
+                          width: screenSize.width,
+                          curve: Curves.easeIn,
+                          fullScreen: true,
+                          fitAndroidIos: BoxFit.cover,
+                          fitWeb: BoxFitWeb.cover,
+                          onLoading: CircularProgressIndicator(),
+                          onError: Icon(MdiIcons.debian),
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: splashImage,
+                          progressIndicatorBuilder:
+                              (context, url, downloadProgress) =>
+                                  CircularProgressIndicator(
+                                      value: downloadProgress.progress),
+                          errorWidget: (context, url, error) =>
+                              Icon(MdiIcons.debian),
+                        ),
                 ),
               );
             } else {

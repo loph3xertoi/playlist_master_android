@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fplayer/fplayer.dart';
@@ -34,7 +37,9 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
-    resetRotation();
+    if (!kIsWeb) {
+      resetRotation();
+    }
   }
 
   void resetRotation() async {
@@ -114,10 +119,17 @@ class _HomePageState extends State<HomePage>
                             ),
                           ),
                           onPressed: () async {
-                            await SystemChrome.setEnabledSystemUIMode(
-                                SystemUiMode.immersiveSticky,
-                                overlays: []);
-                            await FPlugin.setOrientationPortrait();
+                            bool isWeb = kIsWeb;
+                            if (!isWeb) {
+                              String platform = Platform.operatingSystem;
+                              print('Current platform is $platform');
+                              await SystemChrome.setEnabledSystemUIMode(
+                                  SystemUiMode.immersiveSticky,
+                                  overlays: []);
+                              await FPlugin.setOrientationPortrait();
+                            } else {
+                              print('Current platform is web');
+                            }
                             MyToast.showToast('Reset rotation');
                           },
                           child: Text(

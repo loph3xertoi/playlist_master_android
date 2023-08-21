@@ -5,7 +5,7 @@ class API {
   static const demoMpd = 'http://$host/mpd/c.mpd';
 
   /// Host of playlist server.
-  static const host = '192.168.71.26:8080';
+  static const host = '192.168.141.188:8080';
   // static const host = '192.168.8.171:8080';
   // static const host = '192.168.0.114:8080';
 
@@ -79,8 +79,20 @@ class API {
   static const removeSongsFromLibrary = '/removeSongsFromLibrary';
 
   /// Get bilibili splash screen images.
-  static const getBiliSplashScreenImage = '/x/v2/splash/brand/list';
+  /// api: GET /cors/bili/splash
+  static const getBiliSplashScreenImage = '/cors/bili/splash';
 
   /// Get search suggestions in bilibili.
-  static const getSearchSuggestions = '/main/suggest';
+  /// api: GET /cors/bili/suggestions/[keyword]
+  static const getSearchSuggestions = '/cors/bili/suggestions';
+
+  /// Get image from pms for cors and referrer reason.
+  /// api: GET /cors/image?imageUrl=[imageUrl]
+  static const getImage = '/cors/image';
+
+  /// Convert raw image url to image url for pms.
+  static String convertImageUrl(String rawImageUrl) {
+    return Uri.http(API.host, API.getImage, {'imageUrl': rawImageUrl})
+        .toString();
+  }
 }

@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:city_picker_china/city_picker_china.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ip_geolocation_io/ip_geolocation_io.dart';
@@ -13,6 +14,7 @@ import '../entities/bilibili/bili_user.dart';
 import '../entities/netease_cloud_music/ncm_user.dart';
 import '../entities/pms/pms_user.dart';
 import '../entities/qq_music/qqmusic_user.dart';
+import '../http/api.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
 import 'bilibili_level_bar.dart';
@@ -45,8 +47,10 @@ class _BasicInfoState extends State<BasicInfo> {
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       imageSize = MediaQuery.of(context).size.width - 24.0;
-      bgTopOffset = -topMargin;
-      userTopOffset = imageSize - topMargin - bottomMargin;
+      bgTopOffset = kIsWeb ? -topMargin - 100.0 : -topMargin;
+      userTopOffset = kIsWeb
+          ? imageSize - topMargin - bottomMargin - 300.0
+          : imageSize - topMargin - bottomMargin;
     });
   }
 
@@ -159,9 +163,11 @@ class _BasicInfoState extends State<BasicInfo> {
                         },
                         onVerticalDragEnd: (details) {
                           setState(() {
-                            bgTopOffset = -topMargin;
-                            userTopOffset =
-                                imageSize - topMargin - bottomMargin;
+                            bgTopOffset =
+                                kIsWeb ? -topMargin - 100.0 : -topMargin;
+                            userTopOffset = kIsWeb
+                                ? imageSize - topMargin - bottomMargin - 300.0
+                                : imageSize - topMargin - bottomMargin;
                             scale = 1.0;
                           });
                         },
@@ -189,7 +195,10 @@ class _BasicInfoState extends State<BasicInfo> {
                                     : CachedNetworkImage(
                                         imageUrl: user.bgPic.isEmpty
                                             ? MyAppState.defaultCoverImage
-                                            : user.bgPic,
+                                            : kIsWeb
+                                                ? API
+                                                    .convertImageUrl(user.bgPic)
+                                                : user.bgPic,
                                         progressIndicatorBuilder: (context, url,
                                                 downloadProgress) =>
                                             CircularProgressIndicator(
@@ -352,7 +361,11 @@ class BuildQQMusicUser extends StatelessWidget {
       CircleAvatar(
         radius: 36.0,
         backgroundImage: CachedNetworkImageProvider(
-          user.headPic.isEmpty ? MyAppState.defaultCoverImage : user.headPic,
+          user.headPic.isEmpty
+              ? MyAppState.defaultCoverImage
+              : kIsWeb
+                  ? API.convertImageUrl(user.headPic)
+                  : user.headPic,
         ),
       ),
       MySelectableText(
@@ -369,7 +382,9 @@ class BuildQQMusicUser extends StatelessWidget {
             child: CachedNetworkImage(
               imageUrl: user.lvPic.isEmpty
                   ? MyAppState.defaultCoverImage
-                  : user.lvPic,
+                  : kIsWeb
+                      ? API.convertImageUrl(user.lvPic)
+                      : user.lvPic,
               progressIndicatorBuilder: (context, url, downloadProgress) =>
                   CircularProgressIndicator(value: downloadProgress.progress),
               errorWidget: (context, url, error) => Icon(MdiIcons.debian),
@@ -384,7 +399,9 @@ class BuildQQMusicUser extends StatelessWidget {
             child: CachedNetworkImage(
               imageUrl: user.listenPic.isEmpty
                   ? MyAppState.defaultCoverImage
-                  : user.listenPic,
+                  : kIsWeb
+                      ? API.convertImageUrl(user.listenPic)
+                      : user.listenPic,
               progressIndicatorBuilder: (context, url, downloadProgress) =>
                   CircularProgressIndicator(value: downloadProgress.progress),
               errorWidget: (context, url, error) => Icon(MdiIcons.debian),
@@ -473,7 +490,11 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
         CircleAvatar(
           radius: 36.0,
           backgroundImage: CachedNetworkImageProvider(
-            user.headPic.isEmpty ? MyAppState.defaultCoverImage : user.headPic,
+            user.headPic.isEmpty
+                ? MyAppState.defaultCoverImage
+                : kIsWeb
+                    ? API.convertImageUrl(user.headPic)
+                    : user.headPic,
           ),
         ),
         Padding(
@@ -579,7 +600,9 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
                         child: CachedNetworkImage(
                           imageUrl: user.redVipLevelIcon.isEmpty
                               ? MyAppState.defaultCoverImage
-                              : user.redVipLevelIcon,
+                              : kIsWeb
+                                  ? API.convertImageUrl(user.redVipLevelIcon)
+                                  : user.redVipLevelIcon,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
                                   CircularProgressIndicator(
@@ -619,7 +642,10 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
                         child: CachedNetworkImage(
                           imageUrl: user.redPlusVipLevelIcon.isEmpty
                               ? MyAppState.defaultCoverImage
-                              : user.redPlusVipLevelIcon,
+                              : kIsWeb
+                                  ? API
+                                      .convertImageUrl(user.redPlusVipLevelIcon)
+                                  : user.redPlusVipLevelIcon,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
                                   CircularProgressIndicator(
@@ -659,7 +685,10 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
                         child: CachedNetworkImage(
                           imageUrl: user.musicPackageVipLevelIcon.isEmpty
                               ? MyAppState.defaultCoverImage
-                              : user.musicPackageVipLevelIcon,
+                              : kIsWeb
+                                  ? API.convertImageUrl(
+                                      user.musicPackageVipLevelIcon)
+                                  : user.musicPackageVipLevelIcon,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
                                   CircularProgressIndicator(
@@ -950,7 +979,9 @@ class BuildBilibiliUser extends StatelessWidget {
                 backgroundImage: CachedNetworkImageProvider(
                   user.headPic.isEmpty
                       ? MyAppState.defaultCoverImage
-                      : user.headPic,
+                      : kIsWeb
+                          ? API.convertImageUrl(user.headPic)
+                          : user.headPic,
                 ),
               ),
               Opacity(
@@ -963,7 +994,9 @@ class BuildBilibiliUser extends StatelessWidget {
                           triggerMode: TooltipTriggerMode.tap,
                           textStyle: textTheme.labelSmall,
                           child: CachedNetworkImage(
-                            imageUrl: user.dynamicPendantImage,
+                            imageUrl: kIsWeb
+                                ? API.convertImageUrl(user.dynamicPendantImage)
+                                : user.dynamicPendantImage,
                             progressIndicatorBuilder:
                                 (context, url, downloadProgress) =>
                                     CircularProgressIndicator(
@@ -1001,7 +1034,9 @@ class BuildBilibiliUser extends StatelessWidget {
                   child: CachedNetworkImage(
                     imageUrl: user.vipIcon.isEmpty
                         ? MyAppState.defaultCoverImage
-                        : user.vipIcon,
+                        : kIsWeb
+                            ? API.convertImageUrl(user.vipIcon)
+                            : user.vipIcon,
                     progressIndicatorBuilder:
                         (context, url, downloadProgress) =>
                             CircularProgressIndicator(
@@ -1089,7 +1124,9 @@ class BuildBilibiliUser extends StatelessWidget {
                         triggerMode: TooltipTriggerMode.tap,
                         textStyle: textTheme.labelSmall,
                         child: CachedNetworkImage(
-                          imageUrl: user.nameplateImage,
+                          imageUrl: kIsWeb
+                              ? API.convertImageUrl(user.nameplateImage)
+                              : user.nameplateImage,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
                                   CircularProgressIndicator(

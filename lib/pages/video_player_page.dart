@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:fplayer/fplayer.dart';
@@ -11,6 +12,7 @@ import 'package:screen_brightness/screen_brightness.dart';
 import '../entities/basic/basic_video.dart';
 import '../entities/netease_cloud_music/ncm_detail_video.dart';
 import '../entities/qq_music/qqmusic_detail_video.dart';
+import '../http/api.dart';
 import '../http/my_http.dart';
 import '../states/app_state.dart';
 import '../utils/my_logger.dart';
@@ -418,7 +420,9 @@ class QQMusicVideoInfoArea extends StatelessWidget {
                 radius: 15.0,
                 backgroundImage: CachedNetworkImageProvider(
                   detailVideo.singers.isNotEmpty
-                      ? detailVideo.singers[0].headPic
+                      ? kIsWeb
+                          ? API.convertImageUrl(detailVideo.singers[0].headPic)
+                          : detailVideo.singers[0].headPic
                       : MyAppState.defaultCoverImage,
                 ),
               ),
@@ -519,7 +523,9 @@ class NCMVideoInfoArea extends StatelessWidget {
                 radius: 15.0,
                 backgroundImage: CachedNetworkImageProvider(
                   detailVideo.singers.isNotEmpty
-                      ? detailVideo.singers[0].headPic
+                      ? kIsWeb
+                          ? API.convertImageUrl(detailVideo.singers[0].headPic)
+                          : detailVideo.singers[0].headPic
                       : MyAppState.defaultCoverImage,
                 ),
               ),

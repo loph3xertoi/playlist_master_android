@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
+import '../http/api.dart';
 import '../states/app_state.dart';
 
 class SelectableLibraryItem extends StatelessWidget {
@@ -45,7 +47,9 @@ class SelectableLibraryItem extends StatelessWidget {
                         ? Image.asset(library!.cover)
                         : CachedNetworkImage(
                             imageUrl: library!.cover.isNotEmpty
-                                ? library!.cover
+                                ? kIsWeb
+                                    ? API.convertImageUrl(library!.cover)
+                                    : library!.cover
                                 : MyAppState.defaultLibraryCover,
                             progressIndicatorBuilder:
                                 (context, url, downloadProgress) =>

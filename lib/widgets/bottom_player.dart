@@ -1,10 +1,12 @@
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 
+import '../http/api.dart';
 import '../states/app_state.dart';
 import 'queue_popup.dart';
 
@@ -102,7 +104,9 @@ class _BottomPlayerState extends State<BottomPlayer>
                             )
                           : CachedNetworkImage(
                               imageUrl: currentSong?.cover.isNotEmpty ?? false
-                                  ? currentSong!.cover
+                                  ? kIsWeb
+                                      ? API.convertImageUrl(currentSong!.cover)
+                                      : currentSong!.cover
                                   : MyAppState.defaultCoverImage,
                               progressIndicatorBuilder:
                                   (context, url, downloadProgress) =>

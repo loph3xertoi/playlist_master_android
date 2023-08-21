@@ -1,5 +1,6 @@
 import 'package:better_player/better_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:humanize_big_int/humanize_big_int.dart';
 import 'package:intl/intl.dart';
@@ -1031,7 +1032,10 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                         child: CachedNetworkImage(
                           imageUrl:
                               _currentDetailResource.upperHeadPic.isNotEmpty
-                                  ? _currentDetailResource.upperHeadPic
+                                  ? kIsWeb
+                                      ? API.convertImageUrl(
+                                          _currentDetailResource.upperHeadPic)
+                                      : _currentDetailResource.upperHeadPic
                                   : MyAppState.defaultCoverImage,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>

@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lyric/lyrics_reader.dart';
 import 'package:flutter_lyric/lyrics_reader_model.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import '../http/api.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_singer.dart';
@@ -248,7 +250,10 @@ class _DetailSongPageState extends State<DetailSongPage> {
                                       : CachedNetworkImage(
                                           imageUrl: currentDetailSong
                                                   .cover.isNotEmpty
-                                              ? currentDetailSong.cover
+                                              ? kIsWeb
+                                                  ? API.convertImageUrl(
+                                                      currentDetailSong.cover)
+                                                  : currentDetailSong.cover
                                               : MyAppState.defaultCoverImage,
                                           progressIndicatorBuilder: (context,
                                                   url, downloadProgress) =>

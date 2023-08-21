@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:humanize_big_int/humanize_big_int.dart';
 import 'package:intl/intl.dart';
@@ -11,8 +12,10 @@ import '../entities/basic/basic_library.dart';
 import '../entities/bilibili/bili_detail_fav_list.dart';
 import '../entities/bilibili/bili_fav_list.dart';
 import '../entities/bilibili/bili_resource.dart';
+import '../http/api.dart';
 import '../states/app_state.dart';
 import '../states/my_search_state.dart';
+import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 import '../utils/theme_manager.dart';
 import '../widgets/bili_resource_item.dart';
@@ -425,10 +428,10 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                                                       imageUrl: detailFavList
                                                                               .cover
                                                                               .isNotEmpty
-                                                                          ? detailFavList
-                                                                              .cover
-                                                                          : MyAppState
-                                                                              .defaultCoverImage,
+                                                                          ? kIsWeb
+                                                                              ? API.convertImageUrl(detailFavList.cover)
+                                                                              : detailFavList.cover
+                                                                          : MyAppState.defaultCoverImage,
                                                                       progressIndicatorBuilder: (context,
                                                                               url,
                                                                               downloadProgress) =>
@@ -569,6 +572,14 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                                                     IconButton(
                                                                       onPressed:
                                                                           () {
+                                                                        if (kIsWeb) {
+                                                                          MyToast.showToast(
+                                                                              'Not yet implement web for better player');
+                                                                          MyLogger
+                                                                              .logger
+                                                                              .e('Not yet implement web for better player');
+                                                                          return;
+                                                                        }
                                                                         appState
                                                                             .currentResourceIndexInFavList = 0;
                                                                         appState

@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:better_player/better_player.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -150,8 +151,10 @@ class MyAppState extends ChangeNotifier {
   // static const String defaultCoverImage =
   //     'https://www.worldwildlife.org/assets/structure/unique/logo-c562409bb6158bf64e5f8b1be066dbd5983d75f5ce7c9935a5afffbcc03f8e5d.png';
 
-  static const String defaultLibraryCover =
-      'http://y.gtimg.cn/mediastyle/global/img/cover_playlist.png?max_age=31536000';
+  static String defaultLibraryCover = kIsWeb
+      ? API.convertImageUrl(
+          'http://y.gtimg.cn/mediastyle/global/img/cover_playlist.png?max_age=31536000')
+      : 'http://y.gtimg.cn/mediastyle/global/img/cover_playlist.png?max_age=31536000';
 
   /// Set true when init songs player for cover animation forward.
   bool _isFirstLoadSongsPlayer = false;
@@ -2256,12 +2259,7 @@ class MyAppState extends ChangeNotifier {
   }
 
   Future<String> getBiliSplashScreenImage() async {
-    final Uri url =
-        Uri.https('app.bilibili.com', API.getBiliSplashScreenImage, {
-      'appkey': '1d8b6e7d45233436',
-      'ts': '0',
-      'sign': '78a89e153cd6231a4a4d55013aa063ce',
-    });
+    final Uri url = Uri.http(API.host, API.getBiliSplashScreenImage);
     final client = RetryClient(http.Client());
 
     try {
@@ -2300,12 +2298,7 @@ class MyAppState extends ChangeNotifier {
   }
 
   Future<List<String>> getSearchSuggestions(String keyword) async {
-    final Uri url =
-        Uri.https('s.search.bilibili.com', API.getSearchSuggestions, {
-      'term': keyword,
-      'main_ver': 'v1',
-      'highlight': '',
-    });
+    final Uri url = Uri.http(API.host, '${API.getSearchSuggestions}/$keyword');
     final client = RetryClient(http.Client());
 
     try {
