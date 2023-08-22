@@ -1,7 +1,9 @@
 import 'package:bottom_sheet/bottom_sheet.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:playlistmaster/http/api.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -214,26 +216,46 @@ class _SongItemState extends State<SongItem> {
                                 .map((e) => e.name)
                                 .join(', '),
                             title: widget.song.name,
-                            artUri: await appState.getImageFileFromAssets(
-                                widget.song.cover,
-                                appState.songsQueue!.indexOf(widget.song)),
+                            artUri: kIsWeb
+                                ? Uri.parse(MyAppState.defaultCoverImage)
+                                : await appState.getImageFileFromAssets(
+                                    widget.song.cover,
+                                    appState.songsQueue!.indexOf(widget.song)),
                           ),
                         );
                       } else {
-                        newAudioSource = LockCachingAudioSource(
-                          Uri.parse(widget.song.songLink),
-                          tag: MediaItem(
-                            // Specify a unique ID for each media item:
-                            id: Uuid().v1(),
-                            // Metadata to display in the notification:
-                            album: 'Album name',
-                            artist: widget.song.singers
-                                .map((e) => e.name)
-                                .join(', '),
-                            title: widget.song.name,
-                            artUri: Uri.parse(widget.song.cover),
-                          ),
-                        );
+                        if (kIsWeb) {
+                          newAudioSource = AudioSource.uri(
+                            Uri.parse(widget.song.songLink),
+                            tag: MediaItem(
+                              // Specify a unique ID for each media item:
+                              id: Uuid().v1(),
+                              // Metadata to display in the notification:
+                              album: 'Album name',
+                              artist: widget.song.singers
+                                  .map((e) => e.name)
+                                  .join(', '),
+                              title: widget.song.name,
+                              artUri: Uri.parse(
+                                  API.convertImageUrl(widget.song.cover)),
+                            ),
+                          );
+                        } else {
+                          newAudioSource = LockCachingAudioSource(
+                            Uri.parse(widget.song.songLink),
+                            tag: MediaItem(
+                              // Specify a unique ID for each media item:
+                              id: Uuid().v1(),
+                              // Metadata to display in the notification:
+                              album: 'Album name',
+                              artist: widget.song.singers
+                                  .map((e) => e.name)
+                                  .join(', '),
+                              title: widget.song.name,
+                              artUri: Uri.parse(widget.song.cover),
+                            ),
+                          );
+                        }
                       }
                       appState.songsAudioSource!.insert(
                           appState.currentPlayingSongInQueue! + 1,

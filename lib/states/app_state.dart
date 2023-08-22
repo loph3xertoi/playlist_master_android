@@ -843,26 +843,45 @@ class MyAppState extends ChangeNotifier {
                   album: 'Album name',
                   artist: e.singers.map((e) => e.name).join(', '),
                   title: e.name,
-                  artUri: await getImageFileFromAssets(
-                      e.cover, _songsQueue!.indexOf(e)),
+                  artUri: kIsWeb
+                      ? Uri.parse(defaultCoverImage)
+                      : await getImageFileFromAssets(
+                          e.cover, _songsQueue!.indexOf(e)),
                 ),
               ))
           .toList();
     } else {
-      songs = _songsQueue!
-          .map((e) async => LockCachingAudioSource(
-                Uri.parse(e.songLink),
-                tag: MediaItem(
-                  // Specify a unique ID for each media item:
-                  id: Uuid().v1(),
-                  // Metadata to display in the notification:
-                  album: 'Album name',
-                  artist: e.singers.map((e) => e.name).join(', '),
-                  title: e.name,
-                  artUri: Uri.parse(e.cover),
-                ),
-              ))
-          .toList();
+      if (kIsWeb) {
+        songs = _songsQueue!
+            .map((e) async => AudioSource.uri(
+                  Uri.parse(e.songLink),
+                  tag: MediaItem(
+                    // Specify a unique ID for each media item:
+                    id: Uuid().v1(),
+                    // Metadata to display in the notification:
+                    album: 'Album name',
+                    artist: e.singers.map((e) => e.name).join(', '),
+                    title: e.name,
+                    artUri: Uri.parse(API.convertImageUrl(e.cover)),
+                  ),
+                ))
+            .toList();
+      } else {
+        songs = _songsQueue!
+            .map((e) async => LockCachingAudioSource(
+                  Uri.parse(e.songLink),
+                  tag: MediaItem(
+                    // Specify a unique ID for each media item:
+                    id: Uuid().v1(),
+                    // Metadata to display in the notification:
+                    album: 'Album name',
+                    artist: e.singers.map((e) => e.name).join(', '),
+                    title: e.name,
+                    artUri: Uri.parse(e.cover),
+                  ),
+                ))
+            .toList();
+      }
     }
 
     queueList = await Future.wait(songs);

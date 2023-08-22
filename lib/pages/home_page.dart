@@ -62,7 +62,7 @@ class _HomePageState extends State<HomePage>
         key: _scaffoldKey,
         drawer: Drawer(
           backgroundColor: Colors.transparent,
-          width: screenSize.width * 0.75,
+          width: screenSize.width * (kIsWeb ? 0.5 : 0.75),
           child: NightBackground(),
         ),
         body: SafeArea(

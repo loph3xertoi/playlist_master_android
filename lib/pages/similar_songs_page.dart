@@ -31,13 +31,15 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
   late int _currentPlatform;
   late bool _isUsingMockData;
   late AudioPlayer? _player;
-  late List<BasicSong>? _rawSongsInLibrary;
+  List<BasicSong>? _rawSongsInLibrary;
 
   @override
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
+    _currentPlatform = state.currentPlatform;
     _isUsingMockData = state.isUsingMockData;
+    _player = state.songsPlayer;
     if (_isUsingMockData) {
       _similarSongs = Future.value(MockData.similarSongs);
       WidgetsBinding.instance.addPostFrameCallback((_) {
