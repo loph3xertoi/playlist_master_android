@@ -425,7 +425,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
         automaticallyImplyLeading: false,
         backgroundColor: _colorScheme.primary,
         surfaceTintColor: _colorScheme.primary,
-        leadingWidth: 100.0,
+        leadingWidth: 120.0,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Center(

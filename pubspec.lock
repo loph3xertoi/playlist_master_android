@@ -86,10 +86,19 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: e730fa6480d96867cbd3c395a538cd0ac7e429dd
+      resolved-ref: fdba5ba9560784629f80ad27e26cf4cdd5b4dc0c
       url: "https://github.com/loph3xertoi/betterplayer.git"
     source: git
     version: "0.0.83"
+  better_player_web:
+    dependency: transitive
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "72ac6332994733dfeef1771407847fbb471bbe21"
+      url: "https://github.com/SairamVemula/better_player_web.git"
+    source: git
+    version: "0.0.1"
   boolean_selector:
     dependency: transitive
     description:

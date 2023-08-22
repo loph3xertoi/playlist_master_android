@@ -572,14 +572,14 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                                                     IconButton(
                                                                       onPressed:
                                                                           () {
-                                                                        if (kIsWeb) {
-                                                                          MyToast.showToast(
-                                                                              'Not yet implement web for better player');
-                                                                          MyLogger
-                                                                              .logger
-                                                                              .e('Not yet implement web for better player');
-                                                                          return;
-                                                                        }
+                                                                        // if (kIsWeb) {
+                                                                        //   MyToast.showToast(
+                                                                        //       'Not yet implement web for better player');
+                                                                        //   MyLogger
+                                                                        //       .logger
+                                                                        //       .e('Not yet implement web for better player');
+                                                                        //   return;
+                                                                        // }
                                                                         appState
                                                                             .currentResourceIndexInFavList = 0;
                                                                         appState

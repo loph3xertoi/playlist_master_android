@@ -14,7 +14,6 @@ import '../entities/bilibili/bili_resource.dart';
 import '../entities/dto/result.dart';
 import '../http/api.dart';
 import '../states/app_state.dart';
-import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 import 'resource_item_menu_popup.dart';
 import 'select_favlist_popup.dart';
@@ -123,11 +122,11 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
     return Material(
       child: InkWell(
         onTap: () {
-          if (kIsWeb) {
-            MyToast.showToast('Not yet implement web for better player');
-            MyLogger.logger.e('Not yet implement web for better player');
-            return;
-          }
+          // if (kIsWeb) {
+          //   MyToast.showToast('Not yet implement web for better player');
+          //   MyLogger.logger.e('Not yet implement web for better player');
+          //   return;
+          // }
           widget.onTap();
         },
         child: Padding(
