@@ -46,11 +46,10 @@ class _BasicInfoState extends State<BasicInfo> {
       _basicUser = state.fetchUser(state.currentPlatform);
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      imageSize = MediaQuery.of(context).size.width - 24.0;
-      bgTopOffset = kIsWeb ? -topMargin - 100.0 : -topMargin;
-      userTopOffset = kIsWeb
-          ? imageSize - topMargin - bottomMargin - 300.0
-          : imageSize - topMargin - bottomMargin;
+      var screenSize = MediaQuery.of(context).size;
+      imageSize = screenSize.width - 24.0;
+      bgTopOffset = kIsWeb ? -screenSize.width * 0.4 : -topMargin;
+      userTopOffset = kIsWeb ? 300.0 : imageSize - topMargin - bottomMargin;
     });
   }
 
@@ -61,6 +60,7 @@ class _BasicInfoState extends State<BasicInfo> {
     MyAppState appState = context.watch<MyAppState>();
     var isUsingMockData = appState.isUsingMockData;
     var currentPlatform = appState.currentPlatform;
+    var screenSize = MediaQuery.of(context).size;
     return Padding(
       padding: EdgeInsets.fromLTRB(12.0, 76.0, 12.0, 70.0),
       child: ClipRect(
@@ -164,9 +164,9 @@ class _BasicInfoState extends State<BasicInfo> {
                         onVerticalDragEnd: (details) {
                           setState(() {
                             bgTopOffset =
-                                kIsWeb ? -topMargin - 100.0 : -topMargin;
+                                kIsWeb ? -screenSize.width * 0.4 : -topMargin;
                             userTopOffset = kIsWeb
-                                ? imageSize - topMargin - bottomMargin - 300.0
+                                ? 300.0
                                 : imageSize - topMargin - bottomMargin;
                             scale = 1.0;
                           });
@@ -193,6 +193,7 @@ class _BasicInfoState extends State<BasicInfo> {
                                         fit: BoxFit.cover,
                                       )
                                     : CachedNetworkImage(
+                                        fit: BoxFit.contain,
                                         imageUrl: user.bgPic.isEmpty
                                             ? MyAppState.defaultCoverImage
                                             : kIsWeb
