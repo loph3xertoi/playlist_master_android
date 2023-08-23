@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:provider/provider.dart';
 
@@ -20,6 +21,8 @@ import 'states/my_navigation_button_state.dart';
 import 'states/my_search_state.dart';
 import 'utils/theme_manager.dart';
 
+GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 Future<void> main() async {
   await JustAudioBackground.init(
     androidNotificationChannelId: 'com.daw.playlistmaster.channel',
@@ -29,7 +32,11 @@ Future<void> main() async {
   );
   runApp(ChangeNotifierProvider<ThemeNotifier>(
     create: (_) => ThemeNotifier(),
-    child: MyApp(),
+    child: MaterialApp(
+      builder: FToastBuilder(),
+      navigatorKey: navigatorKey,
+      home: MyApp(),
+    ),
   ));
 }
 

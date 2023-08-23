@@ -973,7 +973,6 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final Uri url = Uri.http(
       API.host,
       '${API.user}/${API.uid}',
@@ -982,13 +981,12 @@ class MyAppState extends ChangeNotifier {
       },
     );
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Loading User information from network...');
       final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           Map<String, dynamic> user = decodedResponse['data'];
@@ -1000,7 +998,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1045,20 +1044,18 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final Uri url = Uri.http(
       API.host,
       API.libraries,
       params,
     );
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Loading libraries from network...');
       final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           var jsonList = decodedResponse['data'];
@@ -1077,7 +1074,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1128,15 +1126,13 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Loading detail song from network...');
       final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           return Future.value(resolveJson(decodedResponse['data']));
@@ -1147,7 +1143,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1176,7 +1173,6 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final Uri url = Uri.http(
       API.host,
       '${API.mvLink}/${vids.join(',')}',
@@ -1185,13 +1181,12 @@ class MyAppState extends ChangeNotifier {
       },
     );
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Loading MVs link from network...');
       final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           var mvsLink = decodedResponse['data']!;
@@ -1204,7 +1199,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1229,7 +1225,6 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final Uri url = Uri.http(
       API.host,
       '${API.songsLink}/${songIds.join(',')}',
@@ -1238,13 +1233,12 @@ class MyAppState extends ChangeNotifier {
       },
     );
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Loading songs link from network...');
       final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           var songsLink = decodedResponse['data']!;
@@ -1263,7 +1257,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1327,15 +1322,13 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Loading detail library from network...');
       final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           return Future.value(resolveJson(decodedResponse['data']));
@@ -1346,7 +1339,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1372,20 +1366,18 @@ class MyAppState extends ChangeNotifier {
       throw UnsupportedError('Invalid platform');
     }
     resolveJson = PagedDataDTO<T>.fromJson;
-
     final Uri url = Uri.http(API.host, '${API.searchSong}/$keyword', {
       'pageNo': pageNo.toString(),
       'pageSize': pageSize.toString(),
       'platform': platform.toString(),
     });
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Searching items from network...');
       final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           PagedDataDTO<T> data = resolveJson(decodedResponse['data']);
@@ -1397,7 +1389,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1440,15 +1433,13 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Loading similar songs from network...');
       final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           List<dynamic> jsonList = decodedResponse['data'];
@@ -1461,7 +1452,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1503,15 +1495,13 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Loading detail mv information from network...');
       final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           return Future.value(resolveJson(decodedResponse['data']));
@@ -1522,7 +1512,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1567,15 +1558,13 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Loading related MVs from network...');
       final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           List<dynamic> jsonList = decodedResponse['data'];
@@ -1588,7 +1577,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1617,7 +1607,6 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final Uri url = Uri.http(
       API.host,
       API.createLibrary,
@@ -1627,7 +1616,6 @@ class MyAppState extends ChangeNotifier {
     );
     Map<String, String> requestBody = {};
     requestBody.putIfAbsent('name', () => libraryName);
-
     // Only used in bilibili platform.
     if (intro != null) {
       requestBody.putIfAbsent('intro', () => intro);
@@ -1646,9 +1634,9 @@ class MyAppState extends ChangeNotifier {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Library created successfully');
@@ -1660,7 +1648,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1710,7 +1699,6 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final Uri url = Uri.http(
       API.host,
       '${API.deleteLibrary}/$librariesIds',
@@ -1719,13 +1707,12 @@ class MyAppState extends ChangeNotifier {
       },
     );
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Deleting libraries...');
       final response = await client.delete(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Delete libraries successfully');
@@ -1737,7 +1724,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1779,7 +1767,6 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final Uri url = Uri.http(
       API.host,
       API.addSongsToLibrary,
@@ -1788,7 +1775,6 @@ class MyAppState extends ChangeNotifier {
       },
     );
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Adding songs to library...');
       final response = await client.post(
@@ -1796,9 +1782,9 @@ class MyAppState extends ChangeNotifier {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           return Future.value(result);
@@ -1809,7 +1795,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1861,15 +1848,13 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Removing songs from library...');
       final response = await client.delete(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Songs removed from ${library.name}');
@@ -1881,7 +1866,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1950,9 +1936,7 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Moving songs to other library...');
       final response = await client.put(
@@ -1960,9 +1944,9 @@ class MyAppState extends ChangeNotifier {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Songs moved successfully');
@@ -1974,7 +1958,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1999,24 +1984,8 @@ class MyAppState extends ChangeNotifier {
       throw UnimplementedError('Not yet implement pms platform');
     } else if (platform == 1) {
       throw UnimplementedError('Not yet implement qqmusic platform');
-      // int dirId = (library as QQMusicPlaylist).dirId;
-      // String songsMid = songs.map((e) => (e as QQMusicSong).songMid).join(',');
-      // String tid = library.tid;
-      // requestBody = {
-      //   'libraryId': dirId.toString(),
-      //   'songsId': songsMid,
-      //   'tid': tid,
-      // };
     } else if (platform == 2) {
       throw UnimplementedError('Not yet implement ncm platform');
-      // int id = (library as NCMPlaylist).id;
-      // String songIds = songs.map((e) => (e as NCMSong).id).join(',');
-      // String tid = id.toString();
-      // requestBody = {
-      //   'libraryId': id.toString(),
-      //   'songsId': songIds,
-      //   'tid': tid,
-      // };
     } else if (platform == 3) {
       String resourcesIds;
       if (isFavoriteSearchedResource == 'true') {
@@ -2034,7 +2003,6 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final Uri url = Uri.http(
       API.host,
       API.addSongsToLibrary,
@@ -2043,7 +2011,6 @@ class MyAppState extends ChangeNotifier {
       },
     );
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Adding resources to fav list...');
       final response = await client.post(
@@ -2051,9 +2018,9 @@ class MyAppState extends ChangeNotifier {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           return Future.value(result);
@@ -2064,7 +2031,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2085,34 +2053,8 @@ class MyAppState extends ChangeNotifier {
       throw UnimplementedError('Not yet implement pms platform');
     } else if (platform == 1) {
       throw UnimplementedError('Not yet implement qqmusic platform');
-      // int dirId = (library as QQMusicPlaylist).dirId;
-      // String tid = library.tid;
-      // String songsId = songs.map((e) => (e as QQMusicSong).songId).join(',');
-      // url = Uri.http(
-      //   API.host,
-      //   API.removeSongsFromLibrary,
-      //   {
-      //     'libraryId': dirId.toString(),
-      //     'songsId': songsId,
-      //     'tid': tid,
-      //     'platform': platform.toString(),
-      //   },
-      // );
     } else if (platform == 2) {
       throw UnimplementedError('Not yet implement ncm platform');
-      // int id = (library as NCMPlaylist).id;
-      // String tid = library.id.toString();
-      // String songsId = songs.map((e) => (e as NCMSong).id).join(',');
-      // url = Uri.http(
-      //   API.host,
-      //   API.removeSongsFromLibrary,
-      //   {
-      //     'libraryId': id.toString(),
-      //     'songsId': songsId,
-      //     'tid': tid,
-      //     'platform': platform.toString(),
-      //   },
-      // );
     } else if (platform == 3) {
       int id = (favList as BiliFavList).id;
       String tid = favList.id.toString();
@@ -2130,15 +2072,13 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Removing resources from fav list...');
       final response = await client.delete(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Resources removed from ${favList.name}');
@@ -2150,7 +2090,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2176,46 +2117,8 @@ class MyAppState extends ChangeNotifier {
       throw UnimplementedError('Not yet implement pms platform');
     } else if (platform == 1) {
       throw UnimplementedError('Not yet implement qqmusic platform');
-      // String songsId = songs.map((e) => (e as QQMusicSong).songId).join(',');
-      // int srcDirId = (srcLibrary as QQMusicPlaylist).dirId;
-      // int dstDirId = (dstLibrary as QQMusicPlaylist).dirId;
-      // String srcTid = srcLibrary.tid;
-      // String dstTid = dstLibrary.tid;
-      // url = Uri.http(
-      //   API.host,
-      //   API.moveSongsToOtherLibrary,
-      //   {
-      //     'platform': platform.toString(),
-      //   },
-      // );
-      // requestBody = {
-      //   'songsId': songsId,
-      //   'fromLibrary': srcDirId.toString(),
-      //   'toLibrary': dstDirId.toString(),
-      //   'fromTid': srcTid,
-      //   'toTid': dstTid,
-      // };
     } else if (platform == 2) {
       throw UnimplementedError('Not yet implement ncm platform');
-      // String songsId = songs.map((e) => (e as NCMSong).id).join(',');
-      // int srcLibraryId = (srcLibrary as NCMPlaylist).id;
-      // int dstLibraryId = (dstLibrary as NCMPlaylist).id;
-      // String srcTid = srcLibraryId.toString();
-      // String dstTid = dstLibraryId.toString();
-      // url = Uri.http(
-      //   API.host,
-      //   API.moveSongsToOtherLibrary,
-      //   {
-      //     'platform': platform.toString(),
-      //   },
-      // );
-      // requestBody = {
-      //   'songsId': songsId,
-      //   'fromLibrary': srcLibraryId.toString(),
-      //   'toLibrary': dstLibraryId.toString(),
-      //   'fromTid': srcTid,
-      //   'toTid': dstTid,
-      // };
     } else if (platform == 3) {
       String resourcesIds = resources.map((e) => '${e.id}:${e.type}').join(',');
       int srcFavListId = (srcFavList as BiliFavList).id;
@@ -2239,9 +2142,7 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Moving resources to other fav list...');
       final response = await client.put(
@@ -2249,9 +2150,9 @@ class MyAppState extends ChangeNotifier {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Resources moved successfully');
@@ -2263,7 +2164,8 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2280,13 +2182,12 @@ class MyAppState extends ChangeNotifier {
   Future<String> getBiliSplashScreenImage() async {
     final Uri url = Uri.http(API.host, API.getBiliSplashScreenImage);
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger.i('Loading bilibili splash screen iamges...');
       final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         int resultCode = decodedResponse['code'];
         if (resultCode == 0) {
           List<dynamic> splashScreenMapList = decodedResponse['data']['list'];
@@ -2302,7 +2203,8 @@ class MyAppState extends ChangeNotifier {
           return '';
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return '';
@@ -2319,14 +2221,13 @@ class MyAppState extends ChangeNotifier {
   Future<List<String>> getSearchSuggestions(String keyword) async {
     final Uri url = Uri.http(API.host, '${API.getSearchSuggestions}/$keyword');
     final client = RetryClient(http.Client());
-
     try {
       MyLogger.logger
           .i('Fetching search suggestions for $keyword in bilibili...');
       final response = await client.get(url);
-      final decodedResponse =
-          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         int resultCode = decodedResponse['code'];
         var resultJson = decodedResponse['result'];
         if (resultCode == 0 && resultJson.isNotEmpty) {
@@ -2341,12 +2242,12 @@ class MyAppState extends ChangeNotifier {
           } else {
             _errorMsg = 'No suggestions for $keyword in bilibili.';
           }
-
           MyLogger.logger.e(_errorMsg);
           return [];
         }
       } else {
-        _errorMsg = 'Response error: $decodedResponse';
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return [];

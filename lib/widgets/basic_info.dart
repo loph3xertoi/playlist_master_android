@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:city_picker_china/city_picker_china.dart';
@@ -48,8 +49,12 @@ class _BasicInfoState extends State<BasicInfo> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       var screenSize = MediaQuery.of(context).size;
       imageSize = screenSize.width - 24.0;
-      bgTopOffset = kIsWeb ? -screenSize.width * 0.4 : -topMargin;
-      userTopOffset = kIsWeb ? 300.0 : imageSize - topMargin - bottomMargin;
+      bgTopOffset = (!kIsWeb && Platform.isAndroid || Platform.isIOS)
+          ? -topMargin
+          : -screenSize.width * 0.4;
+      userTopOffset = (!kIsWeb && Platform.isAndroid || Platform.isIOS)
+          ? imageSize - topMargin - bottomMargin
+          : 300.0;
     });
   }
 
@@ -163,11 +168,14 @@ class _BasicInfoState extends State<BasicInfo> {
                         },
                         onVerticalDragEnd: (details) {
                           setState(() {
-                            bgTopOffset =
-                                kIsWeb ? -screenSize.width * 0.4 : -topMargin;
-                            userTopOffset = kIsWeb
-                                ? 300.0
-                                : imageSize - topMargin - bottomMargin;
+                            bgTopOffset = (!kIsWeb && Platform.isAndroid ||
+                                    Platform.isIOS)
+                                ? -topMargin
+                                : -screenSize.width * 0.4;
+                            userTopOffset = (!kIsWeb && Platform.isAndroid ||
+                                    Platform.isIOS)
+                                ? imageSize - topMargin - bottomMargin
+                                : 300.0;
                             scale = 1.0;
                           });
                         },

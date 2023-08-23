@@ -15,7 +15,6 @@ import '../entities/bilibili/bili_resource.dart';
 import '../http/api.dart';
 import '../states/app_state.dart';
 import '../states/my_search_state.dart';
-import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 import '../utils/theme_manager.dart';
 import '../widgets/bili_resource_item.dart';
