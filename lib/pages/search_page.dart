@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:just_audio/just_audio.dart';
@@ -129,6 +132,20 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _onSearchedItemTapped(int index, MyAppState appState) async {
+    // if (!kIsWeb &&
+    //     Platform.isLinux &&
+    //     Process.runSync("which", ["mpv"]).exitCode != 0) {
+    //   MyToast.showToast('mpv not found in linux, please install it first');
+    //   MyLogger.logger.e('mpv not found in linux, please install it first');
+    //   return;
+    // }
+    if (!(kIsWeb || Platform.isAndroid || Platform.isIOS)) {
+      MyToast.showToast(
+          'just_audio not supported on ${Platform.operatingSystem}');
+      MyLogger.logger
+          .e('just_audio not supported on ${Platform.operatingSystem}');
+      return;
+    }
     var isTakenDown = _searchedSongs[index].isTakenDown;
     var payPlayType = _searchedSongs[index].payPlay;
 

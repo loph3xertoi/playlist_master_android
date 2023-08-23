@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -398,6 +400,28 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                       // TODO: fix bug: the init cover will be wrong sometimes when first loading
                                                       // song player in shuffle mode.
                                                       onTap: () async {
+                                                        // if (!kIsWeb &&
+                                                        //     Platform.isLinux &&
+                                                        //     Process.runSync(
+                                                        //                 "which",
+                                                        //                 ["mpv"])
+                                                        //             .exitCode !=
+                                                        //         0) {
+                                                        //   MyToast.showToast(
+                                                        //       'mpv not found in linux, please install it first');
+                                                        //   MyLogger.logger.e(
+                                                        //       'mpv not found in linux, please install it first');
+                                                        //   return;
+                                                        // }
+                                                        if (!(kIsWeb ||
+                                                            Platform.isAndroid ||
+                                                            Platform.isIOS)) {
+                                                          MyToast.showToast(
+                                                              'just_audio not supported on ${Platform.operatingSystem}');
+                                                          MyLogger.logger.e(
+                                                              'just_audio not supported on ${Platform.operatingSystem}');
+                                                          return;
+                                                        }
                                                         var isTakenDown =
                                                             _rawSongsInLibrary![
                                                                     index]

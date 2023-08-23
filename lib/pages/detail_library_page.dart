@@ -1,16 +1,17 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/http/api.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../entities/basic/basic_song.dart';
 import '../entities/netease_cloud_music/ncm_detail_playlist.dart';
 import '../entities/qq_music/qqmusic_detail_playlist.dart';
+import '../http/api.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
 import '../states/my_search_state.dart';
@@ -54,6 +55,20 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
 
   void onSongTap(
       int index, List<BasicSong> searchedSongs, MyAppState appState) async {
+    // if (!kIsWeb &&
+    //     Platform.isLinux &&
+    //     Process.runSync("which", ["mpv"]).exitCode != 0) {
+    //   MyToast.showToast('mpv not found in linux, please install it first');
+    //   MyLogger.logger.e('mpv not found in linux, please install it first');
+    //   return;
+    // }
+    if (!(kIsWeb || Platform.isAndroid || Platform.isIOS)) {
+      MyToast.showToast(
+          'just_audio not supported on ${Platform.operatingSystem}');
+      MyLogger.logger
+          .e('just_audio not supported on ${Platform.operatingSystem}');
+      return;
+    }
     var isTakenDown = searchedSongs[index].isTakenDown;
     var payPlayType = searchedSongs[index].payPlay;
     var songsPlayer = appState.songsPlayer;

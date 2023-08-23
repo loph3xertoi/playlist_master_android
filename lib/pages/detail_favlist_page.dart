@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -15,6 +16,7 @@ import '../entities/bilibili/bili_resource.dart';
 import '../http/api.dart';
 import '../states/app_state.dart';
 import '../states/my_search_state.dart';
+import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 import '../utils/theme_manager.dart';
 import '../widgets/bili_resource_item.dart';
@@ -571,14 +573,16 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                                                     IconButton(
                                                                       onPressed:
                                                                           () {
-                                                                        // if (kIsWeb) {
-                                                                        //   MyToast.showToast(
-                                                                        //       'Not yet implement web for better player');
-                                                                        //   MyLogger
-                                                                        //       .logger
-                                                                        //       .e('Not yet implement web for better player');
-                                                                        //   return;
-                                                                        // }
+                                                                        if (!(kIsWeb ||
+                                                                            Platform.isAndroid ||
+                                                                            Platform.isIOS)) {
+                                                                          MyToast.showToast(
+                                                                              'Better player is not supported on ${Platform.operatingSystem}');
+                                                                          MyLogger
+                                                                              .logger
+                                                                              .e('Better player is not supported on ${Platform.operatingSystem}');
+                                                                          return;
+                                                                        }
                                                                         appState
                                                                             .currentResourceIndexInFavList = 0;
                                                                         appState

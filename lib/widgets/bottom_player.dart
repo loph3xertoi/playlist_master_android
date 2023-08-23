@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -8,6 +9,8 @@ import 'package:provider/provider.dart';
 
 import '../http/api.dart';
 import '../states/app_state.dart';
+import '../utils/my_logger.dart';
+import '../utils/my_toast.dart';
 import 'queue_popup.dart';
 
 class BottomPlayer extends StatefulWidget {
@@ -62,6 +65,22 @@ class _BottomPlayerState extends State<BottomPlayer>
       // color: colorScheme.primary,
       child: InkWell(
         onTap: () {
+          // if (!kIsWeb &&
+          //     Platform.isLinux &&
+          //     Process.runSync("which", ["mpv"]).exitCode != 0) {
+          //   MyToast.showToast(
+          //       'mpv not found in linux, please install it first');
+          //   MyLogger.logger
+          //       .e('mpv not found in linux, please install it first');
+          //   return;
+          // }
+          if (!(kIsWeb || Platform.isAndroid || Platform.isIOS)) {
+            MyToast.showToast(
+                'just_audio not supported on ${Platform.operatingSystem}');
+            MyLogger.logger
+                .e('just_audio not supported on ${Platform.operatingSystem}');
+            return;
+          }
           appState.canSongsPlayerPagePop = true;
           Navigator.pushNamed(context, '/songs_player_page');
         },

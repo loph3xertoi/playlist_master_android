@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -14,6 +15,7 @@ import '../entities/bilibili/bili_resource.dart';
 import '../entities/dto/result.dart';
 import '../http/api.dart';
 import '../states/app_state.dart';
+import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 import 'resource_item_menu_popup.dart';
 import 'select_favlist_popup.dart';
@@ -122,11 +124,13 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
     return Material(
       child: InkWell(
         onTap: () {
-          // if (kIsWeb) {
-          //   MyToast.showToast('Not yet implement web for better player');
-          //   MyLogger.logger.e('Not yet implement web for better player');
-          //   return;
-          // }
+          if (!(kIsWeb || Platform.isAndroid || Platform.isIOS)) {
+            MyToast.showToast(
+                'Better player is not supported on ${Platform.operatingSystem}');
+            MyLogger.logger.e(
+                'Better player is not supported on ${Platform.operatingSystem}');
+            return;
+          }
           widget.onTap();
         },
         child: Padding(
