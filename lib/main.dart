@@ -30,14 +30,12 @@ Future<void> main() async {
     androidNotificationOngoing: true,
     androidShowNotificationBadge: true,
   );
-  runApp(ChangeNotifierProvider<ThemeNotifier>(
-    create: (_) => ThemeNotifier(),
-    child: MaterialApp(
-      builder: FToastBuilder(),
-      navigatorKey: navigatorKey,
-      home: MyApp(),
+  runApp(
+    ChangeNotifierProvider<ThemeNotifier>(
+      create: (_) => ThemeNotifier(),
+      child: MyApp(),
     ),
-  ));
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -59,6 +57,8 @@ class MyApp extends StatelessWidget {
       child: Consumer<ThemeNotifier>(
         builder: (context, theme, _) => MaterialApp(
           // themeMode: ThemeMode.system,
+          builder: FToastBuilder(),
+          navigatorKey: navigatorKey,
           theme: theme.getTheme(),
           title: 'Playlist Master',
           // theme: ThemeData(
