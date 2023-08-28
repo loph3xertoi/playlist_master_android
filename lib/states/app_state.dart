@@ -1755,7 +1755,14 @@ class MyAppState extends ChangeNotifier {
       List<BasicLibrary> libraries, int platform) async {
     String librariesIds;
     if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
+      if (libraries[0] is PMSLibrary) {
+        librariesIds =
+            libraries.map((library) => (library as PMSLibrary).id).join(",");
+      } else {
+        librariesIds = libraries
+            .map((library) => (library as PMSDetailLibrary).id)
+            .join(",");
+      }
     } else if (platform == 1) {
       if (libraries[0] is QQMusicPlaylist) {
         librariesIds = libraries

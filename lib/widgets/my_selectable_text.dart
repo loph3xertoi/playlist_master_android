@@ -8,11 +8,13 @@ class MySelectableText extends StatelessWidget {
     this.text, {
     super.key,
     this.style,
+    this.maxLines,
     this.textAlign = TextAlign.center,
   });
 
   final String text;
   final TextStyle? style;
+  final int? maxLines;
   final TextAlign? textAlign;
 
   @override
@@ -52,6 +54,7 @@ class MySelectableText extends StatelessWidget {
         );
       },
       style: style,
+      maxLines: maxLines,
     );
   }
 }

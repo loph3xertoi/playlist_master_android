@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:playlistmaster/entities/pms/pms_detail_library.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
@@ -288,8 +289,10 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                 as QQMusicDetailPlaylist;
                                       } else {
                                         if (_currentPlatform == 0) {
-                                          throw UnimplementedError(
-                                              'Not yet implement pms platform');
+                                          detailLibrary = snapshot.data == null
+                                              ? null
+                                              : snapshot.data
+                                                  as PMSDetailLibrary;
                                         } else if (_currentPlatform == 1) {
                                           detailLibrary = snapshot.data == null
                                               ? null
@@ -418,6 +421,9 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                   TextOverflow
                                                                       .ellipsis,
                                                             ),
+                                                            maxLines: 2,
+                                                            textAlign:
+                                                                TextAlign.start,
                                                           ),
                                                           Row(
                                                             children: [
@@ -432,31 +438,35 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                     TextOverflow
                                                                         .ellipsis,
                                                               ),
-                                                              SizedBox(
-                                                                width: 10.0,
-                                                                child: Text(
-                                                                  '|',
-                                                                  textAlign:
-                                                                      TextAlign
-                                                                          .center,
-                                                                  style:
-                                                                      TextStyle(
-                                                                    color: colorScheme
-                                                                        .onSecondary,
+                                                              if (_currentPlatform !=
+                                                                  0)
+                                                                SizedBox(
+                                                                  width: 10.0,
+                                                                  child: Text(
+                                                                    '|',
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .center,
+                                                                    style:
+                                                                        TextStyle(
+                                                                      color: colorScheme
+                                                                          .onSecondary,
+                                                                    ),
                                                                   ),
                                                                 ),
-                                                              ),
-                                                              Text(
-                                                                '${detailLibrary != null ? detailLibrary.playCount : 0} listened',
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .start,
-                                                                style: textTheme
-                                                                    .titleSmall,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                              ),
+                                                              if (_currentPlatform !=
+                                                                  0)
+                                                                Text(
+                                                                  '${detailLibrary != null ? detailLibrary.playCount : 0} listened',
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .start,
+                                                                  style: textTheme
+                                                                      .titleSmall,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                ),
                                                             ],
                                                           ),
                                                           Expanded(
@@ -469,8 +479,12 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                               child: Text(
                                                                 detailLibrary !=
                                                                         null
-                                                                    ? detailLibrary
-                                                                        .description
+                                                                    ? _currentPlatform ==
+                                                                            0
+                                                                        ? detailLibrary
+                                                                            .intro
+                                                                        : detailLibrary
+                                                                            .description
                                                                     : 'This library is a hidden library.',
                                                                 style: textTheme
                                                                     .labelLarge!
