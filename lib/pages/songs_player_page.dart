@@ -11,6 +11,7 @@ import 'package:flutter_lyric/lyrics_reader.dart';
 import 'package:flutter_lyric/lyrics_reader_model.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import '../http/my_http.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_song.dart';
@@ -614,6 +615,9 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
                                                                                 .cover
                                                                         : MyAppState
                                                                             .defaultCoverImage,
+                                                                    cacheManager:
+                                                                        MyHttp
+                                                                            .myImageCacheManager,
                                                                     progressIndicatorBuilder: (context,
                                                                             url,
                                                                             downloadProgress) =>
@@ -694,6 +698,8 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
                                                                             .cover
                                                                     : MyAppState
                                                                         .defaultCoverImage,
+                                                                cacheManager: MyHttp
+                                                                    .myImageCacheManager,
                                                                 progressIndicatorBuilder: (context,
                                                                         url,
                                                                         downloadProgress) =>

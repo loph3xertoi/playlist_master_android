@@ -26,8 +26,9 @@ import '../entities/bilibili/bili_fav_list.dart';
 import '../entities/bilibili/bili_resource.dart';
 import '../entities/bilibili/bili_user.dart';
 import '../entities/dto/bili_links_dto.dart';
-import '../entities/dto/paged_data.dart';
+import '../entities/dto/paged_data_dto.dart';
 import '../entities/dto/result.dart';
+import '../entities/dto/updated_library_dto.dart';
 import '../entities/netease_cloud_music/ncm_detail_playlist.dart';
 import '../entities/netease_cloud_music/ncm_detail_song.dart';
 import '../entities/netease_cloud_music/ncm_detail_video.dart';
@@ -35,6 +36,10 @@ import '../entities/netease_cloud_music/ncm_playlist.dart';
 import '../entities/netease_cloud_music/ncm_song.dart';
 import '../entities/netease_cloud_music/ncm_user.dart';
 import '../entities/netease_cloud_music/ncm_video.dart';
+import '../entities/pms/pms_detail_library.dart';
+import '../entities/pms/pms_library.dart';
+import '../entities/pms/pms_song.dart';
+import '../entities/pms/pms_user.dart';
 import '../entities/qq_music/qqmusic_detail_playlist.dart';
 import '../entities/qq_music/qqmusic_detail_song.dart';
 import '../entities/qq_music/qqmusic_detail_video.dart';
@@ -50,6 +55,12 @@ import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 
 class MyAppState extends ChangeNotifier {
+  /// Using mock data.
+  bool _isUsingMockData = false;
+
+  //// The current platform, 0 for pm server, 1 for qq music, 2 for netease music, 3 for bilibili.
+  int _currentPlatform = 0;
+
   /// Whether in detail favlist page.
   bool _inDetailFavlistPage = false;
 
@@ -138,12 +149,6 @@ class MyAppState extends ChangeNotifier {
 
   /// Dark mode.
   bool? _isDarkMode;
-
-  /// Using mock data.
-  bool _isUsingMockData = false;
-
-  //// The current platform, 0 for pm server, 1 for qq music, 2 for netease music, 3 for bilibili.
-  int _currentPlatform = 3;
 
   /// Default image for cover.
   static const String defaultCoverImage =
@@ -835,7 +840,7 @@ class MyAppState extends ChangeNotifier {
     if (isUsingMockData) {
       songs = _songsQueue!
           .map((e) async => AudioSource.asset(
-                e.songLink,
+                e.songLink!,
                 tag: MediaItem(
                   // Specify a unique ID for each media item:
                   id: Uuid().v1(),
@@ -854,7 +859,7 @@ class MyAppState extends ChangeNotifier {
       if (kIsWeb) {
         songs = _songsQueue!
             .map((e) async => AudioSource.uri(
-                  Uri.parse(e.songLink),
+                  Uri.parse(e.songLink!),
                   tag: MediaItem(
                     // Specify a unique ID for each media item:
                     id: Uuid().v1(),
@@ -869,7 +874,7 @@ class MyAppState extends ChangeNotifier {
       } else {
         songs = _songsQueue!
             .map((e) async => LockCachingAudioSource(
-                  Uri.parse(e.songLink),
+                  Uri.parse(e.songLink!),
                   tag: MediaItem(
                     // Specify a unique ID for each media item:
                     id: Uuid().v1(),
@@ -963,7 +968,7 @@ class MyAppState extends ChangeNotifier {
   Future<BasicUser?> fetchUser(int platform) async {
     BasicUser Function(Map<String, dynamic>) resolveJson;
     if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
+      resolveJson = PMSUser.fromJson;
     } else if (platform == 1) {
       resolveJson = QQMusicUser.fromJson;
     } else if (platform == 2) {
@@ -1018,7 +1023,13 @@ class MyAppState extends ChangeNotifier {
     BasicLibrary Function(Map<String, dynamic>) resolveJson;
     Map<String, dynamic>? params;
     if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
+      resolveJson = PMSLibrary.fromJson;
+      params = {
+        'id': API.uid,
+        'pn': pn!,
+        'ps': '20',
+        'platform': platform.toString(),
+      };
     } else if (platform == 1) {
       resolveJson = QQMusicPlaylist.fromJson;
       params = {
@@ -1285,7 +1296,14 @@ class MyAppState extends ChangeNotifier {
     BasicLibrary Function(Map<String, dynamic>) resolveJson;
     Uri? url;
     if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
+      resolveJson = PMSDetailLibrary.fromJson;
+      url = Uri.http(
+        API.host,
+        '${API.detailLibrary}/${(library as PMSLibrary).id}',
+        {
+          'platform': platform.toString(),
+        },
+      );
     } else if (platform == 1) {
       resolveJson = QQMusicDetailPlaylist.fromJson;
       url = Uri.http(
@@ -1600,7 +1618,6 @@ class MyAppState extends ChangeNotifier {
     String? cover,
   ]) async {
     if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
     } else if (platform == 1) {
     } else if (platform == 2) {
     } else if (platform == 3) {
@@ -1640,6 +1657,77 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Library created successfully');
+          return Future.value(result);
+        } else {
+          _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
+        }
+      } else {
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<Result?> updateLibrary(
+      UpdatedLibraryDTO updatedLibrary, int platform) async {
+    if (platform == 0) {
+    } else if (platform == 1) {
+      throw UnimplementedError('Not yet implement qqmusic platform');
+    } else if (platform == 2) {
+      throw UnimplementedError('Not yet implement ncm platform');
+    } else if (platform == 3) {
+      throw UnimplementedError('Not yet implement bilibili platform');
+    } else {
+      throw UnsupportedError('Invalid platform');
+    }
+    final Uri url = Uri.http(
+      API.host,
+      API.updateLibrary,
+      {
+        'platform': platform.toString(),
+      },
+    );
+    var request = http.MultipartRequest('PUT', url);
+    request.fields['id'] = updatedLibrary.id.toString();
+    request.fields['name'] = updatedLibrary.name;
+    // Map<String, String> requestBody = {};
+    // requestBody.putIfAbsent('name', () => libraryName);
+    if (updatedLibrary.intro != null) {
+      // requestBody.putIfAbsent('intro', () => intro);
+      request.fields['intro'] = updatedLibrary.intro!;
+    }
+    if (updatedLibrary.cover != null) {
+      // requestBody.putIfAbsent('cover', () => cover.readAsBytes());
+      request.files.add(updatedLibrary.cover!);
+    }
+    final client = RetryClient(http.Client());
+    try {
+      MyLogger.logger.i('Updating library...');
+      // final response = await client.put(
+      //   url,
+      //   headers: {'Content-Type': 'application/json'},
+      //   body: jsonEncode(requestBody),
+      // );
+      final response = await request.send();
+      if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(await response.stream.toBytes()))
+                as Map<String, dynamic>;
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          MyToast.showToast('Library updated successfully');
           return Future.value(result);
         } else {
           _errorMsg = result.message!;
@@ -1739,29 +1827,62 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  Future<Result?> addSongsToLibrary(
-      List<BasicSong> songs, BasicLibrary library, int platform) async {
+  Future<Result?> addSongsToLibrary(List<BasicSong> songs, BasicLibrary library,
+      bool isAddToPMSLibrary, int platform) async {
     Map<String, Object> requestBody;
     if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
+      int libraryId = (library as PMSLibrary).id;
+      String songsIds = songs.map((e) => (e as PMSSong).id).join(',');
+      String tid = libraryId.toString();
+      requestBody = {
+        'libraryId': libraryId.toString(),
+        'songsIds': songsIds.toString(),
+        'isAddToPMSLibrary': isAddToPMSLibrary,
+        'tid': tid,
+      };
     } else if (platform == 1) {
-      int dirId = (library as QQMusicPlaylist).dirId;
-      String songsMid = songs.map((e) => (e as QQMusicSong).songMid).join(',');
-      String tid = library.tid;
-      requestBody = {
-        'libraryId': dirId.toString(),
-        'songsId': songsMid,
-        'tid': tid,
-      };
+      if (isAddToPMSLibrary) {
+        int libraryId = (library as PMSLibrary).id;
+        String tid = libraryId.toString();
+        requestBody = {
+          'libraryId': libraryId.toString(),
+          'songs': songs,
+          'isAddToPMSLibrary': isAddToPMSLibrary,
+          'tid': tid,
+        };
+      } else {
+        int dirId = (library as QQMusicPlaylist).dirId;
+        String songsMid =
+            songs.map((e) => (e as QQMusicSong).songMid).join(',');
+        String tid = library.tid;
+        requestBody = {
+          'libraryId': dirId.toString(),
+          'songsIds': songsMid,
+          'isAddToPMSLibrary': isAddToPMSLibrary,
+          'tid': tid,
+        };
+      }
     } else if (platform == 2) {
-      int id = (library as NCMPlaylist).id;
-      String songIds = songs.map((e) => (e as NCMSong).id).join(',');
-      String tid = id.toString();
-      requestBody = {
-        'libraryId': id.toString(),
-        'songsId': songIds,
-        'tid': tid,
-      };
+      if (isAddToPMSLibrary) {
+        int libraryId = (library as PMSLibrary).id;
+        String tid = libraryId.toString();
+        requestBody = {
+          'libraryId': libraryId.toString(),
+          'songs': songs,
+          'isAddToPMSLibrary': isAddToPMSLibrary,
+          'tid': tid,
+        };
+      } else {
+        int id = (library as NCMPlaylist).id;
+        String songIds = songs.map((e) => (e as NCMSong).id).join(',');
+        String tid = id.toString();
+        requestBody = {
+          'libraryId': id.toString(),
+          'songsIds': songIds,
+          'isAddToPMSLibrary': isAddToPMSLibrary,
+          'tid': tid,
+        };
+      }
     } else if (platform == 3) {
       throw UnimplementedError('Not yet implement bilibili platform');
     } else {
@@ -1976,7 +2097,8 @@ class MyAppState extends ChangeNotifier {
   Future<Result?> addResourcesToFavList(
       List<BiliResource> resources,
       int biliSourceFavListId,
-      String isFavoriteSearchedResource,
+      bool isFavoriteSearchedResource,
+      bool isAddToPMSLibrary,
       String favListsIds,
       int platform) async {
     Map<String, Object> requestBody;
@@ -1987,19 +2109,28 @@ class MyAppState extends ChangeNotifier {
     } else if (platform == 2) {
       throw UnimplementedError('Not yet implement ncm platform');
     } else if (platform == 3) {
-      String resourcesIds;
-      if (isFavoriteSearchedResource == 'true') {
-        resourcesIds = resources.map((e) => '${e.id}').join(',');
+      if (isAddToPMSLibrary) {
+        requestBody = {
+          'libraryId': favListsIds,
+          'resources': resources,
+          'isAddToPMSLibrary': isAddToPMSLibrary,
+          'tid': favListsIds,
+        };
       } else {
-        resourcesIds = resources.map((e) => '${e.id}:${e.type}').join(',');
+        String resourcesIds;
+        if (isFavoriteSearchedResource) {
+          resourcesIds = resources.map((e) => '${e.id}').join(',');
+        } else {
+          resourcesIds = resources.map((e) => '${e.id}:${e.type}').join(',');
+        }
+        requestBody = {
+          'libraryId': favListsIds,
+          'songsIds': resourcesIds,
+          'biliSourceFavListId': biliSourceFavListId,
+          'isFavoriteSearchedResource': isFavoriteSearchedResource,
+          'tid': favListsIds,
+        };
       }
-      requestBody = {
-        'libraryId': favListsIds,
-        'songsId': resourcesIds,
-        'biliSourceFavListId': biliSourceFavListId,
-        'isFavoriteSearchedResource': isFavoriteSearchedResource,
-        'tid': favListsIds,
-      };
     } else {
       throw UnsupportedError('Invalid platform');
     }
@@ -2183,7 +2314,7 @@ class MyAppState extends ChangeNotifier {
     final Uri url = Uri.http(API.host, API.getBiliSplashScreenImage);
     final client = RetryClient(http.Client());
     try {
-      MyLogger.logger.i('Loading bilibili splash screen iamges...');
+      MyLogger.logger.i('Loading bilibili splash screen images...');
       final response = await client.get(url);
       if (response.statusCode == 200) {
         final decodedResponse =

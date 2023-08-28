@@ -14,6 +14,7 @@ import '../entities/bilibili/bili_detail_fav_list.dart';
 import '../entities/bilibili/bili_fav_list.dart';
 import '../entities/bilibili/bili_resource.dart';
 import '../http/api.dart';
+import '../http/my_http.dart';
 import '../states/app_state.dart';
 import '../states/my_search_state.dart';
 import '../utils/my_logger.dart';
@@ -433,6 +434,9 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                                                               ? API.convertImageUrl(detailFavList.cover)
                                                                               : detailFavList.cover
                                                                           : MyAppState.defaultCoverImage,
+                                                                      cacheManager:
+                                                                          MyHttp
+                                                                              .myImageCacheManager,
                                                                       progressIndicatorBuilder: (context,
                                                                               url,
                                                                               downloadProgress) =>

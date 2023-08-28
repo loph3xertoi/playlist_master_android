@@ -16,8 +16,10 @@ import '../entities/netease_cloud_music/ncm_user.dart';
 import '../entities/pms/pms_user.dart';
 import '../entities/qq_music/qqmusic_user.dart';
 import '../http/api.dart';
+import '../http/my_http.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
+import '../utils/my_logger.dart';
 import 'bilibili_level_bar.dart';
 import 'my_selectable_text.dart';
 
@@ -208,6 +210,8 @@ class _BasicInfoState extends State<BasicInfo> {
                                                 ? API
                                                     .convertImageUrl(user.bgPic)
                                                 : user.bgPic,
+                                        cacheManager:
+                                            MyHttp.myImageCacheManager,
                                         progressIndicatorBuilder: (context, url,
                                                 downloadProgress) =>
                                             CircularProgressIndicator(
@@ -261,9 +265,7 @@ class _BasicInfoState extends State<BasicInfo> {
                                   child: isUsingMockData
                                       ? BuildMockUser(user: user as QQMusicUser)
                                       : currentPlatform == 0
-                                          ? ErrorWidget(UnsupportedError(
-                                              'Not yet implement pms platform'))
-                                          // ? BuildPMSUser(user: user as PMSUser)
+                                          ? BuildPMSUser(user: user as PMSUser)
                                           : currentPlatform == 1
                                               ? BuildQQMusicUser(
                                                   user: user as QQMusicUser)
@@ -355,6 +357,172 @@ class BuildMockUser extends StatelessWidget {
   }
 }
 
+class BuildPMSUser extends StatefulWidget {
+  const BuildPMSUser({
+    super.key,
+    required this.user,
+  });
+
+  final PMSUser user;
+
+  @override
+  State<BuildPMSUser> createState() => _BuildPMSUserState();
+}
+
+class _BuildPMSUserState extends State<BuildPMSUser>
+    with TickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    // _tabController.addListener(() {
+    //   if (_tabController.index == 0 &&
+    //       !_currentDetailResource.isSeasonResource &&
+    //       _currentDetailResource.page > 1) {
+    //     WidgetsBinding.instance.addPostFrameCallback((_) {
+    //       if (_collapseSubpagesScrollController.hasClients) {
+    //         _collapseSubpagesScrollController.animateTo(
+    //           (_subPageNo - 1) * 128.0,
+    //           curve: Curves.easeInOut,
+    //           duration: Duration(milliseconds: 300),
+    //         );
+    //       }
+    //     });
+    //   }
+    // });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return Column(children: [
+      CircleAvatar(
+        radius: 36.0,
+        backgroundImage: CachedNetworkImageProvider(
+          widget.user.headPic.isEmpty
+              ? MyAppState.defaultCoverImage
+              : kIsWeb
+                  ? API.convertImageUrl(widget.user.headPic)
+                  : widget.user.headPic,
+          cacheManager: MyHttp.myImageCacheManager,
+        ),
+      ),
+      SizedBox(height: 10.0),
+      MySelectableText(
+        '${widget.user.name}(${widget.user.id})',
+        style: textTheme.labelLarge,
+      ),
+      if (widget.user.intro.isNotEmpty)
+        MySelectableText(
+          widget.user.intro,
+          style: textTheme.labelSmall,
+        ),
+      SizedBox(height: 10.0),
+      Container(
+        height: 380.0,
+        // width: 300.0,
+        color: colorScheme.primary,
+        child: DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            body: Column(
+              children: [
+                TabBar(
+                  controller: _tabController,
+                  isScrollable: true,
+                  indicatorColor: Color(0xFFFB6A9D),
+                  dividerColor: colorScheme.onPrimary.withOpacity(0.3),
+                  labelColor: Color(0xFFFB6A9D),
+                  labelStyle: textTheme.labelSmall,
+                  overlayColor: MaterialStateProperty.all(Colors.grey),
+                  unselectedLabelColor: colorScheme.onPrimary.withOpacity(0.3),
+                  unselectedLabelStyle: textTheme.labelSmall,
+                  tabs: [
+                    Tab(
+                        child: SizedBox(
+                            height: 50.0,
+                            width: 50.0,
+                            child: CircleAvatar(
+                                backgroundImage:
+                                    AssetImage('assets/images/qqmusic.png')))),
+                    Tab(
+                        child: SizedBox(
+                            height: 50.0,
+                            width: 50.0,
+                            child: CircleAvatar(
+                                backgroundImage:
+                                    AssetImage('assets/images/netease.png')))),
+                    Tab(
+                        child: SizedBox(
+                            height: 50.0,
+                            width: 50.0,
+                            child: CircleAvatar(
+                                backgroundImage:
+                                    AssetImage('assets/images/bilibili.png')))),
+                  ],
+                ),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      Center(
+                        child: widget.user.subUsers.containsKey('qqmusic')
+                            ? ListView(
+                                children: [
+                                  BuildQQMusicUser(
+                                      user: widget.user.subUsers['qqmusic']
+                                          as QQMusicUser),
+                                ],
+                              )
+                            : Text(
+                                'Please login to QQ Music',
+                                style: textTheme.labelMedium,
+                              ),
+                      ),
+                      Center(
+                        child: widget.user.subUsers.containsKey('ncm')
+                            ? ListView(
+                                children: [
+                                  SizedBox(height: 35.0),
+                                  BuildNCMUser(
+                                      user: widget.user.subUsers['ncm']
+                                          as NCMUser),
+                                ],
+                              )
+                            : Text(
+                                'Please login to Netease Cloud Music',
+                                style: textTheme.labelMedium,
+                              ),
+                      ),
+                      Center(
+                        child: widget.user.subUsers.containsKey('bilibili')
+                            ? ListView(
+                                children: [
+                                  BuildBilibiliUser(
+                                      user: widget.user.subUsers['bilibili']
+                                          as BiliUser),
+                                ],
+                              )
+                            : Text(
+                                'Please login to Bilibili',
+                                style: textTheme.labelMedium,
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ]);
+  }
+}
+
 class BuildQQMusicUser extends StatelessWidget {
   const BuildQQMusicUser({
     super.key,
@@ -375,6 +543,7 @@ class BuildQQMusicUser extends StatelessWidget {
               : kIsWeb
                   ? API.convertImageUrl(user.headPic)
                   : user.headPic,
+          cacheManager: MyHttp.myImageCacheManager,
         ),
       ),
       MySelectableText(
@@ -394,6 +563,7 @@ class BuildQQMusicUser extends StatelessWidget {
                   : kIsWeb
                       ? API.convertImageUrl(user.lvPic)
                       : user.lvPic,
+              cacheManager: MyHttp.myImageCacheManager,
               progressIndicatorBuilder: (context, url, downloadProgress) =>
                   CircularProgressIndicator(value: downloadProgress.progress),
               errorWidget: (context, url, error) => Icon(MdiIcons.debian),
@@ -411,6 +581,7 @@ class BuildQQMusicUser extends StatelessWidget {
                   : kIsWeb
                       ? API.convertImageUrl(user.listenPic)
                       : user.listenPic,
+              cacheManager: MyHttp.myImageCacheManager,
               progressIndicatorBuilder: (context, url, downloadProgress) =>
                   CircularProgressIndicator(value: downloadProgress.progress),
               errorWidget: (context, url, error) => Icon(MdiIcons.debian),
@@ -475,6 +646,8 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
           area = '${value.city}, ${value.stateProv}, ${value.countryName}';
         });
       }
+    }, onError: (error) {
+      MyLogger.logger.e('$error: \n${error.stackTrace}');
     });
     resolvePostCode(widget.user.province.toString())
         .then((value) => setState(() {
@@ -504,6 +677,7 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
                 : kIsWeb
                     ? API.convertImageUrl(user.headPic)
                     : user.headPic,
+            cacheManager: MyHttp.myImageCacheManager,
           ),
         ),
         Padding(
@@ -612,6 +786,7 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
                               : kIsWeb
                                   ? API.convertImageUrl(user.redVipLevelIcon)
                                   : user.redVipLevelIcon,
+                          cacheManager: MyHttp.myImageCacheManager,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
                                   CircularProgressIndicator(
@@ -655,6 +830,7 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
                                   ? API
                                       .convertImageUrl(user.redPlusVipLevelIcon)
                                   : user.redPlusVipLevelIcon,
+                          cacheManager: MyHttp.myImageCacheManager,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
                                   CircularProgressIndicator(
@@ -698,6 +874,7 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
                                   ? API.convertImageUrl(
                                       user.musicPackageVipLevelIcon)
                                   : user.musicPackageVipLevelIcon,
+                          cacheManager: MyHttp.myImageCacheManager,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
                                   CircularProgressIndicator(
@@ -991,6 +1168,7 @@ class BuildBilibiliUser extends StatelessWidget {
                       : kIsWeb
                           ? API.convertImageUrl(user.headPic)
                           : user.headPic,
+                  cacheManager: MyHttp.myImageCacheManager,
                 ),
               ),
               Opacity(
@@ -1006,6 +1184,7 @@ class BuildBilibiliUser extends StatelessWidget {
                             imageUrl: kIsWeb
                                 ? API.convertImageUrl(user.dynamicPendantImage)
                                 : user.dynamicPendantImage,
+                            cacheManager: MyHttp.myImageCacheManager,
                             progressIndicatorBuilder:
                                 (context, url, downloadProgress) =>
                                     CircularProgressIndicator(
@@ -1046,6 +1225,7 @@ class BuildBilibiliUser extends StatelessWidget {
                         : kIsWeb
                             ? API.convertImageUrl(user.vipIcon)
                             : user.vipIcon,
+                    cacheManager: MyHttp.myImageCacheManager,
                     progressIndicatorBuilder:
                         (context, url, downloadProgress) =>
                             CircularProgressIndicator(
@@ -1136,6 +1316,7 @@ class BuildBilibiliUser extends StatelessWidget {
                           imageUrl: kIsWeb
                               ? API.convertImageUrl(user.nameplateImage)
                               : user.nameplateImage,
+                          cacheManager: MyHttp.myImageCacheManager,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
                                   CircularProgressIndicator(

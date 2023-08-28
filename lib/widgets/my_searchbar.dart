@@ -9,6 +9,7 @@ import '../entities/basic/basic_song.dart';
 import '../entities/bilibili/bili_resource.dart';
 import '../entities/netease_cloud_music/ncm_song.dart';
 import '../entities/qq_music/qqmusic_song.dart';
+import '../http/my_http.dart';
 import '../states/app_state.dart';
 import 'basic_info.dart';
 import 'custom_selection_handler.dart';
@@ -362,6 +363,7 @@ class _MySearchBarState extends State<MySearchBar>
                                       .image
                                   : CachedNetworkImageProvider(
                                       MyAppState.defaultCoverImage,
+                                      cacheManager: MyHttp.myImageCacheManager,
                                     ),
                               // : Image.network(MyAppState.defaultCoverImage)
                               //     .image,

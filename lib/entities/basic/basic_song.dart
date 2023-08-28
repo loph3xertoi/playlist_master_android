@@ -9,7 +9,7 @@ class BasicSong {
     required this.cover,
     required this.payPlay,
     required this.isTakenDown,
-    required this.songLink,
+    this.songLink,
   });
 
   final String name;
@@ -17,5 +17,5 @@ class BasicSong {
   final String cover;
   final int payPlay;
   final bool isTakenDown;
-  final String songLink;
+  final String? songLink;
 }

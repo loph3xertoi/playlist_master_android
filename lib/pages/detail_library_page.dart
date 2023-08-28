@@ -12,6 +12,7 @@ import '../entities/basic/basic_song.dart';
 import '../entities/netease_cloud_music/ncm_detail_playlist.dart';
 import '../entities/qq_music/qqmusic_detail_playlist.dart';
 import '../http/api.dart';
+import '../http/my_http.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
 import '../states/my_search_state.dart';
@@ -382,6 +383,8 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                                 ? API.convertImageUrl(detailLibrary.cover)
                                                                                 : detailLibrary.cover
                                                                             : MyAppState.defaultCoverImage,
+                                                                        cacheManager:
+                                                                            MyHttp.myImageCacheManager,
                                                                         progressIndicatorBuilder: (context,
                                                                                 url,
                                                                                 downloadProgress) =>

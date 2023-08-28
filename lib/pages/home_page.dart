@@ -102,7 +102,7 @@ class _HomePageState extends State<HomePage>
                           ),
                           onPressed: () async {
                             await MyHttp.clearCache();
-                            await AudioPlayer.clearAssetCache();
+                            // await AudioPlayer.clearAssetCache();
                             MyToast.showToast('Clear local cache');
                           },
                           child: Text(

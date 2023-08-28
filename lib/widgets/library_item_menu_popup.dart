@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/entities/dto/result.dart';
+import 'package:playlistmaster/widgets/update_library_popup.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
@@ -17,10 +19,17 @@ class LibraryItemMenuPopup extends StatelessWidget {
     appState.refreshLibraries!(appState, false);
   }
 
-  void _editLibrary(MyAppState appState) async {
+  void _editLibrary(MyAppState appState, BuildContext context) async {
     int platform = appState.currentPlatform;
     if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
+      Navigator.pop(context);
+      Result? result = await await showDialog<Future<Result?>>(
+        context: context,
+        builder: (_) => UpdateLibraryDialog(library: library),
+      );
+      if (result != null && result.success) {
+        appState.refreshLibraries!(appState, false);
+      }
     } else if (platform == 1) {
       throw UnimplementedError('API missing in qq music platform');
     } else if (platform == 2) {
@@ -126,11 +135,8 @@ class LibraryItemMenuPopup extends StatelessWidget {
               borderRadius: BorderRadius.all(
                 Radius.circular(10.0),
               ),
-              onTap: () {
-                print('Edit library.');
-                print(appState);
-                _editLibrary(appState);
-                Navigator.pop(context);
+              onTap: () async {
+                _editLibrary(appState, context);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -140,10 +146,7 @@ class LibraryItemMenuPopup extends StatelessWidget {
                       icon: Icon(Icons.edit_rounded),
                       color: colorScheme.tertiary,
                       onPressed: () {
-                        print('Edit library.');
-                        print(appState);
-                        _editLibrary(appState);
-                        Navigator.pop(context);
+                        _editLibrary(appState, context);
                       },
                     ),
                     Expanded(

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:playlistmaster/http/my_http.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
-import '../entities/dto/paged_data.dart';
+import '../entities/dto/paged_data_dto.dart';
 import '../entities/dto/result.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
@@ -191,7 +192,9 @@ class _MyContentAreaState extends State<MyContentArea> {
             // Only add libraries of this snapshot.data in the first page,
             // add other libraries to _localLibraries inside _fetchingLibraries.
             // To avoid stuck, don't rebuild the widget when fetching new libraries.
-            if (totalCount != 0 && _currentPage == 1) {
+            if (totalCount != 0 &&
+                _currentPage == 1 &&
+                _localLibraries!.isEmpty) {
               List<BasicLibrary>? libraries = pagedDataDTO.list;
               _hasMore = pagedDataDTO.hasMore;
               _localLibraries?.addAll(libraries!);
@@ -256,6 +259,7 @@ class _MyContentAreaState extends State<MyContentArea> {
                             color: colorScheme.onPrimary,
                             strokeWidth: 2.0,
                             onRefresh: () async {
+                              await MyHttp.clearCache();
                               setState(() {
                                 _currentPage = 1;
                                 _futurePagedLibraries =

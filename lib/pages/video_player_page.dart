@@ -424,6 +424,7 @@ class QQMusicVideoInfoArea extends StatelessWidget {
                           ? API.convertImageUrl(detailVideo.singers[0].headPic)
                           : detailVideo.singers[0].headPic
                       : MyAppState.defaultCoverImage,
+                  cacheManager: MyHttp.myImageCacheManager,
                 ),
               ),
             ),
@@ -527,6 +528,7 @@ class NCMVideoInfoArea extends StatelessWidget {
                           ? API.convertImageUrl(detailVideo.singers[0].headPic)
                           : detailVideo.singers[0].headPic
                       : MyAppState.defaultCoverImage,
+                  cacheManager: MyHttp.myImageCacheManager,
                 ),
               ),
             ),

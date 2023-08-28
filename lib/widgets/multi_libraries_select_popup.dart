@@ -3,7 +3,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
-import '../entities/dto/paged_data.dart';
+import '../entities/dto/paged_data_dto.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
 import '../utils/my_toast.dart';

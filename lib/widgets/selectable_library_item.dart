@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../http/api.dart';
+import '../http/my_http.dart';
 import '../states/app_state.dart';
 
 class SelectableLibraryItem extends StatelessWidget {
@@ -51,6 +52,7 @@ class SelectableLibraryItem extends StatelessWidget {
                                     ? API.convertImageUrl(library!.cover)
                                     : library!.cover
                                 : MyAppState.defaultLibraryCover,
+                            cacheManager: MyHttp.myImageCacheManager,
                             progressIndicatorBuilder:
                                 (context, url, downloadProgress) =>
                                     CircularProgressIndicator(

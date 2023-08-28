@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../entities/basic/basic_library.dart';
 import '../entities/bilibili/bili_fav_list.dart';
 import '../entities/bilibili/bili_resource.dart';
-import '../entities/dto/paged_data.dart';
+import '../entities/dto/paged_data_dto.dart';
 import '../entities/dto/result.dart';
 import '../entities/netease_cloud_music/ncm_playlist.dart';
 import '../entities/qq_music/qqmusic_playlist.dart';
@@ -344,7 +344,8 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
       result = appState.addResourcesToFavList(
         widget.resources,
         widget.biliSourceFavListId,
-        'true',
+        true,
+        false,
         (favList as BiliFavList).id.toString(),
         _currentPlatform,
       );
@@ -352,7 +353,8 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
       result = appState.addResourcesToFavList(
         widget.resources,
         widget.biliSourceFavListId,
-        'false',
+        false,
+        false,
         (favList as BiliFavList).id.toString(),
         _currentPlatform,
       );
@@ -411,7 +413,8 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
       results.add(appState.addResourcesToFavList(
         widget.resources,
         widget.biliSourceFavListId,
-        'true',
+        true,
+        false,
         favListsIds,
         _currentPlatform,
       ));
@@ -420,7 +423,8 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
         results.add(appState.addResourcesToFavList(
           widget.resources,
           widget.biliSourceFavListId,
-          'false',
+          false,
+          false,
           (favLists[_selectedIndex[i]] as BiliFavList).id.toString(),
           _currentPlatform,
         ));

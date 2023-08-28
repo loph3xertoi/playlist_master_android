@@ -1,11 +1,11 @@
 class API {
   /// Your uid in playlist master server.
-  static const uid = '0';
+  static const uid = '1';
 
   static const demoMpd = 'http://$host/mpd/c.mpd';
 
   /// Host of playlist server.
-  static const host = '192.168.110.70:8080';
+  static const host = '192.168.201.147:8080';
   // static const host = '192.168.8.171:8080';
   // static const host = '192.168.0.114:8080';
 
@@ -57,6 +57,10 @@ class API {
   /// Create library in [platform] with [name].
   /// api: POST /library?platform=[platform] {'name': [name]}
   static const createLibrary = '/library';
+
+  /// Update library in [platform].
+  /// api: PUT /library?platform=[platform] {'name': [name], 'intro': [intro], 'cover': [cover]}
+  static const updateLibrary = '/library';
 
   /// Delete library in [platform] with id [libraries].
   /// api: DELETE /library/[libraries]?platform=[platform]

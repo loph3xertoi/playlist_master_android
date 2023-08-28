@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 
 import '../basic/basic_user.dart';
+import '../bilibili/bili_user.dart';
+import '../netease_cloud_music/ncm_user.dart';
 import '../qq_music/qqmusic_user.dart';
 
 /// User for pms.
@@ -8,6 +10,7 @@ import '../qq_music/qqmusic_user.dart';
 class PMSUser extends BasicUser {
   const PMSUser(
     this.id,
+    this.intro,
     this.subUsers, {
     required super.name,
     required super.headPic,
@@ -15,7 +18,10 @@ class PMSUser extends BasicUser {
   });
 
   /// User id in playlist master server.
-  final String id;
+  final int id;
+
+  /// Description of pms user.
+  final String intro;
 
   /// All managed sub users in playlist master server.
   final Map<String, BasicUser> subUsers;
@@ -24,14 +30,21 @@ class PMSUser extends BasicUser {
     Map<String, dynamic> subUsersJson = json['subUsers'];
     Map<String, BasicUser> subUsers = {};
 
-    // TODO: implement other two platform.
     if (subUsersJson.containsKey('qqmusic')) {
       subUsers.putIfAbsent(
           'qqmusic', () => QQMusicUser.fromJson(subUsersJson['qqmusic']));
     }
+    if (subUsersJson.containsKey('ncm')) {
+      subUsers.putIfAbsent('ncm', () => NCMUser.fromJson(subUsersJson['ncm']));
+    }
+    if (subUsersJson.containsKey('bilibili')) {
+      subUsers.putIfAbsent(
+          'bilibili', () => BiliUser.fromJson(subUsersJson['bilibili']));
+    }
 
     return PMSUser(
       json['id'],
+      json['intro'],
       subUsers,
       name: json['name'],
       headPic: json['headPic'],
@@ -41,6 +54,6 @@ class PMSUser extends BasicUser {
 
   @override
   String toString() {
-    return 'PMSUser{id: $id, subUsers: $subUsers, name: $name, headPic: $headPic, bgPic: $bgPic}';
+    return 'PMSUser{id: $id, intro: $intro, subUsers: $subUsers, name: $name, headPic: $headPic, bgPic: $bgPic}';
   }
 }

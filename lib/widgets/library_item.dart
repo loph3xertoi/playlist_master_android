@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:playlistmaster/http/my_http.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
@@ -58,6 +60,7 @@ class LibraryItem extends StatelessWidget {
                                     ? API.convertImageUrl(library.cover)
                                     : library.cover
                                 : MyAppState.defaultLibraryCover,
+                            cacheManager: MyHttp.myImageCacheManager,
                             progressIndicatorBuilder:
                                 (context, url, downloadProgress) =>
                                     CircularProgressIndicator(

@@ -15,7 +15,8 @@ import 'states/app_state.dart';
 
 class MockData {
   static PMSUser pmsUser = PMSUser(
-    '0',
+    1,
+    'PMSUser intro',
     {
       'qqmusic': QQMusicUser(
         'assets/images/qqmusic_vip.png',

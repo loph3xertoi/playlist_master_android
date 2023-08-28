@@ -11,7 +11,7 @@ void main() {
   });
 
   test('Fetch user', () async {
-    print(await appState.fetchUser(1));
+    print(await appState.fetchUser(0));
   });
 
   test('Create library', () async {
@@ -69,6 +69,7 @@ void main() {
         )
       ],
       QQMusicPlaylist(22, '1', name: 'daw', cover: 'cover', itemCount: 1),
+      false,
       1,
     );
     print(result);

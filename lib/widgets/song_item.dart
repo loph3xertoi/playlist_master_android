@@ -3,12 +3,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-import 'package:playlistmaster/http/api.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../entities/basic/basic_song.dart';
 import '../entities/dto/result.dart';
+import '../http/api.dart';
 import '../states/app_state.dart';
 import '../third_lib_change/like_button/like_button.dart';
 import '../utils/my_logger.dart';
@@ -206,7 +206,7 @@ class _SongItemState extends State<SongItem> {
                       AudioSource newAudioSource;
                       if (appState.isUsingMockData) {
                         newAudioSource = AudioSource.asset(
-                          widget.song.songLink,
+                          widget.song.songLink!,
                           tag: MediaItem(
                             // Specify a unique ID for each media item:
                             id: Uuid().v1(),
@@ -226,7 +226,7 @@ class _SongItemState extends State<SongItem> {
                       } else {
                         if (kIsWeb) {
                           newAudioSource = AudioSource.uri(
-                            Uri.parse(widget.song.songLink),
+                            Uri.parse(widget.song.songLink!),
                             tag: MediaItem(
                               // Specify a unique ID for each media item:
                               id: Uuid().v1(),
@@ -242,7 +242,7 @@ class _SongItemState extends State<SongItem> {
                           );
                         } else {
                           newAudioSource = LockCachingAudioSource(
-                            Uri.parse(widget.song.songLink),
+                            Uri.parse(widget.song.songLink!),
                             tag: MediaItem(
                               // Specify a unique ID for each media item:
                               id: Uuid().v1(),

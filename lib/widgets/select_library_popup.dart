@@ -4,9 +4,10 @@ import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../entities/basic/basic_song.dart';
-import '../entities/dto/paged_data.dart';
+import '../entities/dto/paged_data_dto.dart';
 import '../entities/dto/result.dart';
 import '../entities/netease_cloud_music/ncm_playlist.dart';
+import '../entities/pms/pms_library.dart';
 import '../entities/qq_music/qqmusic_playlist.dart';
 import '../states/app_state.dart';
 import 'create_library_popup.dart';
@@ -288,9 +289,14 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
   }
 
   void _addSongsToLibrary(MyAppState appState, BasicLibrary library) async {
+    bool isAddToPMSLibrary = false;
+    if (library is PMSLibrary) {
+      isAddToPMSLibrary = true;
+    }
     Future<Result?> result = appState.addSongsToLibrary(
       widget.songs,
       library,
+      isAddToPMSLibrary,
       appState.currentPlatform,
     );
     if (mounted) {
@@ -315,9 +321,15 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
     int platform = appState.currentPlatform;
     List<Future<Result?>> results = [];
     for (int i = 0; i < _selectedIndex.length; i++) {
+      BasicLibrary library = libraries[_selectedIndex[i]];
+      bool isAddToPMSLibrary = false;
+      if (library is PMSLibrary) {
+        isAddToPMSLibrary = true;
+      }
       results.add(appState.addSongsToLibrary(
         widget.songs,
-        libraries[_selectedIndex[i]],
+        library,
+        isAddToPMSLibrary,
         platform,
       ));
     }

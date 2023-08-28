@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import '../entities/bilibili/bili_resource.dart';
 import '../entities/dto/result.dart';
 import '../http/api.dart';
+import '../http/my_http.dart';
 import '../states/app_state.dart';
 import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
@@ -178,6 +179,7 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
                                                   'https:${resource.cover}')
                                               : 'https:${resource.cover}'
                                       : MyAppState.defaultCoverImage,
+                                  cacheManager: MyHttp.myImageCacheManager,
                                   progressIndicatorBuilder:
                                       (context, url, downloadProgress) =>
                                           CircularProgressIndicator(

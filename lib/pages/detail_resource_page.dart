@@ -13,6 +13,7 @@ import '../entities/bilibili/bili_fav_list.dart';
 import '../entities/bilibili/bili_resource.dart';
 import '../entities/bilibili/bili_subpage_of_resource.dart';
 import '../http/api.dart';
+import '../http/my_http.dart';
 import '../states/app_state.dart';
 import '../widgets/bili_resource_item.dart';
 import '../widgets/foldable_resource_intro_widget.dart';
@@ -1037,6 +1038,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                                           _currentDetailResource.upperHeadPic)
                                       : _currentDetailResource.upperHeadPic
                                   : MyAppState.defaultCoverImage,
+                          cacheManager: MyHttp.myImageCacheManager,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
                                   CircularProgressIndicator(

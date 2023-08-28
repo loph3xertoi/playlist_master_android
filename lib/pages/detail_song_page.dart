@@ -7,7 +7,6 @@ import 'package:flutter_lyric/lyrics_reader.dart';
 import 'package:flutter_lyric/lyrics_reader_model.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import '../http/api.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_singer.dart';
@@ -16,6 +15,8 @@ import '../entities/netease_cloud_music/ncm_detail_song.dart';
 import '../entities/netease_cloud_music/ncm_lyrics.dart';
 import '../entities/qq_music/qqmusic_detail_song.dart';
 import '../entities/qq_music/qqmusic_lyrics.dart';
+import '../http/api.dart';
+import '../http/my_http.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
 import '../widgets/my_lyrics_displayer.dart';
@@ -255,6 +256,8 @@ class _DetailSongPageState extends State<DetailSongPage> {
                                                       currentDetailSong.cover)
                                                   : currentDetailSong.cover
                                               : MyAppState.defaultCoverImage,
+                                          cacheManager:
+                                              MyHttp.myImageCacheManager,
                                           progressIndicatorBuilder: (context,
                                                   url, downloadProgress) =>
                                               CircularProgressIndicator(

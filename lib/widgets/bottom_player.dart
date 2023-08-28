@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:playlistmaster/http/my_http.dart';
 import 'package:provider/provider.dart';
 
 import '../http/api.dart';
@@ -127,6 +128,7 @@ class _BottomPlayerState extends State<BottomPlayer>
                                       ? API.convertImageUrl(currentSong!.cover)
                                       : currentSong!.cover
                                   : MyAppState.defaultCoverImage,
+                              cacheManager: MyHttp.myImageCacheManager,
                               progressIndicatorBuilder:
                                   (context, url, downloadProgress) =>
                                       CircularProgressIndicator(

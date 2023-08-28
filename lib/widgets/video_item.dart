@@ -9,6 +9,7 @@ import '../entities/basic/basic_video.dart';
 import '../entities/netease_cloud_music/ncm_video.dart';
 import '../entities/qq_music/qqmusic_video.dart';
 import '../http/api.dart';
+import '../http/my_http.dart';
 import '../states/app_state.dart';
 
 class VideoItem extends StatefulWidget {
@@ -78,6 +79,7 @@ class QQMusicVideoItem extends StatelessWidget {
                 Ink.image(
                   image: CachedNetworkImageProvider(
                     kIsWeb ? API.convertImageUrl(_video.cover) : _video.cover,
+                    cacheManager: MyHttp.myImageCacheManager,
                   ),
                   height: 100.0,
                   width: 160.0,
@@ -175,6 +177,7 @@ class NCMVideoItem extends StatelessWidget {
                 Ink.image(
                   image: CachedNetworkImageProvider(
                     kIsWeb ? API.convertImageUrl(_video.cover) : _video.cover,
+                    cacheManager: MyHttp.myImageCacheManager,
                   ),
                   height: 100.0,
                   width: 160.0,

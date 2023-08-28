@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_network/image_network.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:playlistmaster/http/my_http.dart';
 import 'package:provider/provider.dart';
 
 import '../http/api.dart';
@@ -143,6 +144,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         )
                       : CachedNetworkImage(
                           imageUrl: splashImage,
+                          cacheManager: MyHttp.myImageCacheManager,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
                                   CircularProgressIndicator(

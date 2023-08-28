@@ -49,6 +49,10 @@ dependencies:
   lottie: ^2.6.0
   flutter_html: ^3.0.0-beta.2
   image_network: ^2.5.4+1
+  form_builder_image_picker: ^4.0.0
+  flutter_form_builder: ^9.1.0
+  form_builder_validators: ^9.0.0
+  cross_file: ^0.3.3+4
   # bottom_sheet:
   #   git:
   #     url: git@github.com:loph3xertoi/flutter-bottom-sheet.git
@@ -120,6 +124,7 @@ flutter:
     - assets/images/bili_share_outline.png
     - assets/images/lottie_wave.json
     - assets/images/up.png
+    - assets/images/default_library_cover.png
     - assets/images/songs_cover/parrot.jpeg
     - assets/images/songs_cover/tit.jpeg
     - assets/images/songs_cover/tit.png
