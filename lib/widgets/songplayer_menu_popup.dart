@@ -27,38 +27,39 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            InkWell(
-              borderRadius: BorderRadius.all(
-                Radius.circular(10.0),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _addSongToLibrary(context, appState, true);
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.playlist_add_rounded),
-                      color: colorScheme.tertiary,
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _addSongToLibrary(context, appState, true);
-                      },
-                    ),
-                    Expanded(
-                      child: Text(
-                        'Add to pms',
-                        style: textTheme.labelMedium!.copyWith(
-                          color: colorScheme.onSecondary,
+            if (appState.currentPlatform != 0)
+              InkWell(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10.0),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _addSongToLibrary(context, appState, true);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.playlist_add_rounded),
+                        color: colorScheme.tertiary,
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _addSongToLibrary(context, appState, true);
+                        },
+                      ),
+                      Expanded(
+                        child: Text(
+                          'Add to pms',
+                          style: textTheme.labelMedium!.copyWith(
+                            color: colorScheme.onSecondary,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
             InkWell(
               borderRadius: BorderRadius.all(
                 Radius.circular(10.0),

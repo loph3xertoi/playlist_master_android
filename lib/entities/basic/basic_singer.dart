@@ -8,5 +8,5 @@ class BasicSinger {
   });
 
   final String name;
-  final String headPic;
+  final String? headPic;
 }

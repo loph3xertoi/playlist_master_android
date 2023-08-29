@@ -29,7 +29,8 @@ class MultiSongsSelectPopup extends StatefulWidget {
 class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
   List<int> _selectedIndex = [];
 
-  void _addSongsToLibraries(BuildContext context, MyAppState appState) async {
+  void _addSongsToLibraries(BuildContext context, MyAppState appState,
+      [bool addToPMS = false]) async {
     List<BasicSong> selectedSongs = widget.inSimilarSongsPage
         ? _selectedIndex.map((index) => widget.similarSongs[index]).toList()
         : _selectedIndex
@@ -58,6 +59,7 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
             scrollController: scrollController,
             songs: selectedSongs,
             action: 'add',
+            addToPMS: addToPMS,
           );
         },
         anchors: [0, 0.45, 0.9],
@@ -67,7 +69,9 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
         List<Result?> results = await Future.wait<Result?>(list);
         for (Result? result in results) {
           if (result != null && result.success) {
-            appState.refreshLibraries!(appState, true);
+            if (!addToPMS) {
+              appState.refreshLibraries!(appState, true);
+            }
             MyToast.showToast('Add songs successfully');
             break;
           }
@@ -291,43 +295,32 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
             ),
             ButtonBar(
               children: <Widget>[
-                !inSimilarSongsPage
-                    ? TextButton(
-                        onPressed: _selectedIndex.isNotEmpty
-                            ? () {
-                                showDialog(
-                                  context: context,
-                                  builder: (_) => ShowConfirmDialog(
-                                    title:
-                                        'Do you want to remove these songs from library?',
-                                    onConfirm: () {
-                                      _removeSelectedSongsFromLibrary(appState);
-                                    },
-                                  ),
-                                );
-                              }
-                            : null,
-                        style: _selectedIndex.isNotEmpty
-                            ? ButtonStyle(
-                                shadowColor: MaterialStateProperty.all(
-                                  colorScheme.primary,
-                                ),
-                                overlayColor: MaterialStateProperty.all(
-                                  Colors.grey,
-                                ),
-                              )
-                            : null,
-                        child: Text(
-                          'Remove',
-                          style: _selectedIndex.isNotEmpty
-                              ? textTheme.labelSmall
-                              : textTheme.labelSmall!.copyWith(
-                                  color:
-                                      colorScheme.onSecondary.withOpacity(0.5),
-                                ),
-                        ),
-                      )
-                    : Container(),
+                if (appState.currentPlatform != 0)
+                  TextButton(
+                    onPressed: _selectedIndex.isNotEmpty
+                        ? () {
+                            _addSongsToLibraries(context, appState, true);
+                          }
+                        : null,
+                    style: _selectedIndex.isNotEmpty
+                        ? ButtonStyle(
+                            shadowColor: MaterialStateProperty.all(
+                              colorScheme.primary,
+                            ),
+                            overlayColor: MaterialStateProperty.all(
+                              Colors.grey,
+                            ),
+                          )
+                        : null,
+                    child: Text(
+                      'Add to pms',
+                      style: _selectedIndex.isNotEmpty
+                          ? textTheme.labelSmall
+                          : textTheme.labelSmall!.copyWith(
+                              color: colorScheme.onSecondary.withOpacity(0.5),
+                            ),
+                    ),
+                  ),
                 TextButton(
                   onPressed: _selectedIndex.isNotEmpty
                       ? () {
@@ -372,6 +365,43 @@ class _MultiSongsSelectPopupState extends State<MultiSongsSelectPopup> {
                             : null,
                         child: Text(
                           'Move to',
+                          style: _selectedIndex.isNotEmpty
+                              ? textTheme.labelSmall
+                              : textTheme.labelSmall!.copyWith(
+                                  color:
+                                      colorScheme.onSecondary.withOpacity(0.5),
+                                ),
+                        ),
+                      )
+                    : Container(),
+                !inSimilarSongsPage
+                    ? TextButton(
+                        onPressed: _selectedIndex.isNotEmpty
+                            ? () {
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => ShowConfirmDialog(
+                                    title:
+                                        'Do you want to remove these songs from library?',
+                                    onConfirm: () {
+                                      _removeSelectedSongsFromLibrary(appState);
+                                    },
+                                  ),
+                                );
+                              }
+                            : null,
+                        style: _selectedIndex.isNotEmpty
+                            ? ButtonStyle(
+                                shadowColor: MaterialStateProperty.all(
+                                  colorScheme.primary,
+                                ),
+                                overlayColor: MaterialStateProperty.all(
+                                  Colors.grey,
+                                ),
+                              )
+                            : null,
+                        child: Text(
+                          'Remove',
                           style: _selectedIndex.isNotEmpty
                               ? textTheme.labelSmall
                               : textTheme.labelSmall!.copyWith(

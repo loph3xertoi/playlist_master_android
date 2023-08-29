@@ -317,44 +317,32 @@ class _MultiResourcesSelectPopupState extends State<MultiResourcesSelectPopup> {
             ),
             ButtonBar(
               children: <Widget>[
-                !inSimilarResourcesPage
-                    ? TextButton(
-                        onPressed: _selectedIndex.isNotEmpty
-                            ? () {
-                                showDialog(
-                                  context: context,
-                                  builder: (_) => ShowConfirmDialog(
-                                    title:
-                                        'Do you want to remove these resources from favlist?',
-                                    onConfirm: () {
-                                      _removeSelectedResourcesFromFavList(
-                                          appState);
-                                    },
-                                  ),
-                                );
-                              }
-                            : null,
-                        style: _selectedIndex.isNotEmpty
-                            ? ButtonStyle(
-                                shadowColor: MaterialStateProperty.all(
-                                  colorScheme.primary,
-                                ),
-                                overlayColor: MaterialStateProperty.all(
-                                  Colors.grey,
-                                ),
-                              )
-                            : null,
-                        child: Text(
-                          'Remove',
-                          style: _selectedIndex.isNotEmpty
-                              ? textTheme.labelSmall
-                              : textTheme.labelSmall!.copyWith(
-                                  color:
-                                      colorScheme.onSecondary.withOpacity(0.5),
-                                ),
-                        ),
-                      )
-                    : Container(),
+                if (appState.currentPlatform != 0)
+                  TextButton(
+                    onPressed: _selectedIndex.isNotEmpty
+                        ? () {
+                            _addResourcesToFavLists(context, appState);
+                          }
+                        : null,
+                    style: _selectedIndex.isNotEmpty
+                        ? ButtonStyle(
+                            shadowColor: MaterialStateProperty.all(
+                              colorScheme.primary,
+                            ),
+                            overlayColor: MaterialStateProperty.all(
+                              Colors.grey,
+                            ),
+                          )
+                        : null,
+                    child: Text(
+                      'Add to pms',
+                      style: _selectedIndex.isNotEmpty
+                          ? textTheme.labelSmall
+                          : textTheme.labelSmall!.copyWith(
+                              color: colorScheme.onSecondary.withOpacity(0.5),
+                            ),
+                    ),
+                  ),
                 TextButton(
                   onPressed: _selectedIndex.isNotEmpty
                       ? () {
@@ -399,6 +387,44 @@ class _MultiResourcesSelectPopupState extends State<MultiResourcesSelectPopup> {
                             : null,
                         child: Text(
                           'Move to',
+                          style: _selectedIndex.isNotEmpty
+                              ? textTheme.labelSmall
+                              : textTheme.labelSmall!.copyWith(
+                                  color:
+                                      colorScheme.onSecondary.withOpacity(0.5),
+                                ),
+                        ),
+                      )
+                    : Container(),
+                !inSimilarResourcesPage
+                    ? TextButton(
+                        onPressed: _selectedIndex.isNotEmpty
+                            ? () {
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => ShowConfirmDialog(
+                                    title:
+                                        'Do you want to remove these resources from favlist?',
+                                    onConfirm: () {
+                                      _removeSelectedResourcesFromFavList(
+                                          appState);
+                                    },
+                                  ),
+                                );
+                              }
+                            : null,
+                        style: _selectedIndex.isNotEmpty
+                            ? ButtonStyle(
+                                shadowColor: MaterialStateProperty.all(
+                                  colorScheme.primary,
+                                ),
+                                overlayColor: MaterialStateProperty.all(
+                                  Colors.grey,
+                                ),
+                              )
+                            : null,
+                        child: Text(
+                          'Remove',
                           style: _selectedIndex.isNotEmpty
                               ? textTheme.labelSmall
                               : textTheme.labelSmall!.copyWith(

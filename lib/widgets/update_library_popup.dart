@@ -263,6 +263,7 @@ class _UpdateLibraryDialogState extends State<UpdateLibraryDialog> {
                                 FormBuilderTextField(
                                   name: 'name',
                                   initialValue: library.name,
+                                  style: textTheme.labelMedium,
                                   decoration: InputDecoration(
                                       labelText: 'Name',
                                       labelStyle: textTheme.labelSmall),
