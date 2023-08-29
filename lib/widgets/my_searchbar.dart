@@ -193,6 +193,7 @@ class _MySearchBarState extends State<MySearchBar>
     _appState.searchedResources = [];
     _appState.searchedCount = 0;
     _appState.searchSuggestions = [];
+    _appState.refreshLibraries!(_appState, false);
     Navigator.pop(context);
   }
 

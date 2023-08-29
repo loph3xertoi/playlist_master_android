@@ -13,9 +13,11 @@ class CreateLibraryDialog extends StatefulWidget {
   CreateLibraryDialog({
     Key? key,
     this.initText,
+    this.addToPMS = false,
   }) : super(key: key);
 
   final String? initText;
+  final bool addToPMS;
 
   @override
   State<CreateLibraryDialog> createState() => _CreateLibraryDialogState();
@@ -38,8 +40,8 @@ class _CreateLibraryDialogState extends State<CreateLibraryDialog> {
     if (value == '') {
       MyToast.showToast('Please enter library name!');
     } else {
-      Future<Result?> result =
-          appState.createLibrary(value, appState.currentPlatform);
+      var currentPlatform = widget.addToPMS ? 0 : appState.currentPlatform;
+      Future<Result?> result = appState.createLibrary(value, currentPlatform);
       if (mounted) {
         Navigator.pop(context, result);
       }

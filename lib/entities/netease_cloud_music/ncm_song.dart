@@ -24,9 +24,11 @@ class NCMSong extends BasicSong {
   final int? mvId;
 
   Map<String, dynamic> toJson() {
+    List<Map<String, dynamic>> singerJsonList =
+        singers.map((singer) => (singer as NCMSinger).toJson()).toList();
     return {
       'name': name,
-      'singers': singers,
+      'singers': singerJsonList,
       'cover': cover,
       'payPlay': payPlay,
       'isTakenDown': isTakenDown,

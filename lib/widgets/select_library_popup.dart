@@ -20,11 +20,13 @@ class SelectLibraryPopup extends StatefulWidget {
     required this.scrollController,
     required this.songs,
     required this.action,
+    this.addToPMS = false,
   });
 
   final ScrollController scrollController;
   final List<BasicSong> songs;
   final String action;
+  final bool addToPMS;
 
   @override
   State<SelectLibraryPopup> createState() => _SelectLibraryPopupState();
@@ -45,7 +47,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
-    _libraries = state.refreshLibraries!(state, true);
+    _libraries = state.refreshLibraries!(state, true, widget.addToPMS);
   }
 
   @override
@@ -99,7 +101,8 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                     ),
                     onPressed: () {
                       setState(() {
-                        _libraries = appState.refreshLibraries!(appState, true);
+                        _libraries = appState.refreshLibraries!(
+                            appState, true, widget.addToPMS);
                         _localLibraries.clear();
                       });
                     },
@@ -110,23 +113,10 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
           } else {
             PagedDataDTO<BasicLibrary>? pagedDataDTO = snapshot.data!;
             var totalCount = pagedDataDTO.count;
-            if (totalCount != 0) {
+            if (totalCount != 0 && _localLibraries.isEmpty) {
               List<BasicLibrary>? libraries = pagedDataDTO.list;
               _localLibraries.addAll(libraries!);
             }
-
-            // List<BasicLibrary> libraries;
-            // if (currentPlatform == 0) {
-            //   throw UnimplementedError('Not yet implement pms platform');
-            // } else if (currentPlatform == 1) {
-            //   libraries = snapshot.data!.cast<BasicLibrary>().toList();
-            // } else if (currentPlatform == 2) {
-            //   libraries = snapshot.data!.cast<BasicLibrary>().toList();
-            // } else if (currentPlatform == 3) {
-            //   throw UnimplementedError('Not yet implement bilibili platform');
-            // } else {
-            //   throw UnsupportedError('Invalid platform');
-            // }
             return Material(
               child: Column(
                 children: [
@@ -136,7 +126,9 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                         padding: const EdgeInsets.all(20.0),
                         child: Text(
                           widget.action == 'add'
-                              ? 'Save to libraries'
+                              ? widget.addToPMS
+                                  ? 'Save to pms'
+                                  : 'Save to libraries'
                               : 'Move to libraries',
                           style: textTheme.labelSmall,
                         ),
@@ -151,8 +143,8 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                                     _inMultiSelectMode = !_inMultiSelectMode;
                                   });
                                   if (_selectedIndex.isNotEmpty) {
-                                    _addSongsToLibraries(
-                                        appState, _localLibraries);
+                                    _addSongsToLibraries(appState,
+                                        _localLibraries, widget.addToPMS);
                                   }
                                 },
                                 style: ButtonStyle(
@@ -182,8 +174,8 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                       strokeWidth: 2.0,
                       onRefresh: () async {
                         setState(() {
-                          _libraries =
-                              appState.refreshLibraries!(appState, true);
+                          _libraries = appState.refreshLibraries!(
+                              appState, true, widget.addToPMS);
                           _localLibraries.clear();
                         });
                       },
@@ -200,13 +192,26 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                                   context: context,
                                   builder: (_) => CreateLibraryDialog(
                                     initText: widget.songs[0].name,
+                                    addToPMS: widget.addToPMS,
                                   ),
                                 );
 
                                 if (result != null && result.success) {
-                                  if (currentPlatform == 0) {
-                                    throw UnimplementedError(
-                                        'Not yet implement pms platform');
+                                  if (widget.addToPMS || currentPlatform == 0) {
+                                    BasicLibrary library = PMSLibrary(
+                                      result.data as int,
+                                      1,
+                                      name: '',
+                                      cover: '',
+                                      itemCount: 1,
+                                    );
+                                    if (widget.addToPMS ||
+                                        widget.action == 'add') {
+                                      _addSongsToLibrary(
+                                          appState, library, widget.addToPMS);
+                                    } else {
+                                      _moveSongsToLibrary(appState, library);
+                                    }
                                   } else if (currentPlatform == 1) {
                                     BasicLibrary library = QQMusicPlaylist(
                                       result.data as int,
@@ -261,8 +266,8 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                                     });
                                   } else {
                                     widget.action == 'add'
-                                        ? _addSongsToLibrary(
-                                            appState, _localLibraries[i])
+                                        ? _addSongsToLibrary(appState,
+                                            _localLibraries[i], widget.addToPMS)
                                         : _moveSongsToLibrary(
                                             appState, _localLibraries[i]);
                                   }
@@ -288,15 +293,12 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
     );
   }
 
-  void _addSongsToLibrary(MyAppState appState, BasicLibrary library) async {
-    bool isAddToPMSLibrary = false;
-    if (library is PMSLibrary) {
-      isAddToPMSLibrary = true;
-    }
+  void _addSongsToLibrary(MyAppState appState, BasicLibrary library,
+      [bool addToPMS = false]) async {
     Future<Result?> result = appState.addSongsToLibrary(
       widget.songs,
       library,
-      isAddToPMSLibrary,
+      addToPMS,
       appState.currentPlatform,
     );
     if (mounted) {
@@ -316,24 +318,20 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
     }
   }
 
-  void _addSongsToLibraries(
-      MyAppState appState, List<BasicLibrary> libraries) async {
+  void _addSongsToLibraries(MyAppState appState, List<BasicLibrary> libraries,
+      [bool addToPMS = false]) async {
     int platform = appState.currentPlatform;
     List<Future<Result?>> results = [];
     for (int i = 0; i < _selectedIndex.length; i++) {
       BasicLibrary library = libraries[_selectedIndex[i]];
-      bool isAddToPMSLibrary = false;
-      if (library is PMSLibrary) {
-        isAddToPMSLibrary = true;
-      }
       results.add(appState.addSongsToLibrary(
         widget.songs,
         library,
-        isAddToPMSLibrary,
+        addToPMS,
         platform,
       ));
     }
-    appState.refreshLibraries!(appState, true);
+    appState.refreshLibraries!(appState, true, addToPMS);
     if (mounted) {
       Navigator.pop(context, results);
     }

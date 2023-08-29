@@ -164,7 +164,9 @@ class _MultiLibrariesSelectPopupState extends State<MultiLibrariesSelectPopup> {
             // Only add libraries of this snapshot.data in the first page,
             // add other libraries to _localLibraries inside _fetchingLibraries.
             // To avoid stuck, don't rebuild the widget when fetching new libraries.
-            if (totalCount != 0 && _currentPage == 1) {
+            if (totalCount != 0 &&
+                _currentPage == 1 &&
+                _localLibraries!.isEmpty) {
               List<BasicLibrary>? libraries = pagedDataDTO.list;
               _hasMore = pagedDataDTO.hasMore;
               _localLibraries?.addAll(libraries!);

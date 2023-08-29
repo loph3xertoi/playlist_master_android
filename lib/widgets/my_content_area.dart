@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/http/my_http.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../entities/dto/paged_data_dto.dart';
 import '../entities/dto/result.dart';
+import '../http/my_http.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
 import '../utils/my_toast.dart';
@@ -38,11 +38,13 @@ class _MyContentAreaState extends State<MyContentArea> {
   ScrollController _scrollController = ScrollController();
 
   Future<PagedDataDTO<BasicLibrary>?> _refreshLibraries(
-      MyAppState appState, bool delayRebuild) async {
+      MyAppState appState, bool delayRebuild,
+      [bool addToPMS = false]) async {
     _currentPage = 1;
     _hasMore = true;
-    _futurePagedLibraries = appState.fetchLibraries(
-        appState.currentPlatform, _currentPage.toString());
+    var currentPlatform = addToPMS ? 0 : appState.currentPlatform;
+    _futurePagedLibraries =
+        appState.fetchLibraries(currentPlatform, _currentPage.toString());
     _localLibraries?.clear();
     if (delayRebuild) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

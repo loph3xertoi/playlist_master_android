@@ -22,11 +22,13 @@ class SelectFavListPopup extends StatefulWidget {
     required this.biliSourceFavListId,
     required this.resources,
     required this.action,
+    this.addToPMS = false,
   });
 
   final int biliSourceFavListId;
   final List<BiliResource> resources;
   final String action;
+  final bool addToPMS;
   final ScrollController scrollController;
 
   @override
@@ -134,7 +136,9 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
           } else {
             PagedDataDTO<BasicLibrary>? pagedDataDTO = snapshot.data!;
             var totalCount = pagedDataDTO.count;
-            if (totalCount != 0 && _currentPage == 1) {
+            if (totalCount != 0 &&
+                _currentPage == 1 &&
+                _localFavLists.isEmpty) {
               List<BasicLibrary>? libraries = pagedDataDTO.list;
               _hasMore = pagedDataDTO.hasMore;
               _localFavLists.addAll(libraries!);
@@ -148,7 +152,9 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
                         padding: const EdgeInsets.all(20.0),
                         child: Text(
                           widget.action == 'add'
-                              ? 'Save to libraries'
+                              ? widget.addToPMS
+                                  ? 'Save to pms'
+                                  : 'Save to libraries'
                               : 'Move to libraries',
                           style: textTheme.labelSmall,
                         ),

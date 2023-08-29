@@ -14,6 +14,14 @@ class NCMSinger extends BasicSinger {
   /// Singer's id.
   final int id;
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'headPic': headPic,
+    };
+  }
+
   factory NCMSinger.fromJson(Map<String, dynamic> json) {
     return NCMSinger(
       json['id'],

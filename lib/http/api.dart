@@ -5,7 +5,7 @@ class API {
   static const demoMpd = 'http://$host/mpd/c.mpd';
 
   /// Host of playlist server.
-  static const host = '192.168.201.147:8080';
+  static const host = '192.168.223.212:8080';
   // static const host = '192.168.8.171:8080';
   // static const host = '192.168.0.114:8080';
 

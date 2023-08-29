@@ -189,6 +189,7 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
       onWillPop: () async {
         appState.isSongsPlayerPageOpened = false;
         _noPoping = false;
+        appState.refreshLibraries!(appState, false);
         return true; // Allow the navigation to proceed
       },
       child: Consumer<ThemeNotifier>(
@@ -342,6 +343,7 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
                                 onPressed: () {
                                   appState.isSongsPlayerPageOpened = false;
                                   _noPoping = false;
+                                  appState.refreshLibraries!(appState, false);
                                   Navigator.pop(context);
                                 },
                               ),

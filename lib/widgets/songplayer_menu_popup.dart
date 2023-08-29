@@ -33,7 +33,7 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
               ),
               onTap: () {
                 Navigator.pop(context);
-                _addSongToLibrary(context, appState);
+                _addSongToLibrary(context, appState, true);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -44,7 +44,39 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                       color: colorScheme.tertiary,
                       onPressed: () {
                         Navigator.pop(context);
-                        _addSongToLibrary(context, appState);
+                        _addSongToLibrary(context, appState, true);
+                      },
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Add to pms',
+                        style: textTheme.labelMedium!.copyWith(
+                          color: colorScheme.onSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            InkWell(
+              borderRadius: BorderRadius.all(
+                Radius.circular(10.0),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _addSongToLibrary(context, appState, false);
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.playlist_add_rounded),
+                      color: colorScheme.tertiary,
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _addSongToLibrary(context, appState, false);
                       },
                     ),
                     Expanded(
@@ -199,7 +231,8 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
     );
   }
 
-  void _addSongToLibrary(BuildContext context, MyAppState appState) async {
+  void _addSongToLibrary(
+      BuildContext context, MyAppState appState, bool addToPMS) async {
     if (context.mounted) {
       List<Future<Result?>>? list =
           await showFlexibleBottomSheet<List<Future<Result?>>>(
@@ -223,6 +256,7 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
             scrollController: scrollController,
             songs: [appState.currentSong!],
             action: 'add',
+            addToPMS: addToPMS,
           );
         },
         anchors: [0, 0.45, 0.9],
@@ -232,7 +266,9 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
         List<Result?> results = await Future.wait<Result?>(list);
         for (Result? result in results) {
           if (result != null && result.success) {
-            appState.refreshLibraries!(appState, true);
+            if (!addToPMS) {
+              appState.refreshLibraries!(appState, true);
+            }
             MyToast.showToast('Add song successfully');
             break;
           }

@@ -31,7 +31,8 @@ class SongItem extends StatefulWidget {
 }
 
 class _SongItemState extends State<SongItem> {
-  void _addSongToLibrary(BuildContext context, MyAppState appState) async {
+  void _addSongToLibrary(BuildContext context, MyAppState appState,
+      [bool addToPMS = false]) async {
     if (mounted) {
       List<Future<Result?>>? list =
           await showFlexibleBottomSheet<List<Future<Result?>>>(
@@ -55,6 +56,7 @@ class _SongItemState extends State<SongItem> {
             scrollController: scrollController,
             songs: [widget.song],
             action: 'add',
+            addToPMS: addToPMS,
           );
         },
         anchors: [0, 0.45, 0.9],
@@ -64,8 +66,10 @@ class _SongItemState extends State<SongItem> {
         List<Result?> results = await Future.wait<Result?>(list);
         for (Result? result in results) {
           if (result != null && result.success) {
-            appState.refreshLibraries!(appState, true);
-            appState.refreshDetailLibraryPage!(appState);
+            if (!addToPMS) {
+              appState.refreshLibraries!(appState, true);
+              appState.refreshDetailLibraryPage!(appState);
+            }
             MyToast.showToast('Add songs successfully');
             break;
           }
@@ -277,6 +281,9 @@ class _SongItemState extends State<SongItem> {
                     );
                     if (data == 'Add to library' && mounted) {
                       _addSongToLibrary(context, appState);
+                    }
+                    if (data == 'Add to pms' && mounted) {
+                      _addSongToLibrary(context, appState, true);
                     }
                   },
                   color: colorScheme.tertiary,

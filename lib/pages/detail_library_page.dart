@@ -48,6 +48,8 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
   // Is using mock data?
   late bool _isUsingMockData;
 
+  MyAppState? _appState;
+
   void _refreshDetailLibraryPage(MyAppState appState) {
     setState(() {
       _detailLibrary =
@@ -158,6 +160,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
+    _appState = state;
     _isUsingMockData = state.isUsingMockData;
     _currentPlatform = state.currentPlatform;
     _currentLibrary = state.rawOpenedLibrary!;
@@ -183,6 +186,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
+    _appState = appState;
     _isUsingMockData = appState.isUsingMockData;
     _currentPlatform = appState.currentPlatform;
     _currentLibrary = appState.rawOpenedLibrary!;
@@ -194,270 +198,248 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
           body: SafeArea(
             child: ChangeNotifierProvider(
               create: (context) => MySearchState(),
-              child: Column(
-                children: [
-                  Container(
-                    color: colorScheme.primary,
-                    child: MySearchBar(
-                      myScaffoldKey: _scaffoldKey,
-                      notInHomepage: true,
-                      inDetailLibraryPage: true,
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: theme.detailLibraryPageBg!,
-                          stops: [0.0, 0.33, 0.67, 1.0],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
+              child: WillPopScope(
+                onWillPop: () async {
+                  _appState!.refreshLibraries!(appState, false);
+                  return true;
+                },
+                child: Column(
+                  children: [
+                    Container(
+                      color: colorScheme.primary,
+                      child: MySearchBar(
+                        myScaffoldKey: _scaffoldKey,
+                        notInHomepage: true,
+                        inDetailLibraryPage: true,
                       ),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              margin:
-                                  EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
-                              child: FutureBuilder(
-                                  future: _detailLibrary,
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return Center(
-                                        child: CircularProgressIndicator(),
-                                      );
-                                    } else if (snapshot.hasError ||
-                                        snapshot.data == null) {
-                                      return Center(
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            MySelectableText(
-                                              snapshot.hasError
-                                                  ? '${snapshot.error}'
-                                                  : appState.errorMsg,
-                                              style: textTheme.labelMedium!
-                                                  .copyWith(
-                                                color: colorScheme.onPrimary,
-                                              ),
-                                            ),
-                                            TextButton.icon(
-                                              style: ButtonStyle(
-                                                shadowColor:
-                                                    MaterialStateProperty.all(
-                                                  colorScheme.primary,
-                                                ),
-                                                overlayColor:
-                                                    MaterialStateProperty.all(
-                                                  Colors.grey,
-                                                ),
-                                              ),
-                                              icon: Icon(
-                                                MdiIcons.webRefresh,
-                                                color: colorScheme.onPrimary,
-                                              ),
-                                              label: Text(
-                                                'Retry',
+                    ),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: theme.detailLibraryPageBg!,
+                            stops: [0.0, 0.33, 0.67, 1.0],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                margin:
+                                    EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
+                                child: FutureBuilder(
+                                    future: _detailLibrary,
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      } else if (snapshot.hasError ||
+                                          snapshot.data == null) {
+                                        return Center(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              MySelectableText(
+                                                snapshot.hasError
+                                                    ? '${snapshot.error}'
+                                                    : appState.errorMsg,
                                                 style: textTheme.labelMedium!
                                                     .copyWith(
                                                   color: colorScheme.onPrimary,
                                                 ),
                                               ),
-                                              onPressed: () {
-                                                setState(() {
-                                                  _changeRawQueue = true;
-                                                  _detailLibrary = appState
-                                                      .fetchDetailLibrary(
-                                                          _currentLibrary,
-                                                          _currentPlatform);
-                                                });
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    } else {
-                                      dynamic detailLibrary;
-                                      if (_isUsingMockData) {
-                                        detailLibrary = snapshot.data == null
-                                            ? null
-                                            : snapshot.data
-                                                as QQMusicDetailPlaylist;
+                                              TextButton.icon(
+                                                style: ButtonStyle(
+                                                  shadowColor:
+                                                      MaterialStateProperty.all(
+                                                    colorScheme.primary,
+                                                  ),
+                                                  overlayColor:
+                                                      MaterialStateProperty.all(
+                                                    Colors.grey,
+                                                  ),
+                                                ),
+                                                icon: Icon(
+                                                  MdiIcons.webRefresh,
+                                                  color: colorScheme.onPrimary,
+                                                ),
+                                                label: Text(
+                                                  'Retry',
+                                                  style: textTheme.labelMedium!
+                                                      .copyWith(
+                                                    color:
+                                                        colorScheme.onPrimary,
+                                                  ),
+                                                ),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    _changeRawQueue = true;
+                                                    _detailLibrary = appState
+                                                        .fetchDetailLibrary(
+                                                            _currentLibrary,
+                                                            _currentPlatform);
+                                                  });
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        );
                                       } else {
-                                        if (_currentPlatform == 0) {
-                                          detailLibrary = snapshot.data == null
-                                              ? null
-                                              : snapshot.data
-                                                  as PMSDetailLibrary;
-                                        } else if (_currentPlatform == 1) {
+                                        dynamic detailLibrary;
+                                        if (_isUsingMockData) {
                                           detailLibrary = snapshot.data == null
                                               ? null
                                               : snapshot.data
                                                   as QQMusicDetailPlaylist;
-                                        } else if (_currentPlatform == 2) {
-                                          detailLibrary = snapshot.data == null
-                                              ? null
-                                              : snapshot.data
-                                                  as NCMDetailPlaylist;
-                                        } else if (_currentPlatform == 3) {
-                                          throw UnimplementedError(
-                                              'Not yet implement bilibili platform');
                                         } else {
-                                          throw UnsupportedError(
-                                              'Invalid platform');
-                                        }
-                                      }
-
-                                      if (detailLibrary != null) {
-                                        WidgetsBinding.instance
-                                            .addPostFrameCallback((_) {
-                                          if (_changeRawQueue) {
-                                            appState.rawSongsInLibrary =
-                                                detailLibrary.songs;
-                                            appState.searchedSongs =
-                                                detailLibrary.songs;
-                                            _changeRawQueue = false;
+                                          if (_currentPlatform == 0) {
+                                            detailLibrary =
+                                                snapshot.data == null
+                                                    ? null
+                                                    : snapshot.data
+                                                        as PMSDetailLibrary;
+                                          } else if (_currentPlatform == 1) {
+                                            detailLibrary = snapshot.data ==
+                                                    null
+                                                ? null
+                                                : snapshot.data
+                                                    as QQMusicDetailPlaylist;
+                                          } else if (_currentPlatform == 2) {
+                                            detailLibrary =
+                                                snapshot.data == null
+                                                    ? null
+                                                    : snapshot.data
+                                                        as NCMDetailPlaylist;
+                                          } else if (_currentPlatform == 3) {
+                                            throw UnimplementedError(
+                                                'Not yet implement bilibili platform');
+                                          } else {
+                                            throw UnsupportedError(
+                                                'Invalid platform');
                                           }
-                                        });
-                                      }
-                                      return Container(
-                                        decoration: BoxDecoration(
-                                          color: colorScheme.primary,
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                        ),
-                                        child: Column(
-                                          children: [
-                                            SizedBox(
-                                              height: 130.0,
-                                              width: MediaQuery.of(context)
-                                                  .size
-                                                  .width,
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(15.0),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.max,
-                                                  children: [
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                        right: 12.0,
-                                                      ),
-                                                      child: Container(
-                                                        width: 100.0,
-                                                        height: 100.0,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                            4.0,
-                                                          ),
+                                        }
+
+                                        if (detailLibrary != null) {
+                                          WidgetsBinding.instance
+                                              .addPostFrameCallback((_) {
+                                            if (_changeRawQueue) {
+                                              appState.rawSongsInLibrary =
+                                                  detailLibrary.songs;
+                                              appState.searchedSongs =
+                                                  detailLibrary.songs;
+                                              _changeRawQueue = false;
+                                            }
+                                          });
+                                        }
+                                        return Container(
+                                          decoration: BoxDecoration(
+                                            color: colorScheme.primary,
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 130.0,
+                                                width: MediaQuery.of(context)
+                                                    .size
+                                                    .width,
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      15.0),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.max,
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                          right: 12.0,
                                                         ),
-                                                        child: GestureDetector(
-                                                          onTap: () {
-                                                            print(appState);
-                                                            print(
-                                                                detailLibrary);
-                                                            print(
-                                                                searchedSongs);
-                                                            setState(() {});
-                                                          },
-                                                          child: ClipRRect(
+                                                        child: Container(
+                                                          width: 100.0,
+                                                          height: 100.0,
+                                                          decoration:
+                                                              BoxDecoration(
                                                             borderRadius:
                                                                 BorderRadius
                                                                     .circular(
-                                                                        4.0),
-                                                            child:
-                                                                _isUsingMockData
-                                                                    ? Image.asset(
-                                                                        detailLibrary
-                                                                            .cover)
-                                                                    : CachedNetworkImage(
-                                                                        imageUrl: detailLibrary != null &&
-                                                                                detailLibrary.cover.isNotEmpty
-                                                                            ? kIsWeb
-                                                                                ? API.convertImageUrl(detailLibrary.cover)
-                                                                                : detailLibrary.cover
-                                                                            : MyAppState.defaultCoverImage,
-                                                                        cacheManager:
-                                                                            MyHttp.myImageCacheManager,
-                                                                        progressIndicatorBuilder: (context,
-                                                                                url,
-                                                                                downloadProgress) =>
-                                                                            CircularProgressIndicator(value: downloadProgress.progress),
-                                                                        errorWidget: (context,
-                                                                                url,
-                                                                                error) =>
-                                                                            Icon(MdiIcons.debian),
-                                                                      ),
+                                                              4.0,
+                                                            ),
+                                                          ),
+                                                          child:
+                                                              GestureDetector(
+                                                            onTap: () {
+                                                              print(appState);
+                                                              print(
+                                                                  detailLibrary);
+                                                              print(
+                                                                  searchedSongs);
+                                                              setState(() {});
+                                                            },
+                                                            child: ClipRRect(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          4.0),
+                                                              child:
+                                                                  _isUsingMockData
+                                                                      ? Image.asset(
+                                                                          detailLibrary
+                                                                              .cover)
+                                                                      : CachedNetworkImage(
+                                                                          imageUrl: detailLibrary != null && detailLibrary.cover.isNotEmpty
+                                                                              ? kIsWeb
+                                                                                  ? API.convertImageUrl(detailLibrary.cover)
+                                                                                  : detailLibrary.cover
+                                                                              : MyAppState.defaultCoverImage,
+                                                                          cacheManager:
+                                                                              MyHttp.myImageCacheManager,
+                                                                          progressIndicatorBuilder: (context, url, downloadProgress) =>
+                                                                              CircularProgressIndicator(value: downloadProgress.progress),
+                                                                          errorWidget: (context, url, error) =>
+                                                                              Icon(MdiIcons.debian),
+                                                                        ),
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
-                                                    ),
-                                                    Expanded(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          MySelectableText(
-                                                            detailLibrary !=
-                                                                    null
-                                                                ? detailLibrary
-                                                                    .name
-                                                                : 'Hidden library',
-                                                            style: textTheme
-                                                                .labelLarge!
-                                                                .copyWith(
-                                                              fontSize: 20.0,
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                            ),
-                                                            maxLines: 2,
-                                                            textAlign:
-                                                                TextAlign.start,
-                                                          ),
-                                                          Row(
-                                                            children: [
-                                                              Text(
-                                                                '${detailLibrary != null ? detailLibrary.itemCount : 0} songs',
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .start,
-                                                                style: textTheme
-                                                                    .titleSmall,
+                                                      Expanded(
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            MySelectableText(
+                                                              detailLibrary !=
+                                                                      null
+                                                                  ? detailLibrary
+                                                                      .name
+                                                                  : 'Hidden library',
+                                                              style: textTheme
+                                                                  .labelLarge!
+                                                                  .copyWith(
+                                                                fontSize: 20.0,
                                                                 overflow:
                                                                     TextOverflow
                                                                         .ellipsis,
                                                               ),
-                                                              if (_currentPlatform !=
-                                                                  0)
-                                                                SizedBox(
-                                                                  width: 10.0,
-                                                                  child: Text(
-                                                                    '|',
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .center,
-                                                                    style:
-                                                                        TextStyle(
-                                                                      color: colorScheme
-                                                                          .onSecondary,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              if (_currentPlatform !=
-                                                                  0)
+                                                              maxLines: 2,
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .start,
+                                                            ),
+                                                            Row(
+                                                              children: [
                                                                 Text(
-                                                                  '${detailLibrary != null ? detailLibrary.playCount : 0} listened',
+                                                                  '${detailLibrary != null ? detailLibrary.itemCount : 0} songs',
                                                                   textAlign:
                                                                       TextAlign
                                                                           .start,
@@ -467,228 +449,268 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                                       TextOverflow
                                                                           .ellipsis,
                                                                 ),
-                                                            ],
-                                                          ),
-                                                          Expanded(
-                                                            child: Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .only(
-                                                                      top:
-                                                                          12.0),
-                                                              child: Text(
-                                                                detailLibrary !=
-                                                                        null
-                                                                    ? _currentPlatform ==
-                                                                            0
-                                                                        ? detailLibrary
-                                                                            .intro
-                                                                        : detailLibrary
-                                                                            .description
-                                                                    : 'This library is a hidden library.',
-                                                                style: textTheme
-                                                                    .labelLarge!
-                                                                    .copyWith(
-                                                                        fontSize:
-                                                                            10.0),
-                                                                maxLines: 3,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
+                                                                if (_currentPlatform !=
+                                                                    0)
+                                                                  SizedBox(
+                                                                    width: 10.0,
+                                                                    child: Text(
+                                                                      '|',
+                                                                      textAlign:
+                                                                          TextAlign
+                                                                              .center,
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: colorScheme
+                                                                            .onSecondary,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                if (_currentPlatform !=
+                                                                    0)
+                                                                  Text(
+                                                                    '${detailLibrary != null ? detailLibrary.playCount : 0} listened',
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .start,
+                                                                    style: textTheme
+                                                                        .titleSmall,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                  ),
+                                                              ],
+                                                            ),
+                                                            Expanded(
+                                                              child: Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .only(
+                                                                        top:
+                                                                            12.0),
+                                                                child: Text(
+                                                                  detailLibrary !=
+                                                                          null
+                                                                      ? _currentPlatform ==
+                                                                              0
+                                                                          ? detailLibrary
+                                                                              .intro
+                                                                          : detailLibrary
+                                                                              .description
+                                                                      : 'This library is a hidden library.',
+                                                                  style: textTheme
+                                                                      .labelLarge!
+                                                                      .copyWith(
+                                                                          fontSize:
+                                                                              10.0),
+                                                                  maxLines: 3,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                ),
                                                               ),
                                                             ),
-                                                          ),
-                                                        ],
+                                                          ],
+                                                        ),
                                                       ),
-                                                    ),
-                                                  ],
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            Expanded(
-                                              child:
-                                                  detailLibrary != null &&
-                                                          detailLibrary
-                                                                  .itemCount !=
-                                                              0
-                                                      ? searchedSongs.isNotEmpty
-                                                          ? Column(
-                                                              children: [
-                                                                SizedBox(
-                                                                  height: 40.0,
-                                                                  child: Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .end,
-                                                                    children: [
-                                                                      IconButton(
-                                                                        onPressed:
-                                                                            () {
-                                                                          onSongTap(
-                                                                              0,
-                                                                              searchedSongs,
-                                                                              appState);
-                                                                        },
-                                                                        icon:
-                                                                            Icon(
-                                                                          Icons
-                                                                              .playlist_play_rounded,
-                                                                        ),
-                                                                        color: colorScheme
-                                                                            .tertiary,
-                                                                        tooltip:
-                                                                            'Play all',
+                                              Expanded(
+                                                child: detailLibrary != null &&
+                                                        detailLibrary
+                                                                .itemCount !=
+                                                            0
+                                                    ? searchedSongs.isNotEmpty
+                                                        ? Column(
+                                                            children: [
+                                                              SizedBox(
+                                                                height: 40.0,
+                                                                child: Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .end,
+                                                                  children: [
+                                                                    IconButton(
+                                                                      onPressed:
+                                                                          () {
+                                                                        onSongTap(
+                                                                            0,
+                                                                            searchedSongs,
+                                                                            appState);
+                                                                      },
+                                                                      icon:
+                                                                          Icon(
+                                                                        Icons
+                                                                            .playlist_play_rounded,
                                                                       ),
-                                                                      IconButton(
-                                                                        onPressed:
-                                                                            () {
-                                                                          showDialog(
-                                                                              context: context,
-                                                                              builder: (_) => MultiSongsSelectPopup());
-                                                                        },
-                                                                        icon:
-                                                                            Icon(
-                                                                          Icons
-                                                                              .checklist_rounded,
-                                                                          // Icons
-                                                                          //     .playlist_add_check_rounded,
-                                                                        ),
-                                                                        color: colorScheme
-                                                                            .tertiary,
-                                                                        tooltip:
-                                                                            'Multi select',
-                                                                      ),
-                                                                      IconButton(
-                                                                        onPressed:
-                                                                            () {
-                                                                          showDialog(
+                                                                      color: colorScheme
+                                                                          .tertiary,
+                                                                      tooltip:
+                                                                          'Play all',
+                                                                    ),
+                                                                    IconButton(
+                                                                      onPressed:
+                                                                          () {
+                                                                        showDialog(
                                                                             context:
                                                                                 context,
                                                                             builder: (_) =>
-                                                                                LibraryItemMenuPopup(
-                                                                              library: detailLibrary,
-                                                                              isInDetailLibraryPage: true,
-                                                                            ),
-                                                                          );
-                                                                        },
-                                                                        icon:
-                                                                            Icon(
-                                                                          Icons
-                                                                              .more_vert_rounded,
-                                                                        ),
-                                                                        color: colorScheme
-                                                                            .tertiary,
-                                                                        tooltip:
-                                                                            'Edit library',
+                                                                                MultiSongsSelectPopup());
+                                                                      },
+                                                                      icon:
+                                                                          Icon(
+                                                                        Icons
+                                                                            .checklist_rounded,
+                                                                        // Icons
+                                                                        //     .playlist_add_check_rounded,
                                                                       ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                                Expanded(
-                                                                  child:
-                                                                      RefreshIndicator(
-                                                                    color: colorScheme
-                                                                        .onPrimary,
-                                                                    strokeWidth:
-                                                                        2.0,
-                                                                    onRefresh:
-                                                                        () async {
-                                                                      setState(
+                                                                      color: colorScheme
+                                                                          .tertiary,
+                                                                      tooltip:
+                                                                          'Multi select',
+                                                                    ),
+                                                                    IconButton(
+                                                                      onPressed:
                                                                           () {
-                                                                        _changeRawQueue =
-                                                                            true;
-                                                                        _detailLibrary = appState.fetchDetailLibrary(
-                                                                            _currentLibrary,
-                                                                            _currentPlatform);
-                                                                      });
-                                                                    },
-                                                                    child: ListView
-                                                                        .builder(
-                                                                      physics:
-                                                                          const AlwaysScrollableScrollPhysics(),
-                                                                      // TODO: fix this. Mock.songs have 10 songs only.
-                                                                      // itemCount: _detailLibrary.songsCount,
-                                                                      itemCount: _isUsingMockData
-                                                                          ? min(
-                                                                              detailLibrary.itemCount,
-                                                                              10)
-                                                                          : searchedSongs.length,
-                                                                      itemBuilder:
-                                                                          (context,
-                                                                              index) {
-                                                                        return Material(
-                                                                          color:
-                                                                              Colors.transparent,
-                                                                          child:
-                                                                              InkWell(
-                                                                            // TODO: fix bug: the init cover will be wrong sometimes when first loading
-                                                                            // song songsPlayer in shuffle mode.
-                                                                            onTap:
-                                                                                () {
-                                                                              onSongTap(index, searchedSongs, appState);
-                                                                            },
-                                                                            child:
-                                                                                SongItem(
-                                                                              index: index,
-                                                                              song: searchedSongs[index],
-                                                                            ),
+                                                                        showDialog(
+                                                                          context:
+                                                                              context,
+                                                                          builder: (_) =>
+                                                                              LibraryItemMenuPopup(
+                                                                            library:
+                                                                                detailLibrary,
+                                                                            isInDetailLibraryPage:
+                                                                                true,
                                                                           ),
                                                                         );
                                                                       },
+                                                                      icon:
+                                                                          Icon(
+                                                                        Icons
+                                                                            .more_vert_rounded,
+                                                                      ),
+                                                                      color: colorScheme
+                                                                          .tertiary,
+                                                                      tooltip:
+                                                                          'Edit library',
                                                                     ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              Expanded(
+                                                                child:
+                                                                    RefreshIndicator(
+                                                                  color: colorScheme
+                                                                      .onPrimary,
+                                                                  strokeWidth:
+                                                                      2.0,
+                                                                  onRefresh:
+                                                                      () async {
+                                                                    setState(
+                                                                        () {
+                                                                      _changeRawQueue =
+                                                                          true;
+                                                                      _detailLibrary = appState.fetchDetailLibrary(
+                                                                          _currentLibrary,
+                                                                          _currentPlatform);
+                                                                    });
+                                                                  },
+                                                                  child: ListView
+                                                                      .builder(
+                                                                    physics:
+                                                                        const AlwaysScrollableScrollPhysics(),
+                                                                    // TODO: fix this. Mock.songs have 10 songs only.
+                                                                    // itemCount: _detailLibrary.songsCount,
+                                                                    itemCount: _isUsingMockData
+                                                                        ? min(
+                                                                            detailLibrary
+                                                                                .itemCount,
+                                                                            10)
+                                                                        : searchedSongs
+                                                                            .length,
+                                                                    itemBuilder:
+                                                                        (context,
+                                                                            index) {
+                                                                      return Material(
+                                                                        color: Colors
+                                                                            .transparent,
+                                                                        child:
+                                                                            InkWell(
+                                                                          // TODO: fix bug: the init cover will be wrong sometimes when first loading
+                                                                          // song songsPlayer in shuffle mode.
+                                                                          onTap:
+                                                                              () {
+                                                                            onSongTap(
+                                                                                index,
+                                                                                searchedSongs,
+                                                                                appState);
+                                                                          },
+                                                                          child:
+                                                                              SongItem(
+                                                                            index:
+                                                                                index,
+                                                                            song:
+                                                                                searchedSongs[index],
+                                                                          ),
+                                                                        ),
+                                                                      );
+                                                                    },
                                                                   ),
-                                                                )
-                                                              ],
-                                                            )
-                                                          : Center(
-                                                              child: Text(
-                                                                'Not found',
-                                                                style: textTheme
-                                                                    .labelMedium,
-                                                              ),
-                                                            )
-                                                      : Center(
-                                                          child: TextButton(
-                                                            onPressed: () {
-                                                              MyToast.showToast(
-                                                                  'To be implement');
-                                                            },
-                                                            style: ButtonStyle(
-                                                              shadowColor:
-                                                                  MaterialStateProperty
-                                                                      .all(
-                                                                colorScheme
-                                                                    .primary,
-                                                              ),
-                                                              overlayColor:
-                                                                  MaterialStateProperty
-                                                                      .all(
-                                                                Colors.grey,
-                                                              ),
-                                                            ),
+                                                                ),
+                                                              )
+                                                            ],
+                                                          )
+                                                        : Center(
                                                             child: Text(
-                                                              'Add songs',
+                                                              'Not found',
                                                               style: textTheme
                                                                   .labelMedium,
                                                             ),
+                                                          )
+                                                    : Center(
+                                                        child: TextButton(
+                                                          onPressed: () {
+                                                            MyToast.showToast(
+                                                                'To be implement');
+                                                          },
+                                                          style: ButtonStyle(
+                                                            shadowColor:
+                                                                MaterialStateProperty
+                                                                    .all(
+                                                              colorScheme
+                                                                  .primary,
+                                                            ),
+                                                            overlayColor:
+                                                                MaterialStateProperty
+                                                                    .all(
+                                                              Colors.grey,
+                                                            ),
+                                                          ),
+                                                          child: Text(
+                                                            'Add songs',
+                                                            style: textTheme
+                                                                .labelMedium,
                                                           ),
                                                         ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }
-                                  }),
+                                                      ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }
+                                    }),
+                              ),
                             ),
-                          ),
-                          appState.currentSong == null
-                              ? Container()
-                              : BottomPlayer(),
-                        ],
+                            appState.currentSong == null
+                                ? Container()
+                                : BottomPlayer(),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
