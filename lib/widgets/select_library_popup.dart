@@ -43,11 +43,28 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
 
   bool _inMultiSelectMode = false;
 
+  // The id of current opened library.
+  late int _currentLibraryId;
+
+  late int _currentPlatform;
+
   @override
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
     _libraries = state.refreshLibraries!(state, true, widget.addToPMS);
+    var currentPlatform = state.currentPlatform;
+    _currentPlatform = currentPlatform;
+    var rawOpenedLibrary = state.rawOpenedLibrary;
+    if (currentPlatform == 0) {
+      _currentLibraryId = (rawOpenedLibrary as PMSLibrary).id;
+    } else if (currentPlatform == 1) {
+      _currentLibraryId = (rawOpenedLibrary as QQMusicPlaylist).dirId;
+    } else if (currentPlatform == 2) {
+      _currentLibraryId = (rawOpenedLibrary as NCMPlaylist).id;
+    } else {
+      throw 'Invalid platform';
+    }
   }
 
   @override
@@ -56,6 +73,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
     final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
     var currentPlatform = appState.currentPlatform;
+    _currentPlatform = currentPlatform;
     return ClipRRect(
       borderRadius: BorderRadius.only(
         topLeft: Radius.circular(30.0),
@@ -252,34 +270,38 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                             ),
                           ),
                           for (int i = 0; i < _localLibraries.length; i++)
-                            Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () {
-                                  if (_inMultiSelectMode) {
-                                    setState(() {
-                                      if (_selectedIndex.contains(i)) {
-                                        _selectedIndex.remove(i);
-                                      } else {
-                                        _selectedIndex.add(i);
-                                      }
-                                    });
-                                  } else {
-                                    widget.action == 'add'
-                                        ? _addSongsToLibrary(appState,
-                                            _localLibraries[i], widget.addToPMS)
-                                        : _moveSongsToLibrary(
-                                            appState, _localLibraries[i]);
-                                  }
-                                },
-                                child: SelectableLibraryItem(
-                                  library: _localLibraries[i],
-                                  isCreateLibraryItem: false,
-                                  inMultiSelectMode: _inMultiSelectMode,
-                                  selected: _selectedIndex.contains(i),
+                            if (_currentLibraryId !=
+                                _getIdentifiedIdOfLibrary(_localLibraries[i]))
+                              Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () {
+                                    if (_inMultiSelectMode) {
+                                      setState(() {
+                                        if (_selectedIndex.contains(i)) {
+                                          _selectedIndex.remove(i);
+                                        } else {
+                                          _selectedIndex.add(i);
+                                        }
+                                      });
+                                    } else {
+                                      widget.action == 'add'
+                                          ? _addSongsToLibrary(
+                                              appState,
+                                              _localLibraries[i],
+                                              widget.addToPMS)
+                                          : _moveSongsToLibrary(
+                                              appState, _localLibraries[i]);
+                                    }
+                                  },
+                                  child: SelectableLibraryItem(
+                                    library: _localLibraries[i],
+                                    isCreateLibraryItem: false,
+                                    inMultiSelectMode: _inMultiSelectMode,
+                                    selected: _selectedIndex.contains(i),
+                                  ),
                                 ),
                               ),
-                            ),
                         ],
                       ),
                     ),
@@ -334,6 +356,18 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
     appState.refreshLibraries!(appState, true, addToPMS);
     if (mounted) {
       Navigator.pop(context, results);
+    }
+  }
+
+  int _getIdentifiedIdOfLibrary(BasicLibrary library) {
+    if (_currentPlatform == 0) {
+      return (library as PMSLibrary).id;
+    } else if (_currentPlatform == 1) {
+      return (library as QQMusicPlaylist).dirId;
+    } else if (_currentPlatform == 2) {
+      return (library as NCMPlaylist).id;
+    } else {
+      throw 'Invalid platform';
     }
   }
 }

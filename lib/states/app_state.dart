@@ -1844,7 +1844,7 @@ class MyAppState extends ChangeNotifier {
       requestBody = {
         'libraryId': libraryId.toString(),
         'songsIds': songsIds.toString(),
-        'isAddToPMSLibrary': isAddToPMSLibrary,
+        'isAddToPMSLibrary': true,
         'tid': tid,
       };
     } else if (platform == 1) {
@@ -1944,7 +1944,18 @@ class MyAppState extends ChangeNotifier {
       List<BasicSong> songs, BasicLibrary library, int platform) async {
     Uri? url;
     if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
+      int id = (library as PMSLibrary).id;
+      String ids = songs.map((e) => (e as PMSSong).id).join(',');
+      url = Uri.http(
+        API.host,
+        API.removeSongsFromLibrary,
+        {
+          'libraryId': id.toString(),
+          'songsId': ids,
+          'tid': id.toString(),
+          'platform': platform.toString(),
+        },
+      );
     } else if (platform == 1) {
       int dirId = (library as QQMusicPlaylist).dirId;
       String tid = library.tid;
@@ -2020,7 +2031,25 @@ class MyAppState extends ChangeNotifier {
     Map<String, Object> requestBody;
     Uri? url;
     if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
+      String ids = songs.map((e) => (e as PMSSong).id).join(',');
+      int srcLibraryId = (srcLibrary as PMSLibrary).id;
+      int dstLibraryId = (dstLibrary as PMSLibrary).id;
+      String srcTid = srcLibraryId.toString();
+      String dstTid = dstLibraryId.toString();
+      url = Uri.http(
+        API.host,
+        API.moveSongsToOtherLibrary,
+        {
+          'platform': platform.toString(),
+        },
+      );
+      requestBody = {
+        'songsId': ids,
+        'fromLibrary': srcLibraryId.toString(),
+        'toLibrary': dstLibraryId.toString(),
+        'fromTid': srcTid,
+        'toTid': dstTid,
+      };
     } else if (platform == 1) {
       String songsId = songs.map((e) => (e as QQMusicSong).songId).join(',');
       int srcDirId = (srcLibrary as QQMusicPlaylist).dirId;

@@ -58,6 +58,9 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
 
   late int _currentPlatform;
 
+  // The id of current opened library.
+  late int _currentFavlistId;
+
   @override
   void dispose() {
     widget.scrollController.removeListener(_scrollListener);
@@ -71,6 +74,12 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
     _favlists = state.refreshLibraries!(state, true);
     _currentPlatform = state.currentPlatform;
     widget.scrollController.addListener(_scrollListener);
+    var rawOpenedLibrary = state.rawOpenedLibrary;
+    if (_currentPlatform == 3) {
+      _currentFavlistId = (rawOpenedLibrary as BiliFavList).id;
+    } else {
+      throw 'Invalid platform';
+    }
   }
 
   @override
@@ -274,34 +283,36 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
                             ),
                           ),
                           for (int i = 0; i < _localFavLists.length; i++)
-                            Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () {
-                                  if (_inMultiSelectMode) {
-                                    setState(() {
-                                      if (_selectedIndex.contains(i)) {
-                                        _selectedIndex.remove(i);
-                                      } else {
-                                        _selectedIndex.add(i);
-                                      }
-                                    });
-                                  } else {
-                                    widget.action == 'add'
-                                        ? _addResourcesToFavList(
-                                            _localFavLists[i], appState)
-                                        : _moveResourcesToFavList(
-                                            _localFavLists[i], appState);
-                                  }
-                                },
-                                child: SelectableLibraryItem(
-                                  library: _localFavLists[i],
-                                  isCreateLibraryItem: false,
-                                  inMultiSelectMode: _inMultiSelectMode,
-                                  selected: _selectedIndex.contains(i),
+                            if (_currentFavlistId !=
+                                _getIdentifiedIdOfFavList(_localFavLists[i]))
+                              Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () {
+                                    if (_inMultiSelectMode) {
+                                      setState(() {
+                                        if (_selectedIndex.contains(i)) {
+                                          _selectedIndex.remove(i);
+                                        } else {
+                                          _selectedIndex.add(i);
+                                        }
+                                      });
+                                    } else {
+                                      widget.action == 'add'
+                                          ? _addResourcesToFavList(
+                                              _localFavLists[i], appState)
+                                          : _moveResourcesToFavList(
+                                              _localFavLists[i], appState);
+                                    }
+                                  },
+                                  child: SelectableLibraryItem(
+                                    library: _localFavLists[i],
+                                    isCreateLibraryItem: false,
+                                    inMultiSelectMode: _inMultiSelectMode,
+                                    selected: _selectedIndex.contains(i),
+                                  ),
                                 ),
                               ),
-                            ),
                           _buildLoadingIndicator(colorScheme),
                         ],
                       ),
@@ -439,6 +450,14 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
     // appState.refreshLibraries!(appState, true);
     if (mounted) {
       Navigator.pop(context, results);
+    }
+  }
+
+  int _getIdentifiedIdOfFavList(BasicLibrary library) {
+    if (_currentPlatform == 3) {
+      return (library as BiliFavList).id;
+    } else {
+      throw 'Invalid platform';
     }
   }
 }
