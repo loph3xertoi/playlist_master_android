@@ -35,17 +35,22 @@ class BiliResource {
   final int danmakuCount;
 
   factory BiliResource.fromJson(Map<String, dynamic> json) {
+    int type = json['type'] ?? 2;
+    int page = json['page'] ?? 1;
+    int duration = json['duration'] ?? 0;
+    int playCount = json['playCount'] ?? 0;
+    int danmakuCount = json['danmakuCount'] ?? 0;
     return BiliResource(
       json['id'],
       json['bvid'],
-      json['type'],
+      type,
       json['title'],
       json['cover'],
-      json['page'],
-      json['duration'],
+      page,
+      duration,
       json['upperName'],
-      json['playCount'],
-      json['danmakuCount'],
+      playCount,
+      danmakuCount,
     );
   }
 

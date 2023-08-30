@@ -10,6 +10,7 @@ import '../entities/dto/result.dart';
 import '../entities/netease_cloud_music/ncm_playlist.dart';
 import '../entities/qq_music/qqmusic_playlist.dart';
 import '../states/app_state.dart';
+import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 import 'create_library_popup.dart';
 import 'my_selectable_text.dart';
@@ -101,45 +102,62 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
               child: CircularProgressIndicator(),
             );
           } else if (snapshot.hasError || snapshot.data == null) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  MySelectableText(
-                    snapshot.hasError ? '${snapshot.error}' : appState.errorMsg,
-                    style: textTheme.labelMedium!.copyWith(
-                      color: colorScheme.onPrimary,
-                    ),
+            MyLogger.logger
+                .e(snapshot.hasError ? '${snapshot.error}' : appState.errorMsg);
+            return Material(
+              child: Scaffold(
+                appBar: AppBar(
+                  title: Text(
+                    'Got some error',
+                    style: textTheme.labelLarge,
                   ),
-                  TextButton.icon(
-                    style: ButtonStyle(
-                      shadowColor: MaterialStateProperty.all(
-                        colorScheme.primary,
+                  backgroundColor: colorScheme.primary,
+                  iconTheme: IconThemeData(color: colorScheme.onSecondary),
+                ),
+                body: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      MySelectableText(
+                        snapshot.hasError
+                            ? '${snapshot.error}'
+                            : appState.errorMsg,
+                        style: textTheme.labelMedium!.copyWith(
+                          color: colorScheme.onSecondary,
+                        ),
                       ),
-                      overlayColor: MaterialStateProperty.all(
-                        Colors.grey,
+                      TextButton.icon(
+                        style: ButtonStyle(
+                          shadowColor: MaterialStateProperty.all(
+                            colorScheme.primary,
+                          ),
+                          overlayColor: MaterialStateProperty.all(
+                            Colors.grey,
+                          ),
+                        ),
+                        icon: Icon(
+                          MdiIcons.webRefresh,
+                          color: colorScheme.onSecondary,
+                        ),
+                        label: Text(
+                          'Retry',
+                          style: textTheme.labelMedium!.copyWith(
+                            color: colorScheme.onSecondary,
+                          ),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _currentPage = 1;
+                            _favlists =
+                                appState.refreshLibraries!(appState, true);
+                            _localFavLists.clear();
+                          });
+                        },
                       ),
-                    ),
-                    icon: Icon(
-                      MdiIcons.webRefresh,
-                      color: colorScheme.onPrimary,
-                    ),
-                    label: Text(
-                      'Retry',
-                      style: textTheme.labelMedium!.copyWith(
-                        color: colorScheme.onPrimary,
-                      ),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _currentPage = 1;
-                        _favlists = appState.refreshLibraries!(appState, true);
-                        _localFavLists.clear();
-                      });
-                    },
+                    ],
                   ),
-                ],
+                ),
               ),
             );
           } else {

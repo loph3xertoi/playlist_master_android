@@ -8,6 +8,7 @@ import '../entities/dto/result.dart';
 import '../http/my_http.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
+import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 import 'create_library_popup.dart';
 import 'libraries_settings_menu_popup.dart';
@@ -147,6 +148,8 @@ class _MyContentAreaState extends State<MyContentArea> {
               child: CircularProgressIndicator(),
             );
           } else if (snapshot.hasError || snapshot.data == null) {
+            MyLogger.logger
+                .e(snapshot.hasError ? '${snapshot.error}' : appState.errorMsg);
             return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -155,7 +158,7 @@ class _MyContentAreaState extends State<MyContentArea> {
                   MySelectableText(
                     snapshot.hasError ? '${snapshot.error}' : appState.errorMsg,
                     style: textTheme.labelMedium!.copyWith(
-                      color: colorScheme.onPrimary,
+                      color: colorScheme.onSecondary,
                     ),
                   ),
                   TextButton.icon(
@@ -169,12 +172,12 @@ class _MyContentAreaState extends State<MyContentArea> {
                     ),
                     icon: Icon(
                       MdiIcons.webRefresh,
-                      color: colorScheme.onPrimary,
+                      color: colorScheme.onSecondary,
                     ),
                     label: Text(
                       'Retry',
                       style: textTheme.labelMedium!.copyWith(
-                        color: colorScheme.onPrimary,
+                        color: colorScheme.onSecondary,
                       ),
                     ),
                     onPressed: () {

@@ -15,6 +15,7 @@ import '../entities/bilibili/bili_subpage_of_resource.dart';
 import '../http/api.dart';
 import '../http/my_http.dart';
 import '../states/app_state.dart';
+import '../utils/my_logger.dart';
 import '../widgets/bili_resource_item.dart';
 import '../widgets/foldable_resource_intro_widget.dart';
 import '../widgets/my_selectable_text.dart';
@@ -96,8 +97,13 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
     _currentPlatform = state.currentPlatform;
     _currentResourceIndexInFavList = state.currentResourceIndexInFavList;
     _allResourcesInCurrentFavList = state.rawResourcesInFavList;
-    _futureCurrentDetailResource = state.fetchDetailSong<BiliDetailResource>(
-        _currentResource, _currentPlatform)!;
+    if (_currentPlatform != 0) {
+      _futureCurrentDetailResource = state.fetchDetailSong<BiliDetailResource>(
+          _currentResource, _currentPlatform)!;
+    } else {
+      _futureCurrentDetailResource =
+          state.fetchDetailSong<BiliDetailResource>(_currentResource, 3)!;
+    }
     _episodesScrollController = ScrollController();
     _expandSubpagesScrollController = ScrollController();
     _collapseSubpagesScrollController = ScrollController();
@@ -159,6 +165,8 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
     _subPageNo = appState.subPageNo;
     _currentResourceIndexInFavList = appState.currentResourceIndexInFavList;
@@ -214,47 +222,67 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                 ),
               );
             } else if (snapshot.hasError || snapshot.data == null) {
-              return Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    MySelectableText(
-                      snapshot.hasError
-                          ? '${snapshot.error}'
-                          : appState.errorMsg,
-                      style: _textTheme.labelMedium!.copyWith(
-                        color: Colors.grey,
-                      ),
+              MyLogger.logger.e(
+                  snapshot.hasError ? '${snapshot.error}' : appState.errorMsg);
+              return Material(
+                child: Scaffold(
+                  appBar: AppBar(
+                    title: Text(
+                      'Got some error',
+                      style: textTheme.labelLarge,
                     ),
-                    TextButton.icon(
-                      style: ButtonStyle(
-                        shadowColor: MaterialStateProperty.all(
-                          _colorScheme.primary,
+                    backgroundColor: colorScheme.primary,
+                    iconTheme: IconThemeData(color: colorScheme.onSecondary),
+                  ),
+                  body: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        MySelectableText(
+                          snapshot.hasError
+                              ? '${snapshot.error}'
+                              : appState.errorMsg,
+                          style: _textTheme.labelMedium!.copyWith(
+                            color: colorScheme.onSecondary,
+                          ),
                         ),
-                        overlayColor: MaterialStateProperty.all(
-                          Colors.grey,
+                        TextButton.icon(
+                          style: ButtonStyle(
+                            shadowColor: MaterialStateProperty.all(
+                              _colorScheme.primary,
+                            ),
+                            overlayColor: MaterialStateProperty.all(
+                              Colors.grey,
+                            ),
+                          ),
+                          icon: Icon(
+                            MdiIcons.webRefresh,
+                            color: colorScheme.onSecondary, // grey
+                          ),
+                          label: Text(
+                            'Retry',
+                            style: _textTheme.labelMedium!.copyWith(
+                              color: colorScheme.onSecondary,
+                            ),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              if (_currentPlatform != 0) {
+                                _futureCurrentDetailResource =
+                                    state.fetchDetailSong<BiliDetailResource>(
+                                        _currentResource, _currentPlatform)!;
+                              } else {
+                                _futureCurrentDetailResource =
+                                    state.fetchDetailSong<BiliDetailResource>(
+                                        _currentResource, 3)!;
+                              }
+                            });
+                          },
                         ),
-                      ),
-                      icon: Icon(
-                        MdiIcons.webRefresh,
-                        color: Colors.grey,
-                      ),
-                      label: Text(
-                        'Retry',
-                        style: _textTheme.labelMedium!.copyWith(
-                          color: Colors.grey,
-                        ),
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _futureCurrentDetailResource = _noListenedState
-                              .fetchDetailSong<BiliDetailResource>(
-                                  _currentResource, _currentPlatform)!;
-                        });
-                      },
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               );
             } else {

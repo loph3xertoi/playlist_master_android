@@ -13,6 +13,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:playlistmaster/entities/basic/basic_library.dart';
 import 'package:playlistmaster/entities/dto/updated_library_dto.dart';
 import 'package:playlistmaster/entities/pms/pms_detail_library.dart';
+import 'package:playlistmaster/utils/my_logger.dart';
 import 'package:playlistmaster/widgets/my_selectable_text.dart';
 import 'package:provider/provider.dart';
 
@@ -130,50 +131,65 @@ class _UpdateLibraryDialogState extends State<UpdateLibraryDialog> {
                   child: CircularProgressIndicator(),
                 );
               } else if (snapshot.hasError || snapshot.data == null) {
-                return Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      MySelectableText(
-                        snapshot.hasError
-                            ? '${snapshot.error}'
-                            : appState.errorMsg,
-                        style: textTheme.labelMedium!.copyWith(
-                          color: colorScheme.onPrimary,
-                        ),
+                MyLogger.logger.e(snapshot.hasError
+                    ? '${snapshot.error}'
+                    : appState.errorMsg);
+                return Material(
+                  child: Scaffold(
+                    appBar: AppBar(
+                      title: Text(
+                        'Got some error',
+                        style: textTheme.labelLarge,
                       ),
-                      TextButton.icon(
-                        style: ButtonStyle(
-                          shadowColor: MaterialStateProperty.all(
-                            colorScheme.primary,
+                      backgroundColor: colorScheme.primary,
+                      iconTheme: IconThemeData(color: colorScheme.onSecondary),
+                    ),
+                    body: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          MySelectableText(
+                            snapshot.hasError
+                                ? '${snapshot.error}'
+                                : appState.errorMsg,
+                            style: textTheme.labelMedium!.copyWith(
+                              color: colorScheme.onSecondary,
+                            ),
                           ),
-                          overlayColor: MaterialStateProperty.all(
-                            Colors.grey,
+                          TextButton.icon(
+                            style: ButtonStyle(
+                              shadowColor: MaterialStateProperty.all(
+                                colorScheme.primary,
+                              ),
+                              overlayColor: MaterialStateProperty.all(
+                                Colors.grey,
+                              ),
+                            ),
+                            icon: Icon(
+                              MdiIcons.webRefresh,
+                              color: colorScheme.onSecondary,
+                            ),
+                            label: Text(
+                              'Retry',
+                              style: textTheme.labelMedium!.copyWith(
+                                color: colorScheme.onSecondary,
+                              ),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                if (widget.inDetailLibraryPage) {
+                                  _detailLibrary = Future.value(widget.library);
+                                } else {
+                                  _detailLibrary = appState.fetchDetailLibrary(
+                                      widget.library, currentPlatform);
+                                }
+                              });
+                            },
                           ),
-                        ),
-                        icon: Icon(
-                          MdiIcons.webRefresh,
-                          color: colorScheme.onPrimary,
-                        ),
-                        label: Text(
-                          'Retry',
-                          style: textTheme.labelMedium!.copyWith(
-                            color: colorScheme.onPrimary,
-                          ),
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            if (widget.inDetailLibraryPage) {
-                              _detailLibrary = Future.value(widget.library);
-                            } else {
-                              _detailLibrary = appState.fetchDetailLibrary(
-                                  widget.library, currentPlatform);
-                            }
-                          });
-                        },
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 );
               } else {

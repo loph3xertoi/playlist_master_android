@@ -11,13 +11,13 @@ import 'package:flutter_lyric/lyrics_reader.dart';
 import 'package:flutter_lyric/lyrics_reader_model.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import '../http/my_http.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_song.dart';
 import '../entities/netease_cloud_music/ncm_detail_song.dart';
 import '../entities/qq_music/qqmusic_detail_song.dart';
 import '../http/api.dart';
+import '../http/my_http.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
 import '../third_lib_change/just_audio/common.dart';
@@ -210,46 +210,63 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
                     child: CircularProgressIndicator(),
                   );
                 } else if (snapshot.hasError || snapshot.data == null) {
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        MySelectableText(
-                          snapshot.hasError
-                              ? '${snapshot.error}'
-                              : appState.errorMsg,
-                          style: textTheme.labelMedium!.copyWith(
-                            color: colorScheme.onPrimary,
-                          ),
+                  MyLogger.logger.e(snapshot.hasError
+                      ? '${snapshot.error}'
+                      : appState.errorMsg);
+                  return Material(
+                    child: Scaffold(
+                      appBar: AppBar(
+                        title: Text(
+                          'Got some error',
+                          style: textTheme.labelLarge,
                         ),
-                        TextButton.icon(
-                          style: ButtonStyle(
-                            shadowColor: MaterialStateProperty.all(
-                              Colors.white54,
+                        backgroundColor: colorScheme.primary,
+                        iconTheme:
+                            IconThemeData(color: colorScheme.onSecondary),
+                      ),
+                      body: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            MySelectableText(
+                              snapshot.hasError
+                                  ? '${snapshot.error}'
+                                  : appState.errorMsg,
+                              style: textTheme.labelMedium!.copyWith(
+                                color: colorScheme.onSecondary,
+                              ),
                             ),
-                            overlayColor: MaterialStateProperty.all(
-                              Colors.grey,
+                            TextButton.icon(
+                              style: ButtonStyle(
+                                shadowColor: MaterialStateProperty.all(
+                                  Colors.white54,
+                                ),
+                                overlayColor: MaterialStateProperty.all(
+                                  Colors.grey,
+                                ),
+                              ),
+                              icon: Icon(
+                                MdiIcons.webRefresh,
+                                color: colorScheme.onSecondary,
+                              ),
+                              label: Text(
+                                'Retry',
+                                style: textTheme.labelMedium!.copyWith(
+                                  color: colorScheme.onSecondary,
+                                ),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _detailSong =
+                                      appState.fetchDetailSong<BasicSong>(
+                                          currentSong!, _currentPlatform!);
+                                });
+                              },
                             ),
-                          ),
-                          icon: Icon(
-                            MdiIcons.webRefresh,
-                            color: colorScheme.onPrimary,
-                          ),
-                          label: Text(
-                            'Retry',
-                            style: textTheme.labelMedium!.copyWith(
-                              color: colorScheme.onPrimary,
-                            ),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _detailSong = appState.fetchDetailSong<BasicSong>(
-                                  currentSong!, _currentPlatform!);
-                            });
-                          },
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   );
                 } else {

@@ -13,12 +13,15 @@ import '../entities/basic/basic_singer.dart';
 import '../entities/basic/basic_song.dart';
 import '../entities/netease_cloud_music/ncm_detail_song.dart';
 import '../entities/netease_cloud_music/ncm_lyrics.dart';
+import '../entities/netease_cloud_music/ncm_song.dart';
 import '../entities/qq_music/qqmusic_detail_song.dart';
 import '../entities/qq_music/qqmusic_lyrics.dart';
+import '../entities/qq_music/qqmusic_song.dart';
 import '../http/api.dart';
 import '../http/my_http.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
+import '../utils/my_logger.dart';
 import '../widgets/my_lyrics_displayer.dart';
 import '../widgets/my_selectable_text.dart';
 
@@ -34,6 +37,10 @@ class _DetailSongPageState extends State<DetailSongPage> {
   Future<BasicSong?>? _detailSong;
   LyricsReaderModel? _lyricModel;
   late MyLyricsDisplayer _lyricUI;
+  late bool _isUsingMockData;
+  late int _currentPlatform;
+  // The platform this song belongs to.
+  int? _realPlatform;
   int _position = 0;
 
   @override
@@ -53,13 +60,25 @@ class _DetailSongPageState extends State<DetailSongPage> {
         textTheme: textTheme,
       );
     });
-
-    var isUsingMockData = state.isUsingMockData;
-    if (isUsingMockData) {
+    _isUsingMockData = state.isUsingMockData;
+    _currentPlatform = state.currentPlatform;
+    if (_isUsingMockData) {
       _detailSong = Future.value(MockData.detailSong);
     } else {
-      _detailSong =
-          state.fetchDetailSong<BasicSong>(widget.song, state.currentPlatform);
+      if (_currentPlatform == 0) {
+        if (widget.song is QQMusicSong) {
+          _realPlatform = 1;
+        } else if (widget.song is NCMSong) {
+          _realPlatform = 2;
+        } else {
+          throw 'Invalid song type';
+        }
+        _detailSong =
+            state.fetchDetailSong<BasicSong>(widget.song, _realPlatform!);
+      } else {
+        _detailSong =
+            state.fetchDetailSong<BasicSong>(widget.song, _currentPlatform);
+      }
     }
   }
 
@@ -78,44 +97,76 @@ class _DetailSongPageState extends State<DetailSongPage> {
             child: CircularProgressIndicator(),
           );
         } else if (snapshot.hasError || snapshot.data == null) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                MySelectableText(
-                  snapshot.hasError ? '${snapshot.error}' : appState.errorMsg,
-                  style: textTheme.labelMedium!.copyWith(
-                    color: colorScheme.onPrimary,
-                  ),
+          MyLogger.logger
+              .e(snapshot.hasError ? '${snapshot.error}' : appState.errorMsg);
+          return Material(
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  'Got some error',
+                  style: textTheme.labelLarge,
                 ),
-                TextButton.icon(
-                  style: ButtonStyle(
-                    shadowColor: MaterialStateProperty.all(
-                      colorScheme.primary,
+                backgroundColor: colorScheme.primary,
+                iconTheme: IconThemeData(color: colorScheme.onSecondary),
+              ),
+              body: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    MySelectableText(
+                      snapshot.hasError
+                          ? '${snapshot.error}'
+                          : appState.errorMsg,
+                      style: textTheme.labelMedium!.copyWith(
+                        color: colorScheme.onSecondary,
+                      ),
                     ),
-                    overlayColor: MaterialStateProperty.all(
-                      Colors.grey,
+                    TextButton.icon(
+                      style: ButtonStyle(
+                        shadowColor: MaterialStateProperty.all(
+                          colorScheme.primary,
+                        ),
+                        overlayColor: MaterialStateProperty.all(
+                          Colors.grey,
+                        ),
+                      ),
+                      icon: Icon(
+                        MdiIcons.webRefresh,
+                        color: colorScheme.onSecondary,
+                      ),
+                      label: Text(
+                        'Retry',
+                        style: textTheme.labelMedium!.copyWith(
+                          color: colorScheme.onSecondary,
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          if (_isUsingMockData) {
+                            _detailSong = Future.value(MockData.detailSong);
+                          } else {
+                            if (_currentPlatform == 0) {
+                              if (widget.song is QQMusicSong) {
+                                _realPlatform = 1;
+                              } else if (widget.song is NCMSong) {
+                                _realPlatform = 2;
+                              } else {
+                                throw 'Invalid song type';
+                              }
+                              _detailSong = appState.fetchDetailSong<BasicSong>(
+                                  widget.song, _realPlatform!);
+                            } else {
+                              _detailSong = appState.fetchDetailSong<BasicSong>(
+                                  widget.song, _currentPlatform);
+                            }
+                          }
+                        });
+                      },
                     ),
-                  ),
-                  icon: Icon(
-                    MdiIcons.webRefresh,
-                    color: colorScheme.onPrimary,
-                  ),
-                  label: Text(
-                    'Retry',
-                    style: textTheme.labelMedium!.copyWith(
-                      color: colorScheme.onPrimary,
-                    ),
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _detailSong = appState.fetchDetailSong<BasicSong>(
-                          widget.song, appState.currentPlatform);
-                    });
-                  },
+                  ],
                 ),
-              ],
+              ),
             ),
           );
         } else {
@@ -142,9 +193,7 @@ class _DetailSongPageState extends State<DetailSongPage> {
                 .bindLyricToExt(lyrics.trans)
                 .getModel();
           } else {
-            if (currentPlatform == 0) {
-              throw UnimplementedError('Not yet implement pms platform');
-            } else if (currentPlatform == 1) {
+            if (currentPlatform == 1 || _realPlatform == 1) {
               detailSong = snapshot.data as QQMusicDetailSong;
               name = detailSong.name;
               singers = detailSong.singers;
@@ -162,7 +211,7 @@ class _DetailSongPageState extends State<DetailSongPage> {
                   .bindLyricToMain(lyrics.lyric)
                   .bindLyricToExt(lyrics.trans)
                   .getModel();
-            } else if (currentPlatform == 2) {
+            } else if (currentPlatform == 2 || _realPlatform == 2) {
               detailSong = snapshot.data as NCMDetailSong;
               name = detailSong.name;
               singers = detailSong.singers;

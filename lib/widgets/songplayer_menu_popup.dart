@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/dto/result.dart';
+import '../entities/pms/pms_detail_song.dart';
+import '../entities/pms/pms_song.dart';
 import '../states/app_state.dart';
 import '../utils/my_toast.dart';
 import 'select_library_popup.dart';
@@ -196,10 +198,7 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                 Radius.circular(10.0),
               ),
               onTap: () {
-                print('song\'s detail');
-                appState.isSongsPlayerPageOpened = false;
-                Navigator.popAndPushNamed(context, '/detail_song_page',
-                    arguments: appState.currentSong);
+                _pushToDetailSongPage(context, appState);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -209,9 +208,7 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                       icon: Icon(Icons.description_rounded),
                       color: colorScheme.tertiary,
                       onPressed: () {
-                        appState.isSongsPlayerPageOpened = false;
-                        Navigator.popAndPushNamed(context, '/detail_song_page',
-                            arguments: appState.currentSong);
+                        _pushToDetailSongPage(context, appState);
                       },
                     ),
                     Expanded(
@@ -230,6 +227,35 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _pushToDetailSongPage(BuildContext context, MyAppState appState) async {
+    print('song\'s detail');
+    appState.isSongsPlayerPageOpened = false;
+    var currentPlatform = appState.currentPlatform;
+    if (currentPlatform == 0) {
+      int songType = (appState.currentSong as PMSSong).type;
+      PMSDetailSong? pmsDetailSong = await appState
+          .fetchDetailSong<PMSDetailSong>(appState.currentSong, 0);
+      if (songType == 1 || songType == 2) {
+        if (context.mounted) {
+          Navigator.popAndPushNamed(context, '/detail_song_page',
+              arguments: pmsDetailSong!.basicSong);
+        }
+      } else if (songType == 3) {
+        appState.currentResource = pmsDetailSong!.biliResource;
+        if (context.mounted) {
+          Navigator.popAndPushNamed(context, '/detail_resource_page');
+        }
+      } else {
+        throw 'Invalid song type';
+      }
+    } else {
+      if (context.mounted) {
+        Navigator.popAndPushNamed(context, '/detail_song_page',
+            arguments: appState.currentSong);
+      }
+    }
   }
 
   void _addSongToLibrary(

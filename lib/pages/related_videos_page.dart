@@ -7,6 +7,7 @@ import '../entities/basic/basic_video.dart';
 import '../entities/netease_cloud_music/ncm_video.dart';
 import '../entities/qq_music/qqmusic_video.dart';
 import '../states/app_state.dart';
+import '../utils/my_logger.dart';
 import '../widgets/my_selectable_text.dart';
 import '../widgets/video_item.dart';
 
@@ -56,46 +57,60 @@ class _RelatedVideosPageState extends State<RelatedVideosPage> {
                 child: CircularProgressIndicator(),
               );
             } else if (snapshot.hasError || snapshot.data == null) {
-              return Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    MySelectableText(
-                      snapshot.hasError
-                          ? '${snapshot.error}'
-                          : appState.errorMsg,
-                      style: textTheme.labelMedium!.copyWith(
-                        color: colorScheme.onPrimary,
-                      ),
+              MyLogger.logger.e(
+                  snapshot.hasError ? '${snapshot.error}' : appState.errorMsg);
+              return Material(
+                child: Scaffold(
+                  appBar: AppBar(
+                title: Text(
+                  'Got some error',
+                  style: textTheme.labelLarge,
+                ),
+                backgroundColor: colorScheme.primary,
+                iconTheme: IconThemeData(color: colorScheme.onSecondary),
+              ),
+                  body: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        MySelectableText(
+                          snapshot.hasError
+                              ? '${snapshot.error}'
+                              : appState.errorMsg,
+                          style: textTheme.labelMedium!.copyWith(
+                            color: colorScheme.onSecondary,
+                          ),
+                        ),
+                        TextButton.icon(
+                          style: ButtonStyle(
+                            shadowColor: MaterialStateProperty.all(
+                              colorScheme.primary,
+                            ),
+                            overlayColor: MaterialStateProperty.all(
+                              Colors.grey,
+                            ),
+                          ),
+                          icon: Icon(
+                            MdiIcons.webRefresh,
+                            color: colorScheme.onSecondary,
+                          ),
+                          label: Text(
+                            'Retry',
+                            style: textTheme.labelMedium!.copyWith(
+                              color: colorScheme.onSecondary,
+                            ),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _relatedVideos = appState.fetchRelatedMVs(
+                                  widget.song, _currentPlatform);
+                            });
+                          },
+                        ),
+                      ],
                     ),
-                    TextButton.icon(
-                      style: ButtonStyle(
-                        shadowColor: MaterialStateProperty.all(
-                          colorScheme.primary,
-                        ),
-                        overlayColor: MaterialStateProperty.all(
-                          Colors.grey,
-                        ),
-                      ),
-                      icon: Icon(
-                        MdiIcons.webRefresh,
-                        color: colorScheme.onPrimary,
-                      ),
-                      label: Text(
-                        'Retry',
-                        style: textTheme.labelMedium!.copyWith(
-                          color: colorScheme.onPrimary,
-                        ),
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _relatedVideos = appState.fetchRelatedMVs(
-                              widget.song, _currentPlatform);
-                        });
-                      },
-                    ),
-                  ],
+                  ),
                 ),
               );
             } else {

@@ -225,44 +225,60 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             child: CircularProgressIndicator(),
           );
         } else if (snapshot.hasError || snapshot.data == null) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                MySelectableText(
-                  snapshot.hasError ? '${snapshot.error}' : appState.errorMsg,
-                  style: textTheme.labelMedium!.copyWith(
-                    color: colorScheme.onPrimary,
-                  ),
+          MyLogger.logger
+              .e(snapshot.hasError ? '${snapshot.error}' : appState.errorMsg);
+          return Material(
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  'Got some error',
+                  style: textTheme.labelLarge,
                 ),
-                TextButton.icon(
-                  style: ButtonStyle(
-                    shadowColor: MaterialStateProperty.all(
-                      colorScheme.primary,
+                backgroundColor: colorScheme.primary,
+                iconTheme: IconThemeData(color: colorScheme.onSecondary),
+              ),
+              body: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    MySelectableText(
+                      snapshot.hasError
+                          ? '${snapshot.error}'
+                          : appState.errorMsg,
+                      style: textTheme.labelMedium!.copyWith(
+                        color: colorScheme.onSecondary,
+                      ),
                     ),
-                    overlayColor: MaterialStateProperty.all(
-                      Colors.grey,
+                    TextButton.icon(
+                      style: ButtonStyle(
+                        shadowColor: MaterialStateProperty.all(
+                          colorScheme.primary,
+                        ),
+                        overlayColor: MaterialStateProperty.all(
+                          Colors.grey,
+                        ),
+                      ),
+                      icon: Icon(
+                        MdiIcons.webRefresh,
+                        color: colorScheme.onSecondary,
+                      ),
+                      label: Text(
+                        'Retry',
+                        style: textTheme.labelMedium!.copyWith(
+                          color: colorScheme.onSecondary,
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _detailVideo = appState.fetchDetailMV(
+                              widget.video, currentPlatform);
+                        });
+                      },
                     ),
-                  ),
-                  icon: Icon(
-                    MdiIcons.webRefresh,
-                    color: colorScheme.onPrimary,
-                  ),
-                  label: Text(
-                    'Retry',
-                    style: textTheme.labelMedium!.copyWith(
-                      color: colorScheme.onPrimary,
-                    ),
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _detailVideo =
-                          appState.fetchDetailMV(widget.video, currentPlatform);
-                    });
-                  },
+                  ],
                 ),
-              ],
+              ),
             ),
           );
         } else {

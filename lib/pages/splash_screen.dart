@@ -5,11 +5,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_network/image_network.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/http/my_http.dart';
 import 'package:provider/provider.dart';
 
 import '../http/api.dart';
+import '../http/my_http.dart';
 import '../states/app_state.dart';
+import '../utils/my_logger.dart';
 import '../utils/storage_manager.dart';
 import '../widgets/my_selectable_text.dart';
 
@@ -70,46 +71,63 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             );
           } else if (snapshot.hasError || snapshot.data == null) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  MySelectableText(
-                    snapshot.hasError ? '${snapshot.error}' : appState.errorMsg,
-                    style: textTheme.labelMedium!.copyWith(
-                      color: colorScheme.onPrimary,
-                    ),
+            MyLogger.logger
+                .e(snapshot.hasError ? '${snapshot.error}' : appState.errorMsg);
+            return Material(
+              child: Scaffold(
+                appBar: AppBar(
+                  title: Text(
+                    'Got some error',
+                    style: textTheme.labelLarge,
                   ),
-                  TextButton.icon(
-                    style: ButtonStyle(
-                      shadowColor: MaterialStateProperty.all(
-                        colorScheme.primary,
+                  backgroundColor: colorScheme.primary,
+                  iconTheme: IconThemeData(color: colorScheme.onSecondary),
+                ),
+                body: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      MySelectableText(
+                        snapshot.hasError
+                            ? '${snapshot.error}'
+                            : appState.errorMsg,
+                        style: textTheme.labelMedium!.copyWith(
+                          color: colorScheme.onSecondary,
+                        ),
                       ),
-                      overlayColor: MaterialStateProperty.all(
-                        Colors.grey,
+                      TextButton.icon(
+                        style: ButtonStyle(
+                          shadowColor: MaterialStateProperty.all(
+                            colorScheme.primary,
+                          ),
+                          overlayColor: MaterialStateProperty.all(
+                            Colors.grey,
+                          ),
+                        ),
+                        icon: Icon(
+                          MdiIcons.webRefresh,
+                          color: colorScheme.onSecondary,
+                        ),
+                        label: Text(
+                          'Retry',
+                          style: textTheme.labelMedium!.copyWith(
+                            color: colorScheme.onSecondary,
+                          ),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            currentPlatformFuture =
+                                StorageManager.readData('currentPlatform')
+                                    as Future<int>;
+                            splashImageFuture =
+                                appState.getBiliSplashScreenImage();
+                          });
+                        },
                       ),
-                    ),
-                    icon: Icon(
-                      MdiIcons.webRefresh,
-                      color: colorScheme.onPrimary,
-                    ),
-                    label: Text(
-                      'Retry',
-                      style: textTheme.labelMedium!.copyWith(
-                        color: colorScheme.onPrimary,
-                      ),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        currentPlatformFuture =
-                            StorageManager.readData('currentPlatform')
-                                as Future<int>;
-                        splashImageFuture = appState.getBiliSplashScreenImage();
-                      });
-                    },
+                    ],
                   ),
-                ],
+                ),
               ),
             );
           } else {

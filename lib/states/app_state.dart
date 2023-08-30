@@ -37,6 +37,7 @@ import '../entities/netease_cloud_music/ncm_song.dart';
 import '../entities/netease_cloud_music/ncm_user.dart';
 import '../entities/netease_cloud_music/ncm_video.dart';
 import '../entities/pms/pms_detail_library.dart';
+import '../entities/pms/pms_detail_song.dart';
 import '../entities/pms/pms_library.dart';
 import '../entities/pms/pms_song.dart';
 import '../entities/pms/pms_user.dart';
@@ -1104,7 +1105,14 @@ class MyAppState extends ChangeNotifier {
     T Function(Map<String, dynamic>) resolveJson;
     Uri? url;
     if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
+      resolveJson = PMSDetailSong.fromJson as T Function(Map<String, dynamic>);
+      url = Uri.http(
+        API.host,
+        '${API.detailSong}/${(song as PMSSong).id}',
+        {
+          'platform': platform.toString(),
+        },
+      );
     } else if (platform == 1) {
       resolveJson =
           QQMusicDetailSong.fromJson as T Function(Map<String, dynamic>);

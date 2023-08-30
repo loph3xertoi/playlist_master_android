@@ -5,12 +5,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/entities/pms/pms_detail_library.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../entities/basic/basic_song.dart';
 import '../entities/netease_cloud_music/ncm_detail_playlist.dart';
+import '../entities/pms/pms_detail_library.dart';
 import '../entities/qq_music/qqmusic_detail_playlist.dart';
 import '../http/api.dart';
 import '../http/my_http.dart';
@@ -239,6 +239,9 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                         );
                                       } else if (snapshot.hasError ||
                                           snapshot.data == null) {
+                                        MyLogger.logger.e(snapshot.hasError
+                                            ? '${snapshot.error}'
+                                            : appState.errorMsg);
                                         return Center(
                                           child: Column(
                                             mainAxisSize: MainAxisSize.min,
@@ -251,7 +254,8 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                     : appState.errorMsg,
                                                 style: textTheme.labelMedium!
                                                     .copyWith(
-                                                  color: colorScheme.onPrimary,
+                                                  color:
+                                                      colorScheme.onSecondary,
                                                 ),
                                               ),
                                               TextButton.icon(
@@ -267,14 +271,15 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
                                                 ),
                                                 icon: Icon(
                                                   MdiIcons.webRefresh,
-                                                  color: colorScheme.onPrimary,
+                                                  color:
+                                                      colorScheme.onSecondary,
                                                 ),
                                                 label: Text(
                                                   'Retry',
                                                   style: textTheme.labelMedium!
                                                       .copyWith(
                                                     color:
-                                                        colorScheme.onPrimary,
+                                                        colorScheme.onSecondary,
                                                   ),
                                                 ),
                                                 onPressed: () {

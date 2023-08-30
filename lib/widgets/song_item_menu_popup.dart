@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/entities/pms/pms_detail_song.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../entities/basic/basic_song.dart';
+import '../entities/bilibili/bili_detail_resource.dart';
+import '../entities/netease_cloud_music/ncm_detail_song.dart';
+import '../entities/pms/pms_song.dart';
+import '../entities/qq_music/qqmusic_detail_song.dart';
 import '../states/app_state.dart';
 import 'confirm_popup.dart';
 
@@ -17,6 +22,8 @@ class CreateSongItemMenuDialog extends StatefulWidget {
 }
 
 class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
+  late MyAppState _appState;
+
   void _removeSongFromLibrary(BuildContext context, MyAppState appState) async {
     appState.rawOpenedLibrary!.itemCount -= 1;
     appState.rawSongsInLibrary!.remove(widget.song);
@@ -27,11 +34,48 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
     appState.refreshDetailLibraryPage!(appState);
   }
 
+  void _pushToDetailSongPage() async {
+    print('song\'s detail');
+    _appState.isSongsPlayerPageOpened = false;
+    var currentPlatform = _appState.currentPlatform;
+    if (currentPlatform == 0) {
+      int songType = (widget.song as PMSSong).type;
+      PMSDetailSong? pmsDetailSong =
+          await _appState.fetchDetailSong<PMSDetailSong>(widget.song, 0);
+      if (songType == 1 || songType == 2) {
+        if (mounted) {
+          Navigator.popAndPushNamed(context, '/detail_song_page',
+              arguments: pmsDetailSong!.basicSong);
+        }
+      } else if (songType == 3) {
+        _appState.currentResource = pmsDetailSong!.biliResource;
+        if (mounted) {
+          Navigator.popAndPushNamed(context, '/detail_resource_page');
+        }
+      } else {
+        throw 'Invalid song type';
+      }
+    } else {
+      if (mounted) {
+        Navigator.popAndPushNamed(context, '/detail_song_page',
+            arguments: widget.song);
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final state = Provider.of<MyAppState>(context, listen: false);
+    _appState = state;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
+    _appState = appState;
     return Dialog(
       insetPadding: EdgeInsets.all(0.0),
       alignment: Alignment.bottomCenter,
@@ -247,12 +291,7 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
               borderRadius: BorderRadius.all(
                 Radius.circular(10.0),
               ),
-              onTap: () {
-                print('song\'s detail');
-                appState.isSongsPlayerPageOpened = false;
-                Navigator.popAndPushNamed(context, '/detail_song_page',
-                    arguments: widget.song);
-              },
+              onTap: _pushToDetailSongPage,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Row(
@@ -260,11 +299,7 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
                     IconButton(
                       icon: Icon(Icons.description_rounded),
                       color: colorScheme.tertiary,
-                      onPressed: () {
-                        appState.isSongsPlayerPageOpened = false;
-                        Navigator.popAndPushNamed(context, '/detail_song_page',
-                            arguments: widget.song);
-                      },
+                      onPressed: _pushToDetailSongPage,
                     ),
                     Expanded(
                       child: Text(
