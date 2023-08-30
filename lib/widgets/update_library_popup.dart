@@ -23,9 +23,11 @@ class UpdateLibraryDialog extends StatefulWidget {
   UpdateLibraryDialog({
     Key? key,
     required this.library,
+    this.inDetailLibraryPage = false,
   }) : super(key: key);
 
   final BasicLibrary library;
+  final bool inDetailLibraryPage;
 
   @override
   State<UpdateLibraryDialog> createState() => _UpdateLibraryDialogState();
@@ -97,8 +99,12 @@ class _UpdateLibraryDialogState extends State<UpdateLibraryDialog> {
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
-    _detailLibrary =
-        state.fetchDetailLibrary(widget.library, state.currentPlatform);
+    if (widget.inDetailLibraryPage) {
+      _detailLibrary = Future.value(widget.library);
+    } else {
+      _detailLibrary =
+          state.fetchDetailLibrary(widget.library, state.currentPlatform);
+    }
   }
 
   @override
@@ -158,8 +164,12 @@ class _UpdateLibraryDialogState extends State<UpdateLibraryDialog> {
                         ),
                         onPressed: () {
                           setState(() {
-                            _detailLibrary = appState.fetchDetailLibrary(
-                                widget.library, currentPlatform);
+                            if (widget.inDetailLibraryPage) {
+                              _detailLibrary = Future.value(widget.library);
+                            } else {
+                              _detailLibrary = appState.fetchDetailLibrary(
+                                  widget.library, currentPlatform);
+                            }
                           });
                         },
                       ),
@@ -281,6 +291,7 @@ class _UpdateLibraryDialogState extends State<UpdateLibraryDialog> {
                                 FormBuilderTextField(
                                   name: 'intro',
                                   initialValue: library.intro,
+                                  style: textTheme.labelMedium,
                                   decoration: InputDecoration(
                                       labelText: 'Intro',
                                       labelStyle: textTheme.labelSmall),

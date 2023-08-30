@@ -25,7 +25,10 @@ class LibraryItemMenuPopup extends StatelessWidget {
       Navigator.pop(context);
       Result? result = await await showDialog<Future<Result?>>(
         context: context,
-        builder: (_) => UpdateLibraryDialog(library: library),
+        builder: (_) => UpdateLibraryDialog(
+          library: library,
+          inDetailLibraryPage: isInDetailLibraryPage,
+        ),
       );
       if (result != null && result.success) {
         appState.refreshLibraries!(appState, false);

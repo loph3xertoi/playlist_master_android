@@ -1,13 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/http/my_http.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../http/api.dart';
+import '../http/my_http.dart';
 import '../states/app_state.dart';
 import 'library_item_menu_popup.dart';
 
