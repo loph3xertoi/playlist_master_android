@@ -1859,9 +1859,11 @@ class MyAppState extends ChangeNotifier {
       if (isAddToPMSLibrary) {
         int libraryId = (library as PMSLibrary).id;
         String tid = libraryId.toString();
+        List<Map<String, dynamic>> songJsonList =
+            songs.map((song) => (song as QQMusicSong).toJson()).toList();
         requestBody = {
           'libraryId': libraryId.toString(),
-          'songs': songs,
+          'songs': songJsonList,
           'isAddToPMSLibrary': isAddToPMSLibrary,
           'tid': tid,
         };

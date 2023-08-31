@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import '../entities/pms/pms_song.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -90,10 +91,16 @@ class _SongItemState extends State<SongItem> {
       height: 50.0,
       child: Row(
         children: [
+          if (currentPlatform == 0)
+            Container(
+              width: 10.0,
+              height: 50.0,
+              color: _getColorForPMSSong(widget.song),
+            ),
           Padding(
             padding: const EdgeInsets.only(left: 5.0),
             child: SizedBox(
-              width: 40.0,
+              width: 30.0,
               height: 50.0,
               child: Center(
                 child: Text(
@@ -296,5 +303,22 @@ class _SongItemState extends State<SongItem> {
         ],
       ),
     );
+  }
+
+  Color _getColorForPMSSong(BasicSong song) {
+    int type = (song as PMSSong).type;
+    Color songColor;
+    if(type==0){
+      songColor = Colors.transparent;
+    }else if (type==1){
+      songColor = Color(0xFF13BE72);
+    }else if (type==2){
+      songColor = Color(0xFFDF0000);
+    }else if (type ==3){
+      songColor= Color(0xFFFF558A);
+    }else {
+      throw 'Invalid song type';
+    }
+    return songColor;
   }
 }

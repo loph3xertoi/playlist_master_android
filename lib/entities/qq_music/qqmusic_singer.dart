@@ -18,6 +18,15 @@ class QQMusicSinger extends BasicSinger {
   /// Mid of the singer.
   final String mid;
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'mid': mid,
+      'name': name,
+      'headPic': headPic,
+    };
+  }
+
   factory QQMusicSinger.fromJson(Map<String, dynamic> json) {
     return QQMusicSinger(
       json['id'],

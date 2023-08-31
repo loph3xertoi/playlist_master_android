@@ -377,7 +377,7 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
   }
 
   int _getIdentifiedIdOfLibrary(BasicLibrary library) {
-    if (_currentPlatform == 0) {
+    if (_currentPlatform == 0 || widget.addToPMS) {
       return (library as PMSLibrary).id;
     } else if (_currentPlatform == 1) {
       return (library as QQMusicPlaylist).dirId;
