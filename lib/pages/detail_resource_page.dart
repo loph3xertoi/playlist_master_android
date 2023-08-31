@@ -96,7 +96,11 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
     _currentResource = state.currentResource!;
     _currentPlatform = state.currentPlatform;
     _currentResourceIndexInFavList = state.currentResourceIndexInFavList;
-    _allResourcesInCurrentFavList = state.rawResourcesInFavList;
+    if (_currentPlatform == 0) {
+      _allResourcesInCurrentFavList = null;
+    } else {
+      _allResourcesInCurrentFavList = state.rawResourcesInFavList;
+    }
     if (_currentPlatform != 0) {
       _futureCurrentDetailResource = state.fetchDetailSong<BiliDetailResource>(
           _currentResource, _currentPlatform)!;
@@ -196,6 +200,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
       return WillPopScope(
         onWillPop: () async {
           appState.inDetailFavlistPage = false;
+          appState.refreshLibraries!(appState, false);
           return true;
         },
         child: SafeArea(
@@ -1233,219 +1238,226 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
                 ],
               ),
             ),
-            // This resource has multiple sub resources.
-            _currentDetailResource.page > 1
-                ? _currentDetailResource
-                        .isSeasonResource // Whether this resource is episodes or videos.
-                    ? Padding(
-                        padding: const EdgeInsets.only(
-                            left: 15.0, right: 15.0, bottom: 10.0),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(6.0),
-                          onTap: () {
-                            _slideInResourceSubPagesPage();
-                          },
-                          child: Ink(
-                            height: 40.0,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(6.0),
-                              color: _colorScheme.onPrimaryContainer,
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 12.0),
-                                    child: Text(
-                                      _currentDetailResource.title,
-                                      textAlign: TextAlign.start,
-                                      style: _textTheme.labelMedium!,
+            if (_currentPlatform == 3)
+              // This resource has multiple sub resources.
+              _currentDetailResource.page > 1
+                  ? _currentDetailResource
+                          .isSeasonResource // Whether this resource is episodes or videos.
+                      ? Padding(
+                          padding: const EdgeInsets.only(
+                              left: 15.0, right: 15.0, bottom: 10.0),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(6.0),
+                            onTap: () {
+                              _slideInResourceSubPagesPage();
+                            },
+                            child: Ink(
+                              height: 40.0,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(6.0),
+                                color: _colorScheme.onPrimaryContainer,
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(left: 12.0),
+                                      child: Text(
+                                        _currentDetailResource.title,
+                                        textAlign: TextAlign.start,
+                                        style: _textTheme.labelMedium!,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 4.0),
-                                  child: Lottie.asset(
-                                    'assets/images/lottie_wave.json',
-                                    height: 12.0,
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 4.0),
+                                    child: Lottie.asset(
+                                      'assets/images/lottie_wave.json',
+                                      height: 12.0,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  '$_subPageNo/${_currentDetailResource.page}',
-                                  style: _textTheme.labelSmall!.copyWith(
-                                    fontSize: 11.0,
-                                    color:
-                                        _colorScheme.onPrimary.withOpacity(0.5),
+                                  Text(
+                                    '$_subPageNo/${_currentDetailResource.page}',
+                                    style: _textTheme.labelSmall!.copyWith(
+                                      fontSize: 11.0,
+                                      color: _colorScheme.onPrimary
+                                          .withOpacity(0.5),
+                                    ),
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 4.0),
-                                  child: Icon(
-                                    Icons.arrow_forward_ios_rounded,
-                                    size: 14.0,
-                                    color: _colorScheme.onPrimary,
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 4.0),
+                                    child: Icon(
+                                      Icons.arrow_forward_ios_rounded,
+                                      size: 14.0,
+                                      color: _colorScheme.onPrimary,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      )
-                    : Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0),
-                        child: SizedBox(
-                          height: 50.0,
-                          child: Stack(
-                            alignment: Alignment.centerRight,
-                            children: [
-                              CustomScrollView(
-                                controller: _collapseSubpagesScrollController,
-                                scrollDirection: Axis.horizontal,
-                                slivers: [
-                                  SliverList(
-                                    delegate: SliverChildBuilderDelegate(
-                                      (context, index) {
-                                        return Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 4.0),
-                                          child: InkWell(
-                                            onTap: () {
-                                              setState(() {
-                                                int newPageNo = index + 1;
-                                                if (newPageNo != _subPageNo) {
-                                                  _subPageNo = newPageNo;
-                                                  appState.subPageNo =
-                                                      newPageNo;
-                                                  _skipToSpecificSubResource();
-                                                }
-                                              });
-                                              WidgetsBinding.instance
-                                                  .addPostFrameCallback((_) {
-                                                _collapseSubpagesScrollController
-                                                    .animateTo(
-                                                  index * 128.0,
-                                                  curve: Curves.easeInOut,
-                                                  duration: Duration(
-                                                      milliseconds: 300),
-                                                );
-                                              });
-                                            },
-                                            borderRadius:
-                                                BorderRadius.circular(4.0),
-                                            child: Ink(
-                                              width: 120.0,
-                                              decoration: BoxDecoration(
-                                                color: _colorScheme.secondary,
-                                                borderRadius:
-                                                    BorderRadius.circular(4.0),
-                                              ),
-                                              child: Center(
-                                                child: Container(
-                                                  margin: EdgeInsets.all(10.0),
-                                                  child: RichText(
-                                                    maxLines: 2,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    text: TextSpan(
-                                                      style: _subPageNo ==
-                                                              index + 1
-                                                          ? _textTheme
-                                                              .labelSmall!
-                                                              .copyWith(
-                                                              height: 1.0,
-                                                              color: Color(
-                                                                  0xFFFB6A9D),
-                                                            )
-                                                          : _textTheme
-                                                              .labelSmall!
-                                                              .copyWith(
-                                                              height: 1.0,
-                                                              color: _colorScheme
-                                                                  .onPrimary
-                                                                  .withOpacity(
-                                                                      0.5),
-                                                            ),
-                                                      children: [
-                                                        _subPageNo == index + 1
-                                                            ? WidgetSpan(
-                                                                child: Padding(
-                                                                  padding: const EdgeInsets
-                                                                      .only(
-                                                                      bottom:
-                                                                          4.0,
-                                                                      right:
-                                                                          4.0),
-                                                                  child: Lottie
-                                                                      .asset(
-                                                                    'assets/images/lottie_wave.json',
-                                                                    height:
-                                                                        10.0,
-                                                                    width: 10.0,
-                                                                  ),
-                                                                ),
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.only(bottom: 10.0),
+                          child: SizedBox(
+                            height: 50.0,
+                            child: Stack(
+                              alignment: Alignment.centerRight,
+                              children: [
+                                CustomScrollView(
+                                  controller: _collapseSubpagesScrollController,
+                                  scrollDirection: Axis.horizontal,
+                                  slivers: [
+                                    SliverList(
+                                      delegate: SliverChildBuilderDelegate(
+                                        (context, index) {
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 4.0),
+                                            child: InkWell(
+                                              onTap: () {
+                                                setState(() {
+                                                  int newPageNo = index + 1;
+                                                  if (newPageNo != _subPageNo) {
+                                                    _subPageNo = newPageNo;
+                                                    appState.subPageNo =
+                                                        newPageNo;
+                                                    _skipToSpecificSubResource();
+                                                  }
+                                                });
+                                                WidgetsBinding.instance
+                                                    .addPostFrameCallback((_) {
+                                                  _collapseSubpagesScrollController
+                                                      .animateTo(
+                                                    index * 128.0,
+                                                    curve: Curves.easeInOut,
+                                                    duration: Duration(
+                                                        milliseconds: 300),
+                                                  );
+                                                });
+                                              },
+                                              borderRadius:
+                                                  BorderRadius.circular(4.0),
+                                              child: Ink(
+                                                width: 120.0,
+                                                decoration: BoxDecoration(
+                                                  color: _colorScheme.secondary,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          4.0),
+                                                ),
+                                                child: Center(
+                                                  child: Container(
+                                                    margin:
+                                                        EdgeInsets.all(10.0),
+                                                    child: RichText(
+                                                      maxLines: 2,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      text: TextSpan(
+                                                        style: _subPageNo ==
+                                                                index + 1
+                                                            ? _textTheme
+                                                                .labelSmall!
+                                                                .copyWith(
+                                                                height: 1.0,
+                                                                color: Color(
+                                                                    0xFFFB6A9D),
                                                               )
-                                                            : TextSpan(),
-                                                        TextSpan(
-                                                          text:
-                                                              _currentDetailResource
-                                                                  .subpages![
-                                                                      index]
-                                                                  .partName,
-                                                        ),
-                                                      ],
+                                                            : _textTheme
+                                                                .labelSmall!
+                                                                .copyWith(
+                                                                height: 1.0,
+                                                                color: _colorScheme
+                                                                    .onPrimary
+                                                                    .withOpacity(
+                                                                        0.5),
+                                                              ),
+                                                        children: [
+                                                          _subPageNo ==
+                                                                  index + 1
+                                                              ? WidgetSpan(
+                                                                  child:
+                                                                      Padding(
+                                                                    padding: const EdgeInsets
+                                                                        .only(
+                                                                        bottom:
+                                                                            4.0,
+                                                                        right:
+                                                                            4.0),
+                                                                    child: Lottie
+                                                                        .asset(
+                                                                      'assets/images/lottie_wave.json',
+                                                                      height:
+                                                                          10.0,
+                                                                      width:
+                                                                          10.0,
+                                                                    ),
+                                                                  ),
+                                                                )
+                                                              : TextSpan(),
+                                                          TextSpan(
+                                                            text:
+                                                                _currentDetailResource
+                                                                    .subpages![
+                                                                        index]
+                                                                    .partName,
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        );
-                                      },
-                                      childCount: _currentDetailResource.page,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () {
-                                    _slideInResourceSubPagesPage();
-                                  },
-                                  child: Ink(
-                                    width: 40.0,
-                                    height: 50.0,
-                                    decoration: BoxDecoration(
-                                      // color: _colorScheme.onPrimaryContainer,
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          _colorScheme.onPrimaryContainer
-                                              .withOpacity(0.0),
-                                          _colorScheme.onPrimaryContainer
-                                              .withOpacity(1.0),
-                                        ],
-                                        stops: [0.0, 1.0],
-                                        begin: Alignment.centerLeft,
-                                        end: Alignment.centerRight,
+                                          );
+                                        },
+                                        childCount: _currentDetailResource.page,
                                       ),
                                     ),
-                                    child: Icon(
-                                      Icons.arrow_forward_ios_rounded,
-                                      size: 20.0,
-                                      color: _colorScheme.onPrimary
-                                          .withOpacity(0.3),
+                                  ],
+                                ),
+                                Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () {
+                                      _slideInResourceSubPagesPage();
+                                    },
+                                    child: Ink(
+                                      width: 40.0,
+                                      height: 50.0,
+                                      decoration: BoxDecoration(
+                                        // color: _colorScheme.onPrimaryContainer,
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            _colorScheme.onPrimaryContainer
+                                                .withOpacity(0.0),
+                                            _colorScheme.onPrimaryContainer
+                                                .withOpacity(1.0),
+                                          ],
+                                          stops: [0.0, 1.0],
+                                          begin: Alignment.centerLeft,
+                                          end: Alignment.centerRight,
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        Icons.arrow_forward_ios_rounded,
+                                        size: 20.0,
+                                        color: _colorScheme.onPrimary
+                                            .withOpacity(0.3),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      )
-                : Container(),
+                        )
+                  : Container(),
           ],
         ),
       ],
