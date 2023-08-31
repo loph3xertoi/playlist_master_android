@@ -246,17 +246,16 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
                                   context: context,
                                   builder: (_) => CreateLibraryDialog(
                                     initText: widget.resources[0].title,
+                                    addToPMS: widget.addToPMS,
                                   ),
                                 );
 
                                 if (result != null && result.success) {
-                                  if (_currentPlatform == 0) {
-                                    throw UnimplementedError(
-                                        'Not yet implement pms _currentPlatform');
-                                  } else if (_currentPlatform == 1) {
-                                    BasicLibrary library = QQMusicPlaylist(
+                                  if (widget.addToPMS ||
+                                      _currentPlatform == 0) {
+                                    BasicLibrary library = PMSLibrary(
                                       result.data as int,
-                                      '',
+                                      1,
                                       name: '',
                                       cover: '',
                                       itemCount: 1,
@@ -266,33 +265,20 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
                                       _addResourcesToFavList(
                                           appState, library, widget.addToPMS);
                                     } else {
-                                      _moveResourcesToFavList(
-                                          appState, library);
+                                      _addResourcesToFavList(appState, library);
                                     }
-                                  } else if (_currentPlatform == 2) {
-                                    BasicLibrary library = NCMPlaylist(
-                                      result.data as int,
-                                      name: '',
-                                      cover: '',
-                                      itemCount: 1,
-                                    );
-                                    widget.action == 'add'
-                                        ? _addResourcesToFavList(
-                                            appState, library)
-                                        : _moveResourcesToFavList(
-                                            appState, library);
                                   } else if (_currentPlatform == 3) {
                                     BiliFavList favList = BiliFavList(
                                         result.data as int, 0, 0, '', 0, 0,
                                         name: '', cover: '', itemCount: 1);
-                                    widget.action == 'add'
-                                        ? _addResourcesToFavList(
-                                            appState, favList)
-                                        : _moveResourcesToFavList(
-                                            appState, favList);
+                                    if (widget.action == 'add') {
+                                      _addResourcesToFavList(appState, favList);
+                                    } else {
+                                      _moveResourcesToFavList(
+                                          appState, favList);
+                                    }
                                   } else {
-                                    throw UnsupportedError(
-                                        'Invalid _currentPlatform');
+                                    throw UnsupportedError('Invalid platform');
                                   }
                                 }
                               },

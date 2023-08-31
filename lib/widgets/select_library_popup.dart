@@ -255,20 +255,22 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                                       cover: '',
                                       itemCount: 1,
                                     );
-                                    widget.action == 'add'
-                                        ? _addSongsToLibrary(appState, library)
-                                        : _moveSongsToLibrary(
-                                            appState, library);
+                                    if (widget.action == 'add') {
+                                      _addSongsToLibrary(appState, library);
+                                    } else {
+                                      _moveSongsToLibrary(appState, library);
+                                    }
                                   } else if (currentPlatform == 2) {
                                     BasicLibrary library = NCMPlaylist(
                                         result.data as int,
                                         name: '',
                                         cover: '',
                                         itemCount: 1);
-                                    widget.action == 'add'
-                                        ? _addSongsToLibrary(appState, library)
-                                        : _moveSongsToLibrary(
-                                            appState, library);
+                                    if (widget.action == 'add') {
+                                      _addSongsToLibrary(appState, library);
+                                    } else {
+                                      _moveSongsToLibrary(appState, library);
+                                    }
                                   } else if (currentPlatform == 3) {
                                     throw UnimplementedError(
                                         'Not yet implement bilibili platform');
