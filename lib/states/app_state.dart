@@ -1558,7 +1558,22 @@ class MyAppState extends ChangeNotifier {
     BasicVideo Function(Map<String, dynamic>) resolveJson;
     Uri? url;
     if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
+      int songType = (song as PMSSong).type;
+      if (songType == 1) {
+        resolveJson = QQMusicVideo.fromJson;
+      } else if (songType == 2) {
+        resolveJson = NCMVideo.fromJson;
+      } else {
+        throw 'Invalid song type';
+      }
+      url = Uri.http(
+        API.host,
+        '${API.relatedMV}/${song.id}',
+        {
+          'songType': songType.toString(),
+          'platform': platform.toString(),
+        },
+      );
     } else if (platform == 1) {
       resolveJson = QQMusicVideo.fromJson;
       url = Uri.http(

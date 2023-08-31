@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../entities/basic/basic_song.dart';
 import '../entities/basic/basic_video.dart';
 import '../entities/netease_cloud_music/ncm_video.dart';
+import '../entities/pms/pms_song.dart';
 import '../entities/qq_music/qqmusic_video.dart';
 import '../states/app_state.dart';
 import '../utils/my_logger.dart';
@@ -62,13 +63,13 @@ class _RelatedVideosPageState extends State<RelatedVideosPage> {
               return Material(
                 child: Scaffold(
                   appBar: AppBar(
-                title: Text(
-                  'Got some error',
-                  style: textTheme.labelLarge,
-                ),
-                backgroundColor: colorScheme.primary,
-                iconTheme: IconThemeData(color: colorScheme.onSecondary),
-              ),
+                    title: Text(
+                      'Got some error',
+                      style: textTheme.labelLarge,
+                    ),
+                    backgroundColor: colorScheme.primary,
+                    iconTheme: IconThemeData(color: colorScheme.onSecondary),
+                  ),
                   body: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -119,7 +120,15 @@ class _RelatedVideosPageState extends State<RelatedVideosPage> {
                 relatedVideos = snapshot.data!.cast<QQMusicVideo>().toList();
               } else {
                 if (_currentPlatform == 0) {
-                  throw UnimplementedError('Not yet implement pms platform');
+                  var songType = (widget.song as PMSSong).type;
+                  if (songType == 1) {
+                    relatedVideos =
+                        snapshot.data!.cast<QQMusicVideo>().toList();
+                  } else if (songType == 2) {
+                    relatedVideos = snapshot.data!.cast<NCMVideo>().toList();
+                  } else {
+                    throw 'Invalid song type';
+                  }
                 } else if (_currentPlatform == 1) {
                   relatedVideos = snapshot.data!.cast<QQMusicVideo>().toList();
                 } else if (_currentPlatform == 2) {

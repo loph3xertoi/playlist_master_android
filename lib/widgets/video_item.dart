@@ -24,10 +24,15 @@ class _VideoItemState extends State<VideoItem> {
   @override
   void initState() {
     super.initState();
+    dynamic video = widget.video;
     final state = Provider.of<MyAppState>(context, listen: false);
     var currentPlatform = state.currentPlatform;
     if (currentPlatform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
+      if (video is QQMusicVideo || video is NCMVideo) {
+        _video = video;
+      } else {
+        throw 'Invalid video type';
+      }
     } else if (currentPlatform == 1) {
       _video = widget.video as QQMusicVideo;
     } else if (currentPlatform == 2) {
@@ -43,15 +48,14 @@ class _VideoItemState extends State<VideoItem> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    MyAppState appState = context.watch<MyAppState>();
-    var currentPlatform = appState.currentPlatform;
-    return currentPlatform == 1
-        ? QQMusicVideoItem(video: _video, textTheme: textTheme)
-        : NCMVideoItem(
-            video: _video,
-            textTheme: textTheme,
-            colorScheme: colorScheme,
-          );
+    if (_video is QQMusicVideo) {
+      return QQMusicVideoItem(video: _video, textTheme: textTheme);
+    } else if (_video is NCMVideo) {
+      return NCMVideoItem(
+          video: _video, textTheme: textTheme, colorScheme: colorScheme);
+    } else {
+      throw 'Invalid video type';
+    }
   }
 }
 

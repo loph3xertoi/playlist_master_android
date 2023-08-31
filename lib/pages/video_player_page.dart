@@ -11,7 +11,9 @@ import 'package:screen_brightness/screen_brightness.dart';
 
 import '../entities/basic/basic_video.dart';
 import '../entities/netease_cloud_music/ncm_detail_video.dart';
+import '../entities/netease_cloud_music/ncm_video.dart';
 import '../entities/qq_music/qqmusic_detail_video.dart';
+import '../entities/qq_music/qqmusic_video.dart';
 import '../http/api.dart';
 import '../http/my_http.dart';
 import '../states/app_state.dart';
@@ -33,7 +35,7 @@ class VideoPlayerPage extends StatefulWidget {
 class _VideoPlayerPageState extends State<VideoPlayerPage> {
   final FPlayer _songsPlayer = FPlayer();
   late Future<BasicVideo?> _detailVideo;
-  late int platform;
+  late int _platform;
   String? _resolutionKey;
   // Speed list.
   Map<String, double> _speedList = {
@@ -59,7 +61,17 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     final state = Provider.of<MyAppState>(context, listen: false);
     var isUsingMockData = state.isUsingMockData;
     var currentPlatform = state.currentPlatform;
-    platform = currentPlatform;
+    if (currentPlatform == 0) {
+      // Change platform id for pms.
+      if (widget.video is QQMusicVideo) {
+        currentPlatform = 1;
+      } else if (widget.video is NCMVideo) {
+        currentPlatform = 2;
+      } else {
+        throw 'Invalid video type';
+      }
+    }
+    _platform = currentPlatform;
     if (isUsingMockData) {
       throw UnimplementedError('No mock data for video');
     } else {
@@ -138,9 +150,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   Future<Map<String, ResolutionItem>> _getResolutionList(
       Future<BasicVideo?> video, int platform) async {
     Map<String, ResolutionItem> resolutionList = {};
-    if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
-    } else if (platform == 1) {
+    if (platform == 1) {
       List<String> videoLinks;
       QQMusicDetailVideo qqMusicDetailVideo =
           (await video) as QQMusicDetailVideo;
@@ -199,7 +209,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   }
 
   void _updateResolutionList() async {
-    _resolutionList = _getResolutionList(_detailVideo, platform);
+    _resolutionList = _getResolutionList(_detailVideo, _platform);
     Map<String, ResolutionItem> resolutionList = await _resolutionList;
     await _songsPlayer.reset();
     await _setVideoUrl(resolutionList[_resolutionKey]!.url);
@@ -211,7 +221,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
-    var currentPlatform = appState.currentPlatform;
     MediaQueryData mediaQueryData = MediaQuery.of(context);
     Size size = mediaQueryData.size;
     // double videoHeight = size.width * 7 / 16;
@@ -271,8 +280,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       ),
                       onPressed: () {
                         setState(() {
-                          _detailVideo = appState.fetchDetailMV(
-                              widget.video, currentPlatform);
+                          _detailVideo =
+                              appState.fetchDetailMV(widget.video, _platform);
                         });
                       },
                     ),
@@ -283,13 +292,13 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           );
         } else {
           dynamic detailVideo;
-          if (currentPlatform == 0) {
+          if (_platform == 0) {
             throw UnimplementedError('Not yet implement pms platform');
-          } else if (currentPlatform == 1) {
+          } else if (_platform == 1) {
             detailVideo = snapshot.data![0] as QQMusicDetailVideo;
-          } else if (currentPlatform == 2) {
+          } else if (_platform == 2) {
             detailVideo = snapshot.data![0] as NCMDetailVideo;
-          } else if (currentPlatform == 3) {
+          } else if (_platform == 3) {
             throw UnimplementedError('Not yet implement bilibili platform');
           } else {
             throw UnsupportedError('Invalid platform');
@@ -339,9 +348,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           onError: () async {
                             await _songsPlayer.reset();
                             String originalUrl;
-                            if (currentPlatform == 1) {
+                            if (_platform == 1) {
                               originalUrl = detailVideo.links[0];
-                            } else if (currentPlatform == 2) {
+                            } else if (_platform == 2) {
                               originalUrl = detailVideo.links.values[0];
                             } else {
                               throw UnimplementedError(
@@ -362,9 +371,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                             // 视频初始化完毕，如有历史记录时间段则可以触发快进
                             int seekTime = appState.videoSeekTime;
                             dynamic videoId;
-                            if (currentPlatform == 1) {
+                            if (_platform == 1) {
                               videoId = detailVideo.vid;
-                            } else if (currentPlatform == 2) {
+                            } else if (_platform == 2) {
                               videoId = detailVideo.id;
                             } else {
                               throw UnimplementedError(
@@ -389,7 +398,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       ),
                     ),
                   ),
-                  currentPlatform == 1
+                  _platform == 1
                       ? QQMusicVideoInfoArea(
                           size: size,
                           detailVideo: detailVideo,
