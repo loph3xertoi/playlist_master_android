@@ -57,7 +57,8 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
     _isUsingMockData = state.isUsingMockData;
   }
 
-  void _addResourceToFavlist(BuildContext context, MyAppState appState) async {
+  void _addResourceToFavlist(BuildContext context, MyAppState appState,
+      [bool addToPMS = false]) async {
     if (mounted) {
       List<Future<Result?>>? list =
           await showFlexibleBottomSheet<List<Future<Result?>>>(
@@ -82,6 +83,7 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
             biliSourceFavListId: widget.biliSourceFavListId,
             resources: [widget.resource],
             action: 'add',
+            addToPMS: addToPMS,
           );
         },
         anchors: [0, 0.45, 0.9],
@@ -91,22 +93,18 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
         List<Result?> results = await Future.wait<Result?>(list);
         for (Result? result in results) {
           if (result != null && result.success) {
-            Timer(Duration(milliseconds: 1500), () {
-              // if (mounted) {
-              if (appState.searchedCount == 0) {
-                appState.refreshDetailFavListPage != null
-                    ? appState.refreshDetailFavListPage!(appState)
+            if (!addToPMS) {
+              Timer(Duration(milliseconds: 1500), () {
+                if (appState.searchedCount == 0) {
+                  appState.refreshDetailFavListPage != null
+                      ? appState.refreshDetailFavListPage!(appState)
+                      : null;
+                }
+                appState.refreshLibraries != null
+                    ? appState.refreshLibraries!(appState, true)
                     : null;
-              }
-              appState.refreshLibraries != null
-                  ? appState.refreshLibraries!(appState, true)
-                  : null;
-              // }
-            });
-            // Future.delayed(Duration(milliseconds: 1500), () {
-            //   appState.refreshDetailFavListPage!(appState);
-            //   appState.refreshLibraries!(appState, true);
-            // });
+              });
+            }
             MyToast.showToast('Add resources successfully');
             break;
           }
@@ -419,6 +417,11 @@ class _BiliResourceItemState extends State<BiliResourceItem> {
                                                     mounted) {
                                                   _addResourceToFavlist(
                                                       context, appState);
+                                                }
+                                                if (data == 'Add to pms' &&
+                                                    mounted) {
+                                                  _addResourceToFavlist(
+                                                      context, appState, true);
                                                 }
                                               },
                                               color: colorScheme.onPrimary

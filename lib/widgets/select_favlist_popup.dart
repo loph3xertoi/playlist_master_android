@@ -8,6 +8,7 @@ import '../entities/bilibili/bili_resource.dart';
 import '../entities/dto/paged_data_dto.dart';
 import '../entities/dto/result.dart';
 import '../entities/netease_cloud_music/ncm_playlist.dart';
+import '../entities/pms/pms_library.dart';
 import '../entities/qq_music/qqmusic_playlist.dart';
 import '../states/app_state.dart';
 import '../utils/my_logger.dart';
@@ -72,7 +73,7 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
   void initState() {
     super.initState();
     final state = Provider.of<MyAppState>(context, listen: false);
-    _favlists = state.refreshLibraries!(state, true);
+    _favlists = state.refreshLibraries!(state, true, widget.addToPMS);
     _currentPlatform = state.currentPlatform;
     widget.scrollController.addListener(_scrollListener);
     var rawOpenedLibrary = state.rawOpenedLibrary;
@@ -260,11 +261,14 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
                                       cover: '',
                                       itemCount: 1,
                                     );
-                                    widget.action == 'add'
-                                        ? _addResourcesToFavList(
-                                            library, appState)
-                                        : _moveResourcesToFavList(
-                                            library, appState);
+                                    if (widget.addToPMS ||
+                                        widget.action == 'add') {
+                                      _addResourcesToFavList(
+                                          appState, library, widget.addToPMS);
+                                    } else {
+                                      _moveResourcesToFavList(
+                                          appState, library);
+                                    }
                                   } else if (_currentPlatform == 2) {
                                     BasicLibrary library = NCMPlaylist(
                                       result.data as int,
@@ -274,18 +278,18 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
                                     );
                                     widget.action == 'add'
                                         ? _addResourcesToFavList(
-                                            library, appState)
+                                            appState, library)
                                         : _moveResourcesToFavList(
-                                            library, appState);
+                                            appState, library);
                                   } else if (_currentPlatform == 3) {
                                     BiliFavList favList = BiliFavList(
                                         result.data as int, 0, 0, '', 0, 0,
                                         name: '', cover: '', itemCount: 1);
                                     widget.action == 'add'
                                         ? _addResourcesToFavList(
-                                            favList, appState)
+                                            appState, favList)
                                         : _moveResourcesToFavList(
-                                            favList, appState);
+                                            appState, favList);
                                   } else {
                                     throw UnsupportedError(
                                         'Invalid _currentPlatform');
@@ -318,9 +322,11 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
                                     } else {
                                       widget.action == 'add'
                                           ? _addResourcesToFavList(
-                                              _localFavLists[i], appState)
+                                              appState,
+                                              _localFavLists[i],
+                                              widget.addToPMS)
                                           : _moveResourcesToFavList(
-                                              _localFavLists[i], appState);
+                                              appState, _localFavLists[i]);
                                     }
                                   },
                                   child: SelectableLibraryItem(
@@ -373,15 +379,22 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
         : Container();
   }
 
-  void _addResourcesToFavList(BasicLibrary favList, MyAppState appState) async {
+  void _addResourcesToFavList(MyAppState appState, BasicLibrary favList,
+      [bool addToPMS = false]) async {
     Future<Result?> result;
+    String favListIds;
+    if (!addToPMS) {
+      favListIds = (favList as BiliFavList).id.toString();
+    } else {
+      favListIds = (favList as PMSLibrary).id.toString();
+    }
     if (widget.biliSourceFavListId == 0) {
       result = appState.addResourcesToFavList(
         widget.resources,
         widget.biliSourceFavListId,
         true,
-        false,
-        (favList as BiliFavList).id.toString(),
+        addToPMS,
+        favListIds,
         _currentPlatform,
       );
     } else {
@@ -389,8 +402,8 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
         widget.resources,
         widget.biliSourceFavListId,
         false,
-        false,
-        (favList as BiliFavList).id.toString(),
+        addToPMS,
+        favListIds,
         _currentPlatform,
       );
     }
@@ -401,7 +414,7 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
   }
 
   void _moveResourcesToFavList(
-      BasicLibrary favList, MyAppState appState) async {
+      MyAppState appState, BasicLibrary favList) async {
     Future<Result?> result = appState.moveResourcesToOtherFavList(
       widget.resources,
       appState.openedLibrary!,
@@ -472,7 +485,9 @@ class _SelectFavListPopupState extends State<SelectFavListPopup> {
   }
 
   int _getIdentifiedIdOfFavList(BasicLibrary library) {
-    if (_currentPlatform == 3) {
+    if (widget.addToPMS) {
+      return (library as PMSLibrary).id;
+    } else if (_currentPlatform == 3) {
       return (library as BiliFavList).id;
     } else {
       throw 'Invalid platform';

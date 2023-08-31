@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/entities/pms/pms_detail_song.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_library.dart';
 import '../entities/basic/basic_song.dart';
-import '../entities/bilibili/bili_detail_resource.dart';
-import '../entities/netease_cloud_music/ncm_detail_song.dart';
+import '../entities/pms/pms_detail_song.dart';
 import '../entities/pms/pms_song.dart';
-import '../entities/qq_music/qqmusic_detail_song.dart';
 import '../states/app_state.dart';
 import 'confirm_popup.dart';
 
@@ -209,8 +206,13 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
                 Radius.circular(10.0),
               ),
               onTap: () {
-                Navigator.popAndPushNamed(context, '/related_videos_page',
-                    arguments: widget.song);
+                if (widget.song is PMSSong &&
+                    (widget.song as PMSSong).type == 3) {
+                  _pushToDetailSongPage();
+                } else {
+                  Navigator.popAndPushNamed(context, '/related_videos_page',
+                      arguments: widget.song);
+                }
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -220,9 +222,14 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
                       icon: Icon(Icons.ondemand_video_rounded),
                       color: colorScheme.tertiary,
                       onPressed: () {
-                        Navigator.popAndPushNamed(
-                            context, '/related_videos_page',
-                            arguments: widget.song);
+                        if (widget.song is PMSSong &&
+                            (widget.song as PMSSong).type == 3) {
+                          _pushToDetailSongPage();
+                        } else {
+                          Navigator.popAndPushNamed(
+                              context, '/related_videos_page',
+                              arguments: widget.song);
+                        }
                       },
                     ),
                     Expanded(
@@ -287,32 +294,33 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
                 ),
               ),
             ),
-            InkWell(
-              borderRadius: BorderRadius.all(
-                Radius.circular(10.0),
-              ),
-              onTap: _pushToDetailSongPage,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.description_rounded),
-                      color: colorScheme.tertiary,
-                      onPressed: _pushToDetailSongPage,
-                    ),
-                    Expanded(
-                      child: Text(
-                        'Song\'s detail',
-                        style: textTheme.labelMedium!.copyWith(
-                          color: colorScheme.onSecondary,
+            if (!(widget.song is PMSSong && (widget.song as PMSSong).type == 3))
+              InkWell(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10.0),
+                ),
+                onTap: _pushToDetailSongPage,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.description_rounded),
+                        color: colorScheme.tertiary,
+                        onPressed: _pushToDetailSongPage,
+                      ),
+                      Expanded(
+                        child: Text(
+                          'Song\'s detail',
+                          style: textTheme.labelMedium!.copyWith(
+                            color: colorScheme.onSecondary,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

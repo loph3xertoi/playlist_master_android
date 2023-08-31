@@ -2175,6 +2175,7 @@ class MyAppState extends ChangeNotifier {
           'libraryId': favListsIds,
           'songsIds': resourcesIds,
           'biliSourceFavListId': biliSourceFavListId,
+          'isAddToPMSLibrary': isAddToPMSLibrary,
           'isFavoriteSearchedResource': isFavoriteSearchedResource,
           'tid': favListsIds,
         };

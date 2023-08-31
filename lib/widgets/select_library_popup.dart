@@ -261,11 +261,10 @@ class _SelectLibraryPopupState extends State<SelectLibraryPopup> {
                                             appState, library);
                                   } else if (currentPlatform == 2) {
                                     BasicLibrary library = NCMPlaylist(
-                                      result.data as int,
-                                      name: '',
-                                      cover: '',
-                                      itemCount: 1,
-                                    );
+                                        result.data as int,
+                                        name: '',
+                                        cover: '',
+                                        itemCount: 1);
                                     widget.action == 'add'
                                         ? _addSongsToLibrary(appState, library)
                                         : _moveSongsToLibrary(

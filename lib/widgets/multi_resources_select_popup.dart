@@ -32,8 +32,8 @@ class MultiResourcesSelectPopup extends StatefulWidget {
 class _MultiResourcesSelectPopupState extends State<MultiResourcesSelectPopup> {
   List<int> _selectedIndex = [];
 
-  void _addResourcesToFavLists(
-      BuildContext context, MyAppState appState) async {
+  void _addResourcesToFavLists(BuildContext context, MyAppState appState,
+      [bool addToPMS = false]) async {
     List<BiliResource> selectedResources = widget.inSimilarResourcesPage
         ? _selectedIndex.map((index) => widget.similarResources[index]).toList()
         : _selectedIndex
@@ -62,6 +62,7 @@ class _MultiResourcesSelectPopupState extends State<MultiResourcesSelectPopup> {
             scrollController: scrollController,
             resources: selectedResources,
             action: 'add',
+            addToPMS: addToPMS,
             biliSourceFavListId: (appState.rawOpenedLibrary as BiliFavList).id,
           );
         },
@@ -72,19 +73,18 @@ class _MultiResourcesSelectPopupState extends State<MultiResourcesSelectPopup> {
         List<Result?> results = await Future.wait<Result?>(list);
         for (Result? result in results) {
           if (result != null && result.success) {
-            Timer(Duration(milliseconds: 1500), () {
-              // if (mounted) {
-              // Not in searched page.
-              if (appState.searchedCount == 0) {
-                appState.refreshDetailFavListPage != null
-                    ? appState.refreshDetailFavListPage!(appState)
+            if (!addToPMS) {
+              Timer(Duration(milliseconds: 1500), () {
+                if (appState.searchedCount == 0) {
+                  appState.refreshDetailFavListPage != null
+                      ? appState.refreshDetailFavListPage!(appState)
+                      : null;
+                }
+                appState.refreshLibraries != null
+                    ? appState.refreshLibraries!(appState, true)
                     : null;
-              }
-              appState.refreshLibraries != null
-                  ? appState.refreshLibraries!(appState, true)
-                  : null;
-              // }
-            });
+              });
+            }
             MyToast.showToast('Add resources successfully');
             break;
           }
@@ -321,7 +321,7 @@ class _MultiResourcesSelectPopupState extends State<MultiResourcesSelectPopup> {
                   TextButton(
                     onPressed: _selectedIndex.isNotEmpty
                         ? () {
-                            _addResourcesToFavLists(context, appState);
+                            _addResourcesToFavLists(context, appState, true);
                           }
                         : null,
                     style: _selectedIndex.isNotEmpty

@@ -225,95 +225,74 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
             body: SafeArea(
               child: ChangeNotifierProvider(
                 create: (context) => MySearchState(),
-                child: Column(
-                  children: [
-                    Container(
-                      color: colorScheme.primary,
-                      child: MySearchBar(
-                        myScaffoldKey: _scaffoldKey,
-                        notInHomepage: true,
-                        inDetailLibraryPage: true,
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: theme.detailLibraryPageBg!,
-                            stops: [0.0, 0.33, 0.67, 1.0],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
+                child: WillPopScope(
+                  onWillPop: () async {
+                    _appState!.refreshLibraries!(appState, false);
+                    return true;
+                  },
+                  child: Column(
+                    children: [
+                      Container(
+                        color: colorScheme.primary,
+                        child: MySearchBar(
+                          myScaffoldKey: _scaffoldKey,
+                          notInHomepage: true,
+                          inDetailLibraryPage: true,
                         ),
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                margin:
-                                    EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
-                                child: FutureBuilder(
-                                    future: _firstFutureDetailFavList,
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return Center(
-                                          child: CircularProgressIndicator(),
-                                        );
-                                      } else if (snapshot.hasError ||
-                                          snapshot.data == null) {
-                                        MyLogger.logger.e(snapshot.hasError
-                                            ? '${snapshot.error}'
-                                            : appState.errorMsg);
-                                        return Material(
-                                          child: Scaffold(
-                                            appBar: AppBar(
-                                              title: Text(
-                                                'Got some error',
-                                                style: textTheme.labelLarge,
+                      ),
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: theme.detailLibraryPageBg!,
+                              stops: [0.0, 0.33, 0.67, 1.0],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  margin: EdgeInsets.fromLTRB(
+                                      12.0, 12.0, 12.0, 0.0),
+                                  child: FutureBuilder(
+                                      future: _firstFutureDetailFavList,
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return Center(
+                                            child: CircularProgressIndicator(),
+                                          );
+                                        } else if (snapshot.hasError ||
+                                            snapshot.data == null) {
+                                          MyLogger.logger.e(snapshot.hasError
+                                              ? '${snapshot.error}'
+                                              : appState.errorMsg);
+                                          return Material(
+                                            child: Scaffold(
+                                              appBar: AppBar(
+                                                title: Text(
+                                                  'Got some error',
+                                                  style: textTheme.labelLarge,
+                                                ),
+                                                backgroundColor:
+                                                    colorScheme.primary,
+                                                iconTheme: IconThemeData(
+                                                    color: colorScheme
+                                                        .onSecondary),
                                               ),
-                                              backgroundColor:
-                                                  colorScheme.primary,
-                                              iconTheme: IconThemeData(
-                                                  color:
-                                                      colorScheme.onSecondary),
-                                            ),
-                                            body: Center(
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  MySelectableText(
-                                                    snapshot.hasError
-                                                        ? '${snapshot.error}'
-                                                        : appState.errorMsg,
-                                                    style: textTheme
-                                                        .labelMedium!
-                                                        .copyWith(
-                                                      color: colorScheme
-                                                          .onSecondary,
-                                                    ),
-                                                  ),
-                                                  TextButton.icon(
-                                                    style: ButtonStyle(
-                                                      shadowColor:
-                                                          MaterialStateProperty
-                                                              .all(
-                                                        colorScheme.primary,
-                                                      ),
-                                                      overlayColor:
-                                                          MaterialStateProperty
-                                                              .all(
-                                                        Colors.grey,
-                                                      ),
-                                                    ),
-                                                    icon: Icon(
-                                                      MdiIcons.webRefresh,
-                                                      color: colorScheme
-                                                          .onSecondary,
-                                                    ),
-                                                    label: Text(
-                                                      'Retry',
+                                              body: Center(
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  children: [
+                                                    MySelectableText(
+                                                      snapshot.hasError
+                                                          ? '${snapshot.error}'
+                                                          : appState.errorMsg,
                                                       style: textTheme
                                                           .labelMedium!
                                                           .copyWith(
@@ -321,228 +300,211 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                                             .onSecondary,
                                                       ),
                                                     ),
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        _firstFutureDetailFavList =
-                                                            appState.fetchDetailLibrary(
-                                                                _currentBiliFavList,
-                                                                _currentPlatform,
-                                                                pn: '1');
-                                                        if (_inSearchMode) {
-                                                          _currentPageNumberInSearchedResources =
-                                                              1;
-                                                          _searchedResources =
-                                                              [];
-                                                        } else {
-                                                          _currentPageNumberInOriginalResources =
-                                                              1;
-                                                          _originalResources =
-                                                              [];
-                                                        }
-                                                      });
-                                                    },
-                                                  ),
-                                                ],
+                                                    TextButton.icon(
+                                                      style: ButtonStyle(
+                                                        shadowColor:
+                                                            MaterialStateProperty
+                                                                .all(
+                                                          colorScheme.primary,
+                                                        ),
+                                                        overlayColor:
+                                                            MaterialStateProperty
+                                                                .all(
+                                                          Colors.grey,
+                                                        ),
+                                                      ),
+                                                      icon: Icon(
+                                                        MdiIcons.webRefresh,
+                                                        color: colorScheme
+                                                            .onSecondary,
+                                                      ),
+                                                      label: Text(
+                                                        'Retry',
+                                                        style: textTheme
+                                                            .labelMedium!
+                                                            .copyWith(
+                                                          color: colorScheme
+                                                              .onSecondary,
+                                                        ),
+                                                      ),
+                                                      onPressed: () {
+                                                        setState(() {
+                                                          _firstFutureDetailFavList =
+                                                              appState.fetchDetailLibrary(
+                                                                  _currentBiliFavList,
+                                                                  _currentPlatform,
+                                                                  pn: '1');
+                                                          if (_inSearchMode) {
+                                                            _currentPageNumberInSearchedResources =
+                                                                1;
+                                                            _searchedResources =
+                                                                [];
+                                                          } else {
+                                                            _currentPageNumberInOriginalResources =
+                                                                1;
+                                                            _originalResources =
+                                                                [];
+                                                          }
+                                                        });
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        );
-                                      } else {
-                                        BiliDetailFavList? detailFavList;
-                                        if (_isUsingMockData) {
-                                          // detailFavList = snapshot.data == null
-                                          //     ? null
-                                          //     : snapshot.data
-                                          //         as QQMusicDetailPlaylist;
-                                          throw UnimplementedError(
-                                              'Not yet implement mock data in bilibili');
+                                          );
                                         } else {
-                                          detailFavList = snapshot.data == null
-                                              ? null
-                                              : snapshot.data
-                                                  as BiliDetailFavList;
-                                          List<BiliResource>? libraries =
-                                              detailFavList!.resources;
-                                          if (!_inSearchMode &&
-                                              _currentPageNumberInOriginalResources ==
-                                                  1 &&
-                                              _originalResources.isEmpty) {
-                                            _hasMoreOriginalResources =
-                                                detailFavList.hasMore;
-                                            _originalResources
-                                                .addAll(libraries);
+                                          BiliDetailFavList? detailFavList;
+                                          if (_isUsingMockData) {
+                                            // detailFavList = snapshot.data == null
+                                            //     ? null
+                                            //     : snapshot.data
+                                            //         as QQMusicDetailPlaylist;
+                                            throw UnimplementedError(
+                                                'Not yet implement mock data in bilibili');
+                                          } else {
+                                            detailFavList =
+                                                snapshot.data == null
+                                                    ? null
+                                                    : snapshot.data
+                                                        as BiliDetailFavList;
+                                            List<BiliResource>? libraries =
+                                                detailFavList!.resources;
+                                            if (!_inSearchMode &&
+                                                _currentPageNumberInOriginalResources ==
+                                                    1 &&
+                                                _originalResources.isEmpty) {
+                                              _hasMoreOriginalResources =
+                                                  detailFavList.hasMore;
+                                              _originalResources
+                                                  .addAll(libraries);
+                                            }
+                                            // TODO: handle search mode.
+                                            if (_inSearchMode &&
+                                                _currentPageNumberInSearchedResources ==
+                                                    1 &&
+                                                _searchedResources.isEmpty) {
+                                              _hasMoreSearchedResources =
+                                                  detailFavList.hasMore;
+                                              _searchedResources
+                                                  .addAll(libraries);
+                                            }
                                           }
-                                          // TODO: handle search mode.
-                                          if (_inSearchMode &&
-                                              _currentPageNumberInSearchedResources ==
-                                                  1 &&
-                                              _searchedResources.isEmpty) {
-                                            _hasMoreSearchedResources =
-                                                detailFavList.hasMore;
-                                            _searchedResources
-                                                .addAll(libraries);
-                                          }
-                                        }
-                                        WidgetsBinding.instance
-                                            .addPostFrameCallback((_) {
-                                          if (_changeRawQueue) {
-                                            appState.rawResourcesInFavList =
-                                                _originalResources;
-                                            appState.searchedResources =
-                                                _searchedResources;
-                                            _changeRawQueue = false;
-                                          }
-                                        });
-                                        return Container(
-                                          decoration: BoxDecoration(
-                                            color: colorScheme.primary,
-                                            borderRadius:
-                                                BorderRadius.circular(10.0),
-                                          ),
-                                          child: Column(
-                                            children: [
-                                              SizedBox(
-                                                height: 130.0,
-                                                width: MediaQuery.of(context)
-                                                    .size
-                                                    .width,
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(
-                                                      15.0),
-                                                  child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.max,
-                                                    children: [
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(
-                                                          right: 12.0,
-                                                        ),
-                                                        child: Container(
-                                                          // width: 100.0,
-                                                          height: 100.0,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                              4.0,
-                                                            ),
+                                          WidgetsBinding.instance
+                                              .addPostFrameCallback((_) {
+                                            if (_changeRawQueue) {
+                                              appState.rawResourcesInFavList =
+                                                  _originalResources;
+                                              appState.searchedResources =
+                                                  _searchedResources;
+                                              _changeRawQueue = false;
+                                            }
+                                          });
+                                          return Container(
+                                            decoration: BoxDecoration(
+                                              color: colorScheme.primary,
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                SizedBox(
+                                                  height: 130.0,
+                                                  width: MediaQuery.of(context)
+                                                      .size
+                                                      .width,
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            15.0),
+                                                    child: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.max,
+                                                      children: [
+                                                        Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                            right: 12.0,
                                                           ),
-                                                          child:
-                                                              GestureDetector(
-                                                            onTap: () {
-                                                              print(appState);
-                                                              print(
-                                                                  detailFavList);
-                                                              print(
-                                                                  _searchedResources);
-                                                              setState(() {});
-                                                            },
-                                                            child: ClipRRect(
+                                                          child: Container(
+                                                            // width: 100.0,
+                                                            height: 100.0,
+                                                            decoration:
+                                                                BoxDecoration(
                                                               borderRadius:
                                                                   BorderRadius
                                                                       .circular(
-                                                                          4.0),
-                                                              child: _isUsingMockData
-                                                                  ? Image.asset(
-                                                                      detailFavList
-                                                                          .cover,
-                                                                      fit: BoxFit
-                                                                          .cover,
-                                                                    )
-                                                                  : CachedNetworkImage(
-                                                                      imageUrl: detailFavList
-                                                                              .cover
-                                                                              .isNotEmpty
-                                                                          ? kIsWeb
-                                                                              ? API.convertImageUrl(detailFavList.cover)
-                                                                              : detailFavList.cover
-                                                                          : MyAppState.defaultCoverImage,
-                                                                      cacheManager:
-                                                                          MyHttp
-                                                                              .myImageCacheManager,
-                                                                      progressIndicatorBuilder: (context,
-                                                                              url,
-                                                                              downloadProgress) =>
-                                                                          CircularProgressIndicator(
-                                                                              value: downloadProgress.progress),
-                                                                      errorWidget: (context,
-                                                                              url,
-                                                                              error) =>
-                                                                          Icon(MdiIcons
-                                                                              .debian),
-                                                                      fit: BoxFit
-                                                                          .cover,
-                                                                    ),
+                                                                4.0,
+                                                              ),
+                                                            ),
+                                                            child:
+                                                                GestureDetector(
+                                                              onTap: () {
+                                                                print(appState);
+                                                                print(
+                                                                    detailFavList);
+                                                                print(
+                                                                    _searchedResources);
+                                                                setState(() {});
+                                                              },
+                                                              child: ClipRRect(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            4.0),
+                                                                child: _isUsingMockData
+                                                                    ? Image.asset(
+                                                                        detailFavList
+                                                                            .cover,
+                                                                        fit: BoxFit
+                                                                            .cover,
+                                                                      )
+                                                                    : CachedNetworkImage(
+                                                                        imageUrl: detailFavList.cover.isNotEmpty
+                                                                            ? kIsWeb
+                                                                                ? API.convertImageUrl(detailFavList.cover)
+                                                                                : detailFavList.cover
+                                                                            : MyAppState.defaultCoverImage,
+                                                                        cacheManager:
+                                                                            MyHttp.myImageCacheManager,
+                                                                        progressIndicatorBuilder: (context,
+                                                                                url,
+                                                                                downloadProgress) =>
+                                                                            CircularProgressIndicator(value: downloadProgress.progress),
+                                                                        errorWidget: (context,
+                                                                                url,
+                                                                                error) =>
+                                                                            Icon(MdiIcons.debian),
+                                                                        fit: BoxFit
+                                                                            .cover,
+                                                                      ),
+                                                              ),
                                                             ),
                                                           ),
                                                         ),
-                                                      ),
-                                                      Expanded(
-                                                        child: Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            SelectableText(
-                                                              detailFavList
-                                                                  .name,
-                                                              style: textTheme
-                                                                  .labelMedium!
-                                                                  .copyWith(
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
+                                                        Expanded(
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              SelectableText(
+                                                                detailFavList
+                                                                    .name,
+                                                                style: textTheme
+                                                                    .labelMedium!
+                                                                    .copyWith(
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                ),
+                                                                maxLines: 2,
                                                               ),
-                                                              maxLines: 2,
-                                                            ),
-                                                            Row(
-                                                              children: [
-                                                                Text(
-                                                                  '${detailFavList.itemCount} resources',
-                                                                  textAlign:
-                                                                      TextAlign
-                                                                          .start,
-                                                                  style: textTheme
-                                                                      .titleSmall,
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                ),
-                                                                SizedBox(
-                                                                  width: 10.0,
-                                                                  child: Text(
-                                                                    '|',
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .center,
-                                                                    style:
-                                                                        TextStyle(
-                                                                      color: colorScheme
-                                                                          .onSecondary,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                Text(
-                                                                  '${humanizeInt(detailFavList.viewCount)} views',
-                                                                  textAlign:
-                                                                      TextAlign
-                                                                          .start,
-                                                                  style: textTheme
-                                                                      .titleSmall,
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            detailFavList.intro
-                                                                    .isEmpty
-                                                                ? Container()
-                                                                : Text(
-                                                                    'intro: ${detailFavList.intro}',
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    '${detailFavList.itemCount} resources',
                                                                     textAlign:
                                                                         TextAlign
                                                                             .start,
@@ -552,252 +514,286 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                                                         TextOverflow
                                                                             .ellipsis,
                                                                   ),
-                                                            Text(
-                                                              'UP: ${detailFavList.upperName}',
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .start,
-                                                              style: textTheme
-                                                                  .titleSmall,
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                            ),
-                                                            Text(
-                                                              'Modified: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.fromMillisecondsSinceEpoch(detailFavList.modifiedTime * 1000))}',
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .start,
-                                                              style: textTheme
-                                                                  .titleSmall,
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                            ),
-                                                          ],
+                                                                  SizedBox(
+                                                                    width: 10.0,
+                                                                    child: Text(
+                                                                      '|',
+                                                                      textAlign:
+                                                                          TextAlign
+                                                                              .center,
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: colorScheme
+                                                                            .onSecondary,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  Text(
+                                                                    '${humanizeInt(detailFavList.viewCount)} views',
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .start,
+                                                                    style: textTheme
+                                                                        .titleSmall,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              detailFavList
+                                                                      .intro
+                                                                      .isEmpty
+                                                                  ? Container()
+                                                                  : Text(
+                                                                      'intro: ${detailFavList.intro}',
+                                                                      textAlign:
+                                                                          TextAlign
+                                                                              .start,
+                                                                      style: textTheme
+                                                                          .titleSmall,
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                    ),
+                                                              Text(
+                                                                'UP: ${detailFavList.upperName}',
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .start,
+                                                                style: textTheme
+                                                                    .titleSmall,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                              Text(
+                                                                'Modified: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.fromMillisecondsSinceEpoch(detailFavList.modifiedTime * 1000))}',
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .start,
+                                                                style: textTheme
+                                                                    .titleSmall,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            ],
+                                                          ),
                                                         ),
-                                                      ),
-                                                    ],
+                                                      ],
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                              Expanded(
-                                                child: detailFavList
-                                                            .itemCount !=
-                                                        0
-                                                    ? (_inSearchMode &&
-                                                                _searchedResources
-                                                                    .isNotEmpty) ||
-                                                            (!_inSearchMode &&
-                                                                _originalResources
-                                                                    .isNotEmpty)
-                                                        ? Column(
-                                                            children: [
-                                                              SizedBox(
-                                                                height: 40.0,
-                                                                child: Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .end,
-                                                                  children: [
-                                                                    IconButton(
-                                                                      onPressed:
-                                                                          () {
-                                                                        if (!(kIsWeb ||
-                                                                            Platform.isAndroid ||
-                                                                            Platform.isIOS)) {
-                                                                          MyToast.showToast(
-                                                                              'Better player is not supported on ${Platform.operatingSystem}');
-                                                                          MyLogger
-                                                                              .logger
-                                                                              .e('Better player is not supported on ${Platform.operatingSystem}');
-                                                                          return;
-                                                                        }
-                                                                        appState
-                                                                            .currentResourceIndexInFavList = 0;
-                                                                        appState
-                                                                            .biliResourcePlayingMode = 4;
-                                                                        appState
-                                                                            .subPageNo = 1;
-                                                                        onResourceTap(
-                                                                            0,
-                                                                            appState);
-                                                                      },
-                                                                      icon:
-                                                                          Icon(
-                                                                        Icons
-                                                                            .playlist_play_rounded,
+                                                Expanded(
+                                                  child: detailFavList
+                                                              .itemCount !=
+                                                          0
+                                                      ? (_inSearchMode &&
+                                                                  _searchedResources
+                                                                      .isNotEmpty) ||
+                                                              (!_inSearchMode &&
+                                                                  _originalResources
+                                                                      .isNotEmpty)
+                                                          ? Column(
+                                                              children: [
+                                                                SizedBox(
+                                                                  height: 40.0,
+                                                                  child: Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .end,
+                                                                    children: [
+                                                                      IconButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          if (!(kIsWeb ||
+                                                                              Platform.isAndroid ||
+                                                                              Platform.isIOS)) {
+                                                                            MyToast.showToast('Better player is not supported on ${Platform.operatingSystem}');
+                                                                            MyLogger.logger.e('Better player is not supported on ${Platform.operatingSystem}');
+                                                                            return;
+                                                                          }
+                                                                          appState.currentResourceIndexInFavList =
+                                                                              0;
+                                                                          appState.biliResourcePlayingMode =
+                                                                              4;
+                                                                          appState.subPageNo =
+                                                                              1;
+                                                                          onResourceTap(
+                                                                              0,
+                                                                              appState);
+                                                                        },
+                                                                        icon:
+                                                                            Icon(
+                                                                          Icons
+                                                                              .playlist_play_rounded,
+                                                                        ),
+                                                                        color: colorScheme
+                                                                            .tertiary,
+                                                                        tooltip:
+                                                                            'Play all',
                                                                       ),
-                                                                      color: colorScheme
-                                                                          .tertiary,
-                                                                      tooltip:
-                                                                          'Play all',
-                                                                    ),
-                                                                    IconButton(
-                                                                      onPressed:
-                                                                          () {
-                                                                        showDialog(
+                                                                      IconButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          showDialog(
+                                                                              context: context,
+                                                                              builder: (_) => MultiResourcesSelectPopup());
+                                                                        },
+                                                                        icon:
+                                                                            Icon(
+                                                                          Icons
+                                                                              .checklist_rounded,
+                                                                        ),
+                                                                        color: colorScheme
+                                                                            .tertiary,
+                                                                        tooltip:
+                                                                            'Multi select',
+                                                                      ),
+                                                                      IconButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          showDialog(
                                                                             context:
                                                                                 context,
                                                                             builder: (_) =>
-                                                                                MultiResourcesSelectPopup());
-                                                                      },
-                                                                      icon:
-                                                                          Icon(
-                                                                        Icons
-                                                                            .checklist_rounded,
+                                                                                LibraryItemMenuPopup(
+                                                                              library: detailFavList!,
+                                                                              isInDetailLibraryPage: true,
+                                                                            ),
+                                                                          );
+                                                                        },
+                                                                        icon:
+                                                                            Icon(
+                                                                          Icons
+                                                                              .more_vert_rounded,
+                                                                        ),
+                                                                        color: colorScheme
+                                                                            .tertiary,
+                                                                        tooltip:
+                                                                            'Edit favlists',
                                                                       ),
-                                                                      color: colorScheme
-                                                                          .tertiary,
-                                                                      tooltip:
-                                                                          'Multi select',
-                                                                    ),
-                                                                    IconButton(
-                                                                      onPressed:
-                                                                          () {
-                                                                        showDialog(
-                                                                          context:
-                                                                              context,
-                                                                          builder: (_) =>
-                                                                              LibraryItemMenuPopup(
-                                                                            library:
-                                                                                detailFavList!,
-                                                                            isInDetailLibraryPage:
-                                                                                true,
-                                                                          ),
-                                                                        );
-                                                                      },
-                                                                      icon:
-                                                                          Icon(
-                                                                        Icons
-                                                                            .more_vert_rounded,
-                                                                      ),
-                                                                      color: colorScheme
-                                                                          .tertiary,
-                                                                      tooltip:
-                                                                          'Edit favlists',
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                              Expanded(
-                                                                child:
-                                                                    RefreshIndicator(
-                                                                  color: Color(
-                                                                      0x00FB6A9D),
-                                                                  strokeWidth:
-                                                                      2.0,
-                                                                  onRefresh:
-                                                                      () async {
-                                                                    setState(
-                                                                        () {
-                                                                      _firstFutureDetailFavList = appState.fetchDetailLibrary(
-                                                                          _currentBiliFavList,
-                                                                          _currentPlatform,
-                                                                          pn: '1');
-                                                                      if (_inSearchMode) {
-                                                                        _currentPageNumberInSearchedResources =
-                                                                            1;
-                                                                        _searchedResources =
-                                                                            [];
-                                                                      } else {
-                                                                        _currentPageNumberInOriginalResources =
-                                                                            1;
-                                                                        _originalResources =
-                                                                            [];
-                                                                      }
-                                                                    });
-                                                                  },
-                                                                  child: ListView
-                                                                      .builder(
-                                                                    physics:
-                                                                        const AlwaysScrollableScrollPhysics(),
-                                                                    controller:
-                                                                        _scrollController,
-                                                                    itemCount: _isUsingMockData
-                                                                        ? min(detailFavList.itemCount, 10)
-                                                                        : _inSearchMode
-                                                                            ? _searchedResources.length
-                                                                            : _originalResources.length,
-                                                                    itemBuilder:
-                                                                        (context,
-                                                                            index) {
-                                                                      if (index <
-                                                                          (_inSearchMode
-                                                                              ? _searchedResources.length + 1
-                                                                              : _originalResources.length + 1)) {
-                                                                        return BiliResourceItem(
-                                                                          biliSourceFavListId:
-                                                                              (_currentBiliFavList as BiliFavList).id,
-                                                                          resource: _inSearchMode
-                                                                              ? _searchedResources[index]
-                                                                              : _originalResources[index],
-                                                                          isSelected:
-                                                                              false,
-                                                                          onTap:
-                                                                              () {
-                                                                            appState.biliResourcePlayingMode =
-                                                                                2;
-                                                                            onResourceTap(index,
-                                                                                appState);
-                                                                          },
-                                                                        );
-                                                                      } else {
-                                                                        return _buildLoadingIndicator(
-                                                                            colorScheme);
-                                                                      }
-                                                                    },
+                                                                    ],
                                                                   ),
                                                                 ),
-                                                              )
-                                                            ],
-                                                          )
-                                                        : Center(
+                                                                Expanded(
+                                                                  child:
+                                                                      RefreshIndicator(
+                                                                    color: Color(
+                                                                        0x00FB6A9D),
+                                                                    strokeWidth:
+                                                                        2.0,
+                                                                    onRefresh:
+                                                                        () async {
+                                                                      setState(
+                                                                          () {
+                                                                        _firstFutureDetailFavList = appState.fetchDetailLibrary(
+                                                                            _currentBiliFavList,
+                                                                            _currentPlatform,
+                                                                            pn: '1');
+                                                                        if (_inSearchMode) {
+                                                                          _currentPageNumberInSearchedResources =
+                                                                              1;
+                                                                          _searchedResources =
+                                                                              [];
+                                                                        } else {
+                                                                          _currentPageNumberInOriginalResources =
+                                                                              1;
+                                                                          _originalResources =
+                                                                              [];
+                                                                        }
+                                                                      });
+                                                                    },
+                                                                    child: ListView
+                                                                        .builder(
+                                                                      physics:
+                                                                          const AlwaysScrollableScrollPhysics(),
+                                                                      controller:
+                                                                          _scrollController,
+                                                                      itemCount: _isUsingMockData
+                                                                          ? min(detailFavList.itemCount, 10)
+                                                                          : _inSearchMode
+                                                                              ? _searchedResources.length
+                                                                              : _originalResources.length,
+                                                                      itemBuilder:
+                                                                          (context,
+                                                                              index) {
+                                                                        if (index <
+                                                                            (_inSearchMode
+                                                                                ? _searchedResources.length + 1
+                                                                                : _originalResources.length + 1)) {
+                                                                          return BiliResourceItem(
+                                                                            biliSourceFavListId:
+                                                                                (_currentBiliFavList as BiliFavList).id,
+                                                                            resource: _inSearchMode
+                                                                                ? _searchedResources[index]
+                                                                                : _originalResources[index],
+                                                                            isSelected:
+                                                                                false,
+                                                                            onTap:
+                                                                                () {
+                                                                              appState.biliResourcePlayingMode = 2;
+                                                                              onResourceTap(index, appState);
+                                                                            },
+                                                                          );
+                                                                        } else {
+                                                                          return _buildLoadingIndicator(
+                                                                              colorScheme);
+                                                                        }
+                                                                      },
+                                                                    ),
+                                                                  ),
+                                                                )
+                                                              ],
+                                                            )
+                                                          : Center(
+                                                              child: Text(
+                                                                'Not found',
+                                                                style: textTheme
+                                                                    .labelMedium,
+                                                              ),
+                                                            )
+                                                      : Center(
+                                                          child: TextButton(
+                                                            onPressed: () {
+                                                              MyToast.showToast(
+                                                                  'To be implement');
+                                                            },
+                                                            style: ButtonStyle(
+                                                              shadowColor:
+                                                                  MaterialStateProperty
+                                                                      .all(
+                                                                colorScheme
+                                                                    .primary,
+                                                              ),
+                                                              overlayColor:
+                                                                  MaterialStateProperty
+                                                                      .all(
+                                                                Colors.grey,
+                                                              ),
+                                                            ),
                                                             child: Text(
-                                                              'Not found',
+                                                              'Add resources',
                                                               style: textTheme
                                                                   .labelMedium,
                                                             ),
-                                                          )
-                                                    : Center(
-                                                        child: TextButton(
-                                                          onPressed: () {
-                                                            MyToast.showToast(
-                                                                'To be implement');
-                                                          },
-                                                          style: ButtonStyle(
-                                                            shadowColor:
-                                                                MaterialStateProperty
-                                                                    .all(
-                                                              colorScheme
-                                                                  .primary,
-                                                            ),
-                                                            overlayColor:
-                                                                MaterialStateProperty
-                                                                    .all(
-                                                              Colors.grey,
-                                                            ),
-                                                          ),
-                                                          child: Text(
-                                                            'Add resources',
-                                                            style: textTheme
-                                                                .labelMedium,
                                                           ),
                                                         ),
-                                                      ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      }
-                                    }),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }
+                                      }),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

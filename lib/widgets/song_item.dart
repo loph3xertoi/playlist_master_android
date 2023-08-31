@@ -93,7 +93,7 @@ class _SongItemState extends State<SongItem> {
         children: [
           if (currentPlatform == 0)
             Container(
-              width: 10.0,
+              width: 3.0,
               height: 50.0,
               color: _getColorForPMSSong(widget.song),
             ),
@@ -300,6 +300,12 @@ class _SongItemState extends State<SongItem> {
                   )),
             ]),
           ),
+          // if (currentPlatform == 0)
+          //   Container(
+          //     width: 3.0,
+          //     height: 50.0,
+          //     color: _getColorForPMSSong(widget.song),
+          //   ),
         ],
       ),
     );
@@ -308,15 +314,15 @@ class _SongItemState extends State<SongItem> {
   Color _getColorForPMSSong(BasicSong song) {
     int type = (song as PMSSong).type;
     Color songColor;
-    if(type==0){
+    if (type == 0) {
       songColor = Colors.transparent;
-    }else if (type==1){
+    } else if (type == 1) {
       songColor = Color(0xFF13BE72);
-    }else if (type==2){
+    } else if (type == 2) {
       songColor = Color(0xFFDF0000);
-    }else if (type ==3){
-      songColor= Color(0xFFFF558A);
-    }else {
+    } else if (type == 3) {
+      songColor = Color(0xFFFF558A);
+    } else {
       throw 'Invalid song type';
     }
     return songColor;

@@ -206,6 +206,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
     return WillPopScope(
       onWillPop: () async {
         appState.inDetailFavlistPage = false;
+        appState.refreshLibraries!(appState, false);
         return true;
       },
       child: SafeArea(
