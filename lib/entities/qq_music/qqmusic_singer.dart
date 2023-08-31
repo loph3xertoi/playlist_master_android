@@ -30,7 +30,7 @@ class QQMusicSinger extends BasicSinger {
   factory QQMusicSinger.fromJson(Map<String, dynamic> json) {
     return QQMusicSinger(
       json['id'],
-      json['mid'],
+      json['mid'] ?? '',
       name: json['name'],
       headPic: json['headPic'],
     );
