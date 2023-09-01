@@ -1435,7 +1435,27 @@ class MyAppState extends ChangeNotifier {
     BasicSong Function(Map<String, dynamic>) resolveJson;
     Uri? url;
     if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
+      int songType;
+      if ((song as PMSSong).type == 1) {
+        songType = 1;
+      } else if (song.type == 2) {
+        songType = 2;
+      } else {
+        throw 'Invalid song type';
+      }
+      if (songType == 1) {
+        resolveJson = QQMusicSong.fromJson;
+      } else {
+        resolveJson = NCMSong.fromJson;
+      }
+      url = Uri.http(
+        API.host,
+        '${API.similarSongs}/${song.id}',
+        {
+          'songType': songType.toString(),
+          'platform': platform.toString(),
+        },
+      );
     } else if (platform == 1) {
       resolveJson = QQMusicSong.fromJson;
       url = Uri.http(
@@ -1862,7 +1882,17 @@ class MyAppState extends ChangeNotifier {
     Map<String, Object> requestBody;
     if (platform == 0) {
       int libraryId = (library as PMSLibrary).id;
-      String songsIds = songs.map((e) => (e as PMSSong).id).join(',');
+      String songsIds = songs.map((e) {
+        if (e is PMSSong) {
+          return e.id;
+        } else if (e is QQMusicSong) {
+          return e.songMid;
+        } else if (e is NCMSong) {
+          return e.id;
+        } else {
+          throw 'Invalid song type';
+        }
+      }).join(',');
       String tid = libraryId.toString();
       requestBody = {
         'libraryId': libraryId.toString(),

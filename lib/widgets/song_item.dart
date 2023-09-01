@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:playlistmaster/entities/netease_cloud_music/ncm_song.dart';
+import 'package:playlistmaster/entities/qq_music/qqmusic_song.dart';
 import '../entities/pms/pms_song.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -312,15 +314,24 @@ class _SongItemState extends State<SongItem> {
   }
 
   Color _getColorForPMSSong(BasicSong song) {
-    int type = (song as PMSSong).type;
+    int songType;
+    if (song is PMSSong) {
+      songType = song.type;
+    } else if (song is QQMusicSong) {
+      songType = 1;
+    } else if (song is NCMSong) {
+      songType = 2;
+    } else {
+      throw 'Invalid song type';
+    }
     Color songColor;
-    if (type == 0) {
+    if (songType == 0) {
       songColor = Colors.transparent;
-    } else if (type == 1) {
+    } else if (songType == 1) {
       songColor = Color(0xFF13BE72);
-    } else if (type == 2) {
+    } else if (songType == 2) {
       songColor = Color(0xFFDF0000);
-    } else if (type == 3) {
+    } else if (songType == 3) {
       songColor = Color(0xFFFF558A);
     } else {
       throw 'Invalid song type';

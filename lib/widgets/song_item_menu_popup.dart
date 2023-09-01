@@ -244,56 +244,57 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
                 ),
               ),
             ),
-            InkWell(
-              borderRadius: BorderRadius.all(
-                Radius.circular(10.0),
-              ),
-              onTap: () {
-                appState.isSongsPlayerPageOpened = false;
-                BasicLibrary originLibrary = appState.openedLibrary!;
-                appState.openedLibrary = BasicLibrary(
-                  name: 'similar song',
-                  cover: '',
-                  itemCount: -1,
-                );
-                Navigator.popAndPushNamed(context, '/similar_songs_page',
-                        arguments: widget.song)
-                    .then((_) => appState.openedLibrary = originLibrary);
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.library_music_rounded),
-                      color: colorScheme.tertiary,
-                      onPressed: () {
-                        appState.isSongsPlayerPageOpened = false;
-                        BasicLibrary originLibrary = appState.openedLibrary!;
-                        appState.openedLibrary = BasicLibrary(
-                          name: 'similar song',
-                          cover: '',
-                          itemCount: -1,
-                        );
-                        Navigator.popAndPushNamed(
-                                context, '/similar_songs_page',
-                                arguments: widget.song)
-                            .then(
-                                (_) => appState.openedLibrary = originLibrary);
-                      },
-                    ),
-                    Expanded(
-                      child: Text(
-                        'Similar songs',
-                        style: textTheme.labelMedium!.copyWith(
-                          color: colorScheme.onSecondary,
+            if (appState.currentPlatform != 0)
+              InkWell(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10.0),
+                ),
+                onTap: () {
+                  appState.isSongsPlayerPageOpened = false;
+                  BasicLibrary originLibrary = appState.openedLibrary!;
+                  appState.openedLibrary = BasicLibrary(
+                    name: 'similar song',
+                    cover: '',
+                    itemCount: -1,
+                  );
+                  Navigator.popAndPushNamed(context, '/similar_songs_page',
+                          arguments: widget.song)
+                      .then((_) => appState.openedLibrary = originLibrary);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.library_music_rounded),
+                        color: colorScheme.tertiary,
+                        onPressed: () {
+                          appState.isSongsPlayerPageOpened = false;
+                          BasicLibrary originLibrary = appState.openedLibrary!;
+                          appState.openedLibrary = BasicLibrary(
+                            name: 'similar song',
+                            cover: '',
+                            itemCount: -1,
+                          );
+                          Navigator.popAndPushNamed(
+                                  context, '/similar_songs_page',
+                                  arguments: widget.song)
+                              .then((_) =>
+                                  appState.openedLibrary = originLibrary);
+                        },
+                      ),
+                      Expanded(
+                        child: Text(
+                          'Similar songs',
+                          style: textTheme.labelMedium!.copyWith(
+                            color: colorScheme.onSecondary,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
             if (!(widget.song is PMSSong && (widget.song as PMSSong).type == 3))
               InkWell(
                 borderRadius: BorderRadius.all(
