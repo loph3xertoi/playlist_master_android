@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:playlistmaster/entities/pms/pms_song.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_song.dart';
@@ -162,19 +163,30 @@ class _MySearchBarState extends State<MySearchBar>
         } else if (_currentPlatform == 1) {
           _appState.searchedSongs = _appState.rawSongsInLibrary!
               .where((e) =>
-                  (e as QQMusicSong).name.contains(keyword) ||
-                  e.singers.any((singer) => singer.name.contains(keyword)))
+                  (e as QQMusicSong)
+                      .name
+                      .toLowerCase()
+                      .contains(keyword.toLowerCase()) ||
+                  e.singers.any((singer) => singer.name
+                      .toLowerCase()
+                      .contains(keyword.toLowerCase())))
               .toList();
         } else if (_currentPlatform == 2) {
           _appState.searchedSongs = _appState.rawSongsInLibrary!
               .where((e) =>
-                  (e as NCMSong).name.contains(keyword) ||
-                  e.singers.any((singer) => singer.name.contains(keyword)))
+                  (e as NCMSong)
+                      .name
+                      .toLowerCase()
+                      .contains(keyword.toLowerCase()) ||
+                  e.singers.any((singer) => singer.name
+                      .toLowerCase()
+                      .contains(keyword.toLowerCase())))
               .toList();
         } else if (_currentPlatform == 3) {
           _appState.searchedResources = _appState.rawResourcesInFavList!
               .where((e) =>
-                  e.title.contains(keyword) || e.upperName.contains(keyword))
+                  e.title.toLowerCase().contains(keyword.toLowerCase()) ||
+                  e.upperName.toLowerCase().contains(keyword.toLowerCase()))
               .toList();
           _appState.isDetailFavListPageInSearchMode = true;
         } else {

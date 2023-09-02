@@ -356,7 +356,8 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
 
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (currentDetailSong == null || prevSong != currentSong) {
-                      appState.currentDetailSong = _currentPmsDetailSong;
+                      appState.currentDetailSong =
+                          _currentPmsDetailSong ?? detailSong;
                     }
                     if (prevSong != currentSong) {
                       appState.prevSong = currentSong;

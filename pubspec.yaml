@@ -15,7 +15,7 @@ dependencies:
   flutter_svg: ^2.0.7
   flutter_animator: ^3.2.2
   flutter_animate: ^4.2.0
-  just_audio: ^0.9.34
+  # just_audio: ^0.9.34
   just_audio_mpv: ^0.1.7
   rxdart: ^0.27.7
   carousel_slider: ^4.2.1
@@ -40,6 +40,11 @@ dependencies:
     git:
       url: https://github.com/loph3xertoi/betterplayer.git
       ref: master
+  just_audio:
+    git:
+      url: https://github.com/loph3xertoi/just_audio.git
+      ref: minor
+      path: just_audio
   screen_brightness: ^0.2.2
   intl: ^0.18.1
   bottom_sheet: ^3.1.0

@@ -383,7 +383,8 @@ class _DetailFavListPageState extends State<DetailFavListPage> {
                                             if (_inSearchMode &&
                                                 _currentPageNumberInSearchedResources ==
                                                     1 &&
-                                                _searchedResources.isEmpty) {
+                                                _searchedResources.isEmpty &&
+                                                _appState!.keyword == null) {
                                               _hasMoreSearchedResources =
                                                   detailFavList.hasMore;
                                               _searchedResources

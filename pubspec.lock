@@ -603,11 +603,12 @@ packages:
   just_audio:
     dependency: "direct main"
     description:
-      name: just_audio
-      sha256: "890cd0fc41a1a4530c171e375a2a3fb6a09d84e9d508c5195f40bcff54330327"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.34"
+      path: just_audio
+      ref: minor
+      resolved-ref: "7057395c79d7fa566e6600c68aa18959a9cfa9d1"
+      url: "https://github.com/loph3xertoi/just_audio.git"
+    source: git
+    version: "0.9.35"
   just_audio_background:
     dependency: "direct main"
     description:

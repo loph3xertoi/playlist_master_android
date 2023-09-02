@@ -893,14 +893,14 @@ class MyAppState extends ChangeNotifier {
           if (_currentPlatform == 0) {
             for (var i = 0; i < _songsQueue!.length; i++) {
               PMSSong initialSong = _songsQueue![i] as PMSSong;
-              var songLink =
-                  await fetchSongsLink([initialSong.id.toString()], 0);
-              songs.add(Future.value(LockCachingAudioSource(
-                Uri.parse(songLink!),
+              songs.add(Future.value(ResolvingAudioSource(
+                uniqueId: initialSong.id.toString(),
+                resolveSoundUrl: (uniqueId) async {
+                  uniqueId = initialSong.id.toString();
+                  return Uri.parse(await fetchSongsLink([uniqueId], 0));
+                },
                 tag: MediaItem(
-                  // Specify a unique ID for each media item:
                   id: Uuid().v1(),
-                  // Metadata to display in the notification:
                   album: 'Album name',
                   artist: initialSong.singers.map((e) => e.name).join(', '),
                   title: initialSong.name,
