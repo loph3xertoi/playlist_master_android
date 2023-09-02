@@ -1410,6 +1410,10 @@ class MyAppState extends ChangeNotifier {
       String keyword, int pageNo, int pageSize, int platform) async {
     PagedDataDTO<T> Function(Map<String, dynamic>) resolveJson;
     if (platform == 0) {
+      if (!(kIsWeb || Platform.isAndroid || Platform.isIOS)) {
+        MyToast.showToast('Not yet implement searching for pms songs');
+        MyLogger.logger.e('Not yet implement searching for pms songs');
+      }
       throw UnimplementedError('Not yet implement pms platform');
     } else if (platform == 1) {
     } else if (platform == 2) {

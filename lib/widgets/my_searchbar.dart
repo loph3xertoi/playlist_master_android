@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'dart:ui' as ui show BoxHeightStyle;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,6 +13,8 @@ import '../entities/netease_cloud_music/ncm_song.dart';
 import '../entities/qq_music/qqmusic_song.dart';
 import '../http/my_http.dart';
 import '../states/app_state.dart';
+import '../utils/my_logger.dart';
+import '../utils/my_toast.dart';
 import 'basic_info.dart';
 import 'custom_selection_handler.dart';
 
@@ -110,7 +114,11 @@ class _MySearchBarState extends State<MySearchBar>
         _appState.keyword = keyword;
         dynamic pagedDataDTO;
         if (_currentPlatform == 0) {
+          MyToast.showToast('Not yet implement searching for pms songs');
+          MyLogger.logger.e('Not yet implement searching for pms songs');
           throw UnimplementedError('Not yet implement pms platform');
+          // _appState.fetchSearchedSongs<PMSSong>(
+          //     keyword, 1, 20, _currentPlatform);
         } else if (_currentPlatform == 1) {
           pagedDataDTO = await _appState.fetchSearchedSongs<QQMusicSong>(
               keyword, 1, 20, _currentPlatform);
