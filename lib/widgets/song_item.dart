@@ -124,7 +124,10 @@ class _SongItemState extends State<SongItem> {
                 ),
                 Row(
                   children: [
-                    (payPlayType == 1 && currentPlatform == 1)
+                    payPlayType == 1 &&
+                            ((currentPlatform == 0 &&
+                                    (widget.song as PMSSong).type == 1) ||
+                                currentPlatform == 1)
                         ? Padding(
                             padding: const EdgeInsets.only(right: 3.0),
                             child: Image.asset(
@@ -132,7 +135,10 @@ class _SongItemState extends State<SongItem> {
                               width: 20.0,
                             ),
                           )
-                        : (payPlayType == 1 && currentPlatform == 2)
+                        : (payPlayType == 1 &&
+                                ((currentPlatform == 0 &&
+                                        (widget.song as PMSSong).type == 2) ||
+                                    currentPlatform == 2))
                             ? Padding(
                                 padding: const EdgeInsets.only(right: 3.0),
                                 child: Image.asset(
@@ -143,6 +149,7 @@ class _SongItemState extends State<SongItem> {
                             : Container(),
                     isTakenDown &&
                             (currentPlatform == 2 ||
+                                currentPlatform == 0 ||
                                 (currentPlatform == 1 && payPlayType == 0))
                         ? Padding(
                             padding:
@@ -180,7 +187,8 @@ class _SongItemState extends State<SongItem> {
               ),
               IconButton(
                   onPressed: () async {
-                    if (currentPlatform == 1 && payPlayType == 1) {
+                    if ((currentPlatform == 1 || currentPlatform == 0) &&
+                        payPlayType == 1) {
                       MyToast.showToast('This song need vip to play');
                       MyLogger.logger.e('This song need vip to play');
                       return;

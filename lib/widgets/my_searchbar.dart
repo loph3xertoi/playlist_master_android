@@ -1,16 +1,14 @@
-import 'dart:io';
 import 'dart:ui' as ui show BoxHeightStyle;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:playlistmaster/entities/pms/pms_song.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_song.dart';
 import '../entities/bilibili/bili_resource.dart';
 import '../entities/netease_cloud_music/ncm_song.dart';
+import '../entities/pms/pms_song.dart';
 import '../entities/qq_music/qqmusic_song.dart';
 import '../http/my_http.dart';
 import '../states/app_state.dart';
@@ -159,7 +157,16 @@ class _MySearchBarState extends State<MySearchBar>
       if (keyword != '') {
         _appState.keyword = keyword;
         if (_currentPlatform == 0) {
-          throw UnimplementedError('Not yet implement pms platform');
+          _appState.searchedSongs = _appState.rawSongsInLibrary!
+              .where((e) =>
+                  (e as PMSSong)
+                      .name
+                      .toLowerCase()
+                      .contains(keyword.toLowerCase()) ||
+                  e.singers.any((singer) => singer.name
+                      .toLowerCase()
+                      .contains(keyword.toLowerCase())))
+              .toList();
         } else if (_currentPlatform == 1) {
           _appState.searchedSongs = _appState.rawSongsInLibrary!
               .where((e) =>

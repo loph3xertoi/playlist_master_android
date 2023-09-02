@@ -77,7 +77,7 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
     var payPlayType = searchedSongs[index].payPlay;
     var songsPlayer = appState.songsPlayer;
 
-    if (_currentPlatform == 1 && payPlayType == 1) {
+    if ((_currentPlatform == 0 || _currentPlatform == 1) && payPlayType == 1) {
       MyToast.showToast('This song need vip to play');
       MyLogger.logger.e('This song need vip to play');
       return;
