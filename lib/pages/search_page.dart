@@ -166,7 +166,7 @@ class _SearchPageState extends State<SearchPage> {
         throw UnimplementedError('Not yet implement pms platform');
       } else if (_currentPlatform == 1) {
         appState.songsQueue = _searchedSongs
-            .where((song) => !song.isTakenDown && (song.payPlay == 0))
+            .where((song) => !song.isTakenDown && (song.payPlay == 0|| song.payPlay == 8))
             .toList();
       } else if (_currentPlatform == 2) {
         appState.songsQueue =
@@ -192,9 +192,9 @@ class _SearchPageState extends State<SearchPage> {
         appState.prevSong = null;
         appState.isSongPlaying = false;
         appState.songsPlayer!.stop();
+        appState.songsAudioSource!.clear();
         appState.songsPlayer!.dispose();
         appState.songsPlayer = null;
-        appState.songsAudioSource!.clear();
         appState.isSongsPlayerPageOpened = false;
         appState.canSongsPlayerPagePop = false;
         return;
@@ -215,7 +215,7 @@ class _SearchPageState extends State<SearchPage> {
         throw UnimplementedError('Not yet implement pms platform');
       } else if (_currentPlatform == 1) {
         appState.songsQueue = _searchedSongs
-            .where((song) => !song.isTakenDown && (song.payPlay == 0))
+            .where((song) => !song.isTakenDown && (song.payPlay == 0|| song.payPlay == 8))
             .toList();
       } else if (_currentPlatform == 2) {
         appState.songsQueue =
@@ -228,9 +228,9 @@ class _SearchPageState extends State<SearchPage> {
       int realIndex = appState.songsQueue!.indexOf(_searchedSongs[index]);
       appState.canSongsPlayerPagePop = true;
       appState.songsPlayer!.stop();
+      appState.songsAudioSource!.clear();
       appState.songsPlayer!.dispose();
       appState.songsPlayer = null;
-      appState.songsAudioSource!.clear();
       appState.currentPlayingSongInQueue = realIndex;
       try {
         await appState.initSongsPlayer();
@@ -244,9 +244,9 @@ class _SearchPageState extends State<SearchPage> {
         appState.prevSong = null;
         appState.isSongPlaying = false;
         appState.songsPlayer!.stop();
+        appState.songsAudioSource!.clear();
         appState.songsPlayer!.dispose();
         appState.songsPlayer = null;
-        appState.songsAudioSource!.clear();
         appState.isSongsPlayerPageOpened = false;
         appState.canSongsPlayerPagePop = false;
         return;

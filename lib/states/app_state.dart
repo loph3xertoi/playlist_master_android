@@ -757,9 +757,9 @@ class MyAppState extends ChangeNotifier {
     _prevSong = null;
     _isSongPlaying = false;
     _songsPlayer!.stop();
+    _songsAudioSource!.clear();
     _songsPlayer!.dispose();
     _songsPlayer = null;
-    _songsAudioSource!.clear();
     _isSongsPlayerPageOpened = false;
     _canSongsPlayerPagePop = false;
   }
@@ -873,20 +873,45 @@ class MyAppState extends ChangeNotifier {
                 ))
             .toList();
       } else {
-        songs = _songsQueue!
-            .map((e) async => LockCachingAudioSource(
-                  Uri.parse(e.songLink!),
-                  tag: MediaItem(
-                    // Specify a unique ID for each media item:
-                    id: Uuid().v1(),
-                    // Metadata to display in the notification:
-                    album: 'Album name',
-                    artist: e.singers.map((e) => e.name).join(', '),
-                    title: e.name,
-                    artUri: Uri.parse(e.cover),
-                  ),
-                ))
-            .toList();
+        for (BasicSong song in _songsQueue!) {
+          if (song.songLink != null) {
+            songs.add(Future.value(LockCachingAudioSource(
+              Uri.parse(song.songLink!),
+              tag: MediaItem(
+                // Specify a unique ID for each media item:
+                id: Uuid().v1(),
+                // Metadata to display in the notification:
+                album: 'Album name',
+                artist: song.singers.map((e) => e.name).join(', '),
+                title: song.name,
+                artUri: Uri.parse(song.cover),
+              ),
+            )));
+          }
+        }
+        if (_songsQueue!.isNotEmpty && songs.isEmpty) {
+          if (_currentPlatform == 0) {
+            for (var i = 0; i < _songsQueue!.length; i++) {
+              PMSSong initialSong = _songsQueue![i] as PMSSong;
+              var songLink =
+                  await fetchSongsLink([initialSong.id.toString()], 0);
+              songs.add(Future.value(LockCachingAudioSource(
+                Uri.parse(songLink!),
+                tag: MediaItem(
+                  // Specify a unique ID for each media item:
+                  id: Uuid().v1(),
+                  // Metadata to display in the notification:
+                  album: 'Album name',
+                  artist: initialSong.singers.map((e) => e.name).join(', '),
+                  title: initialSong.name,
+                  artUri: Uri.parse(initialSong.cover),
+                ),
+              )));
+            }
+          } else {
+            throw 'Invalid platform';
+          }
+        }
       }
     }
 
@@ -1236,7 +1261,6 @@ class MyAppState extends ChangeNotifier {
   /// Only used in bilibili now.
   Future<dynamic> fetchSongsLink(List<String> songIds, int platform) async {
     if (platform == 0) {
-      throw UnimplementedError('Not yet implement pms platform');
     } else if (platform == 1) {
     } else if (platform == 2) {
       throw UnimplementedError('Not yet implement ncm platform');
@@ -1261,13 +1285,15 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           var songsLink = decodedResponse['data']!;
-          if (platform != 3) {
+          if (platform == 0) {
+            return Future.value(songsLink);
+          } else if (platform == 3) {
+            BiliLinksDTO biliLinksDTO = BiliLinksDTO.fromJson(songsLink);
+            return Future.value(biliLinksDTO);
+          } else {
             Map<String, dynamic>? songsMap = songsLink;
             // .map((key, value) => MapEntry<String, dynamic>(key, value));
             return Future.value(songsMap);
-          } else {
-            BiliLinksDTO biliLinksDTO = BiliLinksDTO.fromJson(songsLink);
-            return Future.value(biliLinksDTO);
           }
         } else {
           _errorMsg = result.message!;

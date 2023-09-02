@@ -182,9 +182,9 @@ class _SearchPageState extends State<SearchPage> {
         appState.songsPlayer!.dispose();
         appState.songsPlayer = null;
         appState.resourcesPlayer!.stop();
+        appState.songsAudioSource!.clear();
         appState.resourcesPlayer!.dispose();
         appState.resourcesPlayer = null;
-        appState.songsAudioSource!.clear();
         appState.resourcesAudioSource!.clear();
         appState.isSongsPlayerPageOpened = false;
         appState.canSongsPlayerPagePop = false;
@@ -270,9 +270,9 @@ class _SearchPageState extends State<SearchPage> {
       } else {
         appState.canSongsPlayerPagePop = true;
         appState.songsPlayer!.stop();
+        appState.songsAudioSource!.clear();
         appState.songsPlayer!.dispose();
         appState.songsPlayer = null;
-        appState.songsAudioSource!.clear();
         appState.currentPlayingSongInQueue = realIndex;
         try {
           await appState.initSongsPlayer();
@@ -286,9 +286,9 @@ class _SearchPageState extends State<SearchPage> {
           appState.prevSong = null;
           appState.isSongPlaying = false;
           appState.songsPlayer!.stop();
+          appState.songsAudioSource!.clear();
           appState.songsPlayer!.dispose();
           appState.songsPlayer = null;
-          appState.songsAudioSource!.clear();
           appState.isSongsPlayerPageOpened = false;
           appState.canSongsPlayerPagePop = false;
           return;

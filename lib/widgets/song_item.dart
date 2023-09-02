@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-import 'package:playlistmaster/entities/netease_cloud_music/ncm_song.dart';
-import 'package:playlistmaster/entities/qq_music/qqmusic_song.dart';
+import '../entities/netease_cloud_music/ncm_song.dart';
+import '../entities/qq_music/qqmusic_song.dart';
 import '../entities/pms/pms_song.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -254,18 +254,21 @@ class _SongItemState extends State<SongItem> {
                             ),
                           );
                         } else {
+                          PMSSong initialSong = widget.song as PMSSong;
+                          var songLink = await appState
+                              .fetchSongsLink([initialSong.id.toString()], 0);
                           newAudioSource = LockCachingAudioSource(
-                            Uri.parse(widget.song.songLink!),
+                            Uri.parse(songLink!),
                             tag: MediaItem(
                               // Specify a unique ID for each media item:
                               id: Uuid().v1(),
                               // Metadata to display in the notification:
                               album: 'Album name',
-                              artist: widget.song.singers
+                              artist: initialSong.singers
                                   .map((e) => e.name)
                                   .join(', '),
-                              title: widget.song.name,
-                              artUri: Uri.parse(widget.song.cover),
+                              title: initialSong.name,
+                              artUri: Uri.parse(initialSong.cover),
                             ),
                           );
                         }

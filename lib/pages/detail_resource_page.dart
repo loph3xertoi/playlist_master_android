@@ -201,6 +201,9 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
         onWillPop: () async {
           appState.inDetailFavlistPage = false;
           appState.refreshLibraries!(appState, false);
+          if (appState.songsPlayer != null) {
+            appState.songsPlayer!.play();
+          }
           return true;
         },
         child: SafeArea(
@@ -212,6 +215,9 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
       onWillPop: () async {
         appState.inDetailFavlistPage = false;
         appState.refreshLibraries!(appState, false);
+        if (appState.songsPlayer != null) {
+          appState.songsPlayer!.play();
+        }
         return true;
       },
       child: SafeArea(

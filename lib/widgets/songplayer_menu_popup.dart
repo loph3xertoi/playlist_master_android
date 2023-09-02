@@ -108,9 +108,9 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                   appState.prevSong = null;
                   appState.isSongPlaying = false;
                   appState.songsPlayer!.stop();
+                  appState.songsAudioSource!.clear();
                   appState.songsPlayer!.dispose();
                   appState.songsPlayer = null;
-                  appState.songsAudioSource!.clear();
                   return;
                 }
                 Navigator.pop(context);
@@ -152,9 +152,9 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                           appState.prevSong = null;
                           appState.isSongPlaying = false;
                           appState.songsPlayer!.stop();
+                          appState.songsAudioSource!.clear();
                           appState.songsPlayer!.dispose();
                           appState.songsPlayer = null;
-                          appState.songsAudioSource!.clear();
                           return;
                         }
                         Navigator.pop(context);
@@ -193,36 +193,38 @@ class CreateSongplayerMenuDialog extends StatelessWidget {
                 ),
               ),
             ),
-            InkWell(
-              borderRadius: BorderRadius.all(
-                Radius.circular(10.0),
-              ),
-              onTap: () {
-                _pushToDetailSongPage(context, appState);
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.description_rounded),
-                      color: colorScheme.tertiary,
-                      onPressed: () {
-                        _pushToDetailSongPage(context, appState);
-                      },
-                    ),
-                    Expanded(
-                      child: Text(
-                        'Song\'s detail',
-                        style: textTheme.labelMedium!.copyWith(
-                          color: colorScheme.onSecondary,
+            if (!(appState.currentPlatform == 0 &&
+                (appState.currentSong as PMSSong).type == 3))
+              InkWell(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10.0),
+                ),
+                onTap: () {
+                  _pushToDetailSongPage(context, appState);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.description_rounded),
+                        color: colorScheme.tertiary,
+                        onPressed: () {
+                          _pushToDetailSongPage(context, appState);
+                        },
+                      ),
+                      Expanded(
+                        child: Text(
+                          'Song\'s detail',
+                          style: textTheme.labelMedium!.copyWith(
+                            color: colorScheme.onSecondary,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

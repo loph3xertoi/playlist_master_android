@@ -13,10 +13,8 @@ import '../entities/basic/basic_singer.dart';
 import '../entities/basic/basic_song.dart';
 import '../entities/netease_cloud_music/ncm_detail_song.dart';
 import '../entities/netease_cloud_music/ncm_lyrics.dart';
-import '../entities/netease_cloud_music/ncm_song.dart';
 import '../entities/qq_music/qqmusic_detail_song.dart';
 import '../entities/qq_music/qqmusic_lyrics.dart';
-import '../entities/qq_music/qqmusic_song.dart';
 import '../http/api.dart';
 import '../http/my_http.dart';
 import '../mock_data.dart';
@@ -39,8 +37,6 @@ class _DetailSongPageState extends State<DetailSongPage> {
   late MyLyricsDisplayer _lyricUI;
   late bool _isUsingMockData;
   late int _currentPlatform;
-  // The platform this song belongs to.
-  int? _realPlatform;
   int _position = 0;
 
   @override
@@ -66,15 +62,7 @@ class _DetailSongPageState extends State<DetailSongPage> {
       _detailSong = Future.value(MockData.detailSong);
     } else {
       if (_currentPlatform == 0) {
-        if (widget.song is QQMusicSong) {
-          _realPlatform = 1;
-        } else if (widget.song is NCMSong) {
-          _realPlatform = 2;
-        } else {
-          throw 'Invalid song type';
-        }
-        _detailSong =
-            state.fetchDetailSong<BasicSong>(widget.song, _realPlatform!);
+        _detailSong = Future.value(widget.song);
       } else {
         _detailSong =
             state.fetchDetailSong<BasicSong>(widget.song, _currentPlatform);
@@ -147,15 +135,7 @@ class _DetailSongPageState extends State<DetailSongPage> {
                             _detailSong = Future.value(MockData.detailSong);
                           } else {
                             if (_currentPlatform == 0) {
-                              if (widget.song is QQMusicSong) {
-                                _realPlatform = 1;
-                              } else if (widget.song is NCMSong) {
-                                _realPlatform = 2;
-                              } else {
-                                throw 'Invalid song type';
-                              }
-                              _detailSong = appState.fetchDetailSong<BasicSong>(
-                                  widget.song, _realPlatform!);
+                              _detailSong = Future.value(widget.song);
                             } else {
                               _detailSong = appState.fetchDetailSong<BasicSong>(
                                   widget.song, _currentPlatform);
@@ -193,25 +173,21 @@ class _DetailSongPageState extends State<DetailSongPage> {
                 .bindLyricToExt(lyrics.trans)
                 .getModel();
           } else {
-            if (currentPlatform == 1 || _realPlatform == 1) {
+            if (currentPlatform == 1 || snapshot.data is QQMusicDetailSong) {
               detailSong = snapshot.data as QQMusicDetailSong;
               name = detailSong.name;
               singers = detailSong.singers;
               title = detailSong.subTitle;
               albumName = detailSong.albumName;
-              description = detailSong.songDesc ?? 'No description';
+              description = detailSong.songDesc;
               pubTime = detailSong.pubTime;
               currentDetailSong = detailSong;
-              // var size128 = detailSong.size128;
-              // var size320 = detailSong.size320;
-              // var sizeApe = detailSong.sizeApe;
-              // var sizeFlac = detailSong.sizeFlac;
               QQMusicLyrics lyrics = detailSong.lyrics;
               _lyricModel ??= LyricsModelBuilder.create()
                   .bindLyricToMain(lyrics.lyric)
                   .bindLyricToExt(lyrics.trans)
                   .getModel();
-            } else if (currentPlatform == 2 || _realPlatform == 2) {
+            } else if (currentPlatform == 2 || snapshot.data is NCMDetailSong) {
               detailSong = snapshot.data as NCMDetailSong;
               name = detailSong.name;
               singers = detailSong.singers;

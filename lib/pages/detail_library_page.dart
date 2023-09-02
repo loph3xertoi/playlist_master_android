@@ -95,7 +95,8 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
             searchedSongs.where((song) => !song.isTakenDown).toList();
       } else {
         appState.songsQueue = searchedSongs
-            .where((song) => !song.isTakenDown && (song.payPlay == 0))
+            .where((song) =>
+                !song.isTakenDown && (song.payPlay == 0 || song.payPlay == 8))
             .toList();
       }
       // Real index in songsQueue, not in raw songsQueue as some songs may be taken down.
@@ -125,16 +126,17 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
             searchedSongs.where((song) => !song.isTakenDown).toList();
       } else {
         appState.songsQueue = searchedSongs
-            .where((song) => !song.isTakenDown && (song.payPlay == 0))
+            .where((song) =>
+                !song.isTakenDown && (song.payPlay == 0 || song.payPlay == 8))
             .toList();
       }
       // Real index in songsQueue, not in raw songsQueue as some songs may be taken down.
       int realIndex = appState.songsQueue!.indexOf(searchedSongs[index]);
       appState.canSongsPlayerPagePop = true;
       appState.songsPlayer!.stop();
+      appState.songsAudioSource!.clear();
       appState.songsPlayer!.dispose();
       appState.songsPlayer = null;
-      appState.songsAudioSource!.clear();
       appState.currentPlayingSongInQueue = realIndex;
       try {
         await appState.initSongsPlayer();

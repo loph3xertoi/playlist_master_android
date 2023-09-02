@@ -213,6 +213,9 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
                   Navigator.popAndPushNamed(context, '/related_videos_page',
                       arguments: widget.song);
                 }
+                if (appState.songsPlayer != null) {
+                  appState.songsPlayer!.pause();
+                }
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),

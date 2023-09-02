@@ -49,149 +49,176 @@ class _RelatedVideosPageState extends State<RelatedVideosPage> {
     _currentPlatform = appState.currentPlatform;
     _isUsingMockData = appState.isUsingMockData;
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Related videos',
+          style: textTheme.labelLarge,
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            if (appState.songsPlayer != null) {
+              appState.songsPlayer!.play();
+            }
+            Navigator.pop(context);
+          },
+        ),
+        backgroundColor: colorScheme.primary,
+        iconTheme: IconThemeData(color: colorScheme.onSecondary),
+      ),
       body: SafeArea(
-        child: FutureBuilder(
-          future: _relatedVideos,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            } else if (snapshot.hasError || snapshot.data == null) {
-              MyLogger.logger.e(
-                  snapshot.hasError ? '${snapshot.error}' : appState.errorMsg);
-              return Material(
-                child: Scaffold(
-                  appBar: AppBar(
-                    title: Text(
-                      'Got some error',
-                      style: textTheme.labelLarge,
+        child: WillPopScope(
+          onWillPop: () async {
+            if (appState.songsPlayer != null) {
+              appState.songsPlayer!.play();
+            }
+            return true;
+          },
+          child: FutureBuilder(
+            future: _relatedVideos,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (snapshot.hasError || snapshot.data == null) {
+                MyLogger.logger.e(snapshot.hasError
+                    ? '${snapshot.error}'
+                    : appState.errorMsg);
+                return Material(
+                  child: Scaffold(
+                    appBar: AppBar(
+                      title: Text(
+                        'Got some error',
+                        style: textTheme.labelLarge,
+                      ),
+                      backgroundColor: colorScheme.primary,
+                      iconTheme: IconThemeData(color: colorScheme.onSecondary),
                     ),
-                    backgroundColor: colorScheme.primary,
-                    iconTheme: IconThemeData(color: colorScheme.onSecondary),
-                  ),
-                  body: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        MySelectableText(
-                          snapshot.hasError
-                              ? '${snapshot.error}'
-                              : appState.errorMsg,
-                          style: textTheme.labelMedium!.copyWith(
-                            color: colorScheme.onSecondary,
-                          ),
-                        ),
-                        TextButton.icon(
-                          style: ButtonStyle(
-                            shadowColor: MaterialStateProperty.all(
-                              colorScheme.primary,
-                            ),
-                            overlayColor: MaterialStateProperty.all(
-                              Colors.grey,
-                            ),
-                          ),
-                          icon: Icon(
-                            MdiIcons.webRefresh,
-                            color: colorScheme.onSecondary,
-                          ),
-                          label: Text(
-                            'Retry',
+                    body: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          MySelectableText(
+                            snapshot.hasError
+                                ? '${snapshot.error}'
+                                : appState.errorMsg,
                             style: textTheme.labelMedium!.copyWith(
                               color: colorScheme.onSecondary,
                             ),
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _relatedVideos = appState.fetchRelatedMVs(
-                                  widget.song, _currentPlatform);
-                            });
-                          },
-                        ),
-                      ],
+                          TextButton.icon(
+                            style: ButtonStyle(
+                              shadowColor: MaterialStateProperty.all(
+                                colorScheme.primary,
+                              ),
+                              overlayColor: MaterialStateProperty.all(
+                                Colors.grey,
+                              ),
+                            ),
+                            icon: Icon(
+                              MdiIcons.webRefresh,
+                              color: colorScheme.onSecondary,
+                            ),
+                            label: Text(
+                              'Retry',
+                              style: textTheme.labelMedium!.copyWith(
+                                color: colorScheme.onSecondary,
+                              ),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _relatedVideos = appState.fetchRelatedMVs(
+                                    widget.song, _currentPlatform);
+                              });
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            } else {
-              dynamic relatedVideos;
-              if (_isUsingMockData) {
-                relatedVideos = snapshot.data!.cast<QQMusicVideo>().toList();
+                );
               } else {
-                if (_currentPlatform == 0) {
-                  var songType = (widget.song as PMSSong).type;
-                  if (songType == 1) {
+                dynamic relatedVideos;
+                if (_isUsingMockData) {
+                  relatedVideos = snapshot.data!.cast<QQMusicVideo>().toList();
+                } else {
+                  if (_currentPlatform == 0) {
+                    var songType = (widget.song as PMSSong).type;
+                    if (songType == 1) {
+                      relatedVideos =
+                          snapshot.data!.cast<QQMusicVideo>().toList();
+                    } else if (songType == 2) {
+                      relatedVideos = snapshot.data!.cast<NCMVideo>().toList();
+                    } else {
+                      throw 'Invalid song type';
+                    }
+                  } else if (_currentPlatform == 1) {
                     relatedVideos =
                         snapshot.data!.cast<QQMusicVideo>().toList();
-                  } else if (songType == 2) {
+                  } else if (_currentPlatform == 2) {
                     relatedVideos = snapshot.data!.cast<NCMVideo>().toList();
+                  } else if (_currentPlatform == 3) {
+                    throw UnimplementedError(
+                        'Not yet implement bilibili platform');
                   } else {
-                    throw 'Invalid song type';
+                    throw UnsupportedError('Invalid platform');
                   }
-                } else if (_currentPlatform == 1) {
-                  relatedVideos = snapshot.data!.cast<QQMusicVideo>().toList();
-                } else if (_currentPlatform == 2) {
-                  relatedVideos = snapshot.data!.cast<NCMVideo>().toList();
-                } else if (_currentPlatform == 3) {
-                  throw UnimplementedError(
-                      'Not yet implement bilibili platform');
-                } else {
-                  throw UnsupportedError('Invalid platform');
                 }
-              }
-              return relatedVideos.length == 0
-                  ? Center(
-                      child: Text(
-                        'This song has no videos.',
-                        style: textTheme.labelLarge,
-                      ),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.only(top: 4.0),
-                      child: SizedBox(
-                        height: MediaQuery.of(context).size.height,
-                        child: RefreshIndicator(
-                          color: colorScheme.onPrimary,
-                          strokeWidth: 2.0,
-                          onRefresh: () async {
-                            setState(() {
-                              _relatedVideos = appState.fetchRelatedMVs(
-                                  widget.song, _currentPlatform);
-                            });
-                          },
-                          child: ListView.builder(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            // padding: EdgeInsets.all(10.0),
-                            itemCount: relatedVideos.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0, vertical: 4.0),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      onTap: () {
-                                        Navigator.pushNamed(
-                                            context, '/video_player_page',
-                                            arguments: relatedVideos[index]);
-                                      },
-                                      child: VideoItem(
-                                        video: relatedVideos[index],
+                return relatedVideos.length == 0
+                    ? Center(
+                        child: Text(
+                          'This song has no videos.',
+                          style: textTheme.labelLarge,
+                        ),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.only(top: 4.0),
+                        child: SizedBox(
+                          height: MediaQuery.of(context).size.height,
+                          child: RefreshIndicator(
+                            color: colorScheme.onPrimary,
+                            strokeWidth: 2.0,
+                            onRefresh: () async {
+                              setState(() {
+                                _relatedVideos = appState.fetchRelatedMVs(
+                                    widget.song, _currentPlatform);
+                              });
+                            },
+                            child: ListView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              // padding: EdgeInsets.all(10.0),
+                              itemCount: relatedVideos.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0, vertical: 4.0),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.pushNamed(
+                                              context, '/video_player_page',
+                                              arguments: relatedVideos[index]);
+                                        },
+                                        child: VideoItem(
+                                          video: relatedVideos[index],
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
                         ),
-                      ),
-                    );
-            }
-          },
+                      );
+              }
+            },
+          ),
         ),
       ),
     );

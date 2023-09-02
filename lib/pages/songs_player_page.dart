@@ -11,10 +11,12 @@ import 'package:flutter_lyric/lyrics_reader.dart';
 import 'package:flutter_lyric/lyrics_reader_model.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:playlistmaster/entities/bilibili/bili_detail_resource.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_song.dart';
 import '../entities/netease_cloud_music/ncm_detail_song.dart';
+import '../entities/pms/pms_detail_song.dart';
 import '../entities/qq_music/qqmusic_detail_song.dart';
 import '../http/api.dart';
 import '../http/my_http.dart';
@@ -59,6 +61,7 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
 
   Future<BasicSong?>? _detailSong;
   BasicSong? _simpleDetailSong;
+  BasicSong? _currentPmsDetailSong;
   bool _hasLyrics = true;
   var _lyricUI = MyLyricsDisplayer(
     defaultSize: 20.0,
@@ -274,12 +277,20 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
                   if (_isUsingMockData!) {
                     detailSong = snapshot.data as QQMusicDetailSong;
                   } else {
-                    if (_currentPlatform == 0) {
-                      throw UnimplementedError(
-                          'Not yet implement pms platform');
-                    } else if (_currentPlatform == 1) {
+                    if (snapshot.data is PMSDetailSong) {
+                      detailSong = snapshot.data as PMSDetailSong;
+                      _currentPmsDetailSong = detailSong;
+                      int songType = detailSong.type;
+                      if (songType == 1 || songType == 2) {
+                        detailSong = detailSong.basicSong;
+                      } else if (songType == 3) {
+                        detailSong = detailSong.biliResource;
+                      } else {
+                        throw 'Invalid song type';
+                      }
+                    } else if (snapshot.data is QQMusicDetailSong) {
                       detailSong = snapshot.data as QQMusicDetailSong;
-                    } else if (_currentPlatform == 2) {
+                    } else if (snapshot.data is NCMDetailSong) {
                       detailSong = snapshot.data as NCMDetailSong;
                     } else if (_currentPlatform == 3) {
                       throw UnimplementedError(
@@ -289,15 +300,17 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
                     }
                   }
 
-                  mainLyrics = detailSong.lyrics.lyric;
+                  mainLyrics = detailSong is BiliDetailResource
+                      ? 'No lyrics for bilibili resource'
+                      : detailSong.lyrics.lyric;
                   // mainLyrics = detailSong.lyrics.yrc;
                   if (_lyricModel == null || prevSong != currentSong) {
                     if (!_isUsingMockData!) {
-                      if (_currentPlatform == 0) {
-                        throw UnimplementedError(
-                            'Not yet implement pms platform');
-                      }
-                      if (_currentPlatform == 1) {
+                      if (_currentPlatform == 1 ||
+                          (_currentPlatform == 0 &&
+                              detailSong is QQMusicDetailSong) ||
+                          (detailSong is PMSDetailSong &&
+                              detailSong.type == 1)) {
                         if (mainLyrics == '[00:00:00]此歌曲为没有填词的纯音乐，请您欣赏') {
                           _hasLyrics = false;
                         } else {
@@ -307,7 +320,11 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
                               .bindLyricToExt(detailSong.lyrics.trans)
                               .getModel();
                         }
-                      } else if (_currentPlatform == 2) {
+                      } else if (_currentPlatform == 2 ||
+                          (_currentPlatform == 0 &&
+                              detailSong is NCMDetailSong) ||
+                          (detailSong is PMSDetailSong &&
+                              detailSong.type == 2)) {
                         if (mainLyrics == '[00:00:00]此歌曲为没有填词的纯音乐，请您欣赏') {
                           _hasLyrics = false;
                         } else {
@@ -317,6 +334,12 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
                               .bindLyricToExt(detailSong.lyrics.tLyric)
                               .getModel();
                         }
+                      } else if (_currentPlatform == 0 &&
+                              detailSong is BiliDetailResource ||
+                          (detailSong is PMSDetailSong &&
+                              detailSong.type == 3)) {
+                        mainLyrics = 'No lyrics for bilibili resource';
+                        _hasLyrics = false;
                       } else if (_currentPlatform == 3) {
                         throw UnimplementedError(
                             'Not yet implement bilibili platform');
@@ -333,7 +356,7 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
 
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (currentDetailSong == null || prevSong != currentSong) {
-                      appState.currentDetailSong = detailSong;
+                      appState.currentDetailSong = _currentPmsDetailSong;
                     }
                     if (prevSong != currentSong) {
                       appState.prevSong = currentSong;

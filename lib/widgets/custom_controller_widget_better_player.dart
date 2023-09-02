@@ -805,6 +805,9 @@ class _CustomControlsWidgetState
       _onExpandCollapse();
     } else {
       _appState!.inDetailFavlistPage = false;
+      if (_appState!.songsPlayer != null) {
+        _appState!.songsPlayer!.play();
+      }
       Navigator.pop(context);
     }
   }

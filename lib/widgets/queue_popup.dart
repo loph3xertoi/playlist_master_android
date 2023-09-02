@@ -6,6 +6,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_song.dart';
+import '../entities/pms/pms_song.dart';
 import '../states/app_state.dart';
 import 'confirm_popup.dart';
 import 'song_item_in_queue.dart';
@@ -81,9 +82,9 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
           appState.prevSong = null;
           appState.isSongPlaying = false;
           player.stop();
+          appState.songsAudioSource!.clear();
           player.dispose();
           appState.songsPlayer = null;
-          appState.songsAudioSource!.clear();
           Navigator.of(context).pop();
         }
       });
@@ -147,8 +148,10 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                         itemCount: _queueLength,
                         controller: _scrollController,
                         itemBuilder: (context, index) {
-                          if (_currentPlatform == 3) {
-                          } else {}
+                          int? songType;
+                          if (_currentPlatform == 0) {
+                            songType = (songsQueue![index] as PMSSong).type;
+                          }
                           String name = _currentPlatform == 3
                               ? resourcesQueue![index].title
                               : songsQueue![index].name;
@@ -197,22 +200,19 @@ class _ShowQueueDialogState extends State<ShowQueueDialog>
                                   }
                                 }
                               },
-                              child: Container(
-                                margin:
-                                    EdgeInsets.fromLTRB(25.0, 0.0, 12.0, 0.0),
-                                child: SongItemInQueue(
-                                    name: name,
-                                    payPlayType: payPlayType,
-                                    cover: cover,
-                                    singers: singers,
-                                    isPlaying:
-                                        currentPlayingSongInQueue == index
-                                            ? true
-                                            : false,
-                                    onClose: () {
-                                      onCloseSongItem(index, appState);
-                                    }),
-                              ),
+                              child: SongItemInQueue(
+                                  name: name,
+                                  payPlayType: payPlayType,
+                                  cover: cover,
+                                  singers: singers,
+                                  isPlaying:
+                                      currentPlayingSongInQueue == index
+                                          ? true
+                                          : false,
+                                  songType: songType,
+                                  onClose: () {
+                                    onCloseSongItem(index, appState);
+                                  }),
                             ),
                           );
                         },

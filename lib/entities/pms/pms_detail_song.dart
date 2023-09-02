@@ -1,4 +1,7 @@
 import 'package:flutter/foundation.dart';
+import '../bilibili/bili_detail_resource.dart';
+import '../netease_cloud_music/ncm_detail_song.dart';
+import '../qq_music/qqmusic_detail_song.dart';
 
 import '../basic/basic_song.dart';
 import '../bilibili/bili_resource.dart';
@@ -28,10 +31,10 @@ class PMSDetailSong extends BasicSong {
   /// The type of this song, 1 for qqmusic, 2 for ncm, 3 for bilibili.
   final int type;
 
-  /// Original QQMusic song or NCM song.
+  /// Original song of this pms song with type QQMusicDetailSong or NCMDetailSong.
   final BasicSong? basicSong;
 
-  /// Original BiliBili resources.
+  /// Original resource of this pms song with type BiliDetailResource.
   final BiliResource? biliResource;
 
   factory PMSDetailSong.fromJson(Map<String, dynamic> json) {
@@ -43,11 +46,11 @@ class PMSDetailSong extends BasicSong {
     BasicSong? basicSong;
     BiliResource? biliResource;
     if (type == 1) {
-      basicSong = QQMusicSong.fromJson(json['basicSong']);
+      basicSong = QQMusicDetailSong.fromJson(json['basicSong']);
     } else if (type == 2) {
-      basicSong = NCMSong.fromJson(json['basicSong']);
+      basicSong = NCMDetailSong.fromJson(json['basicSong']);
     } else if (type == 3) {
-      biliResource = BiliResource.fromJson(json['biliResource']);
+      biliResource = BiliDetailResource.fromJson(json['biliResource']);
     } else {
       throw 'Invalid type';
     }
