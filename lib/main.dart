@@ -1,3 +1,7 @@
+import 'dart:ui';
+
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -5,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import 'entities/basic/basic_song.dart';
 import 'entities/basic/basic_video.dart';
+import 'firebase_options.dart';
 import 'pages/detail_favlist_page.dart';
 import 'pages/detail_library_page.dart';
 import 'pages/detail_resource_page.dart';
@@ -24,11 +29,25 @@ import 'utils/theme_manager.dart';
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  };
+  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
   await JustAudioBackground.init(
     androidNotificationChannelId: 'com.daw.playlistmaster.channel',
     // androidNotificationChannelName: 'Audio playback',
     androidNotificationOngoing: true,
     androidShowNotificationBadge: true,
+  );
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(
     ChangeNotifierProvider<ThemeNotifier>(

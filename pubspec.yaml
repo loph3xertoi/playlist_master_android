@@ -58,6 +58,8 @@ dependencies:
   flutter_form_builder: ^9.1.0
   form_builder_validators: ^9.0.0
   cross_file: ^0.3.3+4
+  firebase_core: ^2.15.1
+  firebase_crashlytics: ^3.3.5
   # bottom_sheet:
   #   git:
   #     url: git@github.com:loph3xertoi/flutter-bottom-sheet.git

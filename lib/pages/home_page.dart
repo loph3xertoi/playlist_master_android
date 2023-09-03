@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fplayer/fplayer.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/bilibili/bili_resource.dart';
@@ -119,6 +118,21 @@ class _HomePageState extends State<HomePage>
                               Colors.grey,
                             ),
                           ),
+                          onPressed: () => throw Exception(),
+                          child: Text(
+                            'Throw Test Exception',
+                            style: textTheme.labelMedium,
+                          ),
+                        ),
+                        TextButton(
+                          style: ButtonStyle(
+                            shadowColor: MaterialStateProperty.all(
+                              colorScheme.primary,
+                            ),
+                            overlayColor: MaterialStateProperty.all(
+                              Colors.grey,
+                            ),
+                          ),
                           onPressed: () async {
                             bool isWeb = kIsWeb;
                             if (!isWeb) {
@@ -195,6 +209,21 @@ class _HomePageState extends State<HomePage>
                           },
                           child: Text(
                             'Refresh libraries',
+                            style: textTheme.labelMedium,
+                          ),
+                        ),
+                        TextButton(
+                          style: ButtonStyle(
+                            shadowColor: MaterialStateProperty.all(
+                              colorScheme.primary,
+                            ),
+                            overlayColor: MaterialStateProperty.all(
+                              Colors.grey,
+                            ),
+                          ),
+                          onPressed: () async {},
+                          child: Text(
+                            'Other',
                             style: textTheme.labelMedium,
                           ),
                         ),
