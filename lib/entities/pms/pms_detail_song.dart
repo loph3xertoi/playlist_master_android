@@ -1,12 +1,10 @@
 import 'package:flutter/foundation.dart';
-import '../bilibili/bili_detail_resource.dart';
-import '../netease_cloud_music/ncm_detail_song.dart';
-import '../qq_music/qqmusic_detail_song.dart';
 
 import '../basic/basic_song.dart';
+import '../bilibili/bili_detail_resource.dart';
 import '../bilibili/bili_resource.dart';
-import '../netease_cloud_music/ncm_song.dart';
-import '../qq_music/qqmusic_song.dart';
+import '../netease_cloud_music/ncm_detail_song.dart';
+import '../qq_music/qqmusic_detail_song.dart';
 import 'pms_singer.dart';
 
 /// Detail pms song.

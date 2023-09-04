@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:feedback/feedback.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
@@ -49,12 +50,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(
-    ChangeNotifierProvider<ThemeNotifier>(
-      create: (_) => ThemeNotifier(),
-      child: MyApp(),
-    ),
-  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -63,6 +59,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider<ThemeNotifier>(
+          create: (_) => ThemeNotifier(),
+        ),
         ChangeNotifierProvider<MyNavigationButtonState>(
           create: (_) => MyNavigationButtonState(),
         ),
@@ -74,51 +73,54 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: Consumer<ThemeNotifier>(
-        builder: (context, theme, _) => MaterialApp(
-          // themeMode: ThemeMode.system,
-          builder: FToastBuilder(),
-          navigatorKey: navigatorKey,
-          theme: theme.getTheme(),
-          title: 'Playlist Master',
-          // theme: ThemeData(
-          //   useMaterial3: true,
-          //   colorSchemeSeed: Colors.green,
-          // ),
-          initialRoute: '/splashscreen',
-          routes: {
-            '/splashscreen': (context) => SplashScreen(),
-            '/home_page': (context) => HomePage(),
-            '/search_page': (context) => SearchPage(),
-            '/detail_library_page': (context) => DetailLibraryPage(),
-            '/detail_favlist_page': (context) => DetailFavListPage(),
-            '/songs_player_page': (context) => SongsPlayerPage(),
-            '/detail_resource_page': (context) => DetailResourcePage(),
-            // '/resources_player_page': (context) => ResourcesPlayerPage(),
-          },
-          onGenerateRoute: (settings) {
-            if (settings.name == '/detail_song_page') {
-              final args = settings.arguments as BasicSong;
-              return MaterialPageRoute(
-                builder: (context) => DetailSongPage(song: args),
-              );
-            } else if (settings.name == '/video_player_page') {
-              final args = settings.arguments as BasicVideo;
-              return MaterialPageRoute(
-                builder: (context) => VideoPlayerPage(video: args),
-              );
-            } else if (settings.name == '/similar_songs_page') {
-              final args = settings.arguments as BasicSong;
-              return MaterialPageRoute(
-                builder: (context) => SimilarSongsPage(song: args),
-              );
-            } else if (settings.name == '/related_videos_page') {
-              final args = settings.arguments as BasicSong;
-              return MaterialPageRoute(
-                builder: (context) => RelatedVideosPage(song: args),
-              );
-            }
-            return null;
-          },
+        builder: (context, theme, _) => BetterFeedback(
+          // theme: FeedbackThemeData(
+          //     feedbackSheetColor:
+          //         theme.getTheme()?.colorScheme.primary ?? Colors.amber,
+          //     bottomSheetDescriptionStyle:
+          //         theme.getTheme()?.textTheme.labelMedium! ?? TextStyle()),
+          child: MaterialApp(
+            // themeMode: ThemeMode.system,
+            builder: FToastBuilder(),
+            navigatorKey: navigatorKey,
+            theme: theme.getTheme(),
+            title: 'Playlist Master',
+            initialRoute: '/splashscreen',
+            routes: {
+              '/splashscreen': (context) => SplashScreen(),
+              '/home_page': (context) => HomePage(),
+              '/search_page': (context) => SearchPage(),
+              '/detail_library_page': (context) => DetailLibraryPage(),
+              '/detail_favlist_page': (context) => DetailFavListPage(),
+              '/songs_player_page': (context) => SongsPlayerPage(),
+              '/detail_resource_page': (context) => DetailResourcePage(),
+              // '/resources_player_page': (context) => ResourcesPlayerPage(),
+            },
+            onGenerateRoute: (settings) {
+              if (settings.name == '/detail_song_page') {
+                final args = settings.arguments as BasicSong;
+                return MaterialPageRoute(
+                  builder: (context) => DetailSongPage(song: args),
+                );
+              } else if (settings.name == '/video_player_page') {
+                final args = settings.arguments as BasicVideo;
+                return MaterialPageRoute(
+                  builder: (context) => VideoPlayerPage(video: args),
+                );
+              } else if (settings.name == '/similar_songs_page') {
+                final args = settings.arguments as BasicSong;
+                return MaterialPageRoute(
+                  builder: (context) => SimilarSongsPage(song: args),
+                );
+              } else if (settings.name == '/related_videos_page') {
+                final args = settings.arguments as BasicSong;
+                return MaterialPageRoute(
+                  builder: (context) => RelatedVideosPage(song: args),
+                );
+              }
+              return null;
+            },
+          ),
         ),
       ),
     );

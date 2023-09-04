@@ -60,6 +60,8 @@ dependencies:
   cross_file: ^0.3.3+4
   firebase_core: ^2.15.1
   firebase_crashlytics: ^3.3.5
+  feedback: ^2.6.0
+  flutter_email_sender: ^6.0.1
   # bottom_sheet:
   #   git:
   #     url: git@github.com:loph3xertoi/flutter-bottom-sheet.git
