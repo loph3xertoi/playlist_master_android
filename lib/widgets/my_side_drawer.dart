@@ -7,6 +7,7 @@ import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../states/app_state.dart';
 import '../utils/my_toast.dart';
@@ -36,7 +37,12 @@ class _MySideDrawerState extends State<MySideDrawer> {
     } else if (index == 1) {
       _openFeedback();
     } else if (index == 2) {
-      print('Open Github Issues');
+      // https://github.com/loph3xertoi/playlist_master_android/issues
+      final Uri toLaunch = Uri(
+          scheme: 'https',
+          host: 'github.com',
+          path: '/loph3xertoi/playlist_master_android/issues');
+      _openGithubIssues(toLaunch);
     } else if (index == 3) {
       print('Bug Report');
     } else {
@@ -54,6 +60,15 @@ class _MySideDrawerState extends State<MySideDrawer> {
         );
       },
     );
+  }
+
+  Future<void> _openGithubIssues(Uri url) async {
+    if (!await launchUrl(
+      url,
+      mode: LaunchMode.platformDefault,
+    )) {
+      throw Exception('Could not launch $url');
+    }
   }
 
   void alertFeedbackFunction(
