@@ -1,16 +1,22 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:archive/archive_io.dart';
 import 'package:feedback/feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:log_export/log_export.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../config/secrets.dart';
 import '../states/app_state.dart';
 import '../utils/my_toast.dart';
+import 'confirm_popup.dart';
 
 class MySideDrawer extends StatefulWidget {
   @override
@@ -44,7 +50,16 @@ class _MySideDrawerState extends State<MySideDrawer> {
           path: '/loph3xertoi/playlist_master_android/issues');
       _openGithubIssues(toLaunch);
     } else if (index == 3) {
-      print('Bug Report');
+      showDialog(
+          context: context,
+          builder: (_) => ShowConfirmDialog(
+                title:
+                    'Do you want to upload the crash logs, which is only used for debugging purposes?',
+                onConfirm: () {
+                  print('Upload crash logs');
+                  _reportBugs();
+                },
+              ));
     } else {
       throw 'Invalid selected drawer item';
     }
@@ -54,7 +69,7 @@ class _MySideDrawerState extends State<MySideDrawer> {
     // BetterFeedback.of(context).isVisible
     BetterFeedback.of(context).show(
       (feedback) async {
-        alertFeedbackFunction(
+        _alertFeedbackFunction(
           context,
           feedback,
         );
@@ -71,7 +86,53 @@ class _MySideDrawerState extends State<MySideDrawer> {
     }
   }
 
-  void alertFeedbackFunction(
+  Future<void> _reportBugs() async {
+    File crashLog = await _getCrashLog();
+    final smtpServer = SmtpServer(mySmtpServer,
+        port: 465,
+        ssl: true,
+        username: bugSenderEmail,
+        password: smtpServerPassword);
+    final message = Message()
+      ..from = Address(bugSenderEmail, 'Bug Reporter')
+      ..recipients.add(myEmail)
+      ..subject = 'Bug Report: Playlist Master'
+      ..attachments = [FileAttachment(crashLog)];
+    try {
+      final sendReport = await send(message, smtpServer);
+      print('Upload crash report successfully: $sendReport');
+      MyToast.showToast('Upload crash report successfully: $sendReport');
+    } on MailerException catch (e) {
+      print('Fail to upload crash report: $e');
+      MyToast.showToast('Fail to upload crash report: $e');
+      for (var p in e.problems) {
+        print('Problem: ${p.code}: ${p.msg}');
+      }
+    }
+  }
+
+  Future<File> _getCrashLog() async {
+    try {
+      final logFileExportedPath =
+          await LogExport.getLogFileExportedPath() ?? '';
+      if (logFileExportedPath.isNotEmpty) {
+        var encoder = ZipFileEncoder();
+        final Directory output = await getTemporaryDirectory();
+        String logsPath = '${output.path}/logs.zip';
+        encoder.create(logsPath);
+        encoder.addFile(File(logFileExportedPath));
+        encoder.close();
+        return File(logsPath);
+      } else {
+        throw 'Failed to export log file';
+      }
+    } catch (e, s) {
+      print('Export log error $e $s');
+      rethrow;
+    }
+  }
+
+  void _alertFeedbackFunction(
     BuildContext outerContext,
     UserFeedback feedback,
   ) {
@@ -122,17 +183,16 @@ class _MySideDrawerState extends State<MySideDrawer> {
               onPressed: () async {
                 // draft an email and send to developer
                 final screenshotFilePath =
-                    await writeImageToStorage(feedback.screenshot);
+                    await _writeImageToStorage(feedback.screenshot);
                 print(screenshotFilePath);
                 final Email email = Email(
                   body: feedback.text,
                   subject: 'Feedback: Playlist Master',
-                  recipients: ['loph3xertoi@gmail.com'],
+                  recipients: [myEmail],
                   attachmentPaths: [screenshotFilePath],
                   isHTML: false,
                 );
                 await FlutterEmailSender.send(email);
-                // Navigator.pop(context);
                 MyToast.showToast('Feedback sent successfully');
               },
               child: Text('Submit',
@@ -179,6 +239,14 @@ class _MySideDrawerState extends State<MySideDrawer> {
     );
   }
 
+  Future<String> _writeImageToStorage(Uint8List feedbackScreenshot) async {
+    final Directory output = await getTemporaryDirectory();
+    final String screenshotFilePath = '${output.path}/feedback.png';
+    final File screenshotFile = File(screenshotFilePath);
+    await screenshotFile.writeAsBytes(feedbackScreenshot);
+    return screenshotFilePath;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -208,11 +276,11 @@ class _MySideDrawerState extends State<MySideDrawer> {
                         color: Colors.transparent,
                       ),
                       accountName: Text(
-                        'Daw Loph',
+                        myName,
                         style: textTheme.labelMedium,
                       ),
                       accountEmail: Text(
-                        'loph3xertoi@gmail.com',
+                        myEmail,
                         style: textTheme.labelMedium,
                       ),
                       currentAccountPicture: CircleAvatar(
@@ -287,13 +355,5 @@ class _MySideDrawerState extends State<MySideDrawer> {
         ),
       ),
     );
-  }
-
-  Future<String> writeImageToStorage(Uint8List feedbackScreenshot) async {
-    final Directory output = await getTemporaryDirectory();
-    final String screenshotFilePath = '${output.path}/feedback.png';
-    final File screenshotFile = File(screenshotFilePath);
-    await screenshotFile.writeAsBytes(feedbackScreenshot);
-    return screenshotFilePath;
   }
 }

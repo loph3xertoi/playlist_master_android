@@ -10,6 +10,7 @@ import 'package:ip_geolocation_io/ip_geolocation_io.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 
+import '../config/secrets.dart';
 import '../entities/basic/basic_user.dart';
 import '../entities/bilibili/bili_user.dart';
 import '../entities/netease_cloud_music/ncm_user.dart';
@@ -654,8 +655,7 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
   @override
   void initState() {
     super.initState();
-    const apiKey = '7e6e5a2ec2404fc8b3e846d45c5abb76';
-    final geolocation = IpGeoLocationIO(apiKey);
+    final geolocation = IpGeoLocationIO(ipGeoLocationApiKey);
     geolocation.getUserLocation().then((value) {
       if (mounted) {
         setState(() {
