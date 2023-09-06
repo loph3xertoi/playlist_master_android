@@ -1021,7 +1021,7 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           Map<String, dynamic> user = decodedResponse['data'];
-          return Future.value(resolveJson(user));
+          return resolveJson(user);
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -1103,7 +1103,7 @@ class MyAppState extends ChangeNotifier {
               librariesList.map<BasicLibrary>((e) => resolveJson(e)).toList();
           PagedDataDTO<BasicLibrary> data =
               PagedDataDTO<BasicLibrary>(count, list, hasMore);
-          return Future.value(data);
+          return data;
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -1179,7 +1179,7 @@ class MyAppState extends ChangeNotifier {
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
-          return Future.value(resolveJson(decodedResponse['data']));
+          return resolveJson(decodedResponse['data']);
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -1234,8 +1234,8 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           var mvsLink = decodedResponse['data']!;
-          return Future.value(mvsLink.map((key, value) =>
-              MapEntry<String, List<String>>(key, List<String>.from(value))));
+          return mvsLink.map((key, value) =>
+              MapEntry<String, List<String>>(key, List<String>.from(value)));
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -1286,14 +1286,14 @@ class MyAppState extends ChangeNotifier {
         if (result.success) {
           var songsLink = decodedResponse['data']!;
           if (platform == 0) {
-            return Future.value(songsLink);
+            return songsLink;
           } else if (platform == 3) {
             BiliLinksDTO biliLinksDTO = BiliLinksDTO.fromJson(songsLink);
-            return Future.value(biliLinksDTO);
+            return biliLinksDTO;
           } else {
             Map<String, dynamic>? songsMap = songsLink;
             // .map((key, value) => MapEntry<String, dynamic>(key, value));
-            return Future.value(songsMap);
+            return songsMap;
           }
         } else {
           _errorMsg = result.message!;
@@ -1383,7 +1383,7 @@ class MyAppState extends ChangeNotifier {
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
-          return Future.value(resolveJson(decodedResponse['data']));
+          return resolveJson(decodedResponse['data']);
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -1437,7 +1437,7 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           PagedDataDTO<T> data = resolveJson(decodedResponse['data']);
-          return Future.value(data);
+          return data;
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -1519,8 +1519,7 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           List<dynamic> jsonList = decodedResponse['data'];
-          return Future.value(
-              jsonList.map<BasicSong>((e) => resolveJson(e)).toList());
+          return jsonList.map<BasicSong>((e) => resolveJson(e)).toList();
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -1580,7 +1579,7 @@ class MyAppState extends ChangeNotifier {
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
-          return Future.value(resolveJson(decodedResponse['data']));
+          return resolveJson(decodedResponse['data']);
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -1659,8 +1658,9 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           List<dynamic> jsonList = decodedResponse['data'];
-          return Future.value(
-              jsonList.map<BasicVideo>((video) => resolveJson(video)).toList());
+          return jsonList
+              .map<BasicVideo>((video) => resolveJson(video))
+              .toList();
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -1730,7 +1730,7 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Library created successfully');
-          return Future.value(result);
+          return result;
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -1801,7 +1801,7 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Library updated successfully');
-          return Future.value(result);
+          return result;
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -1884,7 +1884,7 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Delete libraries successfully');
-          return Future.value(result);
+          return result;
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -2002,7 +2002,7 @@ class MyAppState extends ChangeNotifier {
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
-          return Future.value(result);
+          return result;
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -2084,7 +2084,7 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Songs removed from ${library.name}');
-          return Future.value(result);
+          return result;
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -2194,7 +2194,7 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Songs moved successfully');
-          return Future.value(result);
+          return result;
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -2278,7 +2278,7 @@ class MyAppState extends ChangeNotifier {
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
-          return Future.value(result);
+          return result;
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -2337,7 +2337,7 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Resources removed from ${favList.name}');
-          return Future.value(result);
+          return result;
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
@@ -2411,7 +2411,7 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           MyToast.showToast('Resources moved successfully');
-          return Future.value(result);
+          return result;
         } else {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);

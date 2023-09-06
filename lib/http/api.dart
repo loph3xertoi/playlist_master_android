@@ -4,8 +4,10 @@ class API {
 
   static const demoMpd = 'http://$host/mpd/c.mpd';
 
+  static const demoAppcastXml = 'http://$host/xml/appcast.xml';
+
   /// Host of playlist server.
-  static const host = '192.168.10.152:8080';
+  static const host = '192.168.105.39:8080';
   // static const host = '192.168.8.171:8080';
   // static const host = '192.168.0.114:8080';
 
@@ -93,6 +95,10 @@ class API {
   /// Get image from pms for cors and referrer reason.
   /// api: GET /cors/image?imageUrl=[imageUrl]
   static const getImage = '/cors/image';
+
+  /// Check if current token is expired.
+  /// api: GET /login/state?token=[token]
+  static const checkToken = '/login/state';
 
   /// Convert raw image url to image url for pms.
   static String convertImageUrl(String rawImageUrl) {

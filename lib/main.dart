@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:log_export/log_export.dart';
+import 'pages/login_page_new.dart';
 import 'package:provider/provider.dart';
 
 import 'entities/basic/basic_song.dart';
@@ -17,11 +18,12 @@ import 'pages/detail_library_page.dart';
 import 'pages/detail_resource_page.dart';
 import 'pages/detail_song_page.dart';
 import 'pages/home_page.dart';
+import 'pages/login_page.dart';
 import 'pages/related_videos_page.dart';
 import 'pages/search_page.dart';
 import 'pages/similar_songs_page.dart';
 import 'pages/songs_player_page.dart';
-import 'pages/splash_screen.dart';
+import 'widgets/login_widget/splash_screen.dart';
 import 'pages/video_player_page.dart';
 import 'states/app_state.dart';
 import 'states/my_navigation_button_state.dart';
@@ -32,11 +34,15 @@ GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp();
+
   LogExport.init();
+
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
   };
+
   // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
   PlatformDispatcher.instance.onError = (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
@@ -49,9 +55,11 @@ Future<void> main() async {
     androidNotificationOngoing: true,
     androidShowNotificationBadge: true,
   );
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   runApp(const MyApp());
 }
 
@@ -90,6 +98,8 @@ class MyApp extends StatelessWidget {
             initialRoute: '/splashscreen',
             routes: {
               '/splashscreen': (context) => SplashScreen(),
+              '/login_page': (context) => LoginScreen(),
+              // '/login_page': (context) => LoginPage(),
               '/home_page': (context) => HomePage(),
               '/search_page': (context) => SearchPage(),
               '/detail_library_page': (context) => DetailLibraryPage(),

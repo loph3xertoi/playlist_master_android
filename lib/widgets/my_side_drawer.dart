@@ -247,6 +247,13 @@ class _MySideDrawerState extends State<MySideDrawer> {
     return screenshotFilePath;
   }
 
+  Future<bool> _goToLogin(BuildContext context) {
+    return Navigator.of(context)
+        .pushReplacementNamed('/login_page')
+        // we dont want to pop the screen, just replace it completely
+        .then((_) => false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -344,7 +351,7 @@ class _MySideDrawerState extends State<MySideDrawer> {
                           Icon(Icons.logout, color: colorScheme.onSecondary),
                       onTap: () {
                         print(appState);
-                        // TODO: Implement log out functionality
+                        _goToLogin(context);
                       },
                     ),
                   ],

@@ -4,11 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fplayer/fplayer.dart';
+import 'package:playlistmaster/utils/app_updater.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/bilibili/bili_resource.dart';
 import '../entities/netease_cloud_music/ncm_song.dart';
 import '../entities/qq_music/qqmusic_song.dart';
+import '../http/api.dart';
 import '../http/my_http.dart';
 import '../states/app_state.dart';
 import '../utils/my_logger.dart';
@@ -36,12 +38,14 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
+    // TODO: Check for updates.
+    // AppUpdater.checkForUpdate();
     if (!kIsWeb) {
-      resetRotation();
+      _resetRotation();
     }
   }
 
-  void resetRotation() async {
+  void _resetRotation() async {
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky,
         overlays: []);
     await FPlugin.setOrientationPortrait();
@@ -56,6 +60,7 @@ class _HomePageState extends State<HomePage>
     MyAppState appState = context.watch<MyAppState>();
     _currentPlatform = appState.currentPlatform;
     var screenSize = MediaQuery.of(context).size;
+    const appcastURL = API.demoAppcastXml;
     return Consumer<ThemeNotifier>(
       builder: (context, theme, _) => Scaffold(
         key: _scaffoldKey,

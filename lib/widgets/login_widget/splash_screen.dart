@@ -6,13 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:image_network/image_network.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../http/api.dart';
-import '../http/my_http.dart';
-import '../states/app_state.dart';
-import '../utils/my_logger.dart';
-import '../utils/storage_manager.dart';
-import '../widgets/my_selectable_text.dart';
+import '../../http/api.dart';
+import '../../http/my_http.dart';
+import '../../states/app_state.dart';
+import '../../utils/my_logger.dart';
+import '../../utils/my_toast.dart';
+import '../../utils/pm_login.dart';
+import '../../utils/storage_manager.dart';
+import '../my_selectable_text.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -21,11 +24,8 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   late Future<dynamic> currentPlatformFuture;
+  
   late Future<String> splashImageFuture;
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  // }
 
   @override
   void initState() {
@@ -33,15 +33,30 @@ class _SplashScreenState extends State<SplashScreen> {
     final state = Provider.of<MyAppState>(context, listen: false);
     currentPlatformFuture = StorageManager.readData('currentPlatform');
     splashImageFuture = state.getBiliSplashScreenImage();
-    Timer(Duration(seconds: 3), () {
-      // if (hasActiveWork()) {
-      //   final scheduler = SchedulerBinding.instance;
-      //   scheduler.addPostFrameCallback((_) {
-      //     Navigator.pushReplacementNamed(context, '/home_page');
-      //   });
-      // } else {
-      Navigator.pushReplacementNamed(context, '/home_page');
-      // }
+    Timer(Duration(seconds: 3), () async {
+      SharedPreferences localStorage = await SharedPreferences.getInstance();
+      var token = localStorage.getString('token');
+      if (token != null && token.isNotEmpty) {
+        bool? isExpired = await PMLogin.checkToken(token);
+        if (isExpired != null && !isExpired) {
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, '/home_page');
+          }
+        } else {
+          // Expired.
+          MyToast.showToast('Login expired, please login again.');
+          MyLogger.logger.w('Login expired!');
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, '/login_page');
+          }
+        }
+      } else {
+        // Haven't logged.
+        MyLogger.logger.w('Please login first.');
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/login_page');
+        }
+      }
     });
   }
 

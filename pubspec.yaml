@@ -40,6 +40,10 @@ dependencies:
     git:
       url: https://github.com/loph3xertoi/betterplayer.git
       ref: master
+  flutter_login:
+    git:
+      url: https://github.com/loph3xertoi/flutter_login.git
+      ref: master
   just_audio:
     git:
       url: https://github.com/loph3xertoi/just_audio.git
@@ -67,6 +71,7 @@ dependencies:
   log_export: ^1.0.0
   archive: ^3.3.8
   mailer: ^6.0.1
+  font_awesome_flutter: ^10.2.1
   # bottom_sheet:
   #   git:
   #     url: git@github.com:loph3xertoi/flutter-bottom-sheet.git
