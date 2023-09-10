@@ -8,14 +8,14 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../http/api.dart';
-import '../../http/my_http.dart';
-import '../../states/app_state.dart';
-import '../../utils/my_logger.dart';
-import '../../utils/my_toast.dart';
-import '../../utils/pm_login.dart';
-import '../../utils/storage_manager.dart';
-import '../my_selectable_text.dart';
+import '../http/api.dart';
+import '../http/my_http.dart';
+import '../states/app_state.dart';
+import '../utils/my_logger.dart';
+import '../utils/my_toast.dart';
+import '../utils/pm_login.dart';
+import '../utils/storage_manager.dart';
+import '../widgets/my_selectable_text.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -24,7 +24,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   late Future<dynamic> currentPlatformFuture;
-  
+
   late Future<String> splashImageFuture;
 
   @override

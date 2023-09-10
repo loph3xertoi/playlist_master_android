@@ -89,7 +89,8 @@ class _MySideDrawerState extends State<MySideDrawer> {
   Future<void> _reportBugs() async {
     File crashLog = await _getCrashLog();
     final smtpServer = SmtpServer(mySmtpServer,
-        port: 465,
+        // port: 587, works in backend
+        port: 465, // works in pm client
         ssl: true,
         username: bugSenderEmail,
         password: smtpServerPassword);

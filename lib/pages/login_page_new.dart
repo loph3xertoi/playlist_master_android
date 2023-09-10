@@ -1,61 +1,113 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter_login/flutter_login.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../states/app_state.dart';
-import '../utils/mock_user.dart';
 import '../widgets/login_widget/constants.dart';
 
 class LoginScreen extends StatelessWidget {
   static const routeName = '/login_page';
 
-  const LoginScreen({Key? key}) : super(key: key);
+  MyAppState? _appState;
 
-  Duration get loginTime => Duration(milliseconds: timeDilation.ceil() * 2250);
+  SignupData? _signupData;
 
-  Future<String?> _loginUser(LoginData data) {
-    return Future.delayed(loginTime).then((_) {
-      if (!mockUsers.containsKey(data.name)) {
-        return 'User not exists';
-      }
-      if (mockUsers[data.name] != data.password) {
-        return 'Password does not match';
-      }
-      return null;
-    });
+  Future<String?> _loginUser(LoginData data) async {
+    var loginUserId = await _appState!.login(data.name, data.password);
+    if (loginUserId == null) {
+      return _appState!.errorMsg;
+    }
+    return null;
   }
 
-  Future<String?> _signupUser(SignupData data) {
-    return Future.delayed(loginTime).then((_) {
-      return null;
-    });
+  String? _validatePassword(String? password) {
+    if (password == null) {
+      return "Password can't be empty";
+    }
+
+    if (password.length < 8 || password.length > 16) {
+      return "Password must has length from 8 to 16";
+    }
+
+    RegExp invisibleCharRegex = RegExp(r'[\x00-\x1F\x7F]');
+    if (invisibleCharRegex.hasMatch(password)) {
+      return "Password can't contain invisible characters";
+    }
+
+    RegExp uppercaseRegex = RegExp(r'[A-Z]');
+    if (!uppercaseRegex.hasMatch(password)) {
+      return "Password must contain at least one uppercase letter";
+    }
+
+    RegExp lowercaseRegex = RegExp(r'[a-z]');
+    if (!lowercaseRegex.hasMatch(password)) {
+      return "Password must contain at least one lowercase letter";
+    }
+
+    RegExp digitRegex = RegExp(r'\d');
+    if (!digitRegex.hasMatch(password)) {
+      return "Password must contain at least one digit";
+    }
+
+    RegExp specialCharRegex = RegExp(r'[!@#$%^&*(),.?":{}|<>]');
+    if (!specialCharRegex.hasMatch(password)) {
+      return "Password must contain at least one special letter";
+    }
+
+    // TODO: continuous number sequence, alphabet sequence and usqwert keyboard sequence.
+    // RegExp numberSequenceRegex = RegExp(r'.*\b\d{3,}\b.*');
+    // if (numberSequenceRegex.hasMatch(password)) {
+    //   return "Password contains number sequence";
+    // }
+
+    // RegExp alphabetSequenceRegex = RegExp(r'^a*b*c*d*e*f*g*h*i*j*k*l*m*n*o*p*q*r*s*t*u*v*w*x*y*z*A*B*C*D*E*F*G*H*I*J*K*L*M*N*O*P*Q*R*S*T*U*V*W*X*Y*Z*$');
+    // if (alphabetSequenceRegex.hasMatch(password)) {
+    //   return "Password contains alphabet sequence";
+    // }
+
+    return null;
   }
 
-  Future<String?> _recoverPassword(String name) {
-    return Future.delayed(loginTime).then((_) {
-      if (!mockUsers.containsKey(name)) {
-        return 'User not exists';
-      }
-      return null;
-    });
+  Future<String?> _signupUser(SignupData data) async {
+    _signupData = data;
+    var loginUserId = await _appState!.register(
+        data.additionalSignupData!['userName']!,
+        data.name!,
+        data.additionalSignupData!['phoneNumber']!,
+        data.password!);
+    if (loginUserId == null) {
+      return _appState!.errorMsg;
+    }
+    return null;
   }
 
-  Future<String?> _resendCode(SignupData data) {
-    return Future.delayed(loginTime).then((_) {
-      if (!mockUsers.containsKey(data)) {
-        return 'User not exists';
-      }
-      print(data);
-      return null;
-    });
+  Future<String?> _recoverPassword(String name) async {
+    _appState!.sendVerifyToken(name, 2);
+    return null;
   }
 
-  Future<String?> _signupConfirm(String error, LoginData data) {
-    return Future.delayed(loginTime).then((_) {
-      return null;
-    });
+  Future<String?> _resendCode(SignupData data) async {
+    _appState!.sendVerifyToken(data.name!, 1);
+    return null;
+  }
+
+  Future<String?> _signupConfirm(String error, LoginData data) async {
+    var result = await _appState!.verifySignUpNologin(
+        _signupData!.additionalSignupData!['userName']!,
+        _signupData!.name!,
+        _signupData!.additionalSignupData!['phoneNumber']!,
+        _signupData!.password!,
+        error);
+    if (result == null) {
+      return _appState!.errorMsg;
+    }
+    return null;
+  }
+
+  Future<String?> _recoverConfirm(String error, LoginData data) async {
+    return _appState!.verifyResetPasswordNologin(
+        data.password, data.password, error, data.name);
   }
 
   @override
@@ -63,21 +115,22 @@ class LoginScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
+    _appState = appState;
     return FlutterLogin(
       title: Constants.appName,
       logo: const AssetImage('assets/images/pm_round.png'),
       logoTag: Constants.logoTag,
       titleTag: Constants.titleTag,
       navigateBackAfterRecovery: true,
-      onConfirmRecover: _signupConfirm,
+      onConfirmRecover: _recoverConfirm,
       onConfirmSignup: _signupConfirm,
-      loginAfterSignUp: false,
+      loginAfterSignUp: true,
       hideForgotPasswordButton: false,
       // showDebugButtons: true,
       loginProviders: [
         LoginProvider(
           button: Buttons.gitHub,
-          label: 'Sign in with Github',
+          label: 'Sign in with GitHub',
           callback: () async {
             return null;
           },
@@ -102,35 +155,36 @@ class LoginScreen extends StatelessWidget {
         //   },
         // ),
       ],
-      termsOfService: [
-        TermOfService(
-          id: 'newsletter',
-          mandatory: false,
-          text: 'Newsletter subscription',
-        ),
-        TermOfService(
-          id: 'general-term',
-          mandatory: true,
-          text: 'Term of services',
-          linkUrl: 'https://github.com/NearHuscarl/flutter_login',
-        ),
-      ],
+      // termsOfService: [
+      //   TermOfService(
+      //     id: 'newsletter',
+      //     mandatory: false,
+      //     text: 'Newsletter subscription',
+      //   ),
+      //   TermOfService(
+      //     id: 'general-term',
+      //     mandatory: true,
+      //     text: 'Term of services',
+      //     linkUrl: 'https://github.com/NearHuscarl/flutter_login',
+      //   ),
+      // ],
       additionalSignupFields: [
         const UserFormField(
-          keyName: 'Username',
+          keyName: 'userName',
+          displayName: 'User Name',
           icon: Icon(FontAwesomeIcons.userLarge),
         ),
         UserFormField(
-          keyName: 'phone_number',
+          keyName: 'phoneNumber',
           displayName: 'Phone Number',
           userType: LoginUserType.phone,
           fieldValidator: (value) {
             final phoneRegExp = RegExp(
-              '^(\\+\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}\$',
-            );
-            if (value != null &&
-                value.length < 7 &&
-                !phoneRegExp.hasMatch(value)) {
+                '^(\\+\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}\$');
+            if ((value != null &&
+                    value.length < 7 &&
+                    !phoneRegExp.hasMatch(value)) ||
+                value == null) {
               return "This isn't a valid phone number";
             }
             return null;
@@ -143,11 +197,13 @@ class LoginScreen extends StatelessWidget {
       // hideSignUpButton: true,
       disableCustomPageTransformer: true,
       messages: LoginMessages(
-        userHint: 'User',
-        passwordHint: 'Pass',
+        userHint: 'Email',
+        passwordHint: 'Password',
         confirmPasswordHint: 'Confirm',
         loginButton: 'LOG IN',
         signupButton: 'REGISTER',
+        signUpSuccess:
+            'Please check your email, an confirmation code has been sent to your email.',
         // forgotPasswordButton: 'Forgot huh?',
         recoverPasswordButton: 'RESET PASSWORD',
         goBackButton: 'GO BACK',
@@ -155,7 +211,8 @@ class LoginScreen extends StatelessWidget {
         recoverPasswordIntro: 'Don\'t feel bad. Happens all the time.',
         recoverPasswordDescription:
             'Lorem Ipsum is simply dummy text of the printing and typesetting industry',
-        recoverPasswordSuccess: 'Password rescued successfully',
+        recoverPasswordSuccess:
+            'Please check your email, an recovery code for resetting password has been sent to your email.',
         flushbarTitleError: 'Oh no!',
         flushbarTitleSuccess: 'Success!',
         // providersTitle: 'login with'),
@@ -195,7 +252,7 @@ class LoginScreen extends StatelessWidget {
         ),
         inputTheme: InputDecorationTheme(
           filled: true,
-          fillColor: Colors.purple.withOpacity(.1),
+          fillColor: Colors.teal,
           contentPadding: EdgeInsets.zero,
           errorStyle: TextStyle(
             color: Colors.red,
@@ -224,55 +281,50 @@ class LoginScreen extends StatelessWidget {
           ),
         ),
         // buttonTheme: LoginButtonTheme(
-        //   splashColor: Colors.blue,
-        //   // backgroundColor: Colors.pinkAccent,
-        //   // highlightColor: Colors.lightGreen,
-        //   elevation: 1.0,
-        //   highlightElevation: 4.0,
+        //   //TODO: press deep blue color.
+        //   splashColor: Color(0xFF361CC4),
+        //   // backgroundColor: Color(0xFF0DB826),
+        //   // highlightColor: Color(0xFF361CC4),
+        //   // elevation: 1.0,
+        //   // highlightElevation: 4.0,
         //   // shape: BeveledRectangleBorder(
         //   //   borderRadius: BorderRadius.circular(10),
         //   // ),
-        //   shape:
-        //       RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        //   // shape:
+        //   //     RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
         //   // shape: CircleBorder(side: BorderSide(color: Colors.green)),
         //   // shape: ContinuousRectangleBorder(
         //   //     borderRadius: BorderRadius.circular(55.0)),
         // ),
       ),
       userValidator: (value) {
-        if (!value!.contains('@') || !value.endsWith('.com')) {
-          return "Email must contain '@' and end with '.com'";
+        final emailRegex =
+            RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
+        if (value == null || !emailRegex.hasMatch(value)) {
+          return "This isn't a valid email address";
         }
         return null;
       },
-      passwordValidator: (value) {
-        if (value!.isEmpty) {
-          return 'Password is empty';
-        }
-        return null;
-      },
+      passwordValidator: _validatePassword,
       onLogin: (loginData) {
-        debugPrint('Login info');
-        debugPrint('Name: ${loginData.name}');
-        debugPrint('Password: ${loginData.password}');
         return _loginUser(loginData);
       },
       onSignup: (signupData) {
-        debugPrint('Signup info');
-        debugPrint('Name: ${signupData.name}');
-        debugPrint('Password: ${signupData.password}');
+        // debugPrint('Signup info');
+        // debugPrint('Name: ${signupData.name}');
+        // debugPrint('Password: ${signupData.password}');
 
-        signupData.additionalSignupData?.forEach((key, value) {
-          debugPrint('$key: $value');
-        });
-        if (signupData.termsOfService.isNotEmpty) {
-          debugPrint('Terms of service: ');
-          for (final element in signupData.termsOfService) {
-            debugPrint(
-              ' - ${element.term.id}: ${element.accepted == true ? 'accepted' : 'rejected'}',
-            );
-          }
-        }
+        // signupData.additionalSignupData?.forEach((key, value) {
+        //   debugPrint('$key: $value');
+        // });
+        // if (signupData.termsOfService.isNotEmpty) {
+        //   debugPrint('Terms of service: ');
+        //   for (final element in signupData.termsOfService) {
+        //     debugPrint(
+        //       ' - ${element.term.id}: ${element.accepted == true ? 'accepted' : 'rejected'}',
+        //     );
+        //   }
+        // }
         return _signupUser(signupData);
       },
       onSubmitAnimationCompleted: () {
@@ -284,11 +336,9 @@ class LoginScreen extends StatelessWidget {
         Navigator.of(context).pushReplacementNamed('/home_page');
       },
       onResendCode: _resendCode,
+      resendCodeInterval: 60,
       onRecoverPassword: (name) {
-        debugPrint('Recover password info');
-        debugPrint('Name: $name');
         return _recoverPassword(name);
-        // Show new password dialog
       },
       headerWidget: const IntroWidget(),
     );

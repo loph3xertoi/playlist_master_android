@@ -991,6 +991,357 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
+  Future<int?> login(String email, String password) async {
+    Map<String, Object> requestBody = {'email': email, 'password': password};
+    final Uri url = Uri.http(API.host, API.login);
+    final client = RetryClient(http.Client());
+    try {
+      MyLogger.logger.i('Login...');
+      final response = await client.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+      if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          return result.data as int;
+        } else {
+          _errorMsg = result.message!;
+          // MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
+        }
+      } else {
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<void> updateCredential(
+      String thirdId, String thirdCookie, int platform) async {
+    Map<String, Object> requestBody = {
+      'thirdId': thirdId,
+      'thirdCookie': thirdCookie
+    };
+    final Uri url = Uri.http(API.host, API.credential, {'platform': platform});
+    final client = RetryClient(http.Client());
+    try {
+      MyLogger.logger.i('Updating third app\'s credential...');
+      final response = await client.put(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+      if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        Result result = Result.fromJson(decodedResponse);
+        if (!result.success) {
+          _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+        }
+      } else {
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  /// Forgot password, need login first.
+  Future<void> forgotPassword() async {
+    final Uri url = Uri.http(API.host, API.forgot);
+    final client = RetryClient(http.Client());
+    try {
+      MyLogger.logger.i('Forgot password...');
+      final response = await client.get(url);
+      if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        Result result = Result.fromJson(decodedResponse);
+        if (!result.success) {
+          _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+        }
+      } else {
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  /// Send verify token without needing login first.
+  Future<void> sendVerifyToken(String email, int type) async {
+    final Uri url = Uri.http(
+        API.host, API.sendCode, {'email': email, 'type': type.toString()});
+    final client = RetryClient(http.Client());
+    try {
+      MyLogger.logger.i('Send verify token...');
+      final response = await client.get(url);
+      if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        Result result = Result.fromJson(decodedResponse);
+        if (!result.success) {
+          _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+        }
+      } else {
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<void> logout() async {
+    final Uri url = Uri.http(API.host, API.logout);
+    final client = RetryClient(http.Client());
+    try {
+      MyLogger.logger.i('Logout...');
+      final response = await client.get(url);
+      if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        Result result = Result.fromJson(decodedResponse);
+        if (!result.success) {
+          _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+        }
+      } else {
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<String?> register(
+      String name, String email, String phoneNumber, String password) async {
+    Map<String, Object> requestBody = {
+      'name': name,
+      'email': email,
+      'phoneNumber': phoneNumber,
+      'password': password
+    };
+    final Uri url = Uri.http(API.host, API.register);
+    final client = RetryClient(http.Client());
+    try {
+      MyLogger.logger.i('Register user...');
+      final response = await client.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+      if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          return result.data.toString();
+        } else {
+          _errorMsg = result.message!;
+          // MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
+        }
+      } else {
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<String?> verify(
+      String password, String repeatedPassword, String token) async {
+    Map<String, Object> requestBody = {
+      'password': password,
+      'repeatedPassword': repeatedPassword,
+      'token': token
+    };
+    final Uri url = Uri.http(API.host, API.verify);
+    final client = RetryClient(http.Client());
+    try {
+      MyLogger.logger.i('Verify token...');
+      final response = await client.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+      if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        Result result = Result.fromJson(decodedResponse);
+        if (!result.success) {
+          _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
+        } else {
+          return result.data.toString();
+        }
+      } else {
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<String?> verifyResetPasswordNologin(String password,
+      String repeatedPassword, String token, String email) async {
+    Map<String, Object> requestBody = {
+      'password': password,
+      'repeatedPassword': repeatedPassword,
+      'email': email,
+      'token': token
+    };
+    final Uri url = Uri.http(API.host, API.verifyTokenForResetPasswordNologin);
+    final client = RetryClient(http.Client());
+    try {
+      MyLogger.logger.i('Verify token...');
+      final response = await client.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+      if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        Result result = Result.fromJson(decodedResponse);
+        if (!result.success) {
+          _errorMsg = result.message!;
+          // MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
+        } else {
+          return result.data.toString();
+        }
+      } else {
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<String?> verifySignUpNologin(String name, String email,
+      String phoneNumber, String password, String token) async {
+    Map<String, Object> requestBody = {
+      'name': name,
+      'email': email,
+      'phoneNumber': phoneNumber,
+      'password': password,
+      'token': token
+    };
+    final Uri url = Uri.http(API.host, API.verifyTokenForSignUpNologin);
+    final client = RetryClient(http.Client());
+    try {
+      MyLogger.logger.i('Verify token...');
+      final response = await client.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+      if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        Result result = Result.fromJson(decodedResponse);
+        if (!result.success) {
+          _errorMsg = result.message!;
+          // MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
+        } else {
+          return result.data.toString();
+        }
+      } else {
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
   Future<BasicUser?> fetchUser(int platform) async {
     BasicUser Function(Map<String, dynamic>) resolveJson;
     if (platform == 0) {

@@ -7,7 +7,7 @@ class API {
   static const demoAppcastXml = 'http://$host/xml/appcast.xml';
 
   /// Host of playlist server.
-  static const host = '192.168.105.39:8080';
+  static const host = '192.168.54.116:8080';
   // static const host = '192.168.8.171:8080';
   // static const host = '192.168.0.114:8080';
 
@@ -99,6 +99,43 @@ class API {
   /// Check if current token is expired.
   /// api: GET /login/state?token=[token]
   static const checkToken = '/login/state';
+
+  /// Update the credential of third app.
+  /// api: PUT /credential?platform=[platform] {thirdId: [thirdId], thirdCookie: [thirdCookie]}
+  static const credential = '/credential';
+
+  /// Forget user's password, send verifying code to user's email, need login first.
+  /// api: GET /forgot
+  static const forgot = '/forgot';
+
+  /// Send token to yur email for verifying, no need to login first, type: 1 for sign up, 2 for reset password.
+  /// api: GET /sendcode?email=[email]&type=[type]
+  static const sendCode = '/sendcode';
+
+  /// PMS user login endpoint.
+  /// api: POST /login {name: [name], password: [password]}
+  static const login = '/login';
+
+  /// Logout current account.
+  /// api: GET /logout
+  static const logout = '/logout';
+
+  /// Register account in pms.
+  /// api: POST /register {name: [name], email: [email], password: [password]}
+  static const register = '/register';
+
+  /// Verify token for resetting user's password, need to log in first.
+  /// api: POST /verify {password: [password], repeatedPassword: [repeatedPassword], token: [token]}
+  static const verify = '/verify';
+
+  /// Verify token for resetting user's password, no need to log in.
+  /// api: POST /verify/nologin/resetPassword {password: [password], repeatedPassword: [repeatedPassword], email: [email], token: [token]}
+  static const verifyTokenForResetPasswordNologin =
+      '/verify/nologin/resetPassword';
+
+  /// Verify token for sign up new account, no need to log in.
+  /// api: POST /verify/nologin/signUp {name: [name], email: [email], phoneNumber: [phoneNumber], password: [password], token: [token]}
+  static const verifyTokenForSignUpNologin = '/verify/nologin/signUp';
 
   /// Convert raw image url to image url for pms.
   static String convertImageUrl(String rawImageUrl) {
