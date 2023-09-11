@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../states/app_state.dart';
 import '../basic/basic_user.dart';
 import '../bilibili/bili_user.dart';
 import '../netease_cloud_music/ncm_user.dart';
@@ -47,8 +48,8 @@ class PMSUser extends BasicUser {
       json['intro'],
       subUsers,
       name: json['name'],
-      headPic: json['headPic'],
-      bgPic: json['bgPic'],
+      headPic: json['headPic'] ?? MyAppState.defaultCoverImage,
+      bgPic: json['bgPic'] ?? MyAppState.defaultCoverImage,
     );
   }
 

@@ -41,8 +41,6 @@ class NightBackgroundState extends State<NightBackground>
 
   Future<void> _getValueFromSharedPreferences(MyAppState state) async {
     var themeMode = await StorageManager.readData('themeMode');
-    // SharedPreferences prefs = await SharedPreferences.getInstance();
-    // String value = prefs.getString('themeMode') ?? 'dark';
     bool val = themeMode == 'dark';
     state.isDarkMode = val;
     setState(() {
@@ -144,7 +142,6 @@ class NightBackgroundState extends State<NightBackground>
                   );
                 },
               ),
-              // _buildSun(),
               Transform.translate(
                 offset: const Offset(160, -360),
                 child: _buildSun(),
@@ -178,11 +175,6 @@ class NightBackgroundState extends State<NightBackground>
             ],
           ),
         ),
-        // floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-        // floatingActionButton: Transform.translate(
-        //   offset: const Offset(160, -360),
-        //   child: _buildSun(),
-        // ),
       ),
     );
   }

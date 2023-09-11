@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:image_network/image_network.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../http/api.dart';
 import '../http/my_http.dart';
@@ -34,11 +33,12 @@ class _SplashScreenState extends State<SplashScreen> {
     currentPlatformFuture = StorageManager.readData('currentPlatform');
     splashImageFuture = state.getBiliSplashScreenImage();
     Timer(Duration(seconds: 3), () async {
-      SharedPreferences localStorage = await SharedPreferences.getInstance();
-      var token = localStorage.getString('token');
-      if (token != null && token.isNotEmpty) {
-        bool? isExpired = await PMLogin.checkToken(token);
-        if (isExpired != null && !isExpired) {
+      var cookie = await StorageManager.readData('cookie');
+      if (cookie != null && cookie.isNotEmpty) {
+        bool? isLogin = await PMLogin.checkIfLogin(cookie);
+        if (isLogin != null && isLogin) {
+          MyAppState.cookie = cookie;
+          API.uid = (await StorageManager.readData('uid')).toString();
           if (mounted) {
             Navigator.pushReplacementNamed(context, '/home_page');
           }
@@ -59,11 +59,6 @@ class _SplashScreenState extends State<SplashScreen> {
       }
     });
   }
-
-  // bool hasActiveWork() {
-  //   final scheduler = SchedulerBinding.instance;
-  //   return scheduler.hasScheduledFrame;
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -148,13 +143,14 @@ class _SplashScreenState extends State<SplashScreen> {
           } else {
             List<dynamic> data = snapshot.data!;
             int currentPlatform;
-            if (data[0] == null) {
+            if (data[0] == null || int.tryParse(data[0]) == null) {
               StorageManager.saveData(
-                  'currentPlatform', appState.currentPlatform);
+                  'currentPlatform', appState.currentPlatform.toString());
               currentPlatform = appState.currentPlatform;
             } else {
-              currentPlatform = data[0] as int;
+              currentPlatform = int.tryParse(data[0])!;
             }
+            appState.setCurrentPlatform(currentPlatform);
             String splashImage = data[1] as String;
             print('Current platform: $currentPlatform');
             print('Current splash screen image: $splashImage');

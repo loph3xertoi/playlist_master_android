@@ -54,8 +54,12 @@ import '../third_lib_change/just_audio/common.dart';
 import '../utils/get_video_type.dart';
 import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
+import '../utils/storage_manager.dart';
 
 class MyAppState extends ChangeNotifier {
+  /// JSESSIONID for user that has login.
+  static String? cookie;
+
   /// Using mock data.
   bool _isUsingMockData = false;
 
@@ -574,6 +578,10 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setCurrentPlatform(int value) {
+    _currentPlatform = value;
+  }
+
   set isDarkMode(bool? value) {
     _isDarkMode = value;
     notifyListeners();
@@ -1007,6 +1015,10 @@ class MyAppState extends ChangeNotifier {
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
+          cookie = response.headers['set-cookie'];
+          API.uid = result.data.toString();
+          StorageManager.saveData('cookie', cookie);
+          StorageManager.saveData('uid', API.uid);
           return result.data as int;
         } else {
           _errorMsg = result.message!;
@@ -1042,7 +1054,7 @@ class MyAppState extends ChangeNotifier {
       MyLogger.logger.i('Updating third app\'s credential...');
       final response = await client.put(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'Cookie': cookie!},
         body: jsonEncode(requestBody),
       );
       if (response.statusCode == 200) {
@@ -1054,6 +1066,10 @@ class MyAppState extends ChangeNotifier {
           MyToast.showToast(_errorMsg);
           MyLogger.logger.e(_errorMsg);
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1075,7 +1091,7 @@ class MyAppState extends ChangeNotifier {
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Forgot password...');
-      final response = await client.get(url);
+      final response = await client.get(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -1085,6 +1101,10 @@ class MyAppState extends ChangeNotifier {
           MyToast.showToast(_errorMsg);
           MyLogger.logger.e(_errorMsg);
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1101,7 +1121,7 @@ class MyAppState extends ChangeNotifier {
   }
 
   /// Send verify token without needing login first.
-  Future<void> sendVerifyToken(String email, int type) async {
+  Future<bool> sendVerifyToken(String email, int type) async {
     final Uri url = Uri.http(
         API.host, API.sendCode, {'email': email, 'type': type.toString()});
     final client = RetryClient(http.Client());
@@ -1114,14 +1134,16 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (!result.success) {
           _errorMsg = result.message!;
-          MyToast.showToast(_errorMsg);
           MyLogger.logger.e(_errorMsg);
+          return false;
         }
+        return true;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
+        return false;
       }
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
@@ -1146,7 +1168,13 @@ class MyAppState extends ChangeNotifier {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
           MyLogger.logger.e(_errorMsg);
+          return;
         }
+        cookie = null;
+        API.uid = '0';
+        StorageManager.deleteData('cookie');
+        StorageManager.deleteData('uid');
+        StorageManager.deleteData('currentPlatform');
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1220,7 +1248,7 @@ class MyAppState extends ChangeNotifier {
       MyLogger.logger.i('Verify token...');
       final response = await client.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'Cookie': cookie!},
         body: jsonEncode(requestBody),
       );
       if (response.statusCode == 200) {
@@ -1235,6 +1263,11 @@ class MyAppState extends ChangeNotifier {
         } else {
           return result.data.toString();
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1365,7 +1398,7 @@ class MyAppState extends ChangeNotifier {
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Loading User information from network...');
-      final response = await client.get(url);
+      final response = await client.get(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -1379,6 +1412,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1440,7 +1478,7 @@ class MyAppState extends ChangeNotifier {
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Loading libraries from network...');
-      final response = await client.get(url);
+      final response = await client.get(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -1461,6 +1499,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1524,7 +1567,7 @@ class MyAppState extends ChangeNotifier {
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Loading detail song from network...');
-      final response = await client.get(url);
+      final response = await client.get(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -1537,6 +1580,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1578,7 +1626,7 @@ class MyAppState extends ChangeNotifier {
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Loading MVs link from network...');
-      final response = await client.get(url);
+      final response = await client.get(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -1593,6 +1641,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1629,7 +1682,7 @@ class MyAppState extends ChangeNotifier {
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Loading songs link from network...');
-      final response = await client.get(url);
+      final response = await client.get(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -1652,6 +1705,10 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1728,7 +1785,7 @@ class MyAppState extends ChangeNotifier {
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Loading detail library from network...');
-      final response = await client.get(url);
+      final response = await client.get(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -1741,6 +1798,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1781,7 +1843,7 @@ class MyAppState extends ChangeNotifier {
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Searching items from network...');
-      final response = await client.get(url);
+      final response = await client.get(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -1795,6 +1857,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1863,7 +1930,7 @@ class MyAppState extends ChangeNotifier {
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Loading similar songs from network...');
-      final response = await client.get(url);
+      final response = await client.get(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -1877,6 +1944,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1924,7 +1996,7 @@ class MyAppState extends ChangeNotifier {
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Loading detail mv information from network...');
-      final response = await client.get(url);
+      final response = await client.get(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -1937,6 +2009,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2002,7 +2079,7 @@ class MyAppState extends ChangeNotifier {
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Loading related MVs from network...');
-      final response = await client.get(url);
+      final response = await client.get(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -2018,6 +2095,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2072,7 +2154,7 @@ class MyAppState extends ChangeNotifier {
       MyLogger.logger.i('Creating library...');
       final response = await client.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'Cookie': cookie!},
         body: jsonEncode(requestBody),
       );
       if (response.statusCode == 200) {
@@ -2088,6 +2170,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2124,6 +2211,7 @@ class MyAppState extends ChangeNotifier {
       },
     );
     var request = http.MultipartRequest('PUT', url);
+    request.headers['Cookie'] = cookie!;
     request.fields['id'] = updatedLibrary.id.toString();
     request.fields['name'] = updatedLibrary.name;
     // Map<String, String> requestBody = {};
@@ -2159,6 +2247,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2228,7 +2321,7 @@ class MyAppState extends ChangeNotifier {
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Deleting libraries...');
-      final response = await client.delete(url);
+      final response = await client.delete(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -2242,6 +2335,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2345,7 +2443,7 @@ class MyAppState extends ChangeNotifier {
       MyLogger.logger.i('Adding songs to library...');
       final response = await client.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'Cookie': cookie!},
         body: jsonEncode(requestBody),
       );
       if (response.statusCode == 200) {
@@ -2360,6 +2458,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2428,7 +2531,7 @@ class MyAppState extends ChangeNotifier {
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Removing songs from library...');
-      final response = await client.delete(url);
+      final response = await client.delete(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -2442,6 +2545,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2536,7 +2644,7 @@ class MyAppState extends ChangeNotifier {
       MyLogger.logger.i('Moving songs to other library...');
       final response = await client.put(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'Cookie': cookie!},
         body: jsonEncode(requestBody),
       );
       if (response.statusCode == 200) {
@@ -2552,6 +2660,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2621,7 +2734,7 @@ class MyAppState extends ChangeNotifier {
       MyLogger.logger.i('Adding resources to fav list...');
       final response = await client.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'Cookie': cookie!},
         body: jsonEncode(requestBody),
       );
       if (response.statusCode == 200) {
@@ -2636,6 +2749,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2681,7 +2799,7 @@ class MyAppState extends ChangeNotifier {
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Removing resources from fav list...');
-      final response = await client.delete(url);
+      final response = await client.delete(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -2695,6 +2813,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2753,7 +2876,7 @@ class MyAppState extends ChangeNotifier {
       MyLogger.logger.i('Moving resources to other fav list...');
       final response = await client.put(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'Cookie': cookie!},
         body: jsonEncode(requestBody),
       );
       if (response.statusCode == 200) {
@@ -2769,6 +2892,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2830,7 +2958,7 @@ class MyAppState extends ChangeNotifier {
     try {
       MyLogger.logger
           .i('Fetching search suggestions for $keyword in bilibili...');
-      final response = await client.get(url);
+      final response = await client.get(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -2851,6 +2979,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return [];
         }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return [];
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';

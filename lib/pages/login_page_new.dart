@@ -83,12 +83,18 @@ class LoginScreen extends StatelessWidget {
   }
 
   Future<String?> _recoverPassword(String name) async {
-    _appState!.sendVerifyToken(name, 2);
+    var success = await _appState!.sendVerifyToken(name, 2);
+    if (!success) {
+      return _appState!.errorMsg;
+    }
     return null;
   }
 
   Future<String?> _resendCode(SignupData data) async {
-    _appState!.sendVerifyToken(data.name!, 1);
+    var success = await _appState!.sendVerifyToken(data.name!, 1);
+    if (!success) {
+      return _appState!.errorMsg;
+    }
     return null;
   }
 
@@ -106,8 +112,12 @@ class LoginScreen extends StatelessWidget {
   }
 
   Future<String?> _recoverConfirm(String error, LoginData data) async {
-    return _appState!.verifyResetPasswordNologin(
+    var result = await _appState!.verifyResetPasswordNologin(
         data.password, data.password, error, data.name);
+    if (result == null) {
+      return _appState!.errorMsg;
+    }
+    return null;
   }
 
   @override
@@ -124,7 +134,7 @@ class LoginScreen extends StatelessWidget {
       navigateBackAfterRecovery: true,
       onConfirmRecover: _recoverConfirm,
       onConfirmSignup: _signupConfirm,
-      loginAfterSignUp: true,
+      loginAfterSignUp: false,
       hideForgotPasswordButton: false,
       // showDebugButtons: true,
       loginProviders: [

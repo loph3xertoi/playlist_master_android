@@ -351,8 +351,16 @@ class _MySideDrawerState extends State<MySideDrawer> {
                       leading:
                           Icon(Icons.logout, color: colorScheme.onSecondary),
                       onTap: () {
-                        print(appState);
-                        _goToLogin(context);
+                        showDialog(
+                            context: context,
+                            builder: (_) => ShowConfirmDialog(
+                                  title: 'Do you want to logout?',
+                                  onConfirm: () {
+                                    print('Logout...');
+                                    appState.logout();
+                                    _goToLogin(context);
+                                  },
+                                ));
                       },
                     ),
                   ],

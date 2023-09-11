@@ -1,6 +1,6 @@
 class API {
   /// Your uid in playlist master server.
-  static const uid = '1';
+  static String uid = '0';
 
   static const demoMpd = 'http://$host/mpd/c.mpd';
 
@@ -97,8 +97,8 @@ class API {
   static const getImage = '/cors/image';
 
   /// Check if current token is expired.
-  /// api: GET /login/state?token=[token]
-  static const checkToken = '/login/state';
+  /// api: GET /check
+  static const check = '/check';
 
   /// Update the credential of third app.
   /// api: PUT /credential?platform=[platform] {thirdId: [thirdId], thirdCookie: [thirdCookie]}

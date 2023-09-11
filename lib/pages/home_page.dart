@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fplayer/fplayer.dart';
-import 'package:playlistmaster/utils/app_updater.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/bilibili/bili_resource.dart';
@@ -15,6 +14,7 @@ import '../http/my_http.dart';
 import '../states/app_state.dart';
 import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
+import '../utils/storage_manager.dart';
 import '../utils/theme_manager.dart';
 import '../widgets/bottom_player.dart';
 import '../widgets/floating_button/quick_action.dart';
@@ -75,6 +75,7 @@ class _HomePageState extends State<HomePage>
             backgroundColor: Colors.transparent,
             imageUri: 'assets/images/home_button.png',
             onTap: () async {
+              print('homepage button $appState');
               MyToast.showToast('Switched to pms.');
               MyLogger.logger.i('Switched to pms.');
               if (_currentPlatform != 0) {
@@ -83,6 +84,8 @@ class _HomePageState extends State<HomePage>
                 }
               }
               appState.currentPlatform = 0;
+              StorageManager.saveData(
+                  'currentPlatform', appState.currentPlatform.toString());
               appState.refreshLibraries!(appState, false);
               showDialog(
                 builder: (BuildContext context) {
@@ -238,7 +241,6 @@ class _HomePageState extends State<HomePage>
                 },
                 context: context,
               );
-              print('homepage button $appState');
             },
             actions: [
               QuickAction(
@@ -252,6 +254,8 @@ class _HomePageState extends State<HomePage>
                     }
                   }
                   appState.currentPlatform = 3;
+                  StorageManager.saveData(
+                      'currentPlatform', appState.currentPlatform.toString());
                   appState.refreshLibraries!(appState, false);
                 },
               ),
@@ -266,6 +270,8 @@ class _HomePageState extends State<HomePage>
                     }
                   }
                   appState.currentPlatform = 2;
+                  StorageManager.saveData(
+                      'currentPlatform', appState.currentPlatform.toString());
                   appState.refreshLibraries!(appState, false);
                 },
               ),
@@ -280,6 +286,8 @@ class _HomePageState extends State<HomePage>
                     }
                   }
                   appState.currentPlatform = 1;
+                  StorageManager.saveData(
+                      'currentPlatform', appState.currentPlatform.toString());
                   appState.refreshLibraries!(appState, false);
                 },
               ),
