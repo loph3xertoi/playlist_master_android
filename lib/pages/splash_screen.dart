@@ -7,6 +7,7 @@ import 'package:image_network/image_network.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 
+import '../config/user_info.dart';
 import '../http/api.dart';
 import '../http/my_http.dart';
 import '../states/app_state.dart';
@@ -38,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> {
         bool? isLogin = await PMLogin.checkIfLogin(cookie);
         if (isLogin != null && isLogin) {
           MyAppState.cookie = cookie;
-          API.uid = (await StorageManager.readData('uid')).toString();
+          UserInfo.uid = (await StorageManager.readData('uid')).toString();
           if (mounted) {
             Navigator.pushReplacementNamed(context, '/home_page');
           }

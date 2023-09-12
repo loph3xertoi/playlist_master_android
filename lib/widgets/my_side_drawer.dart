@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../config/secrets.dart';
+import '../config/user_info.dart';
 import '../states/app_state.dart';
 import '../utils/my_toast.dart';
 import 'confirm_popup.dart';
@@ -39,7 +40,8 @@ class _MySideDrawerState extends State<MySideDrawer> {
       _selectedIndex = index;
     });
     if (index == 0) {
-      print('Open Settings');
+      Navigator.pop(context);
+      Navigator.pushNamed(context, '/settings');
     } else if (index == 1) {
       _openFeedback();
     } else if (index == 2) {
@@ -284,11 +286,11 @@ class _MySideDrawerState extends State<MySideDrawer> {
                         color: Colors.transparent,
                       ),
                       accountName: Text(
-                        myName,
+                        '${UserInfo.basicUser!.name}(${UserInfo.uid})',
                         style: textTheme.labelMedium,
                       ),
                       accountEmail: Text(
-                        myEmail,
+                        UserInfo.basicUser!.email ?? '',
                         style: textTheme.labelMedium,
                       ),
                       currentAccountPicture: CircleAvatar(
@@ -346,10 +348,10 @@ class _MySideDrawerState extends State<MySideDrawer> {
                     ListTile(
                       title: Text(
                         'Log out',
-                        style: textTheme.labelMedium,
+                        style: textTheme.labelMedium!
+                            .copyWith(color: Colors.red.shade900),
                       ),
-                      leading:
-                          Icon(Icons.logout, color: colorScheme.onSecondary),
+                      leading: Icon(Icons.logout, color: Colors.red.shade900),
                       onTap: () {
                         showDialog(
                             context: context,

@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'entities/basic/basic_song.dart';
 import 'entities/basic/basic_video.dart';
 import 'firebase_options.dart';
+import 'pages/bind_email_page.dart';
 import 'pages/detail_favlist_page.dart';
 import 'pages/detail_library_page.dart';
 import 'pages/detail_resource_page.dart';
@@ -19,7 +20,9 @@ import 'pages/detail_song_page.dart';
 import 'pages/home_page.dart';
 import 'pages/login_page_new.dart';
 import 'pages/related_videos_page.dart';
+import 'pages/reset_password_page.dart';
 import 'pages/search_page.dart';
+import 'pages/settings_page.dart';
 import 'pages/similar_songs_page.dart';
 import 'pages/songs_player_page.dart';
 import 'pages/splash_screen.dart';
@@ -105,6 +108,9 @@ class MyApp extends StatelessWidget {
               '/detail_favlist_page': (context) => DetailFavListPage(),
               '/songs_player_page': (context) => SongsPlayerPage(),
               '/detail_resource_page': (context) => DetailResourcePage(),
+              '/settings': (context) => SettingsPage(),
+              '/reset_password_page': (context) => ResetPassPage(),
+              '/bind_email_page': (context) => BindEmailPage(),
               // '/resources_player_page': (context) => ResourcesPlayerPage(),
             },
             onGenerateRoute: (settings) {

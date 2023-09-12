@@ -1,7 +1,4 @@
 class API {
-  /// Your uid in playlist master server.
-  static String uid = '0';
-
   static const demoMpd = 'http://$host/mpd/c.mpd';
 
   static const demoAppcastXml = 'http://$host/xml/appcast.xml';
@@ -14,6 +11,10 @@ class API {
   /// Get user information according to [uid] in [platform].
   /// api: GET /user/[uid]?platform=[platform]
   static const user = '/user';
+
+  /// Get basic pms user information of current login user.
+  /// api: GET /user/basic
+  static const basicUser = '/user/basic';
 
   /// Get detail song according to [songId] in [platform].
   /// api: GET /song/[songId]?platform=[platform]
@@ -105,8 +106,12 @@ class API {
   static const credential = '/credential';
 
   /// Forget user's password, send verifying code to user's email, need login first.
-  /// api: GET /forgot
-  static const forgot = '/forgot';
+  /// api: GET /forgot/password
+  static const forgotPassword = '/forgot/password';
+
+  /// Bind email, send verifying code to user's email, need login first.
+  /// api: GET /bind/email?email=[email]
+  static const bindEmail = '/bind/email';
 
   /// Send token to yur email for verifying, no need to login first, type: 1 for sign up, 2 for reset password.
   /// api: GET /sendcode?email=[email]&type=[type]
@@ -125,8 +130,12 @@ class API {
   static const register = '/register';
 
   /// Verify token for resetting user's password, need to log in first.
-  /// api: POST /verify {password: [password], repeatedPassword: [repeatedPassword], token: [token]}
-  static const verify = '/verify';
+  /// api: POST /verify/resetPassword {password: [password], repeatedPassword: [repeatedPassword], token: [token]}
+  static const verifyResetPass = '/verify/resetPassword';
+
+  /// Verify token for binding user's email, need to log in first.
+  /// api: POST /verify/bindEmail {email: [email], token: [token]}
+  static const verifyBindEmail = '/verify/bindEmail';
 
   /// Verify token for resetting user's password, no need to log in.
   /// api: POST /verify/nologin/resetPassword {password: [password], repeatedPassword: [repeatedPassword], email: [email], token: [token]}

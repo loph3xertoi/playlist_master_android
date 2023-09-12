@@ -16,6 +16,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 
+import '../config/user_info.dart';
 import '../entities/basic/basic_library.dart';
 import '../entities/basic/basic_song.dart';
 import '../entities/basic/basic_user.dart';
@@ -25,6 +26,7 @@ import '../entities/bilibili/bili_detail_resource.dart';
 import '../entities/bilibili/bili_fav_list.dart';
 import '../entities/bilibili/bili_resource.dart';
 import '../entities/bilibili/bili_user.dart';
+import '../entities/dto/basic_pms_user_info_dto.dart';
 import '../entities/dto/bili_links_dto.dart';
 import '../entities/dto/paged_data_dto.dart';
 import '../entities/dto/result.dart';
@@ -1016,9 +1018,9 @@ class MyAppState extends ChangeNotifier {
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
           cookie = response.headers['set-cookie'];
-          API.uid = result.data.toString();
+          UserInfo.uid = result.data.toString();
           StorageManager.saveData('cookie', cookie);
-          StorageManager.saveData('uid', API.uid);
+          StorageManager.saveData('uid', UserInfo.uid);
           return result.data as int;
         } else {
           _errorMsg = result.message!;
@@ -1085,9 +1087,9 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  /// Forgot password, need login first.
-  Future<void> forgotPassword() async {
-    final Uri url = Uri.http(API.host, API.forgot);
+  /// Send token for resetting password, need login first.
+  Future<bool> forgotPassword() async {
+    final Uri url = Uri.http(API.host, API.forgotPassword);
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Forgot password...');
@@ -1100,16 +1102,59 @@ class MyAppState extends ChangeNotifier {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
           MyLogger.logger.e(_errorMsg);
+          return false;
         }
+        return true;
       } else if (response.statusCode == 401) {
         _errorMsg = 'Cookie expired, please login again.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
+        return false;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
+        return false;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  /// Send token for binding email, need login first.
+  Future<bool> bindEmail(String email) async {
+    final Uri url = Uri.http(API.host, API.bindEmail, {'email': email});
+    final client = RetryClient(http.Client());
+    try {
+      MyLogger.logger.i('Bind email...');
+      final response = await client.get(url, headers: {'Cookie': cookie!});
+      if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        Result result = Result.fromJson(decodedResponse);
+        if (!result.success) {
+          _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return false;
+        }
+        return true;
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
+      } else {
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
       }
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
@@ -1159,7 +1204,7 @@ class MyAppState extends ChangeNotifier {
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Logout...');
-      final response = await client.get(url);
+      final response = await client.get(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -1171,7 +1216,7 @@ class MyAppState extends ChangeNotifier {
           return;
         }
         cookie = null;
-        API.uid = '0';
+        UserInfo.uid = '0';
         StorageManager.deleteData('cookie');
         StorageManager.deleteData('uid');
         StorageManager.deleteData('currentPlatform');
@@ -1235,17 +1280,17 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  Future<String?> verify(
+  Future<bool> verifyResetPassToken(
       String password, String repeatedPassword, String token) async {
     Map<String, Object> requestBody = {
       'password': password,
       'repeatedPassword': repeatedPassword,
       'token': token
     };
-    final Uri url = Uri.http(API.host, API.verify);
+    final Uri url = Uri.http(API.host, API.verifyResetPass);
     final client = RetryClient(http.Client());
     try {
-      MyLogger.logger.i('Verify token...');
+      MyLogger.logger.i('Verify token for resetting password...');
       final response = await client.post(
         url,
         headers: {'Content-Type': 'application/json', 'Cookie': cookie!},
@@ -1259,21 +1304,65 @@ class MyAppState extends ChangeNotifier {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
           MyLogger.logger.e(_errorMsg);
-          return null;
+          return false;
         } else {
-          return result.data.toString();
+          return true;
         }
       } else if (response.statusCode == 401) {
         _errorMsg = 'Cookie expired, please login again.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
-        return null;
+        return false;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
-        return null;
+        return false;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<bool> verifyBindEmailToken(String email, String token) async {
+    Map<String, Object> requestBody = {'email': email, 'token': token};
+    final Uri url = Uri.http(API.host, API.verifyBindEmail);
+    final client = RetryClient(http.Client());
+    try {
+      MyLogger.logger.i('Verify token for binding email...');
+      final response = await client.post(
+        url,
+        headers: {'Content-Type': 'application/json', 'Cookie': cookie!},
+        body: jsonEncode(requestBody),
+      );
+      if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        Result result = Result.fromJson(decodedResponse);
+        if (!result.success) {
+          _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return false;
+        } else {
+          return true;
+        }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
+      } else {
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
       }
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');
@@ -1375,6 +1464,36 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
+  Future<dynamic> getCookies() async {
+    final Uri url = Uri.http(API.host, '/cookies');
+    final client = RetryClient(http.Client());
+    try {
+      MyLogger.logger.i('Get all cookies...');
+      final response = await client.get(url, headers: {'Cookie': cookie!});
+      if (response.statusCode == 200) {
+        final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
+        return decodedResponse;
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else {
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
   Future<BasicUser?> fetchUser(int platform) async {
     BasicUser Function(Map<String, dynamic>) resolveJson;
     if (platform == 0) {
@@ -1390,14 +1509,14 @@ class MyAppState extends ChangeNotifier {
     }
     final Uri url = Uri.http(
       API.host,
-      '${API.user}/${API.uid}',
+      '${API.user}/${UserInfo.uid}',
       {
         'platform': platform.toString(),
       },
     );
     final client = RetryClient(http.Client());
     try {
-      MyLogger.logger.i('Loading User information from network...');
+      MyLogger.logger.i('Loading user information from network...');
       final response = await client.get(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
@@ -1433,6 +1552,46 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
+  Future<BasicPMSUserInfoDTO?> getBasicInfoOfLoginUser() async {
+    final Uri url = Uri.http(API.host, API.basicUser);
+    final client = RetryClient(http.Client());
+    try {
+      MyLogger.logger.i('Loading basic pms user information from network...');
+      final response = await client.get(url, headers: {'Cookie': cookie!});
+      if (response.statusCode == 200) {
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          Map<String, dynamic> user = decodedResponse['data'];
+          return BasicPMSUserInfoDTO.fromJson(user);
+        } else {
+          _errorMsg = result.message!;
+          MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
+        }
+      } else if (response.statusCode == 401) {
+        _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else {
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
   Future<PagedDataDTO<BasicLibrary>?> fetchLibraries(int platform,
       [String? pn]) async {
     BasicLibrary Function(Map<String, dynamic>) resolveJson;
@@ -1440,7 +1599,7 @@ class MyAppState extends ChangeNotifier {
     if (platform == 0) {
       resolveJson = PMSLibrary.fromJson;
       params = {
-        'id': API.uid,
+        'id': UserInfo.uid,
         'pn': pn!,
         'ps': '20',
         'platform': platform.toString(),
@@ -1448,19 +1607,19 @@ class MyAppState extends ChangeNotifier {
     } else if (platform == 1) {
       resolveJson = QQMusicPlaylist.fromJson;
       params = {
-        'id': API.uid,
+        'id': UserInfo.uid,
         'platform': platform.toString(),
       };
     } else if (platform == 2) {
       resolveJson = NCMPlaylist.fromJson;
       params = {
-        'id': API.uid,
+        'id': UserInfo.uid,
         'platform': platform.toString(),
       };
     } else if (platform == 3) {
       resolveJson = BiliFavList.fromJson;
       params = {
-        'id': API.uid,
+        'id': UserInfo.uid,
         'pn': pn!,
         'ps': '20',
         'biliPlatform': 'web',

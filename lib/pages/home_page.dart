@@ -6,7 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:fplayer/fplayer.dart';
 import 'package:provider/provider.dart';
 
+import '../config/user_info.dart';
 import '../entities/bilibili/bili_resource.dart';
+import '../entities/dto/basic_pms_user_info_dto.dart';
 import '../entities/netease_cloud_music/ncm_song.dart';
 import '../entities/qq_music/qqmusic_song.dart';
 import '../http/api.dart';
@@ -40,8 +42,20 @@ class _HomePageState extends State<HomePage>
     super.initState();
     // TODO: Check for updates.
     // AppUpdater.checkForUpdate();
+    final state = Provider.of<MyAppState>(context, listen: false);
+    _initUserInfo(state);
     if (!kIsWeb) {
       _resetRotation();
+    }
+  }
+
+  // Initialize user info, email and phone.
+  void _initUserInfo(MyAppState appState) async {
+    BasicPMSUserInfoDTO? basicUser = await appState.getBasicInfoOfLoginUser();
+    if (basicUser != null) {
+      UserInfo.basicUser = basicUser;
+    } else {
+      throw 'Fail to get basic user info.';
     }
   }
 
@@ -217,6 +231,24 @@ class _HomePageState extends State<HomePage>
                           },
                           child: Text(
                             'Refresh libraries',
+                            style: textTheme.labelMedium,
+                          ),
+                        ),
+                        TextButton(
+                          style: ButtonStyle(
+                            shadowColor: MaterialStateProperty.all(
+                              colorScheme.primary,
+                            ),
+                            overlayColor: MaterialStateProperty.all(
+                              Colors.grey,
+                            ),
+                          ),
+                          onPressed: () async {
+                            dynamic cookies = await appState.getCookies();
+                            MyLogger.logger.i(cookies);
+                          },
+                          child: Text(
+                            'Get cookies',
                             style: textTheme.labelMedium,
                           ),
                         ),
