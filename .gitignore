@@ -94,3 +94,6 @@ macos/Runner/GoogleService-Info.plist
 
 # Api key
 lib/config/secrets.dart
+
+# Android sign key
+android/key.properties
