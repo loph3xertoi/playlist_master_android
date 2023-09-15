@@ -8,6 +8,9 @@ class API {
   // static const host = '192.168.8.171:8080';
   // static const host = '192.168.0.114:8080';
 
+  /// Redirect url for oauth2 by github.
+  static const githubRedirectUrl = '/login/oauth2/github';
+
   /// Get user information according to [uid] in [platform].
   /// api: GET /user/[uid]?platform=[platform]
   static const user = '/user';
@@ -120,6 +123,10 @@ class API {
   /// PMS user login endpoint.
   /// api: POST /login {name: [name], password: [password]}
   static const login = '/login';
+
+  /// Login by github.
+  /// api: GET /login/oauth2/github?code=[authorization code]
+  static const loginByGitHub = '/login/oauth2/github';
 
   /// Logout current account.
   /// api: GET /logout

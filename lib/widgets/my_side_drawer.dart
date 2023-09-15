@@ -229,7 +229,7 @@ class _MySideDrawerState extends State<MySideDrawer> {
           _selectedIndex = 0;
         } else if (title == 'Feedback') {
           _selectedIndex = 1;
-        } else if (title == 'Open Github Issues') {
+        } else if (title == 'Open GitHub Issues') {
           _selectedIndex = 2;
         } else if (title == 'Bug Report') {
           _selectedIndex = 3;
@@ -293,17 +293,41 @@ class _MySideDrawerState extends State<MySideDrawer> {
                         UserInfo.basicUser!.email ?? '',
                         style: textTheme.labelMedium,
                       ),
-                      currentAccountPicture: CircleAvatar(
-                        backgroundImage: AssetImage(
-                          currentPlatform == 0
-                              ? 'assets/images/pm_round.png'
-                              : currentPlatform == 1
-                                  ? 'assets/images/qqmusic.png'
-                                  : currentPlatform == 2
-                                      ? 'assets/images/netease.png'
-                                      : 'assets/images/bilibili.png',
-                        ),
-                        backgroundColor: colorScheme.onSecondary,
+                      currentAccountPicture: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          CircleAvatar(
+                            backgroundImage: AssetImage(
+                              currentPlatform == 0
+                                  ? 'assets/images/pm_round.png'
+                                  : currentPlatform == 1
+                                      ? 'assets/images/qqmusic.png'
+                                      : currentPlatform == 2
+                                          ? 'assets/images/netease.png'
+                                          : 'assets/images/bilibili.png',
+                            ),
+                            backgroundColor: colorScheme.onSecondary,
+                          ),
+                          UserInfo.basicUser!.loginType == 0 ||
+                                  UserInfo.basicUser!.loginType == 1 ||
+                                  UserInfo.basicUser!.loginType == 2
+                              ? Positioned(
+                                  bottom: 0.0,
+                                  right: 0.0,
+                                  child: SizedBox(
+                                    width: 22.0,
+                                    height: 22.0,
+                                    child: Icon(
+                                      UserInfo.basicUser!.loginType == 0
+                                          ? MdiIcons.email
+                                          : UserInfo.basicUser!.loginType == 1
+                                              ? MdiIcons.github
+                                              : MdiIcons.google,
+                                      color: colorScheme.onSecondary,
+                                    ),
+                                  ))
+                              : Container(),
+                        ],
                       ),
                       otherAccountsPictures: [
                         CircleAvatar(
@@ -337,7 +361,7 @@ class _MySideDrawerState extends State<MySideDrawer> {
                               _selectedIndex == 0),
                           _buildMenuTile('Feedback', Icons.feedback_rounded,
                               _selectedIndex == 1),
-                          _buildMenuTile('Open Github Issues', MdiIcons.github,
+                          _buildMenuTile('Open GitHub Issues', MdiIcons.github,
                               _selectedIndex == 2),
                           _buildMenuTile('Bug Report', Icons.bug_report_rounded,
                               _selectedIndex == 3),
@@ -348,8 +372,9 @@ class _MySideDrawerState extends State<MySideDrawer> {
                     ListTile(
                       title: Text(
                         'Log out',
-                        style: textTheme.labelMedium!
-                            .copyWith(color: Colors.red.shade900),
+                        style: textTheme.labelMedium!.copyWith(
+                            color: Colors.red.shade900,
+                            fontWeight: FontWeight.bold),
                       ),
                       leading: Icon(Icons.logout, color: Colors.red.shade900),
                       onTap: () {
