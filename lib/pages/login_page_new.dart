@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
+import 'package:uni_links/uni_links.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import '../config/secrets.dart';
 import '../states/app_state.dart';
 import '../utils/oauth2_utils.dart';
 import '../widgets/login_widget/constants.dart';
@@ -25,6 +29,8 @@ class LoginScreen extends StatelessWidget {
 
   WebViewController _controller = WebViewController()
     ..setJavaScriptMode(JavaScriptMode.unrestricted)
+    ..setUserAgent(
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
     ..setBackgroundColor(const Color(0x00000000));
 
   Future<String?> _loginUser(LoginData data) async {
@@ -179,12 +185,36 @@ class LoginScreen extends StatelessWidget {
               appBar: AppBar(
                 backgroundColor: _colorScheme!.primary,
                 iconTheme: IconThemeData(color: _colorScheme!.onSecondary),
+                leading: IconButton(
+                  icon: Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.pop(_dialogContext!, 'You have canceled login');
+                  },
+                ),
               ),
               body: WebViewWidget(controller: _controller));
         },
       );
     }
     return result;
+  }
+
+  Future<String?> _openBrowser(
+      BuildContext context, Uri authorizationUrl) async {
+    String? result;
+    if (!await launchUrlString(
+      authorizationUrl.toString(),
+      mode: LaunchMode.platformDefault,
+    )) {
+      throw Exception('Could not launch ${authorizationUrl.toString()}');
+    }
+    final linksStream = linkStream.listen((String? uri) {
+      if (uri!.startsWith(GoogleOAuth2Client.redirectUrl.toString())) {
+        result = uri;
+      }
+    });
+    // return result;
+    return 'test google';
   }
 
   void _showLoadingDialog(BuildContext context) {
@@ -220,7 +250,11 @@ class LoginScreen extends StatelessWidget {
       _showLoadingDialog(context);
       try {
         // Future.delayed(Duration(hours: 1));
-        var accessTokenResult = await _appState!.loginByGitHub(result);
+        var pmsUserId = await _appState!.loginByGitHub(result);
+        // Error occur.
+        if (pmsUserId == null) {
+          return _appState!.errorMsg;
+        }
       } catch (e) {
         // Handle any errors here
       } finally {
@@ -231,6 +265,53 @@ class LoginScreen extends StatelessWidget {
       return null;
     }
     return result;
+  }
+
+  Future<String?> _signInWithGoogle(BuildContext context) async {
+    GoogleSignIn googleSignIn = GoogleSignIn(serverClientId: googleClientId);
+    // Revoke google oauth2 authorization.
+    var googleSignInAccount = await googleSignIn.signOut();
+    bool isSignedIn = await googleSignIn.isSignedIn();
+    if (!isSignedIn) {
+      try {
+        var googleSignInAccount = await googleSignIn.signIn();
+        if (googleSignInAccount == null) {
+          return 'You have canceled login';
+        }
+        // var authHeaders = await googleSignInAccount.authHeaders;
+        // print(authHeaders);
+        var serverAuthCode = googleSignInAccount.serverAuthCode;
+        var pmsUserId = await _appState!.loginByGoogle(serverAuthCode!);
+        // Error occur.
+        if (pmsUserId == null) {
+          return _appState!.errorMsg;
+        }
+      } catch (error) {
+        return 'Error: $error';
+      }
+    }
+    return null;
+    // var authorizationUrl = GoogleOAuth2Client.getAuthorizationUrl();
+    // print(authorizationUrl);
+    // var result = await _openBrowser(context, authorizationUrl);
+    // // var result = await _showWebView(context, authorizationUrl);
+    // if (context.mounted &&
+    //     result != null &&
+    //     result.contains(GoogleOAuth2Client.redirectUrl.toString())) {
+    //   // _showLoadingDialog(context);
+    //   try {
+    //     Future.delayed(Duration(hours: 1));
+    //     // var accessTokenResult = await _appState!.loginByGoogle(result);
+    //   } catch (e) {
+    //     // Handle any errors here
+    //   } finally {
+    //     if (_loadingContext!.mounted) {
+    //       // _hideLoadingDialog();
+    //     }
+    //   }
+    //   return null;
+    // }
+    // return result;
   }
 
   @override
@@ -248,7 +329,7 @@ class LoginScreen extends StatelessWidget {
           return false;
         }
         if (_dialogContext != null && _dialogContext!.mounted) {
-          Navigator.pop(_dialogContext!);
+          Navigator.pop(_dialogContext!, 'You have canceled login');
           return false;
         }
         return true;
@@ -275,7 +356,7 @@ class LoginScreen extends StatelessWidget {
           LoginProvider(
             icon: FontAwesomeIcons.google,
             callback: () async {
-              return null;
+              return await _signInWithGoogle(context);
             },
           ),
           // LoginProvider(

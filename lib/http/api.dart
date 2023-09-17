@@ -4,12 +4,16 @@ class API {
   static const demoAppcastXml = 'http://$host/xml/appcast.xml';
 
   /// Host of playlist server.
-  static const host = '192.168.54.116:8080';
+  static const host = 'playlistmaster.com:8080';
+  // static const host = '192.168.81.247:8080';
   // static const host = '192.168.8.171:8080';
   // static const host = '192.168.0.114:8080';
 
   /// Redirect url for oauth2 by github.
   static const githubRedirectUrl = '/login/oauth2/github';
+
+  /// Redirect url for oauth2 by google.
+  static const googleRedirectUrl = '/login/oauth2/google';
 
   /// Get user information according to [uid] in [platform].
   /// api: GET /user/[uid]?platform=[platform]

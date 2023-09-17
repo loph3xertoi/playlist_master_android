@@ -17,30 +17,28 @@ class GitHubOAuth2Client {
       identifier,
       authorizationEndpoint,
       tokenEndpoint,
-      // secret: secret,
     );
-
-    // A URL on the authorization server (authorizationEndpoint with some additional
-    // query parameters). Scopes and state can optionally be passed into this method.
     return grant.getAuthorizationUrl(redirectUrl,
         scopes: {'user:email', 'read:profile'});
+  }
+}
 
-    // state: StringUtils.generateRandomString(128)
+class GoogleOAuth2Client {
+  static final authorizationEndpoint =
+      Uri.parse('https://accounts.google.com/o/oauth2/v2/auth');
+  static final tokenEndpoint = Uri.parse('https://oauth2.googleapis.com/token');
+  static const identifier = googleClientId;
 
-    // Redirect the resource owner to the authorization URL. Once the resource
-    // owner has authorized, they'll be redirected to `redirectUrl` with an
-    // authorization code. The `redirect` should cause the browser to redirect to
-    // another URL which should also have a listener.
-    //
-    // `redirect` and `listen` are not shown implemented here. See below for the
-    // details.
-    // redirect(authorizationUrl, context);
+  static final redirectUrl =
+      Uri.parse('http://${API.host}${API.googleRedirectUrl}');
 
-    // var responseUrl = await listen(redirectUrl);
+  static Uri getAuthorizationUrl() {
+    var grant = oauth2.AuthorizationCodeGrant(
+      identifier,
+      authorizationEndpoint,
+      tokenEndpoint,
+    );
 
-    // Once the user is redirected to `redirectUrl`, pass the query parameters to
-    // the AuthorizationCodeGrant. It will validate them and extract the
-    // authorization code to create a new Client.
-    // return await grant.handleAuthorizationResponse(responseUrl.queryParameters);
+    return grant.getAuthorizationUrl(redirectUrl, scopes: {''});
   }
 }

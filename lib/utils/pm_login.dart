@@ -17,7 +17,7 @@ class PMLogin {
       } else if (response.statusCode == 401) {
         var errorMsg = 'Cookie expired, please login again.';
         MyToast.showToast(errorMsg);
-        MyLogger.logger.e(errorMsg);
+        MyLogger.logger.w(errorMsg);
         return false;
       } else {
         var errorMsg =

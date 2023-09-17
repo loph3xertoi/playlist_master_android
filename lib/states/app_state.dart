@@ -1086,6 +1086,49 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
+  Future<int?> loginByGoogle(String authorizationCode) async {
+    final Uri url =
+        Uri.http(API.host, API.googleRedirectUrl, {'code': authorizationCode});
+    final client = RetryClient(http.Client());
+    try {
+      MyLogger.logger.i('Login by Google...');
+      final response = await client.get(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        print(response.body.toString());
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        Result result = Result.fromJson(decodedResponse);
+        if (result.success) {
+          cookie = response.headers['set-cookie'];
+          UserInfo.uid = result.data.toString();
+          StorageManager.saveData('cookie', cookie);
+          StorageManager.saveData('uid', UserInfo.uid);
+          return result.data as int;
+        } else {
+          _errorMsg = result.message!;
+          // MyToast.showToast(_errorMsg);
+          MyLogger.logger.e(_errorMsg);
+          return null;
+        }
+      } else {
+        _errorMsg =
+            'Response with code ${response.statusCode}: ${response.reasonPhrase}';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      }
+    } catch (e) {
+      MyToast.showToast('Exception thrown: $e');
+      MyLogger.logger.e('Network error with exception: $e');
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
   Future<void> updateCredential(
       String thirdId, String thirdCookie, int platform) async {
     Map<String, Object> requestBody = {

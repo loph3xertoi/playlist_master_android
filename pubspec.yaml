@@ -75,6 +75,8 @@ dependencies:
   oauth2_client: ^3.2.2
   oauth2: ^2.0.2
   webview_flutter: ^4.2.4
+  uni_links: ^0.5.1
+  google_sign_in: ^6.1.5
   # bottom_sheet:
   #   git:
   #     url: git@github.com:loph3xertoi/flutter-bottom-sheet.git

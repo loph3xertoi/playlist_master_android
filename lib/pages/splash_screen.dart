@@ -12,7 +12,6 @@ import '../http/api.dart';
 import '../http/my_http.dart';
 import '../states/app_state.dart';
 import '../utils/my_logger.dart';
-import '../utils/my_toast.dart';
 import '../utils/pm_login.dart';
 import '../utils/storage_manager.dart';
 import '../widgets/my_selectable_text.dart';
@@ -45,8 +44,8 @@ class _SplashScreenState extends State<SplashScreen> {
           }
         } else {
           // Expired.
-          MyToast.showToast('Login expired, please login again.');
-          MyLogger.logger.w('Login expired!');
+          // MyToast.showToast('Login expired, please login again.');
+          // MyLogger.logger.w('Login expired!');
           if (mounted) {
             Navigator.pushReplacementNamed(context, '/login_page');
           }

@@ -5,6 +5,7 @@ import 'package:archive/archive_io.dart';
 import 'package:feedback/feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:log_export/log_export.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
@@ -28,6 +29,7 @@ class _MySideDrawerState extends State<MySideDrawer> {
   late int _selectedIndex;
   ColorScheme? _colorScheme;
   TextTheme? _textTheme;
+  MyAppState? _appState;
 
   @override
   void initState() {
@@ -257,10 +259,32 @@ class _MySideDrawerState extends State<MySideDrawer> {
         .then((_) => false);
   }
 
+  void _logout() {
+    showDialog(
+        context: context,
+        builder: (_) => ShowConfirmDialog(
+              title: 'Do you want to logout?',
+              onConfirm: () async {
+                print('Logout...');
+                _appState!.logout();
+                if (UserInfo.basicUser!.loginType == 2) {
+                  GoogleSignIn googleSignIn =
+                      GoogleSignIn(serverClientId: googleClientId);
+                  // Revoke google oauth2 authorization.
+                  var googleSignInAccount = await googleSignIn.signOut();
+                }
+                if (mounted) {
+                  _goToLogin(context);
+                }
+              },
+            ));
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     MyAppState appState = context.watch<MyAppState>();
+    _appState = appState;
     var currentPlatform = appState.currentPlatform;
     final textTheme = Theme.of(context).textTheme;
     return SafeArea(
@@ -377,18 +401,7 @@ class _MySideDrawerState extends State<MySideDrawer> {
                             fontWeight: FontWeight.bold),
                       ),
                       leading: Icon(Icons.logout, color: Colors.red.shade900),
-                      onTap: () {
-                        showDialog(
-                            context: context,
-                            builder: (_) => ShowConfirmDialog(
-                                  title: 'Do you want to logout?',
-                                  onConfirm: () {
-                                    print('Logout...');
-                                    appState.logout();
-                                    _goToLogin(context);
-                                  },
-                                ));
-                      },
+                      onTap: _logout,
                     ),
                   ],
                 ),
