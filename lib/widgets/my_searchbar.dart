@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../config/user_info.dart';
 import '../entities/basic/basic_song.dart';
 import '../entities/bilibili/bili_resource.dart';
 import '../entities/netease_cloud_music/ncm_song.dart';
@@ -390,7 +391,10 @@ class _MySearchBarState extends State<MySearchBar>
                                   ? Image.asset('assets/images/avatar.png')
                                       .image
                                   : CachedNetworkImageProvider(
-                                      MyAppState.defaultCoverImage,
+                                      UserInfo.basicUser == null ||
+                                              UserInfo.basicUser!.avatar == null
+                                          ? MyAppState.defaultCoverImage
+                                          : UserInfo.basicUser!.avatar!,
                                       cacheManager: MyHttp.myImageCacheManager,
                                     ),
                               // : Image.network(MyAppState.defaultCoverImage)

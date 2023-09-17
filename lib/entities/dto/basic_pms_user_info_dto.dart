@@ -1,7 +1,7 @@
 /// DTO for basic pms user info.
 class BasicPMSUserInfoDTO<T> {
-  BasicPMSUserInfoDTO(
-      this.id, this.name, this.role, this.email, this.phone, this.loginType);
+  BasicPMSUserInfoDTO(this.id, this.name, this.role, this.email, this.phone,
+      this.avatar, this.loginType);
 
   /// The id of pms user.
   final int id;
@@ -18,6 +18,9 @@ class BasicPMSUserInfoDTO<T> {
   /// User's phone number.
   final String? phone;
 
+  /// User's avatar.
+  String? avatar;
+
   /// Login type: 0 for email & password, 1 for GitHub, 2 for Google.
   final int loginType;
 
@@ -28,6 +31,7 @@ class BasicPMSUserInfoDTO<T> {
       json['role'],
       json['email'],
       json['phone'],
+      json['avatar'],
       json['loginType'],
     );
   }

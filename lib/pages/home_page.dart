@@ -53,7 +53,9 @@ class _HomePageState extends State<HomePage>
   void _initUserInfo(MyAppState appState) async {
     BasicPMSUserInfoDTO? basicUser = await appState.getBasicInfoOfLoginUser();
     if (basicUser != null) {
-      UserInfo.basicUser = basicUser;
+      setState(() {
+        UserInfo.basicUser = basicUser;
+      });
     } else {
       throw 'Fail to get basic user info.';
     }
