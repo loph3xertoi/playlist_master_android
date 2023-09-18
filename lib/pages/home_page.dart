@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fplayer/fplayer.dart';
+import 'package:playlistmaster/widgets/add_third_app_cookie_form.dart';
 import 'package:provider/provider.dart';
 
 import '../config/user_info.dart';
@@ -266,6 +267,32 @@ class _HomePageState extends State<HomePage>
                           onPressed: () async {},
                           child: Text(
                             'Other',
+                            style: textTheme.labelMedium,
+                          ),
+                        ),
+                        TextButton(
+                          style: ButtonStyle(
+                            shadowColor: MaterialStateProperty.all(
+                              colorScheme.primary,
+                            ),
+                            overlayColor: MaterialStateProperty.all(
+                              Colors.grey,
+                            ),
+                          ),
+                          onPressed: () {
+                            // appState.refreshLibraries!(appState, false);
+                            showDialog(
+                                context: context,
+                                builder: (_) => Dialog(
+                                      child: AddThirdAppCookieForm(
+                                        thirdAppType: 1,
+                                      ),
+                                    ));
+                            MyToast.showToast('Test add third credential form');
+                            // Navigator.pop(context);
+                          },
+                          child: Text(
+                            'Test add third credential form',
                             style: textTheme.labelMedium,
                           ),
                         ),

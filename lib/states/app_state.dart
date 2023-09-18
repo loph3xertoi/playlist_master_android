@@ -1129,13 +1129,24 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  Future<void> updateCredential(
+  Future<bool> updateCredential(
       String thirdId, String thirdCookie, int platform) async {
+    String thirdAppName;
+    if (platform == 1) {
+      thirdAppName = 'QQ Music';
+    } else if (platform == 2) {
+      thirdAppName = 'Netease Cloud Music';
+    } else if (platform == 3) {
+      thirdAppName = 'BiliBili';
+    } else {
+      throw 'Invalid third app type';
+    }
     Map<String, Object> requestBody = {
       'thirdId': thirdId,
       'thirdCookie': thirdCookie
     };
-    final Uri url = Uri.http(API.host, API.credential, {'platform': platform});
+    final Uri url =
+        Uri.http(API.host, API.credential, {'platform': platform.toString()});
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Updating third app\'s credential...');
@@ -1152,16 +1163,23 @@ class MyAppState extends ChangeNotifier {
           _errorMsg = result.message!;
           MyToast.showToast(_errorMsg);
           MyLogger.logger.e(_errorMsg);
+          return false;
+        } else {
+          MyLogger.logger.i('Id and cookie have been added in $thirdAppName');
+          MyToast.showToast('Id and cookie have been added in $thirdAppName');
+          return true;
         }
       } else if (response.statusCode == 401) {
         _errorMsg = 'Cookie expired, please login again.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
+        return false;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
+        return false;
       }
     } catch (e) {
       MyToast.showToast('Exception thrown: $e');

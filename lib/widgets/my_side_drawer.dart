@@ -64,6 +64,33 @@ class _MySideDrawerState extends State<MySideDrawer> {
                   _reportBugs();
                 },
               ));
+    } else if (index == 4) {
+      // showDialog(context: context, builder: (_) => LicensePage());
+      // showLicensePage(context: context);
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (context) => Theme(
+              data: Theme.of(context).copyWith(
+                  appBarTheme: Theme.of(context).appBarTheme.copyWith(
+                        titleTextStyle: _textTheme!.labelLarge,
+                        color: _colorScheme!.primary,
+                        iconTheme:
+                            IconThemeData(color: _colorScheme!.onSecondary),
+                      ),
+                  cardColor: _colorScheme!.primary,
+                  textTheme: TextTheme(
+                    headlineSmall: _textTheme!.labelLarge!.copyWith(
+                      fontSize: 26.0,
+                    ),
+                    bodyLarge: _textTheme!.labelMedium!,
+                    bodyMedium: _textTheme!.labelSmall!,
+                  ),
+                  listTileTheme: ListTileThemeData(
+                    textColor: _colorScheme!.onSecondary,
+                  )),
+              child: LicensePage()),
+        ),
+      );
     } else {
       throw 'Invalid selected drawer item';
     }
@@ -235,6 +262,8 @@ class _MySideDrawerState extends State<MySideDrawer> {
           _selectedIndex = 2;
         } else if (title == 'Bug Report') {
           _selectedIndex = 3;
+        } else if (title == 'Licenses') {
+          _selectedIndex = 4;
         } else {
           throw 'Invalid selected drawer item';
         }
@@ -389,6 +418,8 @@ class _MySideDrawerState extends State<MySideDrawer> {
                               _selectedIndex == 2),
                           _buildMenuTile('Bug Report', Icons.bug_report_rounded,
                               _selectedIndex == 3),
+                          _buildMenuTile('Licenses', MdiIcons.license,
+                              _selectedIndex == 4),
                         ],
                       ),
                     ),

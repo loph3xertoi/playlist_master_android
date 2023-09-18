@@ -4,8 +4,8 @@ class API {
   static const demoAppcastXml = 'http://$host/xml/appcast.xml';
 
   /// Host of playlist server.
-  static const host = 'playlistmaster.com:8080';
-  // static const host = '192.168.81.247:8080';
+  // static const host = 'playlistmaster.com:8080';
+  static const host = '192.168.111.120:8080';
   // static const host = '192.168.8.171:8080';
   // static const host = '192.168.0.114:8080';
 

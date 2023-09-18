@@ -21,6 +21,8 @@ import '../http/my_http.dart';
 import '../mock_data.dart';
 import '../states/app_state.dart';
 import '../utils/my_logger.dart';
+import '../utils/my_toast.dart';
+import 'add_third_app_cookie_form.dart';
 import 'bilibili_level_bar.dart';
 import 'my_selectable_text.dart';
 
@@ -38,6 +40,12 @@ class _BasicInfoState extends State<BasicInfo> {
   late double userTopOffset;
   double scale = 1.0;
   late double imageSize;
+
+  void _changeBasicUser(Future<BasicUser?> basicUser) {
+    setState(() {
+      _basicUser = basicUser;
+    });
+  }
 
   @override
   void initState() {
@@ -282,7 +290,10 @@ class _BasicInfoState extends State<BasicInfo> {
                                   child: isUsingMockData
                                       ? BuildMockUser(user: user as QQMusicUser)
                                       : currentPlatform == 0
-                                          ? BuildPMSUser(user: user as PMSUser)
+                                          ? BuildPMSUser(
+                                              user: user as PMSUser,
+                                              changeBasicUser: _changeBasicUser,
+                                            )
                                           : currentPlatform == 1
                                               ? BuildQQMusicUser(
                                                   user: user as QQMusicUser)
@@ -378,9 +389,11 @@ class BuildPMSUser extends StatefulWidget {
   const BuildPMSUser({
     super.key,
     required this.user,
+    required this.changeBasicUser,
   });
 
   final PMSUser user;
+  final Function changeBasicUser;
 
   @override
   State<BuildPMSUser> createState() => _BuildPMSUserState();
@@ -415,6 +428,7 @@ class _BuildPMSUserState extends State<BuildPMSUser>
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    MyAppState appState = context.watch<MyAppState>();
     return Column(children: [
       CircleAvatar(
         radius: 36.0,
@@ -462,23 +476,140 @@ class _BuildPMSUserState extends State<BuildPMSUser>
                         child: SizedBox(
                             height: 50.0,
                             width: 50.0,
-                            child: CircleAvatar(
-                                backgroundImage:
-                                    AssetImage('assets/images/qqmusic.png')))),
+                            child: GestureDetector(
+                              onLongPress: () async {
+                                var result = await showDialog(
+                                    context: context,
+                                    builder: (_) => Dialog(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              SizedBox(height: 20.0),
+                                              Text(
+                                                'Add credential for QQ Music',
+                                                style: textTheme.labelMedium,
+                                              ),
+                                              AddThirdAppCookieForm(
+                                                thirdAppType: 1,
+                                              ),
+                                            ],
+                                          ),
+                                        ));
+                                if (result != null) {
+                                  if (result) {
+                                    bool isUsingMockData =
+                                        appState.isUsingMockData;
+                                    Future<BasicUser?> basicUser;
+                                    if (isUsingMockData) {
+                                      basicUser = Future.value(
+                                          MockData.pmsUser.subUsers['qqmusic']);
+                                    } else {
+                                      basicUser = appState
+                                          .fetchUser(appState.currentPlatform);
+                                    }
+                                    widget.changeBasicUser(basicUser);
+                                    setState(() {});
+                                  } else {
+                                    MyToast.showToast(appState.errorMsg);
+                                  }
+                                }
+                              },
+                              child: CircleAvatar(
+                                  backgroundImage:
+                                      AssetImage('assets/images/qqmusic.png')),
+                            ))),
                     Tab(
                         child: SizedBox(
                             height: 50.0,
                             width: 50.0,
-                            child: CircleAvatar(
-                                backgroundImage:
-                                    AssetImage('assets/images/netease.png')))),
+                            child: GestureDetector(
+                              onLongPress: () async {
+                                var result = await showDialog(
+                                    context: context,
+                                    builder: (_) => Dialog(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              SizedBox(height: 20.0),
+                                              Text(
+                                                'Add credential for Netease Cloud Music',
+                                                style: textTheme.labelMedium,
+                                              ),
+                                              AddThirdAppCookieForm(
+                                                thirdAppType: 2,
+                                              ),
+                                            ],
+                                          ),
+                                        ));
+                                if (result != null) {
+                                  if (result) {
+                                    bool isUsingMockData =
+                                        appState.isUsingMockData;
+                                    Future<BasicUser?> basicUser;
+                                    if (isUsingMockData) {
+                                      basicUser = Future.value(
+                                          MockData.pmsUser.subUsers['qqmusic']);
+                                    } else {
+                                      basicUser = appState
+                                          .fetchUser(appState.currentPlatform);
+                                    }
+                                    widget.changeBasicUser(basicUser);
+                                    setState(() {});
+                                  } else {
+                                    MyToast.showToast(appState.errorMsg);
+                                  }
+                                }
+                              },
+                              child: CircleAvatar(
+                                  backgroundImage:
+                                      AssetImage('assets/images/netease.png')),
+                            ))),
                     Tab(
                         child: SizedBox(
                             height: 50.0,
                             width: 50.0,
-                            child: CircleAvatar(
-                                backgroundImage:
-                                    AssetImage('assets/images/bilibili.png')))),
+                            child: GestureDetector(
+                              onLongPress: () async {
+                                var result = await showDialog(
+                                    context: context,
+                                    builder: (_) => Dialog(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              SizedBox(height: 20.0),
+                                              Text(
+                                                'Add credential for BiliBili',
+                                                style: textTheme.labelMedium,
+                                              ),
+                                              AddThirdAppCookieForm(
+                                                thirdAppType: 3,
+                                              ),
+                                            ],
+                                          ),
+                                        ));
+                                if (result != null) {
+                                  if (result) {
+                                    bool isUsingMockData =
+                                        appState.isUsingMockData;
+                                    Future<BasicUser?> basicUser;
+                                    if (isUsingMockData) {
+                                      basicUser = Future.value(
+                                          MockData.pmsUser.subUsers['qqmusic']);
+                                    } else {
+                                      basicUser = appState
+                                          .fetchUser(appState.currentPlatform);
+                                    }
+                                    widget.changeBasicUser(basicUser);
+                                    setState(() {});
+                                  } else {
+                                    MyToast.showToast(appState.errorMsg);
+                                  }
+                                }
+                              },
+                              child: CircleAvatar(
+                                  backgroundImage:
+                                      AssetImage('assets/images/bilibili.png')),
+                            ))),
                   ],
                 ),
                 Expanded(
@@ -524,7 +655,7 @@ class _BuildPMSUserState extends State<BuildPMSUser>
                                 ],
                               )
                             : Text(
-                                'Please login to Bilibili',
+                                'Please login to BiliBili',
                                 style: textTheme.labelMedium,
                               ),
                       ),
