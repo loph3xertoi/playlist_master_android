@@ -1,0 +1,7 @@
+dartdoc:
+  nodoc:
+    [
+      "lib/third_lib_change/**/*.dart",
+      "lib/config/secrets.dart",
+      "lib/firebase_options.dart",
+    ]
