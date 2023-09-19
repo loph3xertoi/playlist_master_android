@@ -1,5 +1,5 @@
 # Simple workflow for deploying api documents to GitHub Pages
-name: API documents
+name: API Documents
 
 on:
   # Runs on pushes targeting the default branch
