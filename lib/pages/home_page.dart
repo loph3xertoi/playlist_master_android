@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fplayer/fplayer.dart';
-import 'package:playlistmaster/widgets/add_third_app_cookie_form.dart';
+import '../entities/pms/pms_user.dart';
+import '../widgets/add_third_app_cookie_form.dart';
 import 'package:provider/provider.dart';
 
 import '../config/user_info.dart';
@@ -53,9 +54,11 @@ class _HomePageState extends State<HomePage>
   // Initialize user info, email and phone.
   void _initUserInfo(MyAppState appState) async {
     BasicPMSUserInfoDTO? basicUser = await appState.getBasicInfoOfLoginUser();
+    PMSUser pmsUser = (await appState.fetchUser(0)) as PMSUser;
     if (basicUser != null) {
       setState(() {
         UserInfo.basicUser = basicUser;
+        UserInfo.pmsUser = pmsUser;
       });
     } else {
       throw 'Fail to get basic user info.';
@@ -307,49 +310,70 @@ class _HomePageState extends State<HomePage>
               QuickAction(
                 imageUri: 'assets/images/bilibili.png',
                 onTap: () {
-                  MyToast.showToast('Switched to bilibili.');
-                  MyLogger.logger.i('Switched to bilibili.');
-                  if (_currentPlatform != 3) {
-                    if (appState.songsPlayer != null) {
-                      appState.disposeSongsPlayer();
+                  if (UserInfo.pmsUser!.subUsers.containsKey('bilibili')) {
+                    MyToast.showToast('Switched to bilibili.');
+                    MyLogger.logger.i('Switched to bilibili.');
+                    if (_currentPlatform != 3) {
+                      if (appState.songsPlayer != null) {
+                        appState.disposeSongsPlayer();
+                      }
                     }
+                    appState.currentPlatform = 3;
+                    StorageManager.saveData(
+                        'currentPlatform', appState.currentPlatform.toString());
+                    appState.refreshLibraries!(appState, false);
+                  } else {
+                    MyToast.showToast(
+                        'Please add valid credential for BiliBili.');
+                    MyLogger.logger
+                        .w('Please add valid credential for BiliBili.');
                   }
-                  appState.currentPlatform = 3;
-                  StorageManager.saveData(
-                      'currentPlatform', appState.currentPlatform.toString());
-                  appState.refreshLibraries!(appState, false);
                 },
               ),
               QuickAction(
                 imageUri: 'assets/images/netease.png',
                 onTap: () {
-                  MyToast.showToast('Switched to netease music.');
-                  MyLogger.logger.i('Switched to netease music.');
-                  if (_currentPlatform != 2) {
-                    if (appState.songsPlayer != null) {
-                      appState.disposeSongsPlayer();
+                  if (UserInfo.pmsUser!.subUsers.containsKey('ncm')) {
+                    MyToast.showToast('Switched to netease music.');
+                    MyLogger.logger.i('Switched to netease music.');
+                    if (_currentPlatform != 2) {
+                      if (appState.songsPlayer != null) {
+                        appState.disposeSongsPlayer();
+                      }
                     }
+                    appState.currentPlatform = 2;
+                    StorageManager.saveData(
+                        'currentPlatform', appState.currentPlatform.toString());
+                    appState.refreshLibraries!(appState, false);
+                  } else {
+                    MyToast.showToast(
+                        'Please add valid credential for Netease Cloud Music.');
+                    MyLogger.logger.w(
+                        'Please add valid credential for Netease Cloud Music.');
                   }
-                  appState.currentPlatform = 2;
-                  StorageManager.saveData(
-                      'currentPlatform', appState.currentPlatform.toString());
-                  appState.refreshLibraries!(appState, false);
                 },
               ),
               QuickAction(
                 imageUri: 'assets/images/qqmusic.png',
                 onTap: () {
-                  MyToast.showToast('Switched to qq music.');
-                  MyLogger.logger.i('Switched to qq music.');
-                  if (_currentPlatform != 1) {
-                    if (appState.songsPlayer != null) {
-                      appState.disposeSongsPlayer();
+                  if (UserInfo.pmsUser!.subUsers.containsKey('qqmusic')) {
+                    MyToast.showToast('Switched to qq music.');
+                    MyLogger.logger.i('Switched to qq music.');
+                    if (_currentPlatform != 1) {
+                      if (appState.songsPlayer != null) {
+                        appState.disposeSongsPlayer();
+                      }
                     }
+                    appState.currentPlatform = 1;
+                    StorageManager.saveData(
+                        'currentPlatform', appState.currentPlatform.toString());
+                    appState.refreshLibraries!(appState, false);
+                  } else {
+                    MyToast.showToast(
+                        'Please add valid credential for QQ Music.');
+                    MyLogger.logger
+                        .w('Please add valid credential for QQ Music.');
                   }
-                  appState.currentPlatform = 1;
-                  StorageManager.saveData(
-                      'currentPlatform', appState.currentPlatform.toString());
-                  appState.refreshLibraries!(appState, false);
                 },
               ),
             ],

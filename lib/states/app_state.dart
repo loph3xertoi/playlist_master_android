@@ -1028,6 +1028,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1070,6 +1075,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1113,6 +1123,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1174,6 +1189,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1210,6 +1230,11 @@ class MyAppState extends ChangeNotifier {
         return true;
       } else if (response.statusCode == 401) {
         _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
@@ -1252,6 +1277,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1286,6 +1316,11 @@ class MyAppState extends ChangeNotifier {
           return false;
         }
         return true;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1323,6 +1358,10 @@ class MyAppState extends ChangeNotifier {
         StorageManager.deleteData('cookie');
         StorageManager.deleteData('uid');
         StorageManager.deleteData('currentPlatform');
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1367,6 +1406,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return null;
         }
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1416,6 +1460,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1457,6 +1506,11 @@ class MyAppState extends ChangeNotifier {
         }
       } else if (response.statusCode == 401) {
         _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
@@ -1505,6 +1559,11 @@ class MyAppState extends ChangeNotifier {
         } else {
           return result.data.toString();
         }
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1551,6 +1610,11 @@ class MyAppState extends ChangeNotifier {
         } else {
           return result.data.toString();
         }
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1581,6 +1645,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1639,6 +1708,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1676,6 +1750,11 @@ class MyAppState extends ChangeNotifier {
         }
       } else if (response.statusCode == 401) {
         _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1766,6 +1845,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1847,6 +1931,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1905,6 +1994,11 @@ class MyAppState extends ChangeNotifier {
         }
       } else if (response.statusCode == 401) {
         _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1971,6 +2065,11 @@ class MyAppState extends ChangeNotifier {
         _errorMsg = 'Cookie expired, please login again.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2065,6 +2164,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2121,6 +2225,11 @@ class MyAppState extends ChangeNotifier {
         }
       } else if (response.statusCode == 401) {
         _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2211,6 +2320,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2273,6 +2387,11 @@ class MyAppState extends ChangeNotifier {
         }
       } else if (response.statusCode == 401) {
         _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2362,6 +2481,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2434,6 +2558,11 @@ class MyAppState extends ChangeNotifier {
         }
       } else if (response.statusCode == 401) {
         _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2511,6 +2640,11 @@ class MyAppState extends ChangeNotifier {
         }
       } else if (response.statusCode == 401) {
         _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2599,6 +2733,11 @@ class MyAppState extends ChangeNotifier {
         }
       } else if (response.statusCode == 401) {
         _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2725,6 +2864,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2809,6 +2953,11 @@ class MyAppState extends ChangeNotifier {
         }
       } else if (response.statusCode == 401) {
         _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2927,6 +3076,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -3016,6 +3170,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -3077,6 +3236,11 @@ class MyAppState extends ChangeNotifier {
         }
       } else if (response.statusCode == 401) {
         _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -3159,6 +3323,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -3198,6 +3367,11 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return '';
         }
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return '';
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -3243,6 +3417,11 @@ class MyAppState extends ChangeNotifier {
         }
       } else if (response.statusCode == 401) {
         _errorMsg = 'Cookie expired, please login again.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return [];
+      } else if (response.statusCode == 403) {
+        _errorMsg = 'You don\'t have the access to this resource.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return [];

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ip_geolocation_io/ip_geolocation_io.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:playlistmaster/config/user_info.dart';
 import 'package:provider/provider.dart';
 
 import '../config/secrets.dart';
@@ -160,6 +161,8 @@ class _BasicInfoState extends State<BasicInfo> {
                     } else {
                       if (currentPlatform == 0) {
                         user = snapshot.data as PMSUser;
+                        // Update pms user info after changing third app's credential.
+                        UserInfo.pmsUser = user;
                       } else if (currentPlatform == 1) {
                         user = snapshot.data as QQMusicUser;
                       } else if (currentPlatform == 2) {
