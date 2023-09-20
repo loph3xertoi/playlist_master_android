@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fplayer/fplayer.dart';
+import 'package:playlistmaster/widgets/confirm_popup.dart';
 import '../entities/pms/pms_user.dart';
 import '../widgets/add_third_app_cookie_form.dart';
 import 'package:provider/provider.dart';
@@ -38,6 +39,11 @@ class _HomePageState extends State<HomePage>
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int? _currentPlatform;
+
+  // If the exit confirm dialog is shown, this will be true.
+  bool _showExitDialog = false;
+
+  BuildContext? exitDialogContext;
 
   @override
   void initState() {
@@ -90,331 +96,360 @@ class _HomePageState extends State<HomePage>
               ((!kIsWeb && Platform.isAndroid || Platform.isIOS) ? 0.75 : 0.5),
           child: NightBackground(),
         ),
-        body: SafeArea(
-          child: QuickActionMenu(
-            backgroundColor: Colors.transparent,
-            imageUri: 'assets/images/home_button.png',
-            onTap: () async {
-              print('homepage button $appState');
-              MyToast.showToast('Switched to pms.');
-              MyLogger.logger.i('Switched to pms.');
-              if (_currentPlatform != 0) {
-                if (appState.songsPlayer != null) {
-                  appState.disposeSongsPlayer();
-                }
+        body: WillPopScope(
+          onWillPop: () async {
+            if (!_showExitDialog) {
+              _showExitDialog = true;
+              var exit = await showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    exitDialogContext = context;
+                    return ShowConfirmDialog(
+                      title: 'Do you want to exit?',
+                      onConfirm: () =>
+                          Navigator.of(exitDialogContext!).pop(true),
+                    );
+                  });
+              if (exit != null) {
+                return true;
+              } else {
+                _showExitDialog = false;
+                return false;
               }
-              appState.currentPlatform = 0;
-              StorageManager.saveData(
-                  'currentPlatform', appState.currentPlatform.toString());
-              appState.refreshLibraries!(appState, false);
-              showDialog(
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text(
-                      'Test network image',
-                      textAlign: TextAlign.center,
-                      style: textTheme.labelMedium,
-                    ),
-                    // content: Image.network(MyAppState.defaultCoverImage),
-                    content: Column(
-                      children: [
-                        TextButton(
-                          style: ButtonStyle(
-                            shadowColor: MaterialStateProperty.all(
-                              colorScheme.primary,
-                            ),
-                            overlayColor: MaterialStateProperty.all(
-                              Colors.grey,
-                            ),
-                          ),
-                          onPressed: () async {
-                            await MyHttp.clearCache();
-                            // await AudioPlayer.clearAssetCache();
-                            MyToast.showToast('Clear local cache');
-                          },
-                          child: Text(
-                            'Clear local cache',
-                            style: textTheme.labelMedium,
-                          ),
-                        ),
-                        TextButton(
-                          style: ButtonStyle(
-                            shadowColor: MaterialStateProperty.all(
-                              colorScheme.primary,
-                            ),
-                            overlayColor: MaterialStateProperty.all(
-                              Colors.grey,
-                            ),
-                          ),
-                          onPressed: () => throw Exception(),
-                          child: Text(
-                            'Throw Test Exception',
-                            style: textTheme.labelMedium,
-                          ),
-                        ),
-                        TextButton(
-                          style: ButtonStyle(
-                            shadowColor: MaterialStateProperty.all(
-                              colorScheme.primary,
-                            ),
-                            overlayColor: MaterialStateProperty.all(
-                              Colors.grey,
-                            ),
-                          ),
-                          onPressed: () async {
-                            bool isWeb = kIsWeb;
-                            if (!isWeb) {
-                              String platform = Platform.operatingSystem;
-                              print('Current platform is $platform');
-                              await SystemChrome.setEnabledSystemUIMode(
-                                  SystemUiMode.immersiveSticky,
-                                  overlays: []);
-                              await FPlugin.setOrientationPortrait();
-                            } else {
-                              print('Current platform is web');
-                            }
-                            MyToast.showToast('Reset rotation');
-                          },
-                          child: Text(
-                            'Reset rotation',
-                            style: textTheme.labelMedium,
-                          ),
-                        ),
-                        TextButton(
-                          style: ButtonStyle(
-                            shadowColor: MaterialStateProperty.all(
-                              colorScheme.primary,
-                            ),
-                            overlayColor: MaterialStateProperty.all(
-                              Colors.grey,
-                            ),
-                          ),
-                          onPressed: () async {
-                            String platformName;
-                            dynamic searchMethod;
-                            if (_currentPlatform == 0) {
-                              platformName = 'PMS';
-                            } else if (_currentPlatform == 1) {
-                              platformName = 'QQ Music';
-                              searchMethod =
-                                  appState.fetchSearchedSongs<QQMusicSong>(
-                                      '洛天依', 1, 10, _currentPlatform!);
-                            } else if (_currentPlatform == 2) {
-                              platformName = 'Netease Music';
-                              searchMethod =
-                                  appState.fetchSearchedSongs<NCMSong>(
-                                      '洛天依', 1, 10, _currentPlatform!);
-                            } else if (_currentPlatform == 3) {
-                              platformName = 'BiliBili';
-                              searchMethod =
-                                  appState.fetchSearchedSongs<BiliResource>(
-                                      '洛天依', 1, 10, _currentPlatform!);
-                            } else {
-                              throw Exception('Invalid platform');
-                            }
-                            MyToast.showToast('Searching in $platformName');
-                            var res = await searchMethod;
-                            print(res);
-                          },
-                          child: Text(
-                            'Test searching',
-                            style: textTheme.labelMedium,
-                          ),
-                        ),
-                        TextButton(
-                          style: ButtonStyle(
-                            shadowColor: MaterialStateProperty.all(
-                              colorScheme.primary,
-                            ),
-                            overlayColor: MaterialStateProperty.all(
-                              Colors.grey,
-                            ),
-                          ),
-                          onPressed: () {
-                            appState.refreshLibraries!(appState, false);
-                            MyToast.showToast('Refresh libraries');
-                            Navigator.pop(context);
-                          },
-                          child: Text(
-                            'Refresh libraries',
-                            style: textTheme.labelMedium,
-                          ),
-                        ),
-                        TextButton(
-                          style: ButtonStyle(
-                            shadowColor: MaterialStateProperty.all(
-                              colorScheme.primary,
-                            ),
-                            overlayColor: MaterialStateProperty.all(
-                              Colors.grey,
-                            ),
-                          ),
-                          onPressed: () async {
-                            dynamic cookies = await appState.getCookies();
-                            MyLogger.logger.i(cookies);
-                          },
-                          child: Text(
-                            'Get cookies',
-                            style: textTheme.labelMedium,
-                          ),
-                        ),
-                        TextButton(
-                          style: ButtonStyle(
-                            shadowColor: MaterialStateProperty.all(
-                              colorScheme.primary,
-                            ),
-                            overlayColor: MaterialStateProperty.all(
-                              Colors.grey,
-                            ),
-                          ),
-                          onPressed: () async {},
-                          child: Text(
-                            'Other',
-                            style: textTheme.labelMedium,
-                          ),
-                        ),
-                        TextButton(
-                          style: ButtonStyle(
-                            shadowColor: MaterialStateProperty.all(
-                              colorScheme.primary,
-                            ),
-                            overlayColor: MaterialStateProperty.all(
-                              Colors.grey,
-                            ),
-                          ),
-                          onPressed: () {
-                            // appState.refreshLibraries!(appState, false);
-                            showDialog(
-                                context: context,
-                                builder: (_) => Dialog(
-                                      child: AddThirdAppCookieForm(
-                                        thirdAppType: 1,
-                                      ),
-                                    ));
-                            MyToast.showToast('Test add third credential form');
-                            // Navigator.pop(context);
-                          },
-                          child: Text(
-                            'Test add third credential form',
-                            style: textTheme.labelMedium,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                context: context,
-              );
-            },
-            actions: [
-              QuickAction(
-                imageUri: 'assets/images/bilibili.png',
-                onTap: () {
-                  if (UserInfo.pmsUser!.subUsers.containsKey('bilibili')) {
-                    MyToast.showToast('Switched to bilibili.');
-                    MyLogger.logger.i('Switched to bilibili.');
-                    if (_currentPlatform != 3) {
-                      if (appState.songsPlayer != null) {
-                        appState.disposeSongsPlayer();
-                      }
-                    }
-                    appState.currentPlatform = 3;
-                    StorageManager.saveData(
-                        'currentPlatform', appState.currentPlatform.toString());
-                    appState.refreshLibraries!(appState, false);
-                  } else {
-                    MyToast.showToast(
-                        'Please add valid credential for BiliBili.');
-                    MyLogger.logger
-                        .w('Please add valid credential for BiliBili.');
+            } else {
+              _showExitDialog = false;
+              Navigator.of(exitDialogContext!).pop();
+              return false;
+            }
+          },
+          child: SafeArea(
+            child: QuickActionMenu(
+              backgroundColor: Colors.transparent,
+              imageUri: 'assets/images/home_button.png',
+              onTap: () async {
+                print('homepage button $appState');
+                MyToast.showToast('Switched to pms.');
+                MyLogger.logger.i('Switched to pms.');
+                if (_currentPlatform != 0) {
+                  if (appState.songsPlayer != null) {
+                    appState.disposeSongsPlayer();
                   }
-                },
-              ),
-              QuickAction(
-                imageUri: 'assets/images/netease.png',
-                onTap: () {
-                  if (UserInfo.pmsUser!.subUsers.containsKey('ncm')) {
-                    MyToast.showToast('Switched to netease music.');
-                    MyLogger.logger.i('Switched to netease music.');
-                    if (_currentPlatform != 2) {
-                      if (appState.songsPlayer != null) {
-                        appState.disposeSongsPlayer();
+                }
+                appState.currentPlatform = 0;
+                StorageManager.saveData(
+                    'currentPlatform', appState.currentPlatform.toString());
+                appState.refreshLibraries!(appState, false);
+                showDialog(
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text(
+                        'Test network image',
+                        textAlign: TextAlign.center,
+                        style: textTheme.labelMedium,
+                      ),
+                      // content: Image.network(MyAppState.defaultCoverImage),
+                      content: Column(
+                        children: [
+                          TextButton(
+                            style: ButtonStyle(
+                              shadowColor: MaterialStateProperty.all(
+                                colorScheme.primary,
+                              ),
+                              overlayColor: MaterialStateProperty.all(
+                                Colors.grey,
+                              ),
+                            ),
+                            onPressed: () async {
+                              await MyHttp.clearCache();
+                              // await AudioPlayer.clearAssetCache();
+                              MyToast.showToast('Clear local cache');
+                            },
+                            child: Text(
+                              'Clear local cache',
+                              style: textTheme.labelMedium,
+                            ),
+                          ),
+                          TextButton(
+                            style: ButtonStyle(
+                              shadowColor: MaterialStateProperty.all(
+                                colorScheme.primary,
+                              ),
+                              overlayColor: MaterialStateProperty.all(
+                                Colors.grey,
+                              ),
+                            ),
+                            onPressed: () => throw Exception(),
+                            child: Text(
+                              'Throw Test Exception',
+                              style: textTheme.labelMedium,
+                            ),
+                          ),
+                          TextButton(
+                            style: ButtonStyle(
+                              shadowColor: MaterialStateProperty.all(
+                                colorScheme.primary,
+                              ),
+                              overlayColor: MaterialStateProperty.all(
+                                Colors.grey,
+                              ),
+                            ),
+                            onPressed: () async {
+                              bool isWeb = kIsWeb;
+                              if (!isWeb) {
+                                String platform = Platform.operatingSystem;
+                                print('Current platform is $platform');
+                                await SystemChrome.setEnabledSystemUIMode(
+                                    SystemUiMode.immersiveSticky,
+                                    overlays: []);
+                                await FPlugin.setOrientationPortrait();
+                              } else {
+                                print('Current platform is web');
+                              }
+                              MyToast.showToast('Reset rotation');
+                            },
+                            child: Text(
+                              'Reset rotation',
+                              style: textTheme.labelMedium,
+                            ),
+                          ),
+                          TextButton(
+                            style: ButtonStyle(
+                              shadowColor: MaterialStateProperty.all(
+                                colorScheme.primary,
+                              ),
+                              overlayColor: MaterialStateProperty.all(
+                                Colors.grey,
+                              ),
+                            ),
+                            onPressed: () async {
+                              String platformName;
+                              dynamic searchMethod;
+                              if (_currentPlatform == 0) {
+                                platformName = 'PMS';
+                              } else if (_currentPlatform == 1) {
+                                platformName = 'QQ Music';
+                                searchMethod =
+                                    appState.fetchSearchedSongs<QQMusicSong>(
+                                        '洛天依', 1, 10, _currentPlatform!);
+                              } else if (_currentPlatform == 2) {
+                                platformName = 'Netease Music';
+                                searchMethod =
+                                    appState.fetchSearchedSongs<NCMSong>(
+                                        '洛天依', 1, 10, _currentPlatform!);
+                              } else if (_currentPlatform == 3) {
+                                platformName = 'BiliBili';
+                                searchMethod =
+                                    appState.fetchSearchedSongs<BiliResource>(
+                                        '洛天依', 1, 10, _currentPlatform!);
+                              } else {
+                                throw Exception('Invalid platform');
+                              }
+                              MyToast.showToast('Searching in $platformName');
+                              var res = await searchMethod;
+                              print(res);
+                            },
+                            child: Text(
+                              'Test searching',
+                              style: textTheme.labelMedium,
+                            ),
+                          ),
+                          TextButton(
+                            style: ButtonStyle(
+                              shadowColor: MaterialStateProperty.all(
+                                colorScheme.primary,
+                              ),
+                              overlayColor: MaterialStateProperty.all(
+                                Colors.grey,
+                              ),
+                            ),
+                            onPressed: () {
+                              appState.refreshLibraries!(appState, false);
+                              MyToast.showToast('Refresh libraries');
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              'Refresh libraries',
+                              style: textTheme.labelMedium,
+                            ),
+                          ),
+                          TextButton(
+                            style: ButtonStyle(
+                              shadowColor: MaterialStateProperty.all(
+                                colorScheme.primary,
+                              ),
+                              overlayColor: MaterialStateProperty.all(
+                                Colors.grey,
+                              ),
+                            ),
+                            onPressed: () async {
+                              dynamic cookies = await appState.getCookies();
+                              MyLogger.logger.i(cookies);
+                            },
+                            child: Text(
+                              'Get cookies',
+                              style: textTheme.labelMedium,
+                            ),
+                          ),
+                          TextButton(
+                            style: ButtonStyle(
+                              shadowColor: MaterialStateProperty.all(
+                                colorScheme.primary,
+                              ),
+                              overlayColor: MaterialStateProperty.all(
+                                Colors.grey,
+                              ),
+                            ),
+                            onPressed: () async {},
+                            child: Text(
+                              'Other',
+                              style: textTheme.labelMedium,
+                            ),
+                          ),
+                          TextButton(
+                            style: ButtonStyle(
+                              shadowColor: MaterialStateProperty.all(
+                                colorScheme.primary,
+                              ),
+                              overlayColor: MaterialStateProperty.all(
+                                Colors.grey,
+                              ),
+                            ),
+                            onPressed: () {
+                              // appState.refreshLibraries!(appState, false);
+                              showDialog(
+                                  context: context,
+                                  builder: (_) => Dialog(
+                                        child: AddThirdAppCookieForm(
+                                          thirdAppType: 1,
+                                        ),
+                                      ));
+                              MyToast.showToast(
+                                  'Test add third credential form');
+                              // Navigator.pop(context);
+                            },
+                            child: Text(
+                              'Test add third credential form',
+                              style: textTheme.labelMedium,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  context: context,
+                );
+              },
+              actions: [
+                QuickAction(
+                  imageUri: 'assets/images/bilibili.png',
+                  onTap: () {
+                    if (UserInfo.pmsUser!.subUsers.containsKey('bilibili')) {
+                      MyToast.showToast('Switched to bilibili.');
+                      MyLogger.logger.i('Switched to bilibili.');
+                      if (_currentPlatform != 3) {
+                        if (appState.songsPlayer != null) {
+                          appState.disposeSongsPlayer();
+                        }
                       }
+                      appState.currentPlatform = 3;
+                      StorageManager.saveData('currentPlatform',
+                          appState.currentPlatform.toString());
+                      appState.refreshLibraries!(appState, false);
+                    } else {
+                      MyToast.showToast(
+                          'Please add valid credential for BiliBili.');
+                      MyLogger.logger
+                          .w('Please add valid credential for BiliBili.');
                     }
-                    appState.currentPlatform = 2;
-                    StorageManager.saveData(
-                        'currentPlatform', appState.currentPlatform.toString());
-                    appState.refreshLibraries!(appState, false);
-                  } else {
-                    MyToast.showToast(
-                        'Please add valid credential for Netease Cloud Music.');
-                    MyLogger.logger.w(
-                        'Please add valid credential for Netease Cloud Music.');
-                  }
-                },
-              ),
-              QuickAction(
-                imageUri: 'assets/images/qqmusic.png',
-                onTap: () {
-                  if (UserInfo.pmsUser!.subUsers.containsKey('qqmusic')) {
-                    MyToast.showToast('Switched to qq music.');
-                    MyLogger.logger.i('Switched to qq music.');
-                    if (_currentPlatform != 1) {
-                      if (appState.songsPlayer != null) {
-                        appState.disposeSongsPlayer();
-                      }
-                    }
-                    appState.currentPlatform = 1;
-                    StorageManager.saveData(
-                        'currentPlatform', appState.currentPlatform.toString());
-                    appState.refreshLibraries!(appState, false);
-                  } else {
-                    MyToast.showToast(
-                        'Please add valid credential for QQ Music.');
-                    MyLogger.logger
-                        .w('Please add valid credential for QQ Music.');
-                  }
-                },
-              ),
-            ],
-            child: Column(
-              children: [
-                Container(
-                  color: colorScheme.primary,
-                  child: MySearchBar(
-                    myScaffoldKey: _scaffoldKey,
-                    notInHomepage: false,
-                    inDetailLibraryPage: false,
-                  ),
+                  },
                 ),
-                // SizedBox.expand(),
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: theme.homepageBg!,
-                        stops: [0.0, 0.38, 0.6, 0.81, 1.0],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
+                QuickAction(
+                  imageUri: 'assets/images/netease.png',
+                  onTap: () {
+                    if (UserInfo.pmsUser!.subUsers.containsKey('ncm')) {
+                      MyToast.showToast('Switched to netease music.');
+                      MyLogger.logger.i('Switched to netease music.');
+                      if (_currentPlatform != 2) {
+                        if (appState.songsPlayer != null) {
+                          appState.disposeSongsPlayer();
+                        }
+                      }
+                      appState.currentPlatform = 2;
+                      StorageManager.saveData('currentPlatform',
+                          appState.currentPlatform.toString());
+                      appState.refreshLibraries!(appState, false);
+                    } else {
+                      MyToast.showToast(
+                          'Please add valid credential for Netease Cloud Music.');
+                      MyLogger.logger.w(
+                          'Please add valid credential for Netease Cloud Music.');
+                    }
+                  },
+                ),
+                QuickAction(
+                  imageUri: 'assets/images/qqmusic.png',
+                  onTap: () {
+                    if (UserInfo.pmsUser!.subUsers.containsKey('qqmusic')) {
+                      MyToast.showToast('Switched to qq music.');
+                      MyLogger.logger.i('Switched to qq music.');
+                      if (_currentPlatform != 1) {
+                        if (appState.songsPlayer != null) {
+                          appState.disposeSongsPlayer();
+                        }
+                      }
+                      appState.currentPlatform = 1;
+                      StorageManager.saveData('currentPlatform',
+                          appState.currentPlatform.toString());
+                      appState.refreshLibraries!(appState, false);
+                    } else {
+                      MyToast.showToast(
+                          'Please add valid credential for QQ Music.');
+                      MyLogger.logger
+                          .w('Please add valid credential for QQ Music.');
+                    }
+                  },
+                ),
+              ],
+              child: Column(
+                children: [
+                  Container(
+                    color: colorScheme.primary,
+                    child: MySearchBar(
+                      myScaffoldKey: _scaffoldKey,
+                      notInHomepage: false,
+                      inDetailLibraryPage: false,
+                    ),
+                  ),
+                  // SizedBox.expand(),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: theme.homepageBg!,
+                          stops: [0.0, 0.38, 0.6, 0.81, 1.0],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              margin:
+                                  EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
+                              child: MyContentArea(),
+                            ),
+                          ),
+                          appState.currentSong == null
+                              ? Container()
+                              : BottomPlayer(),
+                        ],
                       ),
                     ),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            margin: EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 0.0),
-                            child: MyContentArea(),
-                          ),
-                        ),
-                        appState.currentSong == null
-                            ? Container()
-                            : BottomPlayer(),
-                      ],
-                    ),
                   ),
-                ),
-                MyFooter(),
-              ],
+                  MyFooter(),
+                ],
+              ),
             ),
           ),
         ),
