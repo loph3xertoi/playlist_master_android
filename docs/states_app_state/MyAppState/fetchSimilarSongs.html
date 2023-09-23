@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the fetchSimilarSongs method from the MyAppState class, for the Dart programming language.">
+  <title>fetchSimilarSongs method - MyAppState class - app_state library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">playlistmaster</a></li>
+    <li><a href="../../states_app_state/states_app_state-library.html">app_state</a></li>
+    <li><a href="../../states_app_state/MyAppState-class.html">MyAppState</a></li>
+    <li class="self-crumb">fetchSimilarSongs method</li>
+  </ol>
+  <div class="self-name">fetchSimilarSongs</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        brightness_4
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        brightness_5
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div
+      id="dartdoc-main-content"
+      class="main-content"
+      data-above-sidebar="states_app_state&#47;MyAppState-class-sidebar.html"
+      data-below-sidebar="">
+      <div>
+<h1><span class="kind-method">fetchSimilarSongs</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../entities_basic_basic_song/BasicSong-class.html">BasicSong</a></span>&gt;</span>?</span>&gt;</span></span>
+<span class="name ">fetchSimilarSongs</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="fetchSimilarSongs-param-song"><span class="type-annotation"><a href="../../entities_basic_basic_song/BasicSong-class.html">BasicSong</a></span> <span class="parameter-name">song</span>, </span></li>
+<li><span class="parameter" id="fetchSimilarSongs-param-platform"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">platform</span></span></li>
+</ol>)
+
+      
+
+    </section>
+    
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Future&lt;List&lt;BasicSong&gt;?&gt; fetchSimilarSongs(
+    BasicSong song, int platform) async {
+  BasicSong Function(Map&lt;String, dynamic&gt;) resolveJson;
+  Uri? url;
+  if (platform == 0) {
+    int songType;
+    if ((song as PMSSong).type == 1) {
+      songType = 1;
+    } else if (song.type == 2) {
+      songType = 2;
+    } else {
+      throw &#39;Invalid song type&#39;;
+    }
+    if (songType == 1) {
+      resolveJson = QQMusicSong.fromJson;
+    } else {
+      resolveJson = NCMSong.fromJson;
+    }
+    url = Uri.http(
+      API.host,
+      &#39;${API.similarSongs}&#47;${song.id}&#39;,
+      {
+        &#39;songType&#39;: songType.toString(),
+        &#39;platform&#39;: platform.toString(),
+      },
+    );
+  } else if (platform == 1) {
+    resolveJson = QQMusicSong.fromJson;
+    url = Uri.http(
+      API.host,
+      &#39;${API.similarSongs}&#47;${(song as QQMusicSong).songId}&#39;,
+      {
+        &#39;platform&#39;: platform.toString(),
+      },
+    );
+  } else if (platform == 2) {
+    resolveJson = NCMSong.fromJson;
+    url = Uri.http(
+      API.host,
+      &#39;${API.similarSongs}&#47;${(song as NCMSong).id}&#39;,
+      {
+        &#39;platform&#39;: platform.toString(),
+      },
+    );
+  } else if (platform == 3) {
+    throw UnimplementedError(&#39;Not yet implement bilibili platform&#39;);
+  } else {
+    throw UnsupportedError(&#39;Invalid platform&#39;);
+  }
+  final client = RetryClient(http.Client());
+  try {
+    MyLogger.logger.i(&#39;Loading similar songs from network...&#39;);
+    final response = await client.get(url, headers: {&#39;Cookie&#39;: cookie!});
+    if (response.statusCode == 200) {
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map&lt;String, dynamic&gt;;
+      Result result = Result.fromJson(decodedResponse);
+      if (result.success) {
+        List&lt;dynamic&gt; jsonList = decodedResponse[&#39;data&#39;];
+        return jsonList.map&lt;BasicSong&gt;((e) =&gt; resolveJson(e)).toList();
+      } else {
+        _errorMsg = result.message!;
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      }
+    } else if (response.statusCode == 401) {
+      _errorMsg = &#39;Cookie expired, please login again.&#39;;
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } else if (response.statusCode == 403) {
+      _errorMsg = &#39;You don\&#39;t have the access to this resource.&#39;;
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } else {
+      _errorMsg =
+          &#39;Response with code ${response.statusCode}: ${response.reasonPhrase}&#39;;
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    }
+  } catch (e) {
+    MyToast.showToast(&#39;Exception thrown: $e&#39;);
+    MyLogger.logger.e(&#39;Network error with exception: $e&#39;);
+    rethrow;
+  } finally {
+    client.close();
+  }
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">playlistmaster</a></li>
+    <li><a href="../../states_app_state/states_app_state-library.html">app_state</a></li>
+    <li><a href="../../states_app_state/MyAppState-class.html">MyAppState</a></li>
+    <li class="self-crumb">fetchSimilarSongs method</li>
+</ol>
+
+
+    <h5>MyAppState class</h5>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    playlistmaster
+      1.0.0+1
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+
