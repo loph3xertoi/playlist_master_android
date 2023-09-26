@@ -1497,7 +1497,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
     }
     var links =
         await _noListenedState.fetchSongsLink([resourceId], _currentPlatform);
-    final url = 'http://${API.host}${links.mpd}';
+    final url = 'https://${API.host}${links.mpd}';
     BetterPlayerDataSource dataSource = BetterPlayerDataSource(
       BetterPlayerDataSourceType.network,
       url,
@@ -1561,7 +1561,7 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
 
     var links =
         await _noListenedState.fetchSongsLink([resourceId], _currentPlatform);
-    final url = 'http://${API.host}${links.mpd}';
+    final url = 'https://${API.host}${links.mpd}';
     BetterPlayerDataSource dataSource = BetterPlayerDataSource(
       BetterPlayerDataSourceType.network,
       url,

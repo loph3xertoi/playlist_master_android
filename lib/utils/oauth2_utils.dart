@@ -10,7 +10,7 @@ class GitHubOAuth2Client {
       Uri.parse('https://github.com/login/oauth/access_token');
   static const identifier = githubClientId;
   static final redirectUrl =
-      Uri.parse('http://${API.host}${API.githubRedirectUrl}');
+      Uri.parse('https://${API.host}${API.githubRedirectUrl}');
 
   static Uri getAuthorizationUrl() {
     var grant = oauth2.AuthorizationCodeGrant(
@@ -30,7 +30,7 @@ class GoogleOAuth2Client {
   static const identifier = googleClientId;
 
   static final redirectUrl =
-      Uri.parse('http://${API.host}${API.googleRedirectUrl}');
+      Uri.parse('https://${API.host}${API.googleRedirectUrl}');
 
   static Uri getAuthorizationUrl() {
     var grant = oauth2.AuthorizationCodeGrant(

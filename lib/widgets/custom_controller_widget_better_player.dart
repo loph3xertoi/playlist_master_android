@@ -71,9 +71,13 @@ class _CustomControlsWidgetState
           return false;
         }
         if (_betterPlayerController!.isFullScreen) {
-          Timer(Duration(milliseconds: 300), () {
-            _appState!.isFullScreen = false;
-          });
+          // Timer(Duration(milliseconds: 300), () {
+          //   setState(() {
+          //     _appState!.isFullScreen = false;
+          //   });
+          // });
+          _onExpandCollapse();
+          return false;
         }
         return true;
       },

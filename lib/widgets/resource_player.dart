@@ -189,7 +189,7 @@ class _DashPageState extends State<ResourcePlayer> {
     // String url =
     //     'https://baikevideo.cdn.bcebos.com/media/mda-OxWC3meZEwxyMv5u/a4d544933fd90ff496d7a72bf521cbed.mp4';
     String uri = _detailResource.links!.mpd;
-    String url = 'http://${API.host}$uri';
+    String url = 'https://${API.host}$uri';
     if (_detailResource.isSeasonResource) {
       _resourceType = 2;
     } else if (_detailResource.page > 1) {
@@ -447,7 +447,7 @@ class _DashPageState extends State<ResourcePlayer> {
     }
     var links = await _appState!
         .fetchSongsLink([resourceId], _appState!.currentPlatform);
-    final url = 'http://${API.host}${links.mpd}';
+    final url = 'https://${API.host}${links.mpd}';
     BetterPlayerDataSource dataSource = BetterPlayerDataSource(
       BetterPlayerDataSourceType.network,
       url,

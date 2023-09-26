@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
+// import ''
+//     if (dart.library.html) 'package:http/browser_client.dart' as browser_client;
 import 'package:http/retry.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -1003,8 +1005,12 @@ class MyAppState extends ChangeNotifier {
 
   Future<int?> login(String email, String password) async {
     Map<String, Object> requestBody = {'email': email, 'password': password};
-    final Uri url = Uri.http(API.host, API.login);
-    final client = RetryClient(http.Client());
+    final Uri url = Uri.https(API.host, API.login);
+    var rawClient = http.Client();
+    // if (kIsWeb && rawClient is BrowserClient) {
+    //   rawClient.withCredentials = true;
+    // }
+    final client = RetryClient(rawClient);
     try {
       MyLogger.logger.i('Login...');
       final response = await client.post(
@@ -1019,6 +1025,7 @@ class MyAppState extends ChangeNotifier {
         if (result.success) {
           cookie = response.headers['set-cookie'];
           UserInfo.uid = result.data.toString();
+          MyAppState.cookie = cookie;
           StorageManager.saveData('cookie', cookie);
           StorageManager.saveData('uid', UserInfo.uid);
           return result.data as int;
@@ -1029,7 +1036,7 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1066,6 +1073,7 @@ class MyAppState extends ChangeNotifier {
         if (result.success) {
           cookie = response.headers['set-cookie'];
           UserInfo.uid = result.data.toString();
+          MyAppState.cookie = cookie;
           StorageManager.saveData('cookie', cookie);
           StorageManager.saveData('uid', UserInfo.uid);
           return result.data as int;
@@ -1076,7 +1084,7 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1098,7 +1106,7 @@ class MyAppState extends ChangeNotifier {
 
   Future<int?> loginByGoogle(String authorizationCode) async {
     final Uri url =
-        Uri.http(API.host, API.googleRedirectUrl, {'code': authorizationCode});
+        Uri.https(API.host, API.googleRedirectUrl, {'code': authorizationCode});
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Login by Google...');
@@ -1114,6 +1122,7 @@ class MyAppState extends ChangeNotifier {
         if (result.success) {
           cookie = response.headers['set-cookie'];
           UserInfo.uid = result.data.toString();
+          MyAppState.cookie = cookie;
           StorageManager.saveData('cookie', cookie);
           StorageManager.saveData('uid', UserInfo.uid);
           return result.data as int;
@@ -1124,7 +1133,7 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1161,7 +1170,7 @@ class MyAppState extends ChangeNotifier {
       'thirdCookie': thirdCookie
     };
     final Uri url =
-        Uri.http(API.host, API.credential, {'platform': platform.toString()});
+        Uri.https(API.host, API.credential, {'platform': platform.toString()});
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Updating third app\'s credential...');
@@ -1190,7 +1199,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return false;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
@@ -1212,7 +1221,7 @@ class MyAppState extends ChangeNotifier {
 
   /// Send token for resetting password, need login first.
   Future<bool> forgotPassword() async {
-    final Uri url = Uri.http(API.host, API.forgotPassword);
+    final Uri url = Uri.https(API.host, API.forgotPassword);
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Forgot password...');
@@ -1234,7 +1243,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return false;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
@@ -1256,7 +1265,7 @@ class MyAppState extends ChangeNotifier {
 
   /// Send token for binding email, need login first.
   Future<bool> bindEmail(String email) async {
-    final Uri url = Uri.http(API.host, API.bindEmail, {'email': email});
+    final Uri url = Uri.https(API.host, API.bindEmail, {'email': email});
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Bind email...');
@@ -1278,7 +1287,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return false;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
@@ -1300,7 +1309,7 @@ class MyAppState extends ChangeNotifier {
 
   /// Send verify token without needing login first.
   Future<bool> sendVerifyToken(String email, int type) async {
-    final Uri url = Uri.http(
+    final Uri url = Uri.https(
         API.host, API.sendCode, {'email': email, 'type': type.toString()});
     final client = RetryClient(http.Client());
     try {
@@ -1317,7 +1326,7 @@ class MyAppState extends ChangeNotifier {
         }
         return true;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
@@ -1338,7 +1347,7 @@ class MyAppState extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    final Uri url = Uri.http(API.host, API.logout);
+    final Uri url = Uri.https(API.host, API.logout);
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Logout...');
@@ -1359,7 +1368,7 @@ class MyAppState extends ChangeNotifier {
         StorageManager.deleteData('uid');
         StorageManager.deleteData('currentPlatform');
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
       } else {
@@ -1385,7 +1394,7 @@ class MyAppState extends ChangeNotifier {
       'phoneNumber': phoneNumber,
       'password': password
     };
-    final Uri url = Uri.http(API.host, API.register);
+    final Uri url = Uri.https(API.host, API.register);
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Register user...');
@@ -1407,7 +1416,7 @@ class MyAppState extends ChangeNotifier {
           return null;
         }
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1434,7 +1443,7 @@ class MyAppState extends ChangeNotifier {
       'repeatedPassword': repeatedPassword,
       'token': token
     };
-    final Uri url = Uri.http(API.host, API.verifyResetPass);
+    final Uri url = Uri.https(API.host, API.verifyResetPass);
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Verify token for resetting password...');
@@ -1461,7 +1470,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return false;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
@@ -1483,7 +1492,7 @@ class MyAppState extends ChangeNotifier {
 
   Future<bool> verifyBindEmailToken(String email, String token) async {
     Map<String, Object> requestBody = {'email': email, 'token': token};
-    final Uri url = Uri.http(API.host, API.verifyBindEmail);
+    final Uri url = Uri.https(API.host, API.verifyBindEmail);
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Verify token for binding email...');
@@ -1510,7 +1519,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return false;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
@@ -1538,7 +1547,7 @@ class MyAppState extends ChangeNotifier {
       'email': email,
       'token': token
     };
-    final Uri url = Uri.http(API.host, API.verifyTokenForResetPasswordNologin);
+    final Uri url = Uri.https(API.host, API.verifyTokenForResetPasswordNologin);
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Verify token...');
@@ -1560,7 +1569,7 @@ class MyAppState extends ChangeNotifier {
           return result.data.toString();
         }
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1589,7 +1598,7 @@ class MyAppState extends ChangeNotifier {
       'password': password,
       'token': token
     };
-    final Uri url = Uri.http(API.host, API.verifyTokenForSignUpNologin);
+    final Uri url = Uri.https(API.host, API.verifyTokenForSignUpNologin);
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Verify token...');
@@ -1611,7 +1620,7 @@ class MyAppState extends ChangeNotifier {
           return result.data.toString();
         }
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1632,7 +1641,7 @@ class MyAppState extends ChangeNotifier {
   }
 
   Future<dynamic> getCookies() async {
-    final Uri url = Uri.http(API.host, '/cookies');
+    final Uri url = Uri.https(API.host, '/cookies');
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Get all cookies...');
@@ -1646,7 +1655,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
@@ -1679,7 +1688,7 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-    final Uri url = Uri.http(
+    final Uri url = Uri.https(
       API.host,
       '${API.user}/${UserInfo.uid}',
       {
@@ -1709,7 +1718,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1730,10 +1739,12 @@ class MyAppState extends ChangeNotifier {
   }
 
   Future<BasicPMSUserInfoDTO?> getBasicInfoOfLoginUser() async {
-    final Uri url = Uri.http(API.host, API.basicUser);
+    final Uri url = Uri.https(API.host, API.basicUser);
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Loading basic pms user information from network...');
+      // final response = await client.get(url);
+      print('cookie: $cookie');
       final response = await client.get(url, headers: {'Cookie': cookie!});
       if (response.statusCode == 200) {
         final decodedResponse =
@@ -1744,29 +1755,29 @@ class MyAppState extends ChangeNotifier {
           return BasicPMSUserInfoDTO.fromJson(user);
         } else {
           _errorMsg = result.message!;
-          MyToast.showToast(_errorMsg);
+          // MyToast.showToast(_errorMsg);
           MyLogger.logger.e(_errorMsg);
           return null;
         }
       } else if (response.statusCode == 401) {
         _errorMsg = 'Cookie expired, please login again.';
-        MyToast.showToast(_errorMsg);
+        // MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
-        MyToast.showToast(_errorMsg);
+        _errorMsg = 'You don\'t have access for this operation.';
+        // MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
-        MyToast.showToast(_errorMsg);
+        // MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
       }
     } catch (e) {
-      MyToast.showToast('Exception thrown: $e');
+      // MyToast.showToast('Exception thrown: $e');
       MyLogger.logger.e('Network error with exception: $e');
       rethrow;
     } finally {
@@ -1811,7 +1822,7 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-    final Uri url = Uri.http(
+    final Uri url = Uri.https(
       API.host,
       API.libraries,
       params,
@@ -1846,7 +1857,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1871,7 +1882,7 @@ class MyAppState extends ChangeNotifier {
     Uri? url;
     if (platform == 0) {
       resolveJson = PMSDetailSong.fromJson as T Function(Map<String, dynamic>);
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         '${API.detailSong}/${(song as PMSSong).id}',
         {
@@ -1881,7 +1892,7 @@ class MyAppState extends ChangeNotifier {
     } else if (platform == 1) {
       resolveJson =
           QQMusicDetailSong.fromJson as T Function(Map<String, dynamic>);
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         '${API.detailSong}/${(song as QQMusicSong).songMid}',
         {
@@ -1890,7 +1901,7 @@ class MyAppState extends ChangeNotifier {
       );
     } else if (platform == 2) {
       resolveJson = NCMDetailSong.fromJson as T Function(Map<String, dynamic>);
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         '${API.detailSong}/${(song as NCMSong).id}',
         {
@@ -1900,7 +1911,7 @@ class MyAppState extends ChangeNotifier {
     } else if (platform == 3) {
       resolveJson =
           BiliDetailResource.fromJson as T Function(Map<String, dynamic>);
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         '${API.detailSong}/${(song as BiliResource).bvid}',
         {
@@ -1932,7 +1943,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1967,7 +1978,7 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-    final Uri url = Uri.http(
+    final Uri url = Uri.https(
       API.host,
       '${API.mvLink}/${vids.join(',')}',
       {
@@ -1998,7 +2009,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2028,7 +2039,7 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-    final Uri url = Uri.http(
+    final Uri url = Uri.https(
       API.host,
       '${API.songsLink}/${songIds.join(',')}',
       {
@@ -2066,7 +2077,7 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
@@ -2100,7 +2111,7 @@ class MyAppState extends ChangeNotifier {
     Uri? url;
     if (platform == 0) {
       resolveJson = PMSDetailLibrary.fromJson;
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         '${API.detailLibrary}/${(library as PMSLibrary).id}',
         {
@@ -2109,7 +2120,7 @@ class MyAppState extends ChangeNotifier {
       );
     } else if (platform == 1) {
       resolveJson = QQMusicDetailPlaylist.fromJson;
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         '${API.detailLibrary}/${(library as QQMusicPlaylist).tid}',
         {
@@ -2118,7 +2129,7 @@ class MyAppState extends ChangeNotifier {
       );
     } else if (platform == 2) {
       resolveJson = NCMDetailPlaylist.fromJson;
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         '${API.detailLibrary}/${(library as NCMPlaylist).id}',
         {
@@ -2127,7 +2138,7 @@ class MyAppState extends ChangeNotifier {
       );
     } else if (platform == 3) {
       resolveJson = BiliDetailFavList.fromJson;
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         '${API.detailLibrary}/${(library as BiliFavList).id}',
         {
@@ -2165,7 +2176,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2201,7 +2212,7 @@ class MyAppState extends ChangeNotifier {
       throw UnsupportedError('Invalid platform');
     }
     resolveJson = PagedDataDTO<T>.fromJson;
-    final Uri url = Uri.http(API.host, '${API.searchSong}/$keyword', {
+    final Uri url = Uri.https(API.host, '${API.searchSong}/$keyword', {
       'pageNo': pageNo.toString(),
       'pageSize': pageSize.toString(),
       'platform': platform.toString(),
@@ -2229,7 +2240,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2267,7 +2278,7 @@ class MyAppState extends ChangeNotifier {
       } else {
         resolveJson = NCMSong.fromJson;
       }
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         '${API.similarSongs}/${song.id}',
         {
@@ -2277,7 +2288,7 @@ class MyAppState extends ChangeNotifier {
       );
     } else if (platform == 1) {
       resolveJson = QQMusicSong.fromJson;
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         '${API.similarSongs}/${(song as QQMusicSong).songId}',
         {
@@ -2286,7 +2297,7 @@ class MyAppState extends ChangeNotifier {
       );
     } else if (platform == 2) {
       resolveJson = NCMSong.fromJson;
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         '${API.similarSongs}/${(song as NCMSong).id}',
         {
@@ -2321,7 +2332,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2348,7 +2359,7 @@ class MyAppState extends ChangeNotifier {
       throw UnimplementedError('Not yet implement pms platform');
     } else if (platform == 1) {
       resolveJson = QQMusicDetailVideo.fromJson;
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         '${API.detailMV}/${(video as QQMusicVideo).vid}',
         {
@@ -2357,7 +2368,7 @@ class MyAppState extends ChangeNotifier {
       );
     } else if (platform == 2) {
       resolveJson = NCMDetailVideo.fromJson;
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         '${API.detailMV}/${(video as NCMVideo).id}',
         {
@@ -2391,7 +2402,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2424,7 +2435,7 @@ class MyAppState extends ChangeNotifier {
       } else {
         throw 'Invalid song type';
       }
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         '${API.relatedMV}/${song.id}',
         {
@@ -2434,7 +2445,7 @@ class MyAppState extends ChangeNotifier {
       );
     } else if (platform == 1) {
       resolveJson = QQMusicVideo.fromJson;
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         '${API.relatedMV}/${(song as QQMusicSong).songId}',
         {
@@ -2443,7 +2454,7 @@ class MyAppState extends ChangeNotifier {
       );
     } else if (platform == 2) {
       resolveJson = NCMVideo.fromJson;
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         '${API.relatedMV}/${(song as NCMSong).id}',
         {
@@ -2482,7 +2493,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2516,7 +2527,7 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-    final Uri url = Uri.http(
+    final Uri url = Uri.https(
       API.host,
       API.createLibrary,
       {
@@ -2562,7 +2573,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2594,7 +2605,7 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-    final Uri url = Uri.http(
+    final Uri url = Uri.https(
       API.host,
       API.updateLibrary,
       {
@@ -2644,7 +2655,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2707,7 +2718,7 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-    final Uri url = Uri.http(
+    final Uri url = Uri.https(
       API.host,
       '${API.deleteLibrary}/$librariesIds',
       {
@@ -2737,7 +2748,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2832,7 +2843,7 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-    final Uri url = Uri.http(
+    final Uri url = Uri.https(
       API.host,
       API.addSongsToLibrary,
       {
@@ -2865,7 +2876,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2891,7 +2902,7 @@ class MyAppState extends ChangeNotifier {
     if (platform == 0) {
       int id = (library as PMSLibrary).id;
       String ids = songs.map((e) => (e as PMSSong).id).join(',');
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         API.removeSongsFromLibrary,
         {
@@ -2905,7 +2916,7 @@ class MyAppState extends ChangeNotifier {
       int dirId = (library as QQMusicPlaylist).dirId;
       String tid = library.tid;
       String songsId = songs.map((e) => (e as QQMusicSong).songId).join(',');
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         API.removeSongsFromLibrary,
         {
@@ -2919,7 +2930,7 @@ class MyAppState extends ChangeNotifier {
       int id = (library as NCMPlaylist).id;
       String tid = library.id.toString();
       String songsId = songs.map((e) => (e as NCMSong).id).join(',');
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         API.removeSongsFromLibrary,
         {
@@ -2957,7 +2968,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2991,7 +3002,7 @@ class MyAppState extends ChangeNotifier {
       int dstLibraryId = (dstLibrary as PMSLibrary).id;
       String srcTid = srcLibraryId.toString();
       String dstTid = dstLibraryId.toString();
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         API.moveSongsToOtherLibrary,
         {
@@ -3011,7 +3022,7 @@ class MyAppState extends ChangeNotifier {
       int dstDirId = (dstLibrary as QQMusicPlaylist).dirId;
       String srcTid = srcLibrary.tid;
       String dstTid = dstLibrary.tid;
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         API.moveSongsToOtherLibrary,
         {
@@ -3031,7 +3042,7 @@ class MyAppState extends ChangeNotifier {
       int dstLibraryId = (dstLibrary as NCMPlaylist).id;
       String srcTid = srcLibraryId.toString();
       String dstTid = dstLibraryId.toString();
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         API.moveSongsToOtherLibrary,
         {
@@ -3077,7 +3088,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -3138,7 +3149,7 @@ class MyAppState extends ChangeNotifier {
     } else {
       throw UnsupportedError('Invalid platform');
     }
-    final Uri url = Uri.http(
+    final Uri url = Uri.https(
       API.host,
       API.addSongsToLibrary,
       {
@@ -3171,7 +3182,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -3204,7 +3215,7 @@ class MyAppState extends ChangeNotifier {
       int id = (favList as BiliFavList).id;
       String tid = favList.id.toString();
       String resourcesIds = resources.map((e) => '${e.id}:${e.type}').join(',');
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         API.removeSongsFromLibrary,
         {
@@ -3240,7 +3251,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -3280,7 +3291,7 @@ class MyAppState extends ChangeNotifier {
       int dstFavListId = (dstFavList as BiliFavList).id;
       String srcTid = srcFavListId.toString();
       String dstTid = dstFavListId.toString();
-      url = Uri.http(
+      url = Uri.https(
         API.host,
         API.moveSongsToOtherLibrary,
         {
@@ -3324,7 +3335,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return null;
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -3345,7 +3356,7 @@ class MyAppState extends ChangeNotifier {
   }
 
   Future<String> getBiliSplashScreenImage() async {
-    final Uri url = Uri.http(API.host, API.getBiliSplashScreenImage);
+    final Uri url = Uri.https(API.host, API.getBiliSplashScreenImage);
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Loading bilibili splash screen images...');
@@ -3368,7 +3379,7 @@ class MyAppState extends ChangeNotifier {
           return '';
         }
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return '';
@@ -3389,7 +3400,7 @@ class MyAppState extends ChangeNotifier {
   }
 
   Future<List<String>> getSearchSuggestions(String keyword) async {
-    final Uri url = Uri.http(API.host, '${API.getSearchSuggestions}/$keyword');
+    final Uri url = Uri.https(API.host, '${API.getSearchSuggestions}/$keyword');
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger
@@ -3421,7 +3432,7 @@ class MyAppState extends ChangeNotifier {
         MyLogger.logger.e(_errorMsg);
         return [];
       } else if (response.statusCode == 403) {
-        _errorMsg = 'You don\'t have the access to this resource.';
+        _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return [];

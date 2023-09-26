@@ -7,7 +7,7 @@ import 'my_toast.dart';
 
 class PMLogin {
   static Future<bool?> checkIfLogin(String token) async {
-    final Uri url = Uri.http(API.host, API.check);
+    final Uri url = Uri.https(API.host, API.check);
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Checking login state...');
