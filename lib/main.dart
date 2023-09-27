@@ -1,8 +1,7 @@
-import 'dart:ui';
-
 import 'package:feedback/feedback.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -39,7 +38,9 @@ Future<void> main() async {
 
   // await Firebase.initializeApp();
 
-  LogExport.init();
+  if (!kIsWeb) {
+    LogExport.init();
+  }
 
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);

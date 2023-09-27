@@ -49,11 +49,19 @@ dependencies:
       url: https://github.com/loph3xertoi/just_audio.git
       ref: minor
       path: just_audio
+  ip_geolocation_io:
+    git:
+      url: git@github.com:loph3xertoi/dart_ip_geolocation_io.git
+      ref: main
+  http:
+    git:
+      url: git@github.com:loph3xertoi/http.git
+      ref: master
+      path: pkgs/http
   screen_brightness: ^0.2.2
   intl: ^0.18.1
   bottom_sheet: ^3.1.0
   city_picker_china: ^0.1.0
-  ip_geolocation_io: ^1.0.1
   humanize_big_int: ^1.0.1
   lottie: ^2.6.0
   flutter_html: ^3.0.0-beta.2
@@ -67,7 +75,6 @@ dependencies:
   feedback: ^2.6.0
   flutter_email_sender: ^6.0.1
   url_launcher: ^6.1.14
-  mailjet: ^1.0.3+3
   log_export: ^1.0.0
   archive: ^3.3.8
   mailer: ^6.0.1
@@ -77,12 +84,22 @@ dependencies:
   webview_flutter: ^4.2.4
   uni_links: ^0.5.1
   google_sign_in: ^6.1.5
+  webview_flutter_web: ^0.2.2+3
   # bottom_sheet:
   #   git:
   #     url: git@github.com:loph3xertoi/flutter-bottom-sheet.git
   #     ref: SNP-304_bottom_sheet_offset
 dependency_overrides:
-  http: ^1.1.0
+  http:
+    git:
+      url: git@github.com:loph3xertoi/http.git
+      ref: master
+      path: pkgs/http
+  # oauth2: any
+  # oauth2_client: any
+  # image_network: any
+  # ip_geolocation_io: any
+  # flutter_cache_manager: any
 
 dev_dependencies:
   flutter_test:

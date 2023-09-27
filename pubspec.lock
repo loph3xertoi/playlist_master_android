@@ -698,13 +698,14 @@ packages:
     source: hosted
     version: "0.15.4"
   http:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description:
-      name: http
-      sha256: "759d1a329847dd0f39226c688d3e06a6b8679668e350e2891a6474f8b4bb8525"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.0"
+      path: "pkgs/http"
+      ref: master
+      resolved-ref: "17eb0196b4086a151b841a40a842630dcc00e8c7"
+      url: "git@github.com:loph3xertoi/http.git"
+    source: git
+    version: "1.1.1-wip"
   http_parser:
     dependency: transitive
     description:
@@ -812,11 +813,12 @@ packages:
   ip_geolocation_io:
     dependency: "direct main"
     description:
-      name: ip_geolocation_io
-      sha256: "302339e388bc6e2351279d23a3fa23083a727a012433bc6f4c326fae7daac6ec"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
+      path: "."
+      ref: main
+      resolved-ref: b00ab07f05a3052dc7eac03684a6be3ee7b8b475
+      url: "git@github.com:loph3xertoi/dart_ip_geolocation_io.git"
+    source: git
+    version: "1.0.2"
   js:
     dependency: transitive
     description:
@@ -946,14 +948,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.1"
-  mailjet:
-    dependency: "direct main"
-    description:
-      name: mailjet
-      sha256: "80f07459bf2bb2d28cee1c528edb71f75824d43f8f872e6d3641426354d2098a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.3+3"
   matcher:
     dependency: transitive
     description:
@@ -986,14 +980,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.1"
-  mimalo:
-    dependency: transitive
-    description:
-      name: mimalo
-      sha256: acbeba5a61687985872c7e871579b687f72f5cc9a93c79d44a696e71a26486b8
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.3+4"
   mime:
     dependency: transitive
     description:
@@ -1234,14 +1220,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.1"
-  sexy_api_client:
-    dependency: transitive
-    description:
-      name: sexy_api_client
-      sha256: c94f99b848885a45e38c90204026e0943abd691f0976be5f382190f52f314199
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.6+6"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -1623,6 +1601,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.5.0"
+  webview_flutter_web:
+    dependency: "direct main"
+    description:
+      name: webview_flutter_web
+      sha256: b6334cb5b44a5cc9ddec38ce132c7b9a3054d921768a13f95b8cd798ee5f17b4
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.2+3"
   webview_flutter_wkwebview:
     dependency: transitive
     description:

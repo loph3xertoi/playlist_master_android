@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -6,15 +7,21 @@ import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_platform_interface/webview_flutter_platform_interface.dart';
 
 import '../config/secrets.dart';
 import '../states/app_state.dart';
 import '../utils/oauth2_utils.dart';
 import '../widgets/login_widget/constants.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   static const routeName = '/login_page';
 
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   MyAppState? _appState;
 
   SignupData? _signupData;
@@ -27,11 +34,29 @@ class LoginScreen extends StatelessWidget {
 
   TextTheme? _textTheme;
 
-  WebViewController _controller = WebViewController()
-    ..setJavaScriptMode(JavaScriptMode.unrestricted)
-    ..setUserAgent(
-        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
-    ..setBackgroundColor(const Color(0x00000000));
+  WebViewController? _controller;
+
+  PlatformWebViewController? _webController;
+
+  @override
+  void initState() {
+    super.initState();
+    if (kIsWeb) {
+      _webController = PlatformWebViewController(
+        const PlatformWebViewControllerCreationParams(),
+      );
+      // ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      // ..setUserAgent(
+      //     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
+      // ..setBackgroundColor(const Color(0x00000000));
+    } else {
+      _controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setUserAgent(
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
+        ..setBackgroundColor(const Color(0x00000000));
+    }
+  }
 
   Future<String?> _loginUser(LoginData data) async {
     var loginUserId = await _appState!.login(data.name, data.password);
@@ -140,10 +165,40 @@ class LoginScreen extends StatelessWidget {
     return null;
   }
 
+  Future<String?> _webPlatformShowWebView(
+      BuildContext context, Uri authorizationUrl) async {
+    String? result;
+    _webController!.loadRequest(LoadRequestParams(uri: authorizationUrl));
+    if (context.mounted) {
+      result = await showDialog<String?>(
+        context: context,
+        builder: (BuildContext context) {
+          _dialogContext = context;
+          return Scaffold(
+              appBar: AppBar(
+                backgroundColor: _colorScheme!.primary,
+                iconTheme: IconThemeData(color: _colorScheme!.onSecondary),
+                leading: IconButton(
+                  icon: Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.pop(_dialogContext!, 'You have canceled login');
+                  },
+                ),
+              ),
+              body: PlatformWebViewWidget(
+                PlatformWebViewWidgetCreationParams(
+                    controller: _webController!),
+              ).build(context));
+        },
+      );
+    }
+    return result;
+  }
+
   Future<String?> _showWebView(
       BuildContext context, Uri authorizationUrl) async {
     String? result;
-    _controller
+    _controller!
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {
@@ -157,7 +212,7 @@ class LoginScreen extends StatelessWidget {
           },
           onWebResourceError: (WebResourceError error) {
             print(error);
-            _controller.goBack();
+            _controller!.goBack();
           },
           onNavigationRequest: (NavigationRequest request) {
             // User cancels login.
@@ -192,7 +247,7 @@ class LoginScreen extends StatelessWidget {
                   },
                 ),
               ),
-              body: WebViewWidget(controller: _controller));
+              body: WebViewWidget(controller: _controller!));
         },
       );
     }
@@ -243,7 +298,12 @@ class LoginScreen extends StatelessWidget {
   Future<String?> _signInWithGitHub(BuildContext context) async {
     var authorizationUrl = GitHubOAuth2Client.getAuthorizationUrl();
     print(authorizationUrl);
-    var result = await _showWebView(context, authorizationUrl);
+    String? result;
+    if (kIsWeb) {
+      result = await _webPlatformShowWebView(context, authorizationUrl);
+    } else {
+      result = await _showWebView(context, authorizationUrl);
+    }
     if (context.mounted &&
         result != null &&
         result.contains(GitHubOAuth2Client.redirectUrl.toString())) {
@@ -324,10 +384,18 @@ class LoginScreen extends StatelessWidget {
     _appState = appState;
     return WillPopScope(
       onWillPop: () async {
-        if (await _controller.canGoBack()) {
-          _controller.goBack();
-          return false;
+        if (kIsWeb) {
+          if (await _webController!.canGoBack()) {
+            _webController!.goBack();
+            return false;
+          }
+        } else {
+          if (await _controller!.canGoBack()) {
+            _controller!.goBack();
+            return false;
+          }
         }
+
         if (_dialogContext != null && _dialogContext!.mounted) {
           Navigator.pop(_dialogContext!, 'You have canceled login');
           return false;

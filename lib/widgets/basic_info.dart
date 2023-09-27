@@ -61,10 +61,10 @@ class _BasicInfoState extends State<BasicInfo> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       var screenSize = MediaQuery.of(context).size;
       imageSize = screenSize.width - 24.0;
-      bgTopOffset = (!kIsWeb && Platform.isAndroid || Platform.isIOS)
+      bgTopOffset = (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
           ? -topMargin
           : -screenSize.width * 0.4;
-      userTopOffset = (!kIsWeb && Platform.isAndroid || Platform.isIOS)
+      userTopOffset = (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
           ? imageSize - topMargin - bottomMargin
           : 300.0;
     });
@@ -202,8 +202,8 @@ class _BasicInfoState extends State<BasicInfo> {
                                     Platform.isIOS)
                                 ? -topMargin
                                 : -screenSize.width * 0.4;
-                            userTopOffset = (!kIsWeb && Platform.isAndroid ||
-                                    Platform.isIOS)
+                            userTopOffset = (!kIsWeb &&
+                                    (Platform.isAndroid || Platform.isIOS))
                                 ? imageSize - topMargin - bottomMargin
                                 : 300.0;
                             scale = 1.0;

@@ -4,15 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fplayer/fplayer.dart';
-import 'package:playlistmaster/widgets/confirm_popup.dart';
-import '../entities/pms/pms_user.dart';
-import '../widgets/add_third_app_cookie_form.dart';
 import 'package:provider/provider.dart';
 
 import '../config/user_info.dart';
 import '../entities/bilibili/bili_resource.dart';
 import '../entities/dto/basic_pms_user_info_dto.dart';
 import '../entities/netease_cloud_music/ncm_song.dart';
+import '../entities/pms/pms_user.dart';
 import '../entities/qq_music/qqmusic_song.dart';
 import '../http/api.dart';
 import '../http/my_http.dart';
@@ -21,7 +19,9 @@ import '../utils/my_logger.dart';
 import '../utils/my_toast.dart';
 import '../utils/storage_manager.dart';
 import '../utils/theme_manager.dart';
+import '../widgets/add_third_app_cookie_form.dart';
 import '../widgets/bottom_player.dart';
+import '../widgets/confirm_popup.dart';
 import '../widgets/floating_button/quick_action.dart';
 import '../widgets/floating_button/quick_action_menu.dart';
 import '../widgets/my_content_area.dart';
@@ -93,7 +93,7 @@ class _HomePageState extends State<HomePage>
         drawer: Drawer(
           backgroundColor: Colors.transparent,
           width: screenSize.width *
-              ((!kIsWeb && Platform.isAndroid || Platform.isIOS) ? 0.75 : 0.5),
+              (!kIsWeb && (Platform.isAndroid || Platform.isIOS) ? 0.75 : 0.5),
           child: NightBackground(),
         ),
         body: WillPopScope(

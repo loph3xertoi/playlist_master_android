@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 import 'dart:math';
 
 import 'package:better_player/better_player.dart';
@@ -9,8 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
-// import ''
-//     if (dart.library.html) 'package:http/browser_client.dart' as browser_client;
 import 'package:http/retry.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -956,11 +954,11 @@ class MyAppState extends ChangeNotifier {
   Future<Uri> getImageFileFromAssets(String imageAssets, int index) async {
     final byteData = await rootBundle.load(imageAssets);
     final buffer = byteData.buffer;
-    Directory tempDir = await getApplicationDocumentsDirectory();
+    io.Directory tempDir = await getApplicationDocumentsDirectory();
     String tempPath = tempDir.path;
     var filePath =
         '$tempPath/image_tmp_$index.png'; // image_tmp.png is dump file, can be anything
-    return (await File(filePath).writeAsBytes(
+    return (await io.File(filePath).writeAsBytes(
             buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes)))
         .uri;
   }
@@ -1007,15 +1005,15 @@ class MyAppState extends ChangeNotifier {
     Map<String, Object> requestBody = {'email': email, 'password': password};
     final Uri url = Uri.https(API.host, API.login);
     var rawClient = http.Client();
-    // if (kIsWeb && rawClient is BrowserClient) {
-    //   rawClient.withCredentials = true;
-    // }
     final client = RetryClient(rawClient);
     try {
       MyLogger.logger.i('Login...');
       final response = await client.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Credentials': 'true',
+        },
         body: jsonEncode(requestBody),
       );
       if (response.statusCode == 200) {
@@ -2200,7 +2198,7 @@ class MyAppState extends ChangeNotifier {
       String keyword, int pageNo, int pageSize, int platform) async {
     PagedDataDTO<T> Function(Map<String, dynamic>) resolveJson;
     if (platform == 0) {
-      if (!(kIsWeb || Platform.isAndroid || Platform.isIOS)) {
+      if (!(kIsWeb || io.Platform.isAndroid || io.Platform.isIOS)) {
         MyToast.showToast('Not yet implement searching for pms songs');
         MyLogger.logger.e('Not yet implement searching for pms songs');
       }
