@@ -19,7 +19,7 @@ import 'basic_info.dart';
 import 'custom_selection_handler.dart';
 
 class MySearchBar extends StatefulWidget {
-  final GlobalKey<ScaffoldState> myScaffoldKey;
+  GlobalKey<ScaffoldState> myScaffoldKey;
   final bool notInHomepage;
   final bool inDetailLibraryPage;
 

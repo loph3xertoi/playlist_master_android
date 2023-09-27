@@ -233,6 +233,9 @@ class _CreateSongItemMenuDialogState extends State<CreateSongItemMenuDialog> {
                               context, '/related_videos_page',
                               arguments: widget.song);
                         }
+                        if (appState.songsPlayer != null) {
+                          appState.songsPlayer!.pause();
+                        }
                       },
                     ),
                     Expanded(

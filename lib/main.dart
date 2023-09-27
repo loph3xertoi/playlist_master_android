@@ -86,13 +86,7 @@ class MyApp extends StatelessWidget {
       ],
       child: Consumer<ThemeNotifier>(
         builder: (context, theme, _) => BetterFeedback(
-          // theme: FeedbackThemeData(
-          //     feedbackSheetColor:
-          //         theme.getTheme()?.colorScheme.primary ?? Colors.amber,
-          //     bottomSheetDescriptionStyle:
-          //         theme.getTheme()?.textTheme.labelMedium! ?? TextStyle()),
           child: MaterialApp(
-            // themeMode: ThemeMode.system,
             builder: FToastBuilder(),
             navigatorKey: navigatorKey,
             theme: theme.getTheme(),
@@ -101,7 +95,6 @@ class MyApp extends StatelessWidget {
             routes: {
               '/splashscreen': (context) => SplashScreen(),
               '/login_page': (context) => LoginScreen(),
-              // '/login_page': (context) => LoginPage(),
               '/home_page': (context) => HomePage(),
               '/search_page': (context) => SearchPage(),
               '/detail_library_page': (context) => DetailLibraryPage(),
@@ -111,26 +104,25 @@ class MyApp extends StatelessWidget {
               '/settings': (context) => SettingsPage(),
               '/reset_password_page': (context) => ResetPassPage(),
               '/bind_email_page': (context) => BindEmailPage(),
-              // '/resources_player_page': (context) => ResourcesPlayerPage(),
             },
             onGenerateRoute: (settings) {
               if (settings.name == '/detail_song_page') {
-                final args = settings.arguments as BasicSong;
+                var args = settings.arguments as BasicSong;
                 return MaterialPageRoute(
                   builder: (context) => DetailSongPage(song: args),
                 );
               } else if (settings.name == '/video_player_page') {
-                final args = settings.arguments as BasicVideo;
+                var args = settings.arguments as BasicVideo;
                 return MaterialPageRoute(
                   builder: (context) => VideoPlayerPage(video: args),
                 );
               } else if (settings.name == '/similar_songs_page') {
-                final args = settings.arguments as BasicSong;
+                var args = settings.arguments as BasicSong;
                 return MaterialPageRoute(
                   builder: (context) => SimilarSongsPage(song: args),
                 );
               } else if (settings.name == '/related_videos_page') {
-                final args = settings.arguments as BasicSong;
+                var args = settings.arguments as BasicSong;
                 return MaterialPageRoute(
                   builder: (context) => RelatedVideosPage(song: args),
                 );

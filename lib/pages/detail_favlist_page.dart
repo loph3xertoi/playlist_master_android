@@ -32,7 +32,7 @@ class DetailFavListPage extends StatefulWidget {
 }
 
 class _DetailFavListPageState extends State<DetailFavListPage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // Current fav list.
   late BasicLibrary _currentBiliFavList;

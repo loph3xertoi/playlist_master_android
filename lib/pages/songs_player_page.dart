@@ -896,6 +896,7 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
                                               onPressed: () {
                                                 showDialog(
                                                   context: context,
+                                                  useRootNavigator: false,
                                                   builder: (_) =>
                                                       CreateSongplayerMenuDialog(),
                                                 );

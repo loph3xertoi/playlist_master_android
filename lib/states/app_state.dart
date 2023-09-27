@@ -1189,8 +1189,8 @@ class MyAppState extends ChangeNotifier {
           MyLogger.logger.e(_errorMsg);
           return false;
         } else {
-          MyLogger.logger.i('Id and cookie have been added in $thirdAppName');
-          MyToast.showToast('Id and cookie have been added in $thirdAppName');
+          MyLogger.logger.i('Credential have been added in $thirdAppName');
+          MyToast.showToast('Credential have been added in $thirdAppName');
           return true;
         }
       } else if (response.statusCode == 401) {

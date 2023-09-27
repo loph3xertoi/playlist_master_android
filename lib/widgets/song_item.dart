@@ -3,14 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-import '../entities/netease_cloud_music/ncm_song.dart';
-import '../entities/qq_music/qqmusic_song.dart';
-import '../entities/pms/pms_song.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../entities/basic/basic_song.dart';
 import '../entities/dto/result.dart';
+import '../entities/netease_cloud_music/ncm_song.dart';
+import '../entities/pms/pms_song.dart';
+import '../entities/qq_music/qqmusic_song.dart';
 import '../http/api.dart';
 import '../states/app_state.dart';
 import '../third_lib_change/like_button/like_button.dart';
@@ -296,6 +296,7 @@ class _SongItemState extends State<SongItem> {
                   onPressed: () async {
                     var data = await showDialog(
                       context: context,
+                      useRootNavigator: false,
                       builder: (context) =>
                           CreateSongItemMenuDialog(song: widget.song),
                     );

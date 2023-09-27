@@ -33,7 +33,7 @@ class DetailLibraryPage extends StatefulWidget {
 }
 
 class _DetailLibraryPageState extends State<DetailLibraryPage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   late Future<BasicLibrary?> _detailLibrary;
 
