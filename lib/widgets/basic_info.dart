@@ -8,10 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ip_geolocation_io/ip_geolocation_io.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/config/user_info.dart';
 import 'package:provider/provider.dart';
 
 import '../config/secrets.dart';
+import '../config/user_info.dart';
 import '../entities/basic/basic_user.dart';
 import '../entities/bilibili/bili_user.dart';
 import '../entities/netease_cloud_music/ncm_user.dart';
@@ -66,7 +66,7 @@ class _BasicInfoState extends State<BasicInfo> {
           : -screenSize.width * 0.4;
       userTopOffset = (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
           ? imageSize - topMargin - bottomMargin
-          : 300.0;
+          : screenSize.height * 0.1;
     });
   }
 
@@ -205,7 +205,7 @@ class _BasicInfoState extends State<BasicInfo> {
                             userTopOffset = (!kIsWeb &&
                                     (Platform.isAndroid || Platform.isIOS))
                                 ? imageSize - topMargin - bottomMargin
-                                : 300.0;
+                                : screenSize.height * 0.1;
                             scale = 1.0;
                           });
                         },
@@ -467,6 +467,7 @@ class _BuildPMSUserState extends State<BuildPMSUser>
                 TabBar(
                   controller: _tabController,
                   isScrollable: true,
+                  tabAlignment: TabAlignment.center,
                   indicatorColor: Color(0xFFFB6A9D),
                   dividerColor: colorScheme.onPrimary.withOpacity(0.3),
                   labelColor: Color(0xFFFB6A9D),

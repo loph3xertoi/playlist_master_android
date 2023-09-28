@@ -114,10 +114,9 @@ class _UpdateLibraryDialogState extends State<UpdateLibraryDialog> {
     final textTheme = Theme.of(context).textTheme;
     MyAppState appState = context.watch<MyAppState>();
     var currentPlatform = appState.currentPlatform;
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      onPopInvoked: (bool didPop) {
         _removeCachedFormImage();
-        return true;
       },
       child: Dialog(
         // backgroundColor: Colors.white,

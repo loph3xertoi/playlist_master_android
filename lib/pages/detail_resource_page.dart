@@ -197,28 +197,26 @@ class _ResourceSubPagesPageState extends State<DetailResourcePage>
       } else {
         throw Exception('Invalid resource type');
       }
-      return WillPopScope(
-        onWillPop: () async {
+      return PopScope(
+        onPopInvoked: (bool didPop) {
           appState.inDetailFavlistPage = false;
           appState.refreshLibraries!(appState, false);
           if (appState.songsPlayer != null) {
             appState.songsPlayer!.play();
           }
-          return true;
         },
         child: SafeArea(
           child: _buildDetailResourcePage(appState),
         ),
       );
     }
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      onPopInvoked: (bool didPop) {
         appState.inDetailFavlistPage = false;
         appState.refreshLibraries!(appState, false);
         if (appState.songsPlayer != null) {
           appState.songsPlayer!.play();
         }
-        return true;
       },
       child: SafeArea(
         child: FutureBuilder(

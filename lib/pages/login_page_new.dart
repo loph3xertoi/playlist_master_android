@@ -1,8 +1,13 @@
+import 'dart:io';
+
+import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -10,6 +15,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_platform_interface/webview_flutter_platform_interface.dart';
 
 import '../config/secrets.dart';
+import '../http/api.dart';
 import '../states/app_state.dart';
 import '../utils/oauth2_utils.dart';
 import '../widgets/login_widget/constants.dart';
@@ -36,6 +42,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   WebViewController? _controller;
 
+  // webview_universal.WebViewController? _desktopWebViewController;
+
   PlatformWebViewController? _webController;
 
   @override
@@ -49,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // ..setUserAgent(
       //     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
       // ..setBackgroundColor(const Color(0x00000000));
-    } else {
+    } else if (Platform.isAndroid || Platform.isIOS) {
       _controller = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setUserAgent(
@@ -163,6 +171,74 @@ class _LoginScreenState extends State<LoginScreen> {
       return _appState!.errorMsg;
     }
     return null;
+  }
+
+  Future<String> _getWebViewPath() async {
+    final document = await getApplicationDocumentsDirectory();
+    return p.join(
+      document.path,
+      'desktop_webview_window',
+    );
+  }
+
+  Future<String?> _desktopShowWebView(
+      BuildContext context, Uri authorizationUrl) async {
+    String? result;
+    final webview = await WebviewWindow.create(
+        configuration: CreateConfiguration(
+      windowHeight: 1280,
+      windowWidth: 720,
+      title: 'Login',
+      titleBarTopPadding: Platform.isMacOS ? 20 : 0,
+      userDataFolderWindows: await _getWebViewPath(),
+    ));
+    webview
+      ..setBrightness(Brightness.dark)
+      ..setApplicationNameForUserAgent(
+          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
+      ..launch(authorizationUrl.toString())
+      ..addOnUrlRequestCallback((url) {
+        debugPrint('url: $url');
+        final uri = Uri.parse(url);
+        if (uri.path == API.githubRedirectUrl) {
+          result = url;
+          webview.close();
+        }
+      })
+      ..addOnWebMessageReceivedCallback((message) {
+        print(message);
+      })
+      ..onClose.whenComplete(() {
+        debugPrint('on close');
+      });
+
+    do {
+      await Future.delayed(const Duration(seconds: 1));
+    } while (result == null);
+
+    // if (context.mounted) {
+    //   result = await showDialog<String?>(
+    //     context: context,
+    //     builder: (BuildContext context) {
+    //       _dialogContext = context;
+    //       return Scaffold(
+    //           appBar: AppBar(
+    //             backgroundColor: _colorScheme!.primary,
+    //             iconTheme: IconThemeData(color: _colorScheme!.onSecondary),
+    //             leading: IconButton(
+    //               icon: Icon(Icons.arrow_back),
+    //               onPressed: () {
+    //                 Navigator.pop(_dialogContext!, 'You have canceled login');
+    //               },
+    //             ),
+    //           ),
+    //           body: webview_universal.WebView(
+    //             controller: _desktopWebViewController!,
+    //           ));
+    //     },
+    //   );
+    // }
+    return result;
   }
 
   Future<String?> _webPlatformShowWebView(
@@ -301,8 +377,10 @@ class _LoginScreenState extends State<LoginScreen> {
     String? result;
     if (kIsWeb) {
       result = await _webPlatformShowWebView(context, authorizationUrl);
-    } else {
+    } else if (Platform.isAndroid || Platform.isIOS) {
       result = await _showWebView(context, authorizationUrl);
+    } else {
+      result = await _desktopShowWebView(context, authorizationUrl);
     }
     if (context.mounted &&
         result != null &&
@@ -389,11 +467,14 @@ class _LoginScreenState extends State<LoginScreen> {
             _webController!.goBack();
             return false;
           }
-        } else {
+        } else if (Platform.isAndroid || Platform.isIOS) {
           if (await _controller!.canGoBack()) {
             _controller!.goBack();
             return false;
           }
+        } else {
+          await _controller!.goBack();
+          return false;
         }
 
         if (_dialogContext != null && _dialogContext!.mounted) {

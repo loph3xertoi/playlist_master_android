@@ -166,7 +166,8 @@ class _SearchPageState extends State<SearchPage> {
         throw UnimplementedError('Not yet implement pms platform');
       } else if (_currentPlatform == 1) {
         appState.songsQueue = _searchedSongs
-            .where((song) => !song.isTakenDown && (song.payPlay == 0|| song.payPlay == 8))
+            .where((song) =>
+                !song.isTakenDown && (song.payPlay == 0 || song.payPlay == 8))
             .toList();
       } else if (_currentPlatform == 2) {
         appState.songsQueue =
@@ -215,7 +216,8 @@ class _SearchPageState extends State<SearchPage> {
         throw UnimplementedError('Not yet implement pms platform');
       } else if (_currentPlatform == 1) {
         appState.songsQueue = _searchedSongs
-            .where((song) => !song.isTakenDown && (song.payPlay == 0|| song.payPlay == 8))
+            .where((song) =>
+                !song.isTakenDown && (song.payPlay == 0 || song.payPlay == 8))
             .toList();
       } else if (_currentPlatform == 2) {
         appState.songsQueue =
@@ -338,13 +340,12 @@ class _SearchPageState extends State<SearchPage> {
     //   }
     // });
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      onPopInvoked: (bool didPop) {
         appState.searchedSongs = [];
         appState.searchedResources = [];
         appState.searchedCount = 0;
         appState.searchSuggestions = [];
-        return true; // Allow the navigation to proceed
       },
       child: Consumer<ThemeNotifier>(
         builder: (context, theme, _) => Scaffold(

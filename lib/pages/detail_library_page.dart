@@ -200,10 +200,9 @@ class _DetailLibraryPageState extends State<DetailLibraryPage> {
           body: SafeArea(
             child: ChangeNotifierProvider(
               create: (context) => MySearchState(),
-              child: WillPopScope(
-                onWillPop: () async {
+              child: PopScope(
+                onPopInvoked: (bool didPop) {
                   _appState!.refreshLibraries!(appState, false);
-                  return true;
                 },
                 child: Column(
                   children: [

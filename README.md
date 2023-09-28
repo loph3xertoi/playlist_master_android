@@ -5,4 +5,5 @@ Playlist Master for android, dedicating to manage your playlists all in one.
 
 ## Notice
 - Sending feedback email with attachment needs more than one email app to be installed.
+- Install libwebkit2gtk-4.1-dev when build in linux.
 

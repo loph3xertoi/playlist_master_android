@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:feedback/feedback.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -40,17 +43,12 @@ Future<void> main() async {
 
   if (!kIsWeb) {
     LogExport.init();
+    if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+      if (runWebViewTitleBarWidget([''])) {
+        return;
+      }
+    }
   }
-
-  FlutterError.onError = (errorDetails) {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-  };
-
-  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
 
   await JustAudioBackground.init(
     androidNotificationChannelId: 'com.daw.playlistmaster.channel',
@@ -59,9 +57,21 @@ Future<void> main() async {
     androidShowNotificationBadge: true,
   );
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  if (!kIsWeb && Platform.isAndroid) {
+    FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    };
+
+    // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
 
   runApp(const MyApp());
 }

@@ -306,6 +306,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           Map<String, ResolutionItem> resolutionList =
               snapshot.data![1] as Map<String, ResolutionItem>;
           return Scaffold(
+            appBar: AppBar(
+              title: Text(widget.video.name, style: textTheme.labelSmall),
+              backgroundColor: colorScheme.primary,
+              iconTheme: IconThemeData(color: colorScheme.onSecondary),
+            ),
             body: Material(
               color: Colors.black,
               child: Stack(

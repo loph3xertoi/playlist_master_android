@@ -67,12 +67,11 @@ class _RelatedVideosPageState extends State<RelatedVideosPage> {
         iconTheme: IconThemeData(color: colorScheme.onSecondary),
       ),
       body: SafeArea(
-        child: WillPopScope(
-          onWillPop: () async {
+        child: PopScope(
+          onPopInvoked: (bool didPop) {
             if (appState.songsPlayer != null) {
               appState.songsPlayer!.play();
             }
-            return true;
           },
           child: FutureBuilder(
             future: _relatedVideos,

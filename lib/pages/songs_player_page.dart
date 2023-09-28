@@ -11,10 +11,10 @@ import 'package:flutter_lyric/lyrics_reader.dart';
 import 'package:flutter_lyric/lyrics_reader_model.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:playlistmaster/entities/bilibili/bili_detail_resource.dart';
 import 'package:provider/provider.dart';
 
 import '../entities/basic/basic_song.dart';
+import '../entities/bilibili/bili_detail_resource.dart';
 import '../entities/netease_cloud_music/ncm_detail_song.dart';
 import '../entities/pms/pms_detail_song.dart';
 import '../entities/qq_music/qqmusic_detail_song.dart';
@@ -188,12 +188,11 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
     }
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      onPopInvoked: (bool didPop) {
         appState.isSongsPlayerPageOpened = false;
         _noPoping = false;
         appState.refreshLibraries!(appState, false);
-        return true; // Allow the navigation to proceed
       },
       child: Consumer<ThemeNotifier>(
         builder: (context, theme, _) => Container(

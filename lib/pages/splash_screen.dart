@@ -143,12 +143,12 @@ class _SplashScreenState extends State<SplashScreen> {
           } else {
             List<dynamic> data = snapshot.data!;
             int currentPlatform;
-            if (data[0] == null || int.tryParse(data[0]) == null) {
+            if (data[0] == null || int.tryParse(data[0].toString()) == null) {
               StorageManager.saveData(
                   'currentPlatform', appState.currentPlatform.toString());
               currentPlatform = appState.currentPlatform;
             } else {
-              currentPlatform = int.tryParse(data[0])!;
+              currentPlatform = int.tryParse(data[0].toString())!;
             }
             appState.setCurrentPlatform(currentPlatform);
             String splashImage = data[1] as String;
