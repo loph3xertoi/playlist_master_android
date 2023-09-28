@@ -50,6 +50,17 @@ Future<void> main() async {
     }
   }
 
+  // mpvLog = (dynamic message,
+  //     {dynamic error,
+  //     JAMPV_LogLevel level = JAMPV_LogLevel.debug,
+  //     StackTrace? stackTrace}) {
+  //   // Run your logging function of choice here.
+  //   // For example, if using Pinelogger:
+  //   MyLogger.logger.i(message);
+  //   MyLogger.logger.e(error);
+  //   MyLogger.logger.e(stackTrace);
+  // };
+
   await JustAudioBackground.init(
     androidNotificationChannelId: 'com.daw.playlistmaster.channel',
     // androidNotificationChannelName: 'Audio playback',

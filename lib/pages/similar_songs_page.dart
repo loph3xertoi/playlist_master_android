@@ -434,16 +434,16 @@ class _SimilarSongsPageState extends State<SimilarSongsPage> {
                                                         //       'mpv not found in linux, please install it first');
                                                         //   return;
                                                         // }
-                                                        if (!(kIsWeb ||
-                                                            Platform
-                                                                .isAndroid ||
-                                                            Platform.isIOS)) {
-                                                          MyToast.showToast(
-                                                              'just_audio not supported on ${Platform.operatingSystem}');
-                                                          MyLogger.logger.e(
-                                                              'just_audio not supported on ${Platform.operatingSystem}');
-                                                          return;
-                                                        }
+                                                        // if (!(kIsWeb ||
+                                                        //     Platform
+                                                        //         .isAndroid ||
+                                                        //     Platform.isIOS)) {
+                                                        //   MyToast.showToast(
+                                                        //       'just_audio not supported on ${Platform.operatingSystem}');
+                                                        //   MyLogger.logger.e(
+                                                        //       'just_audio not supported on ${Platform.operatingSystem}');
+                                                        //   return;
+                                                        // }
                                                         var isTakenDown =
                                                             _rawSongsInLibrary![
                                                                     index]

@@ -253,7 +253,7 @@ class MyAppState extends ChangeNotifier {
       );
 
   /// Volume of both players.
-  double? _volume = 1.0;
+  double? _volume = 0.5;
 
   /// Speed of both players.
   double? _speed = 1.0;

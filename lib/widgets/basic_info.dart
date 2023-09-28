@@ -456,13 +456,14 @@ class _BuildPMSUserState extends State<BuildPMSUser>
         ),
       SizedBox(height: 10.0),
       Container(
-        height: 380.0,
+        height: 500.0,
         // width: 300.0,
         color: colorScheme.primary,
         child: DefaultTabController(
           length: 2,
           child: Scaffold(
             body: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 TabBar(
                   controller: _tabController,
@@ -819,6 +820,7 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
     final NCMUser user = widget.user;
     final textTheme = Theme.of(context).textTheme;
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         CircleAvatar(
           radius: 36.0,
@@ -1049,15 +1051,18 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
           ],
         ),
         Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 20.0),
               child: Row(
-                mainAxisSize: MainAxisSize.max,
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Expanded(
-                    flex: 1,
+                    flex: (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+                        ? 1
+                        : 2,
                     child: Text(
                       'Listened songs:',
                       textAlign: TextAlign.end,
@@ -1080,7 +1085,9 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  flex: 1,
+                  flex: (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+                      ? 1
+                      : 2,
                   child: Text(
                     'Playlists:',
                     textAlign: TextAlign.end,
@@ -1102,7 +1109,9 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  flex: 1,
+                  flex: (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+                      ? 1
+                      : 2,
                   child: Text(
                     'Province:',
                     textAlign: TextAlign.end,
@@ -1126,7 +1135,9 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  flex: 1,
+                  flex: (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+                      ? 1
+                      : 2,
                   child: Text(
                     'City:',
                     textAlign: TextAlign.end,
@@ -1150,7 +1161,9 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  flex: 1,
+                  flex: (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+                      ? 1
+                      : 2,
                   child: Text(
                     'Registration time:',
                     textAlign: TextAlign.end,
@@ -1174,7 +1187,9 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  flex: 1,
+                  flex: (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+                      ? 1
+                      : 2,
                   child: Text(
                     'Last login:',
                     textAlign: TextAlign.end,
@@ -1204,7 +1219,9 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Expanded(
-                      flex: 1,
+                      flex: (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+                          ? 1
+                          : 2,
                       child: Text(
                         'Area:',
                         textAlign: TextAlign.end,

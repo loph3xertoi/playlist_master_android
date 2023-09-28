@@ -1062,8 +1062,9 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
                                       final playing = playerState?.playing;
                                       if (processingState ==
                                               ProcessingState.loading ||
-                                          processingState ==
-                                              ProcessingState.buffering) {
+                                          ((kIsWeb || !Platform.isLinux) &&
+                                              processingState ==
+                                                  ProcessingState.buffering)) {
                                         return SizedBox(
                                           // margin: const EdgeInsets.all(10.0),
                                           width: 50.0,
