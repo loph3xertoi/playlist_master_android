@@ -51,11 +51,11 @@ dependencies:
       path: just_audio
   ip_geolocation_io:
     git:
-      url: git@github.com:loph3xertoi/dart_ip_geolocation_io.git
+      url: https://github.com/loph3xertoi/dart_ip_geolocation_io.git
       ref: main
   http:
     git:
-      url: git@github.com:loph3xertoi/http.git
+      url: https://github.com/loph3xertoi/http.git
       ref: master
       path: pkgs/http
   screen_brightness: ^0.2.2

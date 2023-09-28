@@ -832,7 +832,7 @@ packages:
       path: "."
       ref: main
       resolved-ref: b00ab07f05a3052dc7eac03684a6be3ee7b8b475
-      url: "git@github.com:loph3xertoi/dart_ip_geolocation_io.git"
+      url: "https://github.com/loph3xertoi/dart_ip_geolocation_io.git"
     source: git
     version: "1.0.2"
   js:
