@@ -238,6 +238,11 @@ class _BasicInfoState extends State<BasicInfo> {
                                                 ? API
                                                     .convertImageUrl(user.bgPic)
                                                 : user.bgPic,
+                                        httpHeaders: {
+                                          'Cookie': MyAppState.cookie!,
+                                          'User-Agent':
+                                              'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                                        },
                                         cacheManager:
                                             MyHttp.myImageCacheManager,
                                         progressIndicatorBuilder: (context, url,
@@ -441,6 +446,11 @@ class _BuildPMSUserState extends State<BuildPMSUser>
               : kIsWeb
                   ? API.convertImageUrl(widget.user.headPic)
                   : widget.user.headPic,
+          headers: {
+            'Cookie': MyAppState.cookie!,
+            'User-Agent':
+                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+          },
           cacheManager: MyHttp.myImageCacheManager,
         ),
       ),
@@ -623,12 +633,11 @@ class _BuildPMSUserState extends State<BuildPMSUser>
                     children: [
                       Center(
                         child: widget.user.subUsers.containsKey('qqmusic')
-                            ? ListView(
-                                children: [
-                                  BuildQQMusicUser(
-                                      user: widget.user.subUsers['qqmusic']
-                                          as QQMusicUser),
-                                ],
+                            ? Padding(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                child: BuildQQMusicUser(
+                                    user: widget.user.subUsers['qqmusic']
+                                        as QQMusicUser),
                               )
                             : Text(
                                 'Please login to QQ Music',
@@ -637,13 +646,11 @@ class _BuildPMSUserState extends State<BuildPMSUser>
                       ),
                       Center(
                         child: widget.user.subUsers.containsKey('ncm')
-                            ? ListView(
-                                children: [
-                                  SizedBox(height: 35.0),
-                                  BuildNCMUser(
-                                      user: widget.user.subUsers['ncm']
-                                          as NCMUser),
-                                ],
+                            ? Padding(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                child: BuildNCMUser(
+                                    user:
+                                        widget.user.subUsers['ncm'] as NCMUser),
                               )
                             : Text(
                                 'Please login to Netease Cloud Music',
@@ -652,12 +659,11 @@ class _BuildPMSUserState extends State<BuildPMSUser>
                       ),
                       Center(
                         child: widget.user.subUsers.containsKey('bilibili')
-                            ? ListView(
-                                children: [
-                                  BuildBilibiliUser(
-                                      user: widget.user.subUsers['bilibili']
-                                          as BiliUser),
-                                ],
+                            ? Padding(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                child: BuildBilibiliUser(
+                                    user: widget.user.subUsers['bilibili']
+                                        as BiliUser),
                               )
                             : Text(
                                 'Please login to BiliBili',
@@ -696,6 +702,11 @@ class BuildQQMusicUser extends StatelessWidget {
               : kIsWeb
                   ? API.convertImageUrl(user.headPic)
                   : user.headPic,
+          headers: {
+            'Cookie': MyAppState.cookie!,
+            'User-Agent':
+                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+          },
           cacheManager: MyHttp.myImageCacheManager,
         ),
       ),
@@ -716,6 +727,11 @@ class BuildQQMusicUser extends StatelessWidget {
                   : kIsWeb
                       ? API.convertImageUrl(user.lvPic)
                       : user.lvPic,
+              httpHeaders: {
+                'Cookie': MyAppState.cookie!,
+                'User-Agent':
+                    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+              },
               cacheManager: MyHttp.myImageCacheManager,
               progressIndicatorBuilder: (context, url, downloadProgress) =>
                   CircularProgressIndicator(value: downloadProgress.progress),
@@ -734,6 +750,11 @@ class BuildQQMusicUser extends StatelessWidget {
                   : kIsWeb
                       ? API.convertImageUrl(user.listenPic)
                       : user.listenPic,
+              httpHeaders: {
+                'Cookie': MyAppState.cookie!,
+                'User-Agent':
+                    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+              },
               cacheManager: MyHttp.myImageCacheManager,
               progressIndicatorBuilder: (context, url, downloadProgress) =>
                   CircularProgressIndicator(value: downloadProgress.progress),
@@ -830,6 +851,11 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
                 : kIsWeb
                     ? API.convertImageUrl(user.headPic)
                     : user.headPic,
+            headers: {
+              'Cookie': MyAppState.cookie!,
+              'User-Agent':
+                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+            },
             cacheManager: MyHttp.myImageCacheManager,
           ),
         ),
@@ -939,6 +965,11 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
                               : kIsWeb
                                   ? API.convertImageUrl(user.redVipLevelIcon)
                                   : user.redVipLevelIcon,
+                          httpHeaders: {
+                            'Cookie': MyAppState.cookie!,
+                            'User-Agent':
+                                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                          },
                           cacheManager: MyHttp.myImageCacheManager,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
@@ -983,6 +1014,11 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
                                   ? API
                                       .convertImageUrl(user.redPlusVipLevelIcon)
                                   : user.redPlusVipLevelIcon,
+                          httpHeaders: {
+                            'Cookie': MyAppState.cookie!,
+                            'User-Agent':
+                                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                          },
                           cacheManager: MyHttp.myImageCacheManager,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
@@ -1027,6 +1063,7 @@ class _BuildNCMUserState extends State<BuildNCMUser> {
                                   ? API.convertImageUrl(
                                       user.musicPackageVipLevelIcon)
                                   : user.musicPackageVipLevelIcon,
+                          httpHeaders: {'Cookie': MyAppState.cookie!},
                           cacheManager: MyHttp.myImageCacheManager,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
@@ -1336,6 +1373,11 @@ class BuildBilibiliUser extends StatelessWidget {
                       : kIsWeb
                           ? API.convertImageUrl(user.headPic)
                           : user.headPic,
+                  headers: {
+                    'Cookie': MyAppState.cookie!,
+                    'User-Agent':
+                        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                  },
                   cacheManager: MyHttp.myImageCacheManager,
                 ),
               ),
@@ -1352,6 +1394,11 @@ class BuildBilibiliUser extends StatelessWidget {
                             imageUrl: kIsWeb
                                 ? API.convertImageUrl(user.dynamicPendantImage)
                                 : user.dynamicPendantImage,
+                            httpHeaders: {
+                              'Cookie': MyAppState.cookie!,
+                              'User-Agent':
+                                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                            },
                             cacheManager: MyHttp.myImageCacheManager,
                             progressIndicatorBuilder:
                                 (context, url, downloadProgress) =>
@@ -1393,6 +1440,11 @@ class BuildBilibiliUser extends StatelessWidget {
                         : kIsWeb
                             ? API.convertImageUrl(user.vipIcon)
                             : user.vipIcon,
+                    httpHeaders: {
+                      'Cookie': MyAppState.cookie!,
+                      'User-Agent':
+                          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                    },
                     cacheManager: MyHttp.myImageCacheManager,
                     progressIndicatorBuilder:
                         (context, url, downloadProgress) =>
@@ -1484,6 +1536,11 @@ class BuildBilibiliUser extends StatelessWidget {
                           imageUrl: kIsWeb
                               ? API.convertImageUrl(user.nameplateImage)
                               : user.nameplateImage,
+                          httpHeaders: {
+                            'Cookie': MyAppState.cookie!,
+                            'User-Agent':
+                                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                          },
                           cacheManager: MyHttp.myImageCacheManager,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>

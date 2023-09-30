@@ -158,6 +158,7 @@ class API {
   static const verifyTokenForSignUpNologin = '/verify/nologin/signUp';
 
   /// Convert raw image url to image url for pms.
+  /// TODO: network_cache_image don't support withCredential, can't set cookie in request header in flutter web.
   static String convertImageUrl(String rawImageUrl) {
     return Uri.https(API.host, API.getImage, {'imageUrl': rawImageUrl})
         .toString();

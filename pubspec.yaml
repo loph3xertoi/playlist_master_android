@@ -220,3 +220,5 @@ flutter:
     - assets/audios/finches.mp3
     - assets/audios/bluebirds.mp3
     - assets/audios/lyrics.mp3
+
+    - assets/certificate.cer

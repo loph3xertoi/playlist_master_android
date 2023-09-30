@@ -83,6 +83,11 @@ class QQMusicVideoItem extends StatelessWidget {
                 Ink.image(
                   image: CachedNetworkImageProvider(
                     kIsWeb ? API.convertImageUrl(_video.cover) : _video.cover,
+                    headers: {
+                      'Cookie': MyAppState.cookie!,
+                      'User-Agent':
+                          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                    },
                     cacheManager: MyHttp.myImageCacheManager,
                   ),
                   height: 100.0,
@@ -181,6 +186,11 @@ class NCMVideoItem extends StatelessWidget {
                 Ink.image(
                   image: CachedNetworkImageProvider(
                     kIsWeb ? API.convertImageUrl(_video.cover) : _video.cover,
+                    headers: {
+                      'Cookie': MyAppState.cookie!,
+                      'User-Agent':
+                          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                    },
                     cacheManager: MyHttp.myImageCacheManager,
                   ),
                   height: 100.0,

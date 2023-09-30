@@ -454,6 +454,11 @@ class QQMusicVideoInfoArea extends StatelessWidget {
                           ? API.convertImageUrl(detailVideo.singers[0].headPic!)
                           : detailVideo.singers[0].headPic!
                       : MyAppState.defaultCoverImage,
+                  headers: {
+                    'Cookie': MyAppState.cookie!,
+                    'User-Agent':
+                        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                  },
                   cacheManager: MyHttp.myImageCacheManager,
                 ),
               ),
@@ -558,6 +563,11 @@ class NCMVideoInfoArea extends StatelessWidget {
                           ? API.convertImageUrl(detailVideo.singers[0].headPic!)
                           : detailVideo.singers[0].headPic!
                       : MyAppState.defaultCoverImage,
+                  headers: {
+                    'Cookie': MyAppState.cookie!,
+                    'User-Agent':
+                        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                  },
                   cacheManager: MyHttp.myImageCacheManager,
                 ),
               ),

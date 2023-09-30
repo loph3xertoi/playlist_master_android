@@ -260,6 +260,11 @@ class _SongItemState extends State<SongItem> {
                               artUri: Uri.parse(
                                   API.convertImageUrl(widget.song.cover)),
                             ),
+                            headers: {
+                              'Cookie': MyAppState.cookie!,
+                              'User-Agent':
+                                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                            },
                           );
                         } else {
                           PMSSong initialSong = widget.song as PMSSong;
@@ -267,6 +272,11 @@ class _SongItemState extends State<SongItem> {
                               .fetchSongsLink([initialSong.id.toString()], 0);
                           newAudioSource = LockCachingAudioSource(
                             Uri.parse(songLink!),
+                            headers: {
+                              'Cookie': MyAppState.cookie!,
+                              'User-Agent':
+                                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                            },
                             tag: MediaItem(
                               // Specify a unique ID for each media item:
                               id: Uuid().v1(),
@@ -277,6 +287,11 @@ class _SongItemState extends State<SongItem> {
                                   .join(', '),
                               title: initialSong.name,
                               artUri: Uri.parse(initialSong.cover),
+                              artHeaders: {
+                                'Cookie': MyAppState.cookie!,
+                                'User-Agent':
+                                    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                              },
                             ),
                           );
                         }

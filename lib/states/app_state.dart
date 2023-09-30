@@ -863,14 +863,24 @@ class MyAppState extends ChangeNotifier {
                       ? Uri.parse(defaultCoverImage)
                       : await getImageFileFromAssets(
                           e.cover, _songsQueue!.indexOf(e)),
+                  artHeaders: {
+                    'Cookie': MyAppState.cookie!,
+                    'User-Agent':
+                        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                  },
                 ),
               ))
           .toList();
     } else {
-      if (kIsWeb) {
+      if (false && kIsWeb) {
         songs = _songsQueue!
             .map((e) async => AudioSource.uri(
                   Uri.parse(e.songLink!),
+                  headers: {
+                    'Cookie': MyAppState.cookie!,
+                    'User-Agent':
+                        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                  },
                   tag: MediaItem(
                     // Specify a unique ID for each media item:
                     id: Uuid().v1(),
@@ -879,6 +889,11 @@ class MyAppState extends ChangeNotifier {
                     artist: e.singers.map((e) => e.name).join(', '),
                     title: e.name,
                     artUri: Uri.parse(API.convertImageUrl(e.cover)),
+                    artHeaders: {
+                      'Cookie': MyAppState.cookie!,
+                      'User-Agent':
+                          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                    },
                   ),
                 ))
             .toList();
@@ -887,6 +902,11 @@ class MyAppState extends ChangeNotifier {
           if (song.songLink != null) {
             songs.add(Future.value(LockCachingAudioSource(
               Uri.parse(song.songLink!),
+              headers: {
+                'Cookie': MyAppState.cookie!,
+                'User-Agent':
+                    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+              },
               tag: MediaItem(
                 // Specify a unique ID for each media item:
                 id: Uuid().v1(),
@@ -895,6 +915,11 @@ class MyAppState extends ChangeNotifier {
                 artist: song.singers.map((e) => e.name).join(', '),
                 title: song.name,
                 artUri: Uri.parse(song.cover),
+                artHeaders: {
+                  'Cookie': MyAppState.cookie!,
+                  'User-Agent':
+                      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                },
               ),
             )));
           }
@@ -909,12 +934,22 @@ class MyAppState extends ChangeNotifier {
                   uniqueId = initialSong.id.toString();
                   return Uri.parse(await fetchSongsLink([uniqueId], 0));
                 },
+                headers: {
+                  'Cookie': MyAppState.cookie!,
+                  'User-Agent':
+                      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                },
                 tag: MediaItem(
                   id: Uuid().v1(),
                   album: 'Album name',
                   artist: initialSong.singers.map((e) => e.name).join(', '),
                   title: initialSong.name,
                   artUri: Uri.parse(initialSong.cover),
+                  artHeaders: {
+                    'Cookie': MyAppState.cookie!,
+                    'User-Agent':
+                        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                  },
                 ),
               )));
             }
@@ -1021,12 +1056,16 @@ class MyAppState extends ChangeNotifier {
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
-          cookie = response.headers['set-cookie'];
-          UserInfo.uid = result.data.toString();
-          MyAppState.cookie = cookie;
-          StorageManager.saveData('cookie', cookie);
+          if (kIsWeb) {
+            cookie = (result.data as Map)['cookie'];
+          } else {
+            cookie = response.headers['set-cookie'];
+          }
+          int userId = (result.data as Map)['id'];
+          UserInfo.uid = userId.toString();
           StorageManager.saveData('uid', UserInfo.uid);
-          return result.data as int;
+          StorageManager.saveData('cookie', cookie);
+          return userId;
         } else {
           _errorMsg = result.message!;
           // MyToast.showToast(_errorMsg);
@@ -1069,12 +1108,16 @@ class MyAppState extends ChangeNotifier {
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
-          cookie = response.headers['set-cookie'];
-          UserInfo.uid = result.data.toString();
-          MyAppState.cookie = cookie;
-          StorageManager.saveData('cookie', cookie);
+          if (kIsWeb) {
+            cookie = (result.data as Map)['cookie'];
+          } else {
+            cookie = response.headers['set-cookie'];
+          }
+          int userId = (result.data as Map)['id'];
+          UserInfo.uid = userId.toString();
           StorageManager.saveData('uid', UserInfo.uid);
-          return result.data as int;
+          StorageManager.saveData('cookie', cookie);
+          return userId;
         } else {
           _errorMsg = result.message!;
           // MyToast.showToast(_errorMsg);
@@ -1118,12 +1161,16 @@ class MyAppState extends ChangeNotifier {
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
-          cookie = response.headers['set-cookie'];
-          UserInfo.uid = result.data.toString();
-          MyAppState.cookie = cookie;
-          StorageManager.saveData('cookie', cookie);
+          if (kIsWeb) {
+            cookie = (result.data as Map)['cookie'];
+          } else {
+            cookie = response.headers['set-cookie'];
+          }
+          int userId = (result.data as Map)['id'];
+          UserInfo.uid = userId.toString();
           StorageManager.saveData('uid', UserInfo.uid);
-          return result.data as int;
+          StorageManager.saveData('cookie', cookie);
+          return userId;
         } else {
           _errorMsg = result.message!;
           // MyToast.showToast(_errorMsg);

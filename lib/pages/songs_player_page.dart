@@ -657,6 +657,11 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
                                                                                 .cover
                                                                         : MyAppState
                                                                             .defaultCoverImage,
+                                                                    httpHeaders: {
+                                                                      'Cookie':
+                                                                          MyAppState
+                                                                              .cookie!
+                                                                    },
                                                                     cacheManager:
                                                                         MyHttp
                                                                             .myImageCacheManager,
@@ -740,6 +745,11 @@ class _SongsPlayerPageState extends State<SongsPlayerPage>
                                                                             .cover
                                                                     : MyAppState
                                                                         .defaultCoverImage,
+                                                                httpHeaders: {
+                                                                  'Cookie':
+                                                                      MyAppState
+                                                                          .cookie!
+                                                                },
                                                                 cacheManager: MyHttp
                                                                     .myImageCacheManager,
                                                                 progressIndicatorBuilder: (context,
