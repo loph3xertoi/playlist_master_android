@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
 import 'package:feedback/feedback.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -54,16 +54,20 @@ class _MySideDrawerState extends State<MySideDrawer> {
           path: '/loph3xertoi/playlist_master_android/issues');
       _openGithubIssues(toLaunch);
     } else if (index == 3) {
-      showDialog(
-          context: context,
-          builder: (_) => ShowConfirmDialog(
-                title:
-                    'Do you want to upload the crash logs, which is only used for debugging purposes?',
-                onConfirm: () {
-                  print('Upload crash logs');
-                  _reportBugs();
-                },
-              ));
+      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+        showDialog(
+            context: context,
+            builder: (_) => ShowConfirmDialog(
+                  title:
+                      'Do you want to upload the crash logs, which is only used for debugging purposes?',
+                  onConfirm: () {
+                    print('Upload crash logs');
+                    _reportBugs();
+                  },
+                ));
+      } else {
+        MyToast.showToast('Only support android and ios');
+      }
     } else if (index == 4) {
       // showDialog(context: context, builder: (_) => LicensePage());
       // showLicensePage(context: context);

@@ -42,7 +42,9 @@ Future<void> main() async {
   // await Firebase.initializeApp();
 
   if (!kIsWeb) {
-    LogExport.init();
+    if (Platform.isAndroid || Platform.isIOS) {
+      LogExport.init();
+    }
     if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
       if (runWebViewTitleBarWidget([''])) {
         return;
