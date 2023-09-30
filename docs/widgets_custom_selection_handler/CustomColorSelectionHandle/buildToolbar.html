@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the buildToolbar method from the CustomColorSelectionHandle class, for the Dart programming language.">
+  <title>buildToolbar method - CustomColorSelectionHandle class - custom_selection_handler library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">playlistmaster</a></li>
+    <li><a href="../../widgets_custom_selection_handler/widgets_custom_selection_handler-library.html">custom_selection_handler</a></li>
+    <li><a href="../../widgets_custom_selection_handler/CustomColorSelectionHandle-class.html">CustomColorSelectionHandle</a></li>
+    <li class="self-crumb">buildToolbar method</li>
+  </ol>
+  <div class="self-name">buildToolbar</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        brightness_4
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        brightness_5
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div
+      id="dartdoc-main-content"
+      class="main-content"
+      data-above-sidebar="widgets_custom_selection_handler&#47;CustomColorSelectionHandle-class-sidebar.html"
+      data-below-sidebar="">
+      <div>
+<h1><span class="kind-method">buildToolbar</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+  <div>
+    <ol class="annotation-list">
+        <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
+    </ol>
+  </div>
+
+<span class="returntype"><a href="https://api.flutter.dev/flutter/widgets/Widget-class.html">Widget</a></span>
+<span class="name ">buildToolbar</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="buildToolbar-param-context"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, </span></li>
+<li><span class="parameter" id="buildToolbar-param-globalEditableRegion"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/Rect-class.html">Rect</a></span> <span class="parameter-name">globalEditableRegion</span>, </span></li>
+<li><span class="parameter" id="buildToolbar-param-textLineHeight"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">textLineHeight</span>, </span></li>
+<li><span class="parameter" id="buildToolbar-param-selectionMidpoint"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/Offset-class.html">Offset</a></span> <span class="parameter-name">selectionMidpoint</span>, </span></li>
+<li><span class="parameter" id="buildToolbar-param-endpoints"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/rendering/TextSelectionPoint-class.html">TextSelectionPoint</a></span>&gt;</span></span> <span class="parameter-name">endpoints</span>, </span></li>
+<li><span class="parameter" id="buildToolbar-param-delegate"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/services/TextSelectionDelegate-mixin.html">TextSelectionDelegate</a></span> <span class="parameter-name">delegate</span>, </span></li>
+<li><span class="parameter" id="buildToolbar-param-clipboardStatus"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/ValueListenable-class.html">ValueListenable</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/widgets/ClipboardStatus.html">ClipboardStatus</a></span>&gt;</span>?</span> <span class="parameter-name">clipboardStatus</span>, </span></li>
+<li><span class="parameter" id="buildToolbar-param-lastSecondaryTapDownPosition"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/Offset-class.html">Offset</a>?</span> <span class="parameter-name">lastSecondaryTapDownPosition</span></span></li>
+</ol>)
+
+      <div class="features"><span class="feature">override</span></div>
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Builds a toolbar near a text selection.</p>
+<p>Typically displays buttons for copying and pasting text.</p>
+<p>The <code>globalEditableRegion</code> parameter is the TextField size of the global
+coordinate system in logical pixels.</p>
+<p>The <code>textLineHeight</code> parameter is the <a href="https://api.flutter.dev/flutter/rendering/RenderEditable/preferredLineHeight.html">RenderEditable.preferredLineHeight</a>
+of the <a href="https://api.flutter.dev/flutter/rendering/RenderEditable-class.html">RenderEditable</a> we are building a toolbar for.</p>
+<p>The <code>selectionMidpoint</code> parameter is a general calculation midpoint
+parameter of the toolbar. More detailed position information
+is computable from the <code>endpoints</code> parameter.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">@override
+Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset selectionMidpoint,
+    List&lt;TextSelectionPoint&gt; endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable&lt;ClipboardStatus&gt;? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition) {
+  return _controls.buildToolbar(
+      context,
+      globalEditableRegion,
+      textLineHeight,
+      selectionMidpoint,
+      endpoints,
+      delegate,
+      clipboardStatus,
+      lastSecondaryTapDownPosition);
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">playlistmaster</a></li>
+    <li><a href="../../widgets_custom_selection_handler/widgets_custom_selection_handler-library.html">custom_selection_handler</a></li>
+    <li><a href="../../widgets_custom_selection_handler/CustomColorSelectionHandle-class.html">CustomColorSelectionHandle</a></li>
+    <li class="self-crumb">buildToolbar method</li>
+</ol>
+
+
+    <h5>CustomColorSelectionHandle class</h5>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    playlistmaster
+      1.0.0+1
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+
