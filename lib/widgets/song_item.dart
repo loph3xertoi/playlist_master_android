@@ -1,6 +1,7 @@
 import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +13,7 @@ import '../entities/netease_cloud_music/ncm_song.dart';
 import '../entities/pms/pms_song.dart';
 import '../entities/qq_music/qqmusic_song.dart';
 import '../http/api.dart';
+import '../http/my_http.dart';
 import '../states/app_state.dart';
 import '../third_lib_change/like_button/like_button.dart';
 import '../utils/my_logger.dart';
@@ -226,6 +228,21 @@ class _SongItemState extends State<SongItem> {
                           appState.currentPlayingSongInQueue! + 1, widget.song);
                       AudioSource newAudioSource;
                       if (appState.isUsingMockData) {
+                        final url = kIsWeb
+                            ? Uri.parse(MyAppState.defaultCoverImage)
+                            : await appState.getImageFileFromAssets(
+                                widget.song.cover,
+                                appState.songsQueue!.indexOf(widget.song));
+                        CacheManager cacheManager = MyHttp.myImageCacheManager;
+                        final file = await cacheManager.getSingleFile(
+                          url.toString(),
+                          headers: {
+                            'Cookie': MyAppState.cookie!,
+                            'User-Agent':
+                                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                          },
+                        );
+                        final artUri = Uri.file(file.path);
                         newAudioSource = AudioSource.asset(
                           widget.song.songLink!,
                           tag: MediaItem(
@@ -237,15 +254,22 @@ class _SongItemState extends State<SongItem> {
                                 .map((e) => e.name)
                                 .join(', '),
                             title: widget.song.name,
-                            artUri: kIsWeb
-                                ? Uri.parse(MyAppState.defaultCoverImage)
-                                : await appState.getImageFileFromAssets(
-                                    widget.song.cover,
-                                    appState.songsQueue!.indexOf(widget.song)),
+                            artUri: artUri,
                           ),
                         );
                       } else {
                         if (kIsWeb) {
+                          CacheManager cacheManager =
+                              MyHttp.myImageCacheManager;
+                          final file = await cacheManager.getSingleFile(
+                            API.convertImageUrl(widget.song.cover),
+                            headers: {
+                              'Cookie': MyAppState.cookie!,
+                              'User-Agent':
+                                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                            },
+                          );
+                          final artUri = Uri.file(file.path);
                           newAudioSource = AudioSource.uri(
                             Uri.parse(widget.song.songLink!),
                             tag: MediaItem(
@@ -257,8 +281,7 @@ class _SongItemState extends State<SongItem> {
                                   .map((e) => e.name)
                                   .join(', '),
                               title: widget.song.name,
-                              artUri: Uri.parse(
-                                  API.convertImageUrl(widget.song.cover)),
+                              artUri: artUri,
                             ),
                             headers: {
                               'Cookie': MyAppState.cookie!,
@@ -268,6 +291,17 @@ class _SongItemState extends State<SongItem> {
                           );
                         } else {
                           PMSSong initialSong = widget.song as PMSSong;
+                          CacheManager cacheManager =
+                              MyHttp.myImageCacheManager;
+                          final file = await cacheManager.getSingleFile(
+                            initialSong.cover,
+                            headers: {
+                              'Cookie': MyAppState.cookie!,
+                              'User-Agent':
+                                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                            },
+                          );
+                          final artUri = Uri.file(file.path);
                           var songLink = await appState
                               .fetchSongsLink([initialSong.id.toString()], 0);
                           newAudioSource = LockCachingAudioSource(
@@ -286,12 +320,7 @@ class _SongItemState extends State<SongItem> {
                                   .map((e) => e.name)
                                   .join(', '),
                               title: initialSong.name,
-                              artUri: Uri.parse(initialSong.cover),
-                              artHeaders: {
-                                'Cookie': MyAppState.cookie!,
-                                'User-Agent':
-                                    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
-                              },
+                              artUri: artUri,
                             ),
                           );
                         }

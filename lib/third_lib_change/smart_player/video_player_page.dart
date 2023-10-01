@@ -82,13 +82,24 @@ class SmartPlayerState extends State<SmartPlayer> {
     super.initState();
     showControls = widget.showControls ?? true;
     advertisementUrl = widget.adsUrl?.trim() ?? '';
-    _adsController = CachedVideoPlayerController.network(advertisementUrl
-            .isNotEmpty
-        ? advertisementUrl
-        : 'https://cdn.download.ams.birds.cornell.edu/api/v1/asset/347497131/mp4/1280');
+    _adsController = CachedVideoPlayerController.network(
+      advertisementUrl.isNotEmpty
+          ? advertisementUrl
+          : 'https://cdn.download.ams.birds.cornell.edu/api/v1/asset/347497131/mp4/1280',
+      httpHeaders: {
+        'User-Agent':
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+      },
+    );
     _adsController?.initialize().then((_) => setState(() {}));
     _adsController?.play();
-    _controller = CachedVideoPlayerController.network(widget.url);
+    _controller = CachedVideoPlayerController.network(
+      widget.url,
+      httpHeaders: {
+        'User-Agent':
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+      },
+    );
     _controller?.initialize().then((_) => setState(() {
           String twoDigits(int n) => n.toString().padLeft(2, '0');
           int twoDigitMinutes = int.parse(

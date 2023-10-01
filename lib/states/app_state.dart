@@ -849,113 +849,106 @@ class MyAppState extends ChangeNotifier {
     List<AudioSource> queueList;
     List<Future<AudioSource>> songs = [];
     if (isUsingMockData) {
-      songs = _songsQueue!
-          .map((e) async => AudioSource.asset(
-                e.songLink!,
-                tag: MediaItem(
-                  // Specify a unique ID for each media item:
-                  id: Uuid().v1(),
-                  // Metadata to display in the notification:
-                  album: 'Album name',
-                  artist: e.singers.map((e) => e.name).join(', '),
-                  title: e.name,
-                  artUri: kIsWeb
-                      ? Uri.parse(defaultCoverImage)
-                      : await getImageFileFromAssets(
-                          e.cover, _songsQueue!.indexOf(e)),
-                  artHeaders: {
-                    'Cookie': MyAppState.cookie!,
-                    'User-Agent':
-                        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
-                  },
-                ),
-              ))
-          .toList();
+      songs = _songsQueue!.map((e) async {
+        var url = kIsWeb
+            ? Uri.parse(defaultCoverImage)
+            : await getImageFileFromAssets(e.cover, _songsQueue!.indexOf(e));
+        CacheManager cacheManager = MyHttp.myImageCacheManager;
+        final file = await cacheManager.getSingleFile(
+          url.toString(),
+          headers: {
+            'Cookie': MyAppState.cookie!,
+            'User-Agent':
+                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+          },
+        );
+        final artUri = Uri.file(file.path);
+        return AudioSource.asset(
+          e.songLink!,
+          tag: MediaItem(
+            // Specify a unique ID for each media item:
+            id: Uuid().v1(),
+            // artHeaders: {
+            //   'Cookie': MyAppState.cookie!,
+            //   'User-Agent':
+            //       'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+            // },
+            // Metadata to display in the notification:
+            album: 'Album name',
+            artist: e.singers.map((e) => e.name).join(', '),
+            title: e.name,
+            artUri: artUri,
+          ),
+        );
+      }).toList();
     } else {
-      if (false && kIsWeb) {
-        songs = _songsQueue!
-            .map((e) async => AudioSource.uri(
-                  Uri.parse(e.songLink!),
-                  headers: {
-                    'Cookie': MyAppState.cookie!,
-                    'User-Agent':
-                        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
-                  },
-                  tag: MediaItem(
-                    // Specify a unique ID for each media item:
-                    id: Uuid().v1(),
-                    // Metadata to display in the notification:
-                    album: 'Album name',
-                    artist: e.singers.map((e) => e.name).join(', '),
-                    title: e.name,
-                    artUri: Uri.parse(API.convertImageUrl(e.cover)),
-                    artHeaders: {
-                      'Cookie': MyAppState.cookie!,
-                      'User-Agent':
-                          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
-                    },
-                  ),
-                ))
-            .toList();
-      } else {
-        for (BasicSong song in _songsQueue!) {
-          if (song.songLink != null) {
-            songs.add(Future.value(LockCachingAudioSource(
-              Uri.parse(song.songLink!),
+      for (BasicSong song in _songsQueue!) {
+        if (song.songLink != null) {
+          CacheManager cacheManager = MyHttp.myImageCacheManager;
+          final file = await cacheManager.getSingleFile(
+            song.cover,
+            headers: {
+              'Cookie': MyAppState.cookie!,
+              'User-Agent':
+                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+            },
+          );
+          final artUri = Uri.file(file.path);
+          songs.add(Future.value(LockCachingAudioSource(
+            Uri.parse(song.songLink!),
+            headers: {
+              'Cookie': MyAppState.cookie!,
+              'User-Agent':
+                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+            },
+            tag: MediaItem(
+              // Specify a unique ID for each media item:
+              id: Uuid().v1(),
+              // Metadata to display in the notification:
+              album: 'Album name',
+              artist: song.singers.map((e) => e.name).join(', '),
+              title: song.name,
+              artUri: artUri,
+            ),
+          )));
+        }
+      }
+      if (_songsQueue!.isNotEmpty && songs.isEmpty) {
+        if (_currentPlatform == 0) {
+          for (var i = 0; i < _songsQueue!.length; i++) {
+            PMSSong initialSong = _songsQueue![i] as PMSSong;
+            CacheManager cacheManager = MyHttp.myImageCacheManager;
+            final file = await cacheManager.getSingleFile(
+              initialSong.cover,
+              headers: {
+                'Cookie': MyAppState.cookie!,
+                'User-Agent':
+                    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+              },
+            );
+            final artUri = Uri.file(file.path);
+            songs.add(Future.value(ResolvingAudioSource(
+              uniqueId: initialSong.id.toString(),
+              resolveSoundUrl: (uniqueId) async {
+                uniqueId = initialSong.id.toString();
+                return Uri.parse(await fetchSongsLink([uniqueId], 0));
+              },
               headers: {
                 'Cookie': MyAppState.cookie!,
                 'User-Agent':
                     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
               },
               tag: MediaItem(
-                // Specify a unique ID for each media item:
                 id: Uuid().v1(),
-                // Metadata to display in the notification:
                 album: 'Album name',
-                artist: song.singers.map((e) => e.name).join(', '),
-                title: song.name,
-                artUri: Uri.parse(song.cover),
-                artHeaders: {
-                  'Cookie': MyAppState.cookie!,
-                  'User-Agent':
-                      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
-                },
+                artist: initialSong.singers.map((e) => e.name).join(', '),
+                title: initialSong.name,
+                artUri: artUri,
               ),
             )));
           }
-        }
-        if (_songsQueue!.isNotEmpty && songs.isEmpty) {
-          if (_currentPlatform == 0) {
-            for (var i = 0; i < _songsQueue!.length; i++) {
-              PMSSong initialSong = _songsQueue![i] as PMSSong;
-              songs.add(Future.value(ResolvingAudioSource(
-                uniqueId: initialSong.id.toString(),
-                resolveSoundUrl: (uniqueId) async {
-                  uniqueId = initialSong.id.toString();
-                  return Uri.parse(await fetchSongsLink([uniqueId], 0));
-                },
-                headers: {
-                  'Cookie': MyAppState.cookie!,
-                  'User-Agent':
-                      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
-                },
-                tag: MediaItem(
-                  id: Uuid().v1(),
-                  album: 'Album name',
-                  artist: initialSong.singers.map((e) => e.name).join(', '),
-                  title: initialSong.name,
-                  artUri: Uri.parse(initialSong.cover),
-                  artHeaders: {
-                    'Cookie': MyAppState.cookie!,
-                    'User-Agent':
-                        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
-                  },
-                ),
-              )));
-            }
-          } else {
-            throw 'Invalid platform';
-          }
+        } else {
+          throw 'Invalid platform';
         }
       }
     }

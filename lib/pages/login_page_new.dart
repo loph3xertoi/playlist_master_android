@@ -518,19 +518,20 @@ class _LoginScreenState extends State<LoginScreen> {
           //   },
           // ),
         ],
-        // termsOfService: [
-        //   TermOfService(
-        //     id: 'newsletter',
-        //     mandatory: false,
-        //     text: 'Newsletter subscription',
-        //   ),
-        //   TermOfService(
-        //     id: 'general-term',
-        //     mandatory: true,
-        //     text: 'Term of services',
-        //     linkUrl: 'https://github.com/NearHuscarl/flutter_login',
-        //   ),
-        // ],
+        termsOfService: [
+          TermOfService(
+            id: 'privacy-policy',
+            mandatory: true,
+            text: 'Privacy policy',
+            linkUrl: 'https://playlistmaster.fun',
+          ),
+          TermOfService(
+            id: 'general-term',
+            mandatory: true,
+            text: 'Term of services',
+            linkUrl: 'https://playlistmaster.fun',
+          ),
+        ],
         additionalSignupFields: [
           const UserFormField(
             keyName: 'userName',
