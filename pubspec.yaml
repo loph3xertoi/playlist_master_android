@@ -31,31 +31,35 @@ dependencies:
   shared_preferences: ^2.2.0
   uuid: ^3.0.7
   flutter_vlc_player: ^7.2.0
-  cached_video_player: ^2.0.4
+  # cached_video_player: ^2.0.4
+  cached_video_player:
+    git:
+      url: https://github.com/vikram25897/flutter_cached_video_player
+      ref: feature/gradle_version_bump
   fplayer:
     git:
-      url: https://github.com/loph3xertoi/fplayer.git
+      url: git@github.com:loph3xertoi/fplayer.git
       ref: master
   better_player:
     git:
-      url: https://github.com/loph3xertoi/betterplayer.git
+      url: git@github.com:loph3xertoi/betterplayer.git
       ref: master
   flutter_login:
     git:
-      url: https://github.com/loph3xertoi/flutter_login.git
+      url: git@github.com:loph3xertoi/flutter_login.git
       ref: master
   just_audio:
     git:
-      url: https://github.com/loph3xertoi/just_audio.git
+      url: git@github.com:loph3xertoi/just_audio.git
       ref: minor
       path: just_audio
   ip_geolocation_io:
     git:
-      url: https://github.com/loph3xertoi/dart_ip_geolocation_io.git
+      url: git@github.com:loph3xertoi/dart_ip_geolocation_io.git
       ref: main
   http:
     git:
-      url: https://github.com/loph3xertoi/http.git
+      url: git@github.com:loph3xertoi/http.git
       ref: master
       path: pkgs/http
   screen_brightness: ^0.2.2
