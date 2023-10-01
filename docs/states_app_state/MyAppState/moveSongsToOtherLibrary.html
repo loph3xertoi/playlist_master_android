@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the moveSongsToOtherLibrary method from the MyAppState class, for the Dart programming language.">
+  <title>moveSongsToOtherLibrary method - MyAppState class - app_state library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">playlistmaster</a></li>
+    <li><a href="../../states_app_state/states_app_state-library.html">app_state</a></li>
+    <li><a href="../../states_app_state/MyAppState-class.html">MyAppState</a></li>
+    <li class="self-crumb">moveSongsToOtherLibrary method</li>
+  </ol>
+  <div class="self-name">moveSongsToOtherLibrary</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        brightness_4
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        brightness_5
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div
+      id="dartdoc-main-content"
+      class="main-content"
+      data-above-sidebar="states_app_state&#47;MyAppState-class-sidebar.html"
+      data-below-sidebar="">
+      <div>
+<h1><span class="kind-method">moveSongsToOtherLibrary</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../entities_dto_result/Result-class.html">Result</a>?</span>&gt;</span></span>
+<span class="name ">moveSongsToOtherLibrary</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="moveSongsToOtherLibrary-param-songs"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../entities_basic_basic_song/BasicSong-class.html">BasicSong</a></span>&gt;</span></span> <span class="parameter-name">songs</span>, </span></li>
+<li><span class="parameter" id="moveSongsToOtherLibrary-param-srcLibrary"><span class="type-annotation"><a href="../../entities_basic_basic_library/BasicLibrary-class.html">BasicLibrary</a></span> <span class="parameter-name">srcLibrary</span>, </span></li>
+<li><span class="parameter" id="moveSongsToOtherLibrary-param-dstLibrary"><span class="type-annotation"><a href="../../entities_basic_basic_library/BasicLibrary-class.html">BasicLibrary</a></span> <span class="parameter-name">dstLibrary</span>, </span></li>
+<li><span class="parameter" id="moveSongsToOtherLibrary-param-platform"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">platform</span></span></li>
+</ol>)
+
+      
+
+    </section>
+    
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Future&lt;Result?&gt; moveSongsToOtherLibrary(
+  List&lt;BasicSong&gt; songs,
+  BasicLibrary srcLibrary,
+  BasicLibrary dstLibrary,
+  int platform,
+) async {
+  Map&lt;String, Object&gt; requestBody;
+  Uri? url;
+  if (platform == 0) {
+    String ids = songs.map((e) =&gt; (e as PMSSong).id).join(&#39;,&#39;);
+    int srcLibraryId = (srcLibrary as PMSLibrary).id;
+    int dstLibraryId = (dstLibrary as PMSLibrary).id;
+    String srcTid = srcLibraryId.toString();
+    String dstTid = dstLibraryId.toString();
+    url = Uri.https(
+      API.host,
+      API.moveSongsToOtherLibrary,
+      {
+        &#39;platform&#39;: platform.toString(),
+      },
+    );
+    requestBody = {
+      &#39;songsId&#39;: ids,
+      &#39;fromLibrary&#39;: srcLibraryId.toString(),
+      &#39;toLibrary&#39;: dstLibraryId.toString(),
+      &#39;fromTid&#39;: srcTid,
+      &#39;toTid&#39;: dstTid,
+    };
+  } else if (platform == 1) {
+    String songsId = songs.map((e) =&gt; (e as QQMusicSong).songId).join(&#39;,&#39;);
+    int srcDirId = (srcLibrary as QQMusicPlaylist).dirId;
+    int dstDirId = (dstLibrary as QQMusicPlaylist).dirId;
+    String srcTid = srcLibrary.tid;
+    String dstTid = dstLibrary.tid;
+    url = Uri.https(
+      API.host,
+      API.moveSongsToOtherLibrary,
+      {
+        &#39;platform&#39;: platform.toString(),
+      },
+    );
+    requestBody = {
+      &#39;songsId&#39;: songsId,
+      &#39;fromLibrary&#39;: srcDirId.toString(),
+      &#39;toLibrary&#39;: dstDirId.toString(),
+      &#39;fromTid&#39;: srcTid,
+      &#39;toTid&#39;: dstTid,
+    };
+  } else if (platform == 2) {
+    String songsId = songs.map((e) =&gt; (e as NCMSong).id).join(&#39;,&#39;);
+    int srcLibraryId = (srcLibrary as NCMPlaylist).id;
+    int dstLibraryId = (dstLibrary as NCMPlaylist).id;
+    String srcTid = srcLibraryId.toString();
+    String dstTid = dstLibraryId.toString();
+    url = Uri.https(
+      API.host,
+      API.moveSongsToOtherLibrary,
+      {
+        &#39;platform&#39;: platform.toString(),
+      },
+    );
+    requestBody = {
+      &#39;songsId&#39;: songsId,
+      &#39;fromLibrary&#39;: srcLibraryId.toString(),
+      &#39;toLibrary&#39;: dstLibraryId.toString(),
+      &#39;fromTid&#39;: srcTid,
+      &#39;toTid&#39;: dstTid,
+    };
+  } else if (platform == 3) {
+    throw UnimplementedError(&#39;Not yet implement bilibili platform&#39;);
+  } else {
+    throw UnsupportedError(&#39;Invalid platform&#39;);
+  }
+  final client = RetryClient(http.Client());
+  try {
+    MyLogger.logger.i(&#39;Moving songs to other library...&#39;);
+    final response = await client.put(
+      url,
+      headers: {&#39;Content-Type&#39;: &#39;application&#47;json&#39;, &#39;Cookie&#39;: cookie!},
+      body: jsonEncode(requestBody),
+    );
+    if (response.statusCode == 200) {
+      final decodedResponse =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map&lt;String, dynamic&gt;;
+      Result result = Result.fromJson(decodedResponse);
+      if (result.success) {
+        MyToast.showToast(&#39;Songs moved successfully&#39;);
+        return result;
+      } else {
+        _errorMsg = result.message!;
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      }
+    } else if (response.statusCode == 401) {
+      _errorMsg = &#39;Cookie expired, please login again.&#39;;
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } else if (response.statusCode == 403) {
+      _errorMsg = &#39;You don\&#39;t have access for this operation.&#39;;
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    } else {
+      _errorMsg =
+          &#39;Response with code ${response.statusCode}: ${response.reasonPhrase}&#39;;
+      MyToast.showToast(_errorMsg);
+      MyLogger.logger.e(_errorMsg);
+      return null;
+    }
+  } catch (e) {
+    MyToast.showToast(&#39;Exception thrown: $e&#39;);
+    MyLogger.logger.e(&#39;Network error with exception: $e&#39;);
+    rethrow;
+  } finally {
+    client.close();
+  }
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">playlistmaster</a></li>
+    <li><a href="../../states_app_state/states_app_state-library.html">app_state</a></li>
+    <li><a href="../../states_app_state/MyAppState-class.html">MyAppState</a></li>
+    <li class="self-crumb">moveSongsToOtherLibrary method</li>
+</ol>
+
+
+    <h5>MyAppState class</h5>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    playlistmaster
+      1.0.0+1
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+
