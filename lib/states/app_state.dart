@@ -1070,6 +1070,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1119,6 +1124,11 @@ class MyAppState extends ChangeNotifier {
         }
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1172,6 +1182,11 @@ class MyAppState extends ChangeNotifier {
         }
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1241,6 +1256,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1282,6 +1302,11 @@ class MyAppState extends ChangeNotifier {
         return false;
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests, please retry in one minute.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
@@ -1329,6 +1354,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests, please retry in one minute.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1365,6 +1395,11 @@ class MyAppState extends ChangeNotifier {
         return true;
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests, please retry in one minute.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
@@ -1407,6 +1442,10 @@ class MyAppState extends ChangeNotifier {
         StorageManager.deleteData('currentPlatform');
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
       } else {
@@ -1455,6 +1494,11 @@ class MyAppState extends ChangeNotifier {
         }
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1512,6 +1556,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1558,6 +1607,11 @@ class MyAppState extends ChangeNotifier {
         return false;
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return false;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return false;
@@ -1608,6 +1662,11 @@ class MyAppState extends ChangeNotifier {
         }
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -1662,6 +1721,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1696,7 +1760,12 @@ class MyAppState extends ChangeNotifier {
         _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
-        return false;
+        return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1760,6 +1829,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1805,6 +1879,11 @@ class MyAppState extends ChangeNotifier {
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
         // MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
       } else {
@@ -1899,6 +1978,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -1985,6 +2069,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2048,6 +2137,11 @@ class MyAppState extends ChangeNotifier {
         return null;
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2118,7 +2212,12 @@ class MyAppState extends ChangeNotifier {
         _errorMsg = 'You don\'t have access for this operation.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
-        return false;
+        return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2218,6 +2317,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2279,6 +2383,11 @@ class MyAppState extends ChangeNotifier {
         return null;
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2374,6 +2483,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2441,6 +2555,11 @@ class MyAppState extends ChangeNotifier {
         return null;
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2535,6 +2654,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -2612,6 +2736,11 @@ class MyAppState extends ChangeNotifier {
         return null;
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2694,6 +2823,11 @@ class MyAppState extends ChangeNotifier {
         return null;
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2787,6 +2921,11 @@ class MyAppState extends ChangeNotifier {
         return null;
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -2918,6 +3057,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -3007,6 +3151,11 @@ class MyAppState extends ChangeNotifier {
         return null;
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -3130,6 +3279,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -3224,6 +3378,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -3290,6 +3449,11 @@ class MyAppState extends ChangeNotifier {
         return null;
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
@@ -3377,6 +3541,11 @@ class MyAppState extends ChangeNotifier {
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return null;
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return null;
       } else {
         _errorMsg =
             'Response with code ${response.statusCode}: ${response.reasonPhrase}';
@@ -3418,6 +3587,11 @@ class MyAppState extends ChangeNotifier {
         }
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return '';
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return '';
@@ -3471,6 +3645,11 @@ class MyAppState extends ChangeNotifier {
         return [];
       } else if (response.statusCode == 403) {
         _errorMsg = 'You don\'t have access for this operation.';
+        MyToast.showToast(_errorMsg);
+        MyLogger.logger.e(_errorMsg);
+        return [];
+      } else if (response.statusCode == 429) {
+        _errorMsg = 'Too many requests.';
         MyToast.showToast(_errorMsg);
         MyLogger.logger.e(_errorMsg);
         return [];
