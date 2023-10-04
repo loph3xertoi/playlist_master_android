@@ -39,7 +39,7 @@ class MyToast {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset('assets/images/pm_round.png', height: 20.0, width: 20.0),
+          Image.asset('assets/images/pm_icon_inapp.png', height: 20.0, width: 20.0),
           SizedBox(width: 12.0),
           Text(msg, style: TextStyle(fontSize: 16.0, color: Colors.white))
         ],

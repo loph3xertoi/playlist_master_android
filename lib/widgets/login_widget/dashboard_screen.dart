@@ -89,7 +89,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             child: Hero(
               tag: Constants.logoTag,
               child: Image.asset(
-                'assets/images/pm_round.png',
+                'assets/images/pm_icon_inapp.png',
                 filterQuality: FilterQuality.high,
                 height: 30,
               ),

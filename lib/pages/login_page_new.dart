@@ -485,7 +485,7 @@ class _LoginScreenState extends State<LoginScreen> {
       },
       child: FlutterLogin(
         title: Constants.appName,
-        logo: const AssetImage('assets/images/pm_round.png'),
+        logo: const AssetImage('assets/images/pm_icon_inapp.png'),
         logoTag: Constants.logoTag,
         titleTag: Constants.titleTag,
         navigateBackAfterRecovery: true,

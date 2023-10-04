@@ -130,6 +130,7 @@ flutter:
     - assets/images/vip_item_ncm.png
     - assets/images/song_playing_state.webp
     - assets/images/pm_round.png
+    - assets/images/pm_icon_inapp.png
     - assets/images/pm_square.png
     - assets/images/qqmusic.png
     - assets/images/netease.png
