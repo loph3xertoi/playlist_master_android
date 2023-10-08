@@ -20,6 +20,12 @@
       "request": "launch",
       "type": "dart",
       "flutterMode": "release"
+    },
+    {
+      "name": "playlist_master_android (debug mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug"
     }
   ]
 }

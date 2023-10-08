@@ -356,7 +356,7 @@ class _MySideDrawerState extends State<MySideDrawer> {
                           CircleAvatar(
                             backgroundImage: AssetImage(
                               currentPlatform == 0
-                                  ? 'assets/images/pm_icon_inapp.png'
+                                  ? 'assets/images/pm_round.png'
                                   : currentPlatform == 1
                                       ? 'assets/images/qqmusic.png'
                                       : currentPlatform == 2
