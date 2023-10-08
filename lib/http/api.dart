@@ -154,7 +154,7 @@ class API {
       '/verify/nologin/resetPassword';
 
   /// Verify token for sign up new account, no need to log in.
-  /// api: POST /verify/nologin/signUp {name: [name], email: [email], phoneNumber: [phoneNumber], password: [password], token: [token]}
+  /// api: POST /verify/nologin/signUp {name: [name], email: [email], phoneNumber: [phoneNumber], password: [password], token: [token], registrationCode: [registrationCode]}
   static const verifyTokenForSignUpNologin = '/verify/nologin/signUp';
 
   /// Convert raw image url to image url for pms.

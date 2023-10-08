@@ -1091,7 +1091,7 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  Future<int?> loginByGitHub(String authorizationUrl) async {
+  Future<Map<String, Object>?> loginByGitHub(String authorizationUrl) async {
     final Uri url = Uri.parse(authorizationUrl);
     final client = RetryClient(http.Client());
     try {
@@ -1106,16 +1106,28 @@ class MyAppState extends ChangeNotifier {
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
-          if (kIsWeb) {
-            cookie = (result.data as Map)['cookie'];
+          bool userExists = (result.data as Map)['userExists'] as bool;
+          if (userExists) {
+            if (kIsWeb) {
+              cookie = (result.data as Map)['cookie'];
+            } else {
+              cookie = response.headers['set-cookie'];
+            }
+            int userId = (result.data as Map)['id'];
+            UserInfo.uid = userId.toString();
+            StorageManager.saveData('uid', UserInfo.uid);
+            StorageManager.saveData('cookie', cookie);
+            Map<String, Object> ret = {
+              'id': userId,
+              'userExists': userExists,
+            };
+            return ret;
           } else {
-            cookie = response.headers['set-cookie'];
+            Map<String, Object> ret = {
+              'userExists': userExists,
+            };
+            return ret;
           }
-          int userId = (result.data as Map)['id'];
-          UserInfo.uid = userId.toString();
-          StorageManager.saveData('uid', UserInfo.uid);
-          StorageManager.saveData('cookie', cookie);
-          return userId;
         } else {
           _errorMsg = result.message!;
           // MyToast.showToast(_errorMsg);
@@ -1148,9 +1160,13 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  Future<int?> loginByGoogle(String authorizationCode) async {
-    final Uri url =
-        Uri.https(API.host, API.googleRedirectUrl, {'code': authorizationCode});
+  Future<Map<String, Object>?> loginByGoogle(String authorizationCode,
+      [String? registrationCode]) async {
+    Map<String, String> queryParameters = {'code': authorizationCode};
+    if (registrationCode != null) {
+      queryParameters['registrationCode'] = registrationCode;
+    }
+    final Uri url = Uri.https(API.host, API.googleRedirectUrl, queryParameters);
     final client = RetryClient(http.Client());
     try {
       MyLogger.logger.i('Login by Google...');
@@ -1164,16 +1180,28 @@ class MyAppState extends ChangeNotifier {
             jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
         Result result = Result.fromJson(decodedResponse);
         if (result.success) {
-          if (kIsWeb) {
-            cookie = (result.data as Map)['cookie'];
+          bool userExists = (result.data as Map)['userExists'] as bool;
+          if (userExists) {
+            if (kIsWeb) {
+              cookie = (result.data as Map)['cookie'];
+            } else {
+              cookie = response.headers['set-cookie'];
+            }
+            int userId = (result.data as Map)['id'];
+            UserInfo.uid = userId.toString();
+            StorageManager.saveData('uid', UserInfo.uid);
+            StorageManager.saveData('cookie', cookie);
+            Map<String, Object> ret = {
+              'id': userId,
+              'userExists': userExists,
+            };
+            return ret;
           } else {
-            cookie = response.headers['set-cookie'];
+            Map<String, Object> ret = {
+              'userExists': userExists,
+            };
+            return ret;
           }
-          int userId = (result.data as Map)['id'];
-          UserInfo.uid = userId.toString();
-          StorageManager.saveData('uid', UserInfo.uid);
-          StorageManager.saveData('cookie', cookie);
-          return userId;
         } else {
           _errorMsg = result.message!;
           // MyToast.showToast(_errorMsg);
@@ -1463,13 +1491,14 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  Future<String?> register(
-      String name, String email, String phoneNumber, String password) async {
+  Future<String?> register(String name, String email, String phoneNumber,
+      String password, String registrationCode) async {
     Map<String, Object> requestBody = {
       'name': name,
       'email': email,
       'phoneNumber': phoneNumber,
-      'password': password
+      'password': password,
+      'registrationCode': registrationCode,
     };
     final Uri url = Uri.https(API.host, API.register);
     final client = RetryClient(http.Client());
@@ -1686,14 +1715,20 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  Future<String?> verifySignUpNologin(String name, String email,
-      String phoneNumber, String password, String token) async {
+  Future<String?> verifySignUpNologin(
+      String name,
+      String email,
+      String phoneNumber,
+      String password,
+      String token,
+      String registrationCode) async {
     Map<String, Object> requestBody = {
       'name': name,
       'email': email,
       'phoneNumber': phoneNumber,
       'password': password,
-      'token': token
+      'token': token,
+      'registrationCode': registrationCode,
     };
     final Uri url = Uri.https(API.host, API.verifyTokenForSignUpNologin);
     final client = RetryClient(http.Client());

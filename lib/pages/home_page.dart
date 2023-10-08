@@ -60,14 +60,21 @@ class _HomePageState extends State<HomePage>
   // Initialize user info, email and phone.
   void _initUserInfo(MyAppState appState) async {
     BasicPMSUserInfoDTO? basicUser = await appState.getBasicInfoOfLoginUser();
-    PMSUser pmsUser = (await appState.fetchUser(0)) as PMSUser;
-    if (basicUser != null) {
+    var user = await appState.fetchUser(0);
+    if (user != null) {
+      PMSUser pmsUser = user as PMSUser;
       setState(() {
         UserInfo.basicUser = basicUser;
         UserInfo.pmsUser = pmsUser;
       });
     } else {
-      throw 'Fail to get basic user info.';
+      appState.logout();
+      if (mounted) {
+        return Navigator.of(context)
+            .pushReplacementNamed('/login_page')
+            .then((_) => false);
+      }
+      MyToast.showToast('Fail to get basic user info');
     }
   }
 
@@ -329,6 +336,26 @@ class _HomePageState extends State<HomePage>
                             },
                             child: Text(
                               'Test add third credential form',
+                              style: textTheme.labelMedium,
+                            ),
+                          ),
+                          TextButton(
+                            style: ButtonStyle(
+                              shadowColor: MaterialStateProperty.all(
+                                colorScheme.primary,
+                              ),
+                              overlayColor: MaterialStateProperty.all(
+                                Colors.grey,
+                              ),
+                            ),
+                            onPressed: () {
+                              appState.isUsingMockData =
+                                  !appState.isUsingMockData;
+                              MyToast.showToast(
+                                  'Use Mock Data: ${appState.isUsingMockData}');
+                            },
+                            child: Text(
+                              'Use Mock Data: ${appState.isUsingMockData}',
                               style: textTheme.labelMedium,
                             ),
                           ),

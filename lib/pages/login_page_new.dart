@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -41,6 +42,15 @@ class _LoginScreenState extends State<LoginScreen> {
   TextTheme? _textTheme;
 
   WebViewController? _controller;
+
+  // If current user already exists when login using oauth2.
+  bool? _userExists;
+
+  // Login type, 0 for email, 1 for GitHub, 2 for Google.
+  int _loginType = 0;
+
+  // Login after sign up.
+  bool _loginAfterSignUp = false;
 
   // webview_universal.WebViewController? _desktopWebViewController;
 
@@ -122,17 +132,40 @@ class _LoginScreenState extends State<LoginScreen> {
     return null;
   }
 
+  Future<String?> _preSignup() async {
+    _loginType = 0;
+    setState(() {
+      _loginAfterSignUp = false;
+    });
+    return '';
+  }
+
   Future<String?> _signupUser(SignupData data) async {
-    _signupData = data;
-    var loginUserId = await _appState!.register(
+    // Sign up with email.
+    if (_loginType == 0) {
+      _signupData = data;
+      var loginUserId = await _appState!.register(
         data.additionalSignupData!['userName']!,
         data.name!,
         data.additionalSignupData!['phoneNumber']!,
-        data.password!);
-    if (loginUserId == null) {
-      return _appState!.errorMsg;
+        data.password!,
+        data.additionalSignupData!['registrationCode']!,
+      );
+      if (loginUserId == null) {
+        return _appState!.errorMsg;
+      }
+      return null;
+    } else if (_loginType == 1) {
+      var ret = await _signInWithGitHub(
+          context, data.additionalSignupData!['registrationCode']!);
+      return ret;
+    } else if (_loginType == 2) {
+      var ret = await _signInWithGoogle(
+          context, data.additionalSignupData!['registrationCode']!);
+      return ret;
+    } else {
+      throw 'Invalid login type';
     }
-    return null;
   }
 
   Future<String?> _recoverPassword(String name) async {
@@ -151,22 +184,34 @@ class _LoginScreenState extends State<LoginScreen> {
     return null;
   }
 
-  Future<String?> _signupConfirm(String error, LoginData data) async {
+  Future<String?> _signupConfirm(String token, LoginData data) async {
     var result = await _appState!.verifySignUpNologin(
-        _signupData!.additionalSignupData!['userName']!,
-        _signupData!.name!,
-        _signupData!.additionalSignupData!['phoneNumber']!,
-        _signupData!.password!,
-        error);
+      _signupData!.additionalSignupData!['userName']!,
+      _signupData!.name!,
+      _signupData!.additionalSignupData!['phoneNumber']!,
+      _signupData!.password!,
+      token,
+      _signupData!.additionalSignupData!['registrationCode']!,
+    );
     if (result == null) {
       return _appState!.errorMsg;
     }
     return null;
   }
 
-  Future<String?> _recoverConfirm(String error, LoginData data) async {
+  Future<bool> _requireConfirmWhenSignup(LoginData data) async {
+    if (_loginType == 0) {
+      return true;
+    } else {
+      // Navigator.of(context).pushReplacementNamed('/home_page');
+      // TODO: disable toast for sending verification code.
+      return false;
+    }
+  }
+
+  Future<String?> _recoverConfirm(String token, LoginData data) async {
     var result = await _appState!.verifyResetPasswordNologin(
-        data.password, data.password, error, data.name);
+        data.password, data.password, token, data.name);
     if (result == null) {
       return _appState!.errorMsg;
     }
@@ -371,7 +416,8 @@ class _LoginScreenState extends State<LoginScreen> {
     Navigator.of(_loadingContext!).pop();
   }
 
-  Future<String?> _signInWithGitHub(BuildContext context) async {
+  Future<String?> _signInWithGitHub(BuildContext context,
+      [String? registrationCode]) async {
     var authorizationUrl = GitHubOAuth2Client.getAuthorizationUrl();
     print(authorizationUrl);
     String? result;
@@ -388,10 +434,21 @@ class _LoginScreenState extends State<LoginScreen> {
       _showLoadingDialog(context);
       try {
         // Future.delayed(Duration(hours: 1));
-        var pmsUserId = await _appState!.loginByGitHub(result);
+        if (registrationCode != null) {
+          result += '&registrationCode=$registrationCode';
+        }
+        var ret = await _appState!.loginByGitHub(result);
         // Error occur.
-        if (pmsUserId == null) {
+        if (ret == null) {
           return _appState!.errorMsg;
+        }
+        _userExists = ret['userExists'] as bool;
+        if (_userExists!) {
+          return null;
+        } else if (registrationCode == null) {
+          return null;
+        } else {
+          return 'Please input registration code';
         }
       } catch (e) {
         // Handle any errors here
@@ -400,12 +457,12 @@ class _LoginScreenState extends State<LoginScreen> {
           _hideLoadingDialog();
         }
       }
-      return null;
     }
-    return result;
+    return 'Unknown error, please send bug report.';
   }
 
-  Future<String?> _signInWithGoogle(BuildContext context) async {
+  Future<String?> _signInWithGoogle(BuildContext context,
+      [String? registrationCode]) async {
     GoogleSignIn googleSignIn = GoogleSignIn(serverClientId: googleClientId);
     // Revoke google oauth2 authorization.
     var googleSignInAccount = await googleSignIn.signOut();
@@ -416,40 +473,26 @@ class _LoginScreenState extends State<LoginScreen> {
         if (googleSignInAccount == null) {
           return 'You have canceled login';
         }
-        // var authHeaders = await googleSignInAccount.authHeaders;
-        // print(authHeaders);
         var serverAuthCode = googleSignInAccount.serverAuthCode;
-        var pmsUserId = await _appState!.loginByGoogle(serverAuthCode!);
+        var ret =
+            await _appState!.loginByGoogle(serverAuthCode!, registrationCode);
         // Error occur.
-        if (pmsUserId == null) {
+        if (ret == null) {
           return _appState!.errorMsg;
+        }
+        _userExists = ret['userExists'] as bool;
+        if (_userExists!) {
+          return null;
+        } else if (registrationCode == null) {
+          return null;
+        } else {
+          return 'Please input registration code';
         }
       } catch (error) {
         return 'Error: $error';
       }
     }
-    return null;
-    // var authorizationUrl = GoogleOAuth2Client.getAuthorizationUrl();
-    // print(authorizationUrl);
-    // var result = await _openBrowser(context, authorizationUrl);
-    // // var result = await _showWebView(context, authorizationUrl);
-    // if (context.mounted &&
-    //     result != null &&
-    //     result.contains(GoogleOAuth2Client.redirectUrl.toString())) {
-    //   // _showLoadingDialog(context);
-    //   try {
-    //     Future.delayed(Duration(hours: 1));
-    //     // var accessTokenResult = await _appState!.loginByGoogle(result);
-    //   } catch (e) {
-    //     // Handle any errors here
-    //   } finally {
-    //     if (_loadingContext!.mounted) {
-    //       // _hideLoadingDialog();
-    //     }
-    //   }
-    //   return null;
-    // }
-    // return result;
+    return 'Unknown error, please send bug report.';
   }
 
   @override
@@ -485,13 +528,14 @@ class _LoginScreenState extends State<LoginScreen> {
       },
       child: FlutterLogin(
         title: Constants.appName,
-        logo: const AssetImage('assets/images/pm_icon_inapp.png'),
+        logo: const AssetImage('assets/images/pm_round.png'),
         logoTag: Constants.logoTag,
         titleTag: Constants.titleTag,
         navigateBackAfterRecovery: true,
         onConfirmRecover: _recoverConfirm,
         onConfirmSignup: _signupConfirm,
-        loginAfterSignUp: false,
+        confirmSignupRequired: _requireConfirmWhenSignup,
+        loginAfterSignUp: _loginAfterSignUp,
         hideForgotPasswordButton: false,
         // showDebugButtons: true,
         loginProviders: [
@@ -499,24 +543,29 @@ class _LoginScreenState extends State<LoginScreen> {
             button: Buttons.gitHub,
             label: 'Sign in with GitHub',
             callback: () async {
+              _loginType = 1;
+              setState(() {
+                _loginAfterSignUp = true;
+              });
               return await _signInWithGitHub(context);
+            },
+            providerNeedsSignUpCallback: () async {
+              return !_userExists!;
             },
           ),
           LoginProvider(
             icon: FontAwesomeIcons.google,
             callback: () async {
+              _loginType = 2;
+              setState(() {
+                _loginAfterSignUp = true;
+              });
               return await _signInWithGoogle(context);
             },
+            providerNeedsSignUpCallback: () async {
+              return !_userExists!;
+            },
           ),
-          // LoginProvider(
-          //   icon: FontAwesomeIcons.github,
-          //   callback: () async {
-          //     debugPrint('start github sign in');
-          //     await Future.delayed(loginTime);
-          //     debugPrint('stop github sign in');
-          //     return null;
-          //   },
-          // ),
         ],
         termsOfService: [
           TermOfService(
@@ -536,20 +585,33 @@ class _LoginScreenState extends State<LoginScreen> {
           const UserFormField(
             keyName: 'userName',
             displayName: 'User Name',
-            icon: Icon(FontAwesomeIcons.userLarge),
+            icon: Icon(Icons.person_rounded),
           ),
           UserFormField(
             keyName: 'phoneNumber',
             displayName: 'Phone Number',
             userType: LoginUserType.phone,
+            icon: Icon(Icons.smartphone_rounded),
             fieldValidator: (value) {
               final phoneRegExp = RegExp(
                   '^(\\+\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}\$');
-              if ((value != null &&
-                      value.length < 7 &&
-                      !phoneRegExp.hasMatch(value)) ||
-                  value == null) {
+              if ((value == null ||
+                  value.length < 7 && !phoneRegExp.hasMatch(value))) {
                 return "This isn't a valid phone number";
+              }
+              return null;
+            },
+          ),
+          UserFormField(
+            keyName: 'registrationCode',
+            displayName: 'Registration Code',
+            icon: Icon(MdiIcons.ticket),
+            fieldValidator: (value) {
+              final registerCodeRegExp = RegExp('^[2-9A-HJ-NP-Z]{6}\$');
+              if ((value == null ||
+                  value.length != 6 ||
+                  !registerCodeRegExp.hasMatch(value))) {
+                return 'Only allow 6 uppercase lettles and numbers';
               }
               return null;
             },
@@ -565,7 +627,7 @@ class _LoginScreenState extends State<LoginScreen> {
           passwordHint: 'Password',
           confirmPasswordHint: 'Confirm',
           loginButton: 'LOG IN',
-          signupButton: 'REGISTER',
+          signupButton: 'SIGN UP',
           signUpSuccess:
               'Please check your email, an confirmation code has been sent to your email.',
           // forgotPasswordButton: 'Forgot huh?',
@@ -644,22 +706,6 @@ class _LoginScreenState extends State<LoginScreen> {
               // borderRadius: inputBorder,
             ),
           ),
-          // buttonTheme: LoginButtonTheme(
-          //   //TODO: press deep blue color.
-          //   splashColor: Color(0xFF361CC4),
-          //   // backgroundColor: Color(0xFF0DB826),
-          //   // highlightColor: Color(0xFF361CC4),
-          //   // elevation: 1.0,
-          //   // highlightElevation: 4.0,
-          //   // shape: BeveledRectangleBorder(
-          //   //   borderRadius: BorderRadius.circular(10),
-          //   // ),
-          //   // shape:
-          //   //     RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-          //   // shape: CircleBorder(side: BorderSide(color: Colors.green)),
-          //   // shape: ContinuousRectangleBorder(
-          //   //     borderRadius: BorderRadius.circular(55.0)),
-          // ),
         ),
         userValidator: (value) {
           final emailRegex =
@@ -673,31 +719,14 @@ class _LoginScreenState extends State<LoginScreen> {
         onLogin: (loginData) {
           return _loginUser(loginData);
         },
+        preSignup: _preSignup,
         onSignup: (signupData) {
-          // debugPrint('Signup info');
-          // debugPrint('Name: ${signupData.name}');
-          // debugPrint('Password: ${signupData.password}');
-
-          // signupData.additionalSignupData?.forEach((key, value) {
-          //   debugPrint('$key: $value');
-          // });
-          // if (signupData.termsOfService.isNotEmpty) {
-          //   debugPrint('Terms of service: ');
-          //   for (final element in signupData.termsOfService) {
-          //     debugPrint(
-          //       ' - ${element.term.id}: ${element.accepted == true ? 'accepted' : 'rejected'}',
-          //     );
-          //   }
-          // }
           return _signupUser(signupData);
         },
         onSubmitAnimationCompleted: () {
-          // Navigator.of(context).pushReplacement(
-          //   FadePageRoute(
-          //     builder: (context) => const DashboardScreen(),
-          //   ),
-          // );
-          Navigator.of(context).pushReplacementNamed('/home_page');
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context).pushReplacementNamed('/home_page');
+          });
         },
         onResendCode: _resendCode,
         resendCodeInterval: 60,
