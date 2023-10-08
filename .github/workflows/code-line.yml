@@ -1,0 +1,40 @@
+name: Badges
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-badges:
+    name: Update Badges
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Download cloc
+        run: sudo apt-get update -y && sudo apt-get install -y cloc
+      - name: Get the Numbers
+        run: |
+          echo "CODE_LINES=$(   ./cloc.sh --loc)" >> $GITHUB_ENV
+          echo "COMMENT_PERCENTAGE=$(./cloc.sh --percentage)" >> $GITHUB_ENV
+      - name: Create Lines-of-Code-Badge
+        uses: Schneegans/dynamic-badges-action@v1.6.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: ${{ vars.BADGE_GIST_ID }}
+          filename: pms-loc.json
+          label: Lines of Code
+          message: ${{ env.CODE_LINES }}
+          color: lightgrey
+      - name: Create Comments-Badge
+        uses: Schneegans/dynamic-badges-action@v1.6.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: ${{ vars.BADGE_GIST_ID }}
+          filename: pms-comments.json
+          label: Comments
+          message: ${{ env.COMMENT_PERCENTAGE }}%
+          valColorRange: ${{ env.COMMENT_PERCENTAGE }}
+          maxColorRange: 50
+          minColorRange: 0

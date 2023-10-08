@@ -1,5 +1,5 @@
 # Generate and deploy api docs to github pages.
-name: docs
+name: Docs
 
 on:
   push:
