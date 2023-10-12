@@ -19,9 +19,9 @@ class MockData {
     'PMSUser intro',
     {
       'qqmusic': QQMusicUser(
+        '10001',
         'assets/images/qqmusic_vip.png',
         'assets/images/qqmusic_listenlv.png',
-        '10001',
         7,
         4,
         5,

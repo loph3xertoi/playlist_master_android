@@ -44,8 +44,14 @@ class _MyContentAreaState extends State<MyContentArea> {
     _currentPage = 1;
     _hasMore = true;
     var currentPlatform = addToPMS ? 0 : appState.currentPlatform;
-    _futurePagedLibraries =
-        appState.fetchLibraries(currentPlatform, _currentPage.toString());
+    if (appState.isUsingMockData) {
+      var pagedDataDTO = PagedDataDTO<BasicLibrary>(
+          MockData.libraries.length, MockData.libraries, false);
+      _futurePagedLibraries = Future.value(pagedDataDTO);
+    } else {
+      _futurePagedLibraries =
+          appState.fetchLibraries(currentPlatform, _currentPage.toString());
+    }
     _localLibraries?.clear();
     if (delayRebuild) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

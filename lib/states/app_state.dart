@@ -849,38 +849,56 @@ class MyAppState extends ChangeNotifier {
     List<AudioSource> queueList;
     List<Future<AudioSource>> songs = [];
     if (isUsingMockData) {
-      songs = _songsQueue!.map((e) async {
-        var url = kIsWeb
-            ? Uri.parse(defaultCoverImage)
-            : await getImageFileFromAssets(e.cover, _songsQueue!.indexOf(e));
-        CacheManager cacheManager = MyHttp.myImageCacheManager;
-        final file = await cacheManager.getSingleFile(
-          url.toString(),
-          headers: {
-            'Cookie': MyAppState.cookie!,
-            'User-Agent':
-                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
-          },
-        );
-        final artUri = Uri.file(file.path);
-        return AudioSource.asset(
-          e.songLink!,
-          tag: MediaItem(
-            // Specify a unique ID for each media item:
-            id: Uuid().v1(),
-            // artHeaders: {
-            //   'Cookie': MyAppState.cookie!,
-            //   'User-Agent':
-            //       'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
-            // },
-            // Metadata to display in the notification:
-            album: 'Album name',
-            artist: e.singers.map((e) => e.name).join(', '),
-            title: e.name,
-            artUri: artUri,
-          ),
-        );
-      }).toList();
+      if (kIsWeb) {
+        songs = _songsQueue!.map((e) async {
+          var url = Uri.parse(defaultCoverImage);
+          CacheManager cacheManager = MyHttp.myImageCacheManager;
+          final file = await cacheManager.getSingleFile(
+            url.toString(),
+            headers: {
+              'Cookie': MyAppState.cookie!,
+              'User-Agent':
+                  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+            },
+          );
+          final artUri = Uri.file(file.path);
+          return AudioSource.asset(
+            e.songLink!,
+            tag: MediaItem(
+              id: Uuid().v1(),
+              album: 'Album name',
+              artist: e.singers.map((e) => e.name).join(', '),
+              title: e.name,
+              artUri: artUri,
+            ),
+          );
+        }).toList();
+      } else {
+        songs = _songsQueue!.map((e) async {
+          var url =
+              await getImageFileFromAssets(e.cover, _songsQueue!.indexOf(e));
+          // CacheManager cacheManager = MyHttp.myImageCacheManager;
+          // final file = await cacheManager.getSingleFile(url.toString());
+          // final artUri = Uri.file(url.path);
+          return AudioSource.asset(
+            e.songLink!,
+            tag: MediaItem(
+              // Specify a unique ID for each media item:
+              id: Uuid().v1(),
+              // artHeaders: {
+              //   'Cookie': MyAppState.cookie!,
+              //   'User-Agent':
+              //       'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+              // },
+              // Metadata to display in the notification:
+              album: 'Album name',
+              artist: e.singers.map((e) => e.name).join(', '),
+              title: e.name,
+              artUri: url,
+            ),
+          );
+        }).toList();
+      }
     } else {
       for (BasicSong song in _songsQueue!) {
         if (song.songLink != null) {
