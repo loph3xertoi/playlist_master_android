@@ -343,7 +343,7 @@ class _MySideDrawerState extends State<MySideDrawer> {
                         color: Colors.transparent,
                       ),
                       accountName: Text(
-                        '${UserInfo.basicUser!.name}(${UserInfo.uid})',
+                        '${UserInfo.basicUser!.name}(${UserInfo.uid}) (${UserInfo.basicUser!.role})',
                         style: textTheme.labelMedium,
                       ),
                       accountEmail: Text(
