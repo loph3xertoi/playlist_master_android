@@ -71,10 +71,10 @@ class NCMUser extends BasicUser {
   final String redVipLevelIcon;
 
   /// Dynamic icon for your red vip.
-  final String redVipDynamicIconUrl;
+  final String? redVipDynamicIconUrl;
 
   /// Dynamic icon2 for your red vip.
-  final String redVipDynamicIconUrl2;
+  final String? redVipDynamicIconUrl2;
 
   /// Your music package vip level.
   final int musicPackageVipLevel;
