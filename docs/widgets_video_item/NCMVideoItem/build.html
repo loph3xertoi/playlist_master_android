@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the build method from the NCMVideoItem class, for the Dart programming language.">
+  <title>build method - NCMVideoItem class - video_item library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">playlistmaster</a></li>
+    <li><a href="../../widgets_video_item/widgets_video_item-library.html">video_item</a></li>
+    <li><a href="../../widgets_video_item/NCMVideoItem-class.html">NCMVideoItem</a></li>
+    <li class="self-crumb">build method</li>
+  </ol>
+  <div class="self-name">build</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        brightness_4
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        brightness_5
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div
+      id="dartdoc-main-content"
+      class="main-content"
+      data-above-sidebar="widgets_video_item&#47;NCMVideoItem-class-sidebar.html"
+      data-below-sidebar="">
+      <div>
+<h1><span class="kind-method">build</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+  <div>
+    <ol class="annotation-list">
+        <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
+    </ol>
+  </div>
+
+<span class="returntype"><a href="https://api.flutter.dev/flutter/widgets/Widget-class.html">Widget</a></span>
+<span class="name ">build</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="build-param-context"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span></span></li>
+</ol>)
+
+      <div class="features"><span class="feature">override</span></div>
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Describes the part of the user interface represented by this widget.</p>
+<p>The framework calls this method when this widget is inserted into the tree
+in a given <a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a> and when the dependencies of this widget change
+(e.g., an <a href="https://api.flutter.dev/flutter/widgets/InheritedWidget-class.html">InheritedWidget</a> referenced by this widget changes). This
+method can potentially be called in every frame and should not have any side
+effects beyond building a widget.</p>
+<p>The framework replaces the subtree below this widget with the widget
+returned by this method, either by updating the existing subtree or by
+removing the subtree and inflating a new subtree, depending on whether the
+widget returned by this method can update the root of the existing
+subtree, as determined by calling <a href="https://api.flutter.dev/flutter/widgets/Widget/canUpdate.html">Widget.canUpdate</a>.</p>
+<p>Typically implementations return a newly created constellation of widgets
+that are configured with information from this widget's constructor and
+from the given <a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a>.</p>
+<p>The given <a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a> contains information about the location in the
+tree at which this widget is being built. For example, the context
+provides the set of inherited widgets for this location in the tree. A
+given widget might be built with multiple different <a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a>
+arguments over time if the widget is moved around the tree or if the
+widget is inserted into the tree in multiple places at once.</p>
+<p>The implementation of this method must only depend on:</p>
+<ul>
+<li>the fields of the widget, which themselves must not change over time,
+and</li>
+<li>any ambient state obtained from the <code>context</code> using
+<a href="https://api.flutter.dev/flutter/widgets/BuildContext/dependOnInheritedWidgetOfExactType.html">BuildContext.dependOnInheritedWidgetOfExactType</a>.</li>
+</ul>
+<p>If a widget's <a href="../../widgets_video_item/NCMVideoItem/build.html">build</a> method is to depend on anything else, use a
+<a href="https://api.flutter.dev/flutter/widgets/StatefulWidget-class.html">StatefulWidget</a> instead.</p>
+<p>See also:</p>
+<ul>
+<li><a href="https://api.flutter.dev/flutter/widgets/StatelessWidget-class.html">StatelessWidget</a>, which contains the discussion on performance considerations.</li>
+</ul>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">@override
+Widget build(BuildContext context) {
+  RegExp regex = RegExp(r&#39;[a-zA-Z]&#39;);
+  bool isMV = !regex.hasMatch(_video.id);
+  return SizedBox(
+    height: 100.0,
+    child: Row(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10.0),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Ink.image(
+                image: CachedNetworkImageProvider(
+                  kIsWeb ? API.convertImageUrl(_video.cover) : _video.cover,
+                  headers: {
+                    &#39;Cookie&#39;: MyAppState.cookie!,
+                    &#39;User-Agent&#39;:
+                        &#39;Mozilla&#47;5.0 (X11; Linux x86_64) AppleWebKit&#47;537.36 (KHTML, like Gecko) Chrome&#47;117.0.0.0 Safari&#47;537.36&#39;,
+                  },
+                  cacheManager: MyHttp.myImageCacheManager,
+                ),
+                height: 100.0,
+                width: 160.0,
+                fit: BoxFit.cover,
+              ),
+              Icon(
+                Icons.play_arrow_rounded,
+                color: Colors.white70,
+                size: 80.0,
+              ),
+              Positioned(
+                right: 8.0,
+                bottom: 2.0,
+                child: Text(
+                  formatDuration(_video.duration),
+                  style: textTheme.labelSmall!.copyWith(
+                    color: Colors.white,
+                    fontSize: 14.0,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              )
+            ],
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 10.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: RichText(
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        text: TextSpan(
+                          children: [
+                            isMV
+                                ? WidgetSpan(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          right: 4.0, bottom: 3.0),
+                                      child: Image.asset(
+                                        &#39;assets&#47;images&#47;ncm_mv.png&#39;,
+                                        width: 20.0,
+                                      ),
+                                    ),
+                                  )
+                                : TextSpan(),
+                            TextSpan(
+                              text: _video.name,
+                              style: textTheme.labelLarge!.copyWith(
+                                fontSize: 16.0,
+                                overflow: TextOverflow.ellipsis,
+                                color: colorScheme.onPrimary.withOpacity(0.9),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
+                ),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _video.singers.map((e) =&gt; e.name).join(&#39;, &#39;),
+                        style: textTheme.labelSmall!.copyWith(
+                          fontSize: 12.0,
+                          color: colorScheme.onPrimary.withOpacity(0.5),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            &#39;${humanizeInt(_video.playCount)} views&#39;,
+                            style: textTheme.labelSmall!.copyWith(
+                              color: colorScheme.onPrimary.withOpacity(0.5),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 2.0),
+                            child: Text(
+                              &#39;·&#39;,
+                              style: textTheme.labelSmall!.copyWith(
+                                color: colorScheme.onPrimary.withOpacity(0.5),
+                              ),
+                            ),
+                          ),
+                          Text(
+                            DateFormat(&#39;yyyy-MM-dd&#39;).format(
+                                DateTime.fromMillisecondsSinceEpoch(
+                                    int.parse(_video.publishTime))),
+                            style: textTheme.labelSmall!.copyWith(
+                              color: colorScheme.onPrimary.withOpacity(0.5),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">playlistmaster</a></li>
+    <li><a href="../../widgets_video_item/widgets_video_item-library.html">video_item</a></li>
+    <li><a href="../../widgets_video_item/NCMVideoItem-class.html">NCMVideoItem</a></li>
+    <li class="self-crumb">build method</li>
+</ol>
+
+
+    <h5>NCMVideoItem class</h5>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    playlistmaster
+      1.0.1+2
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+
