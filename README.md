@@ -6,7 +6,7 @@
 [![proto](https://custom-icon-badges.demolab.com/badge/Proto-blue.svg?logo=figma-icon&logoColor=white)](https://www.figma.com/proto/MtbhS6MvorgkDHg5aJuEzT/Playlist-Manager-App?type=design&t=1fvL2OcX7GNLrKyI-1&scaling=scale-down&page-id=0%3A1&starting-point-node-id=48%3A46&show-proto-sidebar=1&node-id=48-46&mode=design)
 # Playlist Master
 
-Playlist Master for android, dedicating to manage your playlists all in one.
+Playlist Master for android, dedicating to manage your playlists all in one. The registration code is **5EG9LZ**.
 
 ## Notice
 - Sending feedback email with attachment needs more than one email app to be installed.
