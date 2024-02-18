@@ -3,7 +3,7 @@ description: Android client for playlist master.
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.1+2
+version: 1.0.2+3
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -91,6 +91,7 @@ dependencies:
   webview_flutter_web: ^0.2.2+3
   desktop_webview_window: ^0.2.3
   just_audio_libwinmedia: ^0.0.4+1
+  flutter_app_update: ^3.0.4
   # bottom_sheet:
   #   git:
   #     url: git@github.com:loph3xertoi/flutter-bottom-sheet.git

@@ -9,6 +9,9 @@ class API {
   // static const host = '192.168.8.171:8080';
   // static const host = '192.168.0.114:8080';
 
+  /// Get latest release in github.
+  static const getLatestRelease = 'https://api.github.com/repos/loph3xertoi/playlist_master_android/releases/latest';
+
   /// Redirect url for oauth2 by github.
   static const githubRedirectUrl = '/login/oauth2/github';
 

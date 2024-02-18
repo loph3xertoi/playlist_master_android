@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:playlistmaster/config/user_info.dart';
+import 'package:playlistmaster/utils/app_updater.dart';
 import 'package:playlistmaster/utils/my_toast.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -13,6 +14,10 @@ class SettingsPage extends StatelessWidget {
       return;
     }
     Navigator.pushNamed(context, '/reset_password_page');
+  }
+
+  void _aboutPage(BuildContext context) {
+    Navigator.pushNamed(context, '/about_page');
   }
 
   void _bindEmail(BuildContext context) {
@@ -42,6 +47,11 @@ class SettingsPage extends StatelessWidget {
               name: 'Reset Password',
               style: textTheme.labelMedium!,
               onTap: _resetPassword,
+            ),
+            SettingItem(
+              name: 'About',
+              style: textTheme.labelMedium!,
+              onTap: _aboutPage,
             ),
           ],
         ));

@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import 'entities/basic/basic_song.dart';
 import 'entities/basic/basic_video.dart';
 import 'firebase_options.dart';
+import 'pages/about_page.dart';
 import 'pages/bind_email_page.dart';
 import 'pages/detail_favlist_page.dart';
 import 'pages/detail_library_page.dart';
@@ -127,6 +128,7 @@ class MyApp extends StatelessWidget {
               '/detail_resource_page': (context) => DetailResourcePage(),
               '/settings': (context) => SettingsPage(),
               '/reset_password_page': (context) => ResetPassPage(),
+              '/about_page': (context) => AboutPage(),
               '/bind_email_page': (context) => BindEmailPage(),
             },
             onGenerateRoute: (settings) {
